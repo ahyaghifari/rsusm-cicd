@@ -1,0 +1,9 @@
+main {
+    background-color: #ea92d8;
+    background-image: url('../../img/syifa-medika.webp');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: local;
+    background-blend-mode: lighten;
+}
