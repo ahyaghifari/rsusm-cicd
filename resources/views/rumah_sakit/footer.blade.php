@@ -1,32 +1,45 @@
-<footer class="bg-primary/15 px-10 py-24 grid grid-cols-4 gap-8">
-    <div>
-        <img src="{{ asset('img/syifa-medika-banjarbaru.png') }}" class="w-52" alt="">
-        <p class="mt-2 text-on-surface text-sm"> Jl. RO Ulin No.93, Loktabat Selatan, Kec. Banjarbaru Selatan, Kota Banjar Baru, Kalimantan Selatan, 70712</p>
+<footer class="bg-primary/15 px-10 py-20 md:py-22 lg:py-24 flex flex-col lg:grid lg:grid-cols-5 gap-5">
+    <div class="lg:col-span-2">
+        <img src="{{ Storage::url($currentRumahSakit->logo) }}" class="w-full md:w-52" alt="">
+        <p class="mt-2 text-on-surface text-sm mb-5">{{ $currentRumahSakit->alamat }}</p>
+        
+        @if($currentRumahSakit->lokasi_google_map)
+            <div class="mt-3 rounded-lg overflow-hidden" style="height:220px;">
+                <style>.map-wrapper iframe { width:100% !important; height:100% !important; border:0; display:block; }</style>
+                <div class="map-wrapper" style="width:100%;height:100%;">
+                    {!! $currentRumahSakit->lokasi_google_map !!}
+                </div>
+            </div>
+        @endif
     </div>
-    <div class="col-span-2 border-l border-primary/50 pl-4">
-        <p class="font-semibold text-xl text-on-surface">Hubungi Kami</p>
-        <table class="border-separate border-spacing-2 mt-4 w-full">
+    <div class="mt-5 lg:mt-0 lg:col-span-3 lg:border-l-2 border-primary/50 lg:pl-4">
+        <p class="font-semibold text-lg lg:text-xl text-on-surface">Hubungi Kami</p>
+        <table class="border-separate border-spacing-2 mt-4 w-full text-xs md:text-sm">
             <tbody>
+                @foreach($kontakRumahSakit as $kontak)
                 <tr>
-                    <td>Ambulan dan Gawat Darurat</td>
-                    <td>0811 504 2424</td>
+                    <td>
+                        @if($kontak->logo != null)
+                        <span class="size-4 text-primary">
+                            {!! $kontak->logo !!}
+                        </span>
+                        @else
+                        -
+                        @endif
+                    </td>
+                    <td>{{ $kontak->label }}</td>
+                    <td>
+                        @if($kontak->link != null)
+                        <a href="{{ $kontak->link }}"
+                                target="_blank"
+                                rel="noopener noreferrer" class="text-primary hover:text-on-surface">{{ $kontak->value }} <span class="material-symbols-outlined text-base opacity-60">open_in_new</span></a>
+                            @else
+                        {{ $kontak->value }}
+                        @endif
+                    </td>
                 </tr>
-                <tr>
-                    <td>Operator</td>
-                    <td>0511 5910 889</td>
-                </tr>
-                <tr>
-                    <td>Email</td>
-                    <td>info.rsusyifamedika@gmail.com</td>
-                </tr>
+                @endforeach
             </tbody>
         </table>
-    </div>
-    <div class="border-l border-primary/50 pl-4">
-        <p class="font-semibold text-xl text-on-surface">Tentang Kami</p>
-        <div class="mt-4 flex flex-col gap-y-2">
-            <a href="">Kenapa harus memilih kami?</a>
-            <a href="">Tentang Perusahaan</a>
-        </div>
     </div>
 </footer>

@@ -10,4 +10,12 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    server: {
+        host: '0.0.0.0',
+        // Mengizinkan domain Ngrok agar tidak terkena error "Block/Invalid Host"
+        allowedHosts: ['.ngrok-free.app', '.ngrok-free.dev'],
+        hmr: {
+            host: 'localhost',
+        },
+    },
 });

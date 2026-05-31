@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class RumahSakit extends Model
 {
+    use HasFactory;
+
     /**
      * The table associated with the model.
      *
@@ -28,6 +31,10 @@ class RumahSakit extends Model
         'gambar',
         'logo',
         'aktif',
+        'link_pendaftaran_online',
+        'lokasi_google_map',
+        'tentang_kami',
+        'gambar_tentang',
     ];
 
     /**
@@ -45,5 +52,26 @@ class RumahSakit extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    /**
+     * Get the gedungs for the rumah sakit.
+     */
+    public function gedung(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Gedung::class, 'rumah_sakit_id');
+    }
+
+    /**
+     * Get the rawat inap records for the rumah sakit.
+     */
+    public function rawatInap(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(RawatInap::class, 'rumah_sakit_id');
+    }
+
+    public function linkLayanan(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(LinkLayanan::class, 'rumah_sakit_id');
     }
 }
