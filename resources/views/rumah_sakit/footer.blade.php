@@ -14,7 +14,7 @@
     </div>
     <div class="mt-5 lg:mt-0 lg:col-span-3 lg:border-l-2 border-primary/50 lg:pl-4">
         <p class="font-semibold text-lg lg:text-xl text-on-surface">Hubungi Kami</p>
-        <table class="border-separate border-spacing-2 mt-4 w-full text-xs md:text-sm">
+        <table class="border-separate border-spacing-2 mt-4 w-full text-xs md:text-sm lg:text-base">
             <tbody>
                 @foreach($kontakRumahSakit as $kontak)
                 <tr>

@@ -1,5 +1,5 @@
 <div class="relative">
-    <img src="{{ asset('img/bg-header.png') }}" class="h-full w-full object-cover blur-xs opacity-10 absolute -z-10" alt="">
+    <img src="{{ asset('img/bg-header.png') }}" class="h-full w-full object-cover blur-xs opacity-20 absolute -z-10" alt="">
     <x-page-hero title="Profil Dokter" />
 
     <div class="w-11/12 max-w-5xl mt-8 mx-auto pb-12">
