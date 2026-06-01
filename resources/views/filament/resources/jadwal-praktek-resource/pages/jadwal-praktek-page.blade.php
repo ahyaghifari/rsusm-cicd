@@ -1,8 +1,18 @@
 <x-filament-panels::page>
+
+{{-- CSS: sembunyikan sidebar Filament saat mode layar penuh --}}
+<style>
+    .jp-fullscreen .fi-sidebar { display: none !important; }
+    .jp-fullscreen .fi-main    { margin-inline-start: 0 !important; width: 100% !important; }
+    .jp-fullscreen .fi-topbar  { padding-inline-start: 1rem !important; }
+</style>
+
 <div
     class="space-y-4"
     x-data="{ isFs: false }"
-    x-on:fullscreenchange.window="isFs = !!document.fullscreenElement"
+    x-effect="isFs
+        ? document.body.classList.add('jp-fullscreen')
+        : document.body.classList.remove('jp-fullscreen')"
 >
 
     {{-- =====================================================================
@@ -19,21 +29,23 @@
                 <span class="text-sm font-semibold text-gray-700 dark:text-white tracking-wide">Filter</span>
             </div>
 
-            {{-- Fullscreen button --}}
+            {{-- Fullscreen: sembunyikan sidebar Filament --}}
             <button
                 type="button"
-                x-on:click="isFs ? document.exitFullscreen() : document.documentElement.requestFullscreen()"
-                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium
+                x-on:click="isFs = !isFs"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium
                        text-white/80 hover:text-white hover:bg-white/15 transition"
-                title="Toggle Fullscreen"
+                :title="isFs ? 'Tampilkan Sidebar' : 'Sembunyikan Sidebar'"
             >
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    {{-- Ikon expand (sidebar visible) --}}
                     <path x-show="!isFs" stroke-linecap="round" stroke-linejoin="round"
                           d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/>
+                    {{-- Ikon compress (sidebar hidden) --}}
                     <path x-show="isFs" stroke-linecap="round" stroke-linejoin="round"
                           d="M9 9L3.75 3.75M9 9H4.5M9 9V4.5M15 9l5.25-5.25M15 9h4.5M15 9V4.5M9 15l-5.25 5.25M9 15H4.5M9 15v4.5M15 15l5.25 5.25M15 15h4.5M15 15v4.5"/>
                 </svg>
-                <span x-text="isFs ? 'Keluar' : 'Layar Penuh'"></span>
+                <span x-text="isFs ? 'Tampilkan Sidebar' : 'Layar Penuh'"></span>
             </button>
         </div>
         <div class="bg-white dark:bg-gray-900 px-4 py-4">
@@ -42,9 +54,34 @@
     </div>
 
     {{-- =====================================================================
-         KONTEN: hanya tampil setelah RS dipilih
+         KONTEN
     ====================================================================== --}}
-    @if($this->getActiveRumahSakitId())
+    @if(! $this->getActiveRumahSakitId())
+        {{-- Belum pilih RS --}}
+        <x-filament::section>
+            <div class="py-10 text-center flex flex-col items-center gap-3 text-gray-400 dark:text-gray-500">
+                <svg class="w-10 h-10 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+                <p class="text-sm">Pilih <strong>Rumah Sakit</strong> terlebih dahulu.</p>
+            </div>
+        </x-filament::section>
+
+    @elseif($this->mustPickUnit())
+        {{-- RS punya >1 unit tapi belum dipilih --}}
+        <x-filament::section>
+            <div class="py-10 text-center flex flex-col items-center gap-3 text-gray-400 dark:text-gray-500">
+                <svg class="w-10 h-10 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/>
+                </svg>
+                <p class="text-sm font-medium text-gray-600 dark:text-gray-300">Pilih <strong>Unit Layanan</strong> terlebih dahulu</p>
+                <p class="text-xs text-gray-400">Rumah sakit ini memiliki lebih dari satu unit layanan. Pilih salah satu untuk melanjutkan.</p>
+            </div>
+        </x-filament::section>
+
+    @else
 
         {{-- ================================================================
              MODE: PER HARI
@@ -319,16 +356,6 @@
 
         @endif
 
-    @else
-        <x-filament::section>
-            <div class="py-10 text-center flex flex-col items-center gap-3 text-gray-400">
-                <svg class="w-10 h-10 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                </svg>
-                <p class="text-sm">Pilih <strong>Rumah Sakit</strong> terlebih dahulu.</p>
-            </div>
-        </x-filament::section>
     @endif
 
 </div>

@@ -7,6 +7,7 @@ use App\Models\Dokter;
 use App\Models\LayananUnggulan;
 use App\Models\LinkLayanan;
 use App\Models\Partner;
+use App\Models\Promo;
 use App\Models\RumahSakit;
 use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\SEOMeta;
@@ -38,7 +39,10 @@ class Index extends Component
 
     public function render()
     {
-        $banner = Banner::where('rumah_sakit_id', $this->rs->id)->where('aktif', true)->orderBy('sort_order')->get();
+        $banner = Banner::where('rumah_sakit_id', $this->rs->id)
+            ->where('aktif', true)
+            ->orderBy('sort_order')
+            ->get();
 
         $layananUnggulan = LayananUnggulan::where('rumah_sakit_id', $this->rs->id)->get();
 
@@ -67,6 +71,13 @@ class Index extends Component
             ->limit(10)
             ->get();
 
+        $promos = Promo::where('rumah_sakit_id', $this->rs->id)
+            ->aktif()
+            ->orderByDesc('popup')
+            ->orderByDesc('created_at')
+            ->limit(6)
+            ->get();
+
         return view('rumah_sakit.index', [
             'banner'             => $banner,
             'layanan_unggulan'   => $layananUnggulan,
@@ -74,6 +85,7 @@ class Index extends Component
             'link_layanan'       => $linkLayanan,
             'partner_asuransi'   => $partnerAsuransi,
             'partner_perusahaan' => $partnerPerusahaan,
+            'promos'             => $promos,
         ]);
     }
 }

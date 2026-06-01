@@ -84,8 +84,9 @@ class JadwalPraktekPage extends Page
                 // ── Unit Layanan (jika > 1) ────────────────────────────────
                 Forms\Components\Select::make('selectedUnitLayananId')
                     ->label('Unit Layanan')
-                    ->placeholder('— Semua Unit Layanan —')
+                    ->placeholder('— Pilih Unit Layanan —')
                     ->options(fn () => $this->getUnitLayananOptions())
+                    ->required(fn () => count($this->getUnitLayananOptions()) > 1)
                     ->visible(fn () => count($this->getUnitLayananOptions()) > 1)
                     ->live(),
 
@@ -111,8 +112,9 @@ class JadwalPraktekPage extends Page
                     ->placeholder('— Cari & pilih dokter —')
                     ->options(fn () => $this->getDokterOptions())
                     ->searchable()
+                    ->preload()
                     ->live()
-                    ->visible(fn () => $rsSet && $perDokter)
+                    ->visible(fn () => (bool) $this->getActiveRumahSakitId() && $this->viewMode === 'per_dokter')
                     ->columnSpanFull(),
             ])
             ->statePath('')
@@ -126,6 +128,14 @@ class JadwalPraktekPage extends Page
     public function getActiveRumahSakitId(): ?int
     {
         return $this->selectedRumahSakitId;
+    }
+
+    // RS punya >1 unit layanan tapi belum memilih → jadwal belum boleh tampil
+    public function mustPickUnit(): bool
+    {
+        return (bool) $this->getActiveRumahSakitId()
+            && count($this->getUnitLayananOptions()) > 1
+            && ! $this->selectedUnitLayananId;
     }
 
     public function getPoliklinikOptions(): array

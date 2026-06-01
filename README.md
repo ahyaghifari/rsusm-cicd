@@ -14,8 +14,10 @@ Sistem informasi multi-tenant untuk manajemen dan portal publik rumah sakit. Sat
 | Styling | Tailwind CSS v4 |
 | Asset Bundler | Vite |
 | Database | SQLite (dev) / MySQL / PostgreSQL |
-| Icons | FontAwesome (via blade-fontawesome) |
+| Icons | Material Symbols (Google Fonts) |
 | Animasi | AOS (Animate On Scroll) |
+| Searchable Select | Tom Select 2.x (CDN) |
+| Slider | Swiper.js |
 
 ---
 
@@ -28,9 +30,10 @@ RumahSakit
 ├── User (admin rumah sakit, terikat ke 1 RS)
 ├── Dokter → Spesialis
 ├── UnitLayanan → PoliKlinik
-│   └── JadwalLayanan (mingguan)
-│       └── JadwalLayananHarian (harian)
-├── JadwalPraktek (per dokter)
+│   └── JadwalPraktek (per poliklinik, per hari, opsional per dokter)
+│       → table: jadwal_praktek
+├── JadwalHarian (override harian per tanggal)
+│   → table: jadwal_harian
 ├── RawatInap → Gedung
 │   ├── GambarRawatInap
 │   └── FasilitasRawatInap
@@ -47,6 +50,8 @@ RumahSakit
 └── LinkLayanan
 ```
 
+> **Perubahan arsitektur jadwal:** `JadwalPraktek` kini adalah jadwal rawat jalan per poliklinik (bukan per dokter). `JadwalLayanan` telah dihapus. `JadwalLayananHarian` telah diganti menjadi `JadwalHarian`.
+
 ### Role
 
 | Role | Akses |
@@ -58,16 +63,25 @@ RumahSakit
 
 ## Fitur
 
+### Halaman Landing (`/`)
+
+Halaman pemilihan rumah sakit dengan:
+- Welcome section bergradasi dengan background gambar RS
+- Search & filter: pilih RS + filter spesialis dokter (Tom Select, AJAX)
+- Card setiap RS: gambar, alamat, nomor emergency/hotline (tombol klik)
+- Promo aktif semua RS dengan filter per RS
+- jQuery **dihapus** — semua interaksi via vanilla JavaScript
+
 ### Portal Publik (`/{slug-rs}/...`)
 
 | Route | Halaman |
 |---|---|
 | `/` | Beranda rumah sakit |
-| `/dokter-kami` | Daftar & cari dokter |
-| `/dokter-kami/{dokter}` | Profil dokter |
+| `/dokter-kami` | Daftar & cari dokter (filter nama + spesialis) |
+| `/dokter-kami/{dokter}` | Profil dokter + jadwal praktek |
 | `/jadwal-praktek` | Jadwal praktek dokter |
-| `/rawat-jalan` | Daftar poliklinik & jadwal layanan |
-| `/rawat-jalan/{poliklinik}` | Detail poliklinik |
+| `/rawat-jalan` | Daftar poliklinik per unit layanan |
+| `/rawat-jalan/{poliklinik}` | Detail poliklinik + jadwal |
 | `/rawat-inap` | Informasi kelas rawat inap |
 | `/unggulan` | Layanan unggulan |
 | `/fasilitas-pendukung` | Fasilitas pendukung |
@@ -76,29 +90,49 @@ RumahSakit
 | `/hubungi-kami` | Kontak & lokasi |
 | `/promo` | Daftar promo aktif |
 | `/promo/{slug}` | Detail promo |
-| `/info/{slug}` | Halaman statis (tentang, kebijakan, dll.) |
+| `/info/{slug}` | Halaman statis |
 | `/magazine` | Arsip majalah/publikasi digital |
 | `/faq` | Pertanyaan yang sering diajukan |
 
 Semua halaman ditenagai **Livewire 3** — tidak ada full page reload.
 
+#### Halaman Jadwal Praktek
+
+Dua mode tampilan:
+
+| Mode | Deskripsi |
+|---|---|
+| **Per Hari** | Tab SENIN–MINGGU, kartu per poliklinik dengan baris dokter style WhatsApp. Filter poliklinik via Tom Select. |
+| **Per Poli** | Pilih poliklinik → tampilkan semua 7 hari (grid horizontal di desktop). Hari kosong tetap ditampilkan. |
+
+#### Homepage RS (Beranda)
+
+Seksi-seksi berurutan:
+1. Hero Carousel (welcome slide + banner)
+2. Link Layanan Digital
+3. Tentang Kami
+4. Layanan Unggulan
+5. Dokter Kami (3 random)
+6. **CTA "Siap Melayani"** — gradient tertiary, tombol buat janji + emergency + hotline
+7. Partner & Rekanan (Swiper slider)
+8. **Promo & Penawaran** (kondisional)
+
 ### Admin Panel (`/admin`)
 
 | Modul | Keterangan |
 |---|---|
-| Rumah Sakit | CRUD data rumah sakit, logo, gambar, about |
+| Rumah Sakit | CRUD data RS, logo, gambar, about |
 | Dokter | Manajemen dokter beserta foto & deskripsi |
 | Spesialis | Spesialisasi per rumah sakit |
 | Unit Layanan | Kelompok layanan (poli, IGD, dll.) |
-| Poliklinik | Klinik per unit layanan |
-| Jadwal Layanan | Jadwal mingguan per poliklinik — tampilan tabel & **AG Grid Excel** |
-| Jadwal Layanan Harian | Override jadwal untuk tanggal tertentu — tampilan tabel & **AG Grid Excel** |
-| Jadwal Praktek | Jadwal praktek dokter |
+| Poliklinik | Klinik per unit layanan (dengan gambar/ikon) |
+| **Jadwal Praktek** | Jadwal rawat jalan per poliklinik — 2 mode: Per Hari & Per Dokter |
+| **Jadwal Harian** | Override jadwal untuk tanggal tertentu — tabel & AG Grid Excel |
 | Rawat Inap | Kelas kamar, fasilitas, galeri foto |
 | Gedung | Manajemen gedung rumah sakit |
 | Banner | Spanduk promosi beranda |
 | Promo | Manajemen promosi + popup |
-| Halaman Statis | CMS halaman statis (slug unik per RS) |
+| Halaman Statis | CMS halaman statis |
 | Majalah | Upload majalah digital (cover + PDF) |
 | FAQ | Kelola FAQ dengan sort order |
 | Layanan Unggulan | Highlight layanan andalan |
@@ -109,19 +143,19 @@ Semua halaman ditenagai **Livewire 3** — tidak ada full page reload.
 | Link Layanan | Tautan cepat di halaman RS |
 | User | Manajemen akun admin + penugasan RS |
 
-#### Halaman Khusus Jadwal (AG Grid)
+#### Halaman Jadwal Praktek — Fitur Khusus
 
-Halaman **Jadwal Layanan · Excel** dan **Jadwal Harian · Excel** menggunakan [AG Grid Community](https://www.ag-grid.com/) untuk pengalaman edit seperti spreadsheet:
-- Klik sel untuk edit langsung
-- Dropdown poliklinik, dokter, status layanan
-- Time picker untuk jam mulai/selesai
-- Highlight kuning pada kolom wajib yang kosong
-- Tambah/hapus baris tanpa reload
-- Simpan semua sekaligus (replace-all per hari/tanggal)
+- **Mode Per Hari**: tab SENIN–MINGGU, tabel baris editable (poliklinik, dokter, jam, perjanjian, catatan), simpan replace-all per hari
+- **Mode Per Dokter**: pilih dokter (searchable + preload), tabel jadwal lintas semua hari, kolom hari bisa dipilih bebas
+- **Layar Penuh**: sembunyikan sidebar Filament untuk ruang kerja maksimal
+- **Gate Unit Layanan**: jika RS punya >1 unit layanan, wajib pilih unit dulu sebelum jadwal tampil
 
-### Chatbot
+#### Halaman Jadwal Harian — Fitur Khusus
 
-Widget chatbot mengambang terintegrasi di portal publik. Interaktif berbasis Livewire dengan panel slide-in.
+- Navigasi tanggal (kemarin/besok/date picker)
+- **Muat dari Jadwal Praktek Mingguan**: prefill baris dari JadwalPraktek hari yang sesuai
+- AG Grid Excel (via CDN) untuk edit seperti spreadsheet
+- Replace-all per tanggal × scope poliklinik RS
 
 ---
 
@@ -150,12 +184,11 @@ cp .env.example .env
 php artisan key:generate
 
 # 4. Konfigurasi database di .env
-# DB_CONNECTION=sqlite (default, buat file database/database.sqlite)
+# DB_CONNECTION=sqlite  ← buat file database/database.sqlite
 # atau atur MySQL/PostgreSQL
 
 # 5. Migrasi & seed
-php artisan migrate
-# php artisan db:seed   ← jika tersedia seeder
+php artisan migrate:fresh --seed
 
 # 6. Storage link
 php artisan storage:link
@@ -169,7 +202,11 @@ npm run dev
 php artisan serve
 ```
 
-Admin panel tersedia di `/admin`. Buat akun superadmin via Tinker:
+Admin panel tersedia di `/admin`. Akun superadmin dibuat otomatis oleh `DatabaseSeeder`:
+- **Email**: `test@example.com`
+- **Password**: `password`
+
+Atau buat manual via Tinker:
 
 ```bash
 php artisan tinker
@@ -188,44 +225,49 @@ php artisan tinker
 
 ```
 app/
-├── Enums/              # Hari, StatusLayanan
+├── Enums/                  # Hari, StatusLayanan
 ├── Filament/
-│   └── Resources/      # 24+ resource Filament
-│       ├── JadwalLayananResource/
-│       │   └── Pages/  # JadwalLayananPage, JadwalLayananExcel
-│       └── JadwalLayananHarianResource/
-│           └── Pages/  # JadwalLayananHarianPage, JadwalLayananHarianExcel
+│   └── Resources/          # 21 resource Filament
+│       ├── JadwalPraktekResource/
+│       │   └── Pages/      # JadwalPraktekPage (2 mode), JadwalPraktekExcel
+│       └── JadwalHarianResource/
+│           └── Pages/      # JadwalHarianPage, JadwalHarianExcel
 ├── Livewire/
-│   ├── Chatbot/        # Floating, Panel
-│   ├── Dokter/         # Find, Show
-│   ├── Pages/          # 13 halaman portal
-│   └── RumahSakit/     # Index
-├── Models/             # 24 model Eloquent
+│   ├── Dokter/             # Find, Show
+│   ├── Pages/              # 12 halaman portal
+│   └── RumahSakit/         # Index
+├── Models/                 # 22 model Eloquent
 └── Http/
-    ├── Controllers/    # PortalController
-    └── Middleware/     # RumahSakitMiddleware
+    ├── Controllers/        # PortalController
+    └── Middleware/         # RumahSakitMiddleware
 
 resources/views/
-├── layouts/            # rumah_sakit.blade.php, portal-layout.blade.php
-├── components/         # page-hero, rawat-inap, header, footer portal
-├── rumah_sakit/        # semua view portal publik
-│   ├── pages/          # 14 halaman
+├── welcome.blade.php       # Landing page pilih RS (non-Livewire)
+├── layouts/                # rumah_sakit.blade.php, portal-layout.blade.php
+├── components/             # page-hero, rawat-inap, header, footer portal
+├── rumah_sakit/            # semua view portal publik
+│   ├── pages/              # 12 halaman + partials (_jadwal-praktek-row, _searchable-select)
 │   ├── dokter/
-│   ├── chatbot/
-│   └── partials/       # mobile-bottom-bar, promo-popup
-└── filament/           # view kustom Filament (jadwal grid)
+│   └── partials/           # mobile-bottom-bar, promo-popup
+└── filament/               # view kustom Filament (jadwal grid)
+    ├── brand.blade.php     # Logo custom di login Filament
+    └── resources/
+        ├── jadwal-praktek-resource/pages/
+        └── jadwal-harian-resource/pages/
 ```
 
 ---
 
 ## Konvensi Kode
 
-- Resource Filament extends `BaseResource` atau `BaseRumahSakitResource` untuk scoping otomatis
+- Resource Filament extends `BaseResource` untuk scoping otomatis
 - Super admin cek via `BaseResource::isSuperAdmin()`
-- Halaman jadwal kustom extends parent page class, override hook navigasi untuk sync AG Grid
+- Halaman jadwal custom extends parent page class (pattern cache per hari/tanggal)
 - Blade portal menggunakan Livewire full-page components; semua properti reaktif
-- Tailwind v4: gunakan `bg-linear-to-r` (bukan `bg-gradient-to-r`), `scheme-dark` (bukan `[color-scheme:dark]`)
-- AG Grid di-load dari CDN; integrasi via `window.namaFungsi = function(){}` (bukan `@script`) karena timing Alpine
+- Tailwind v4: gunakan `bg-linear-to-r` (bukan `bg-gradient-to-r`), warna via CSS custom property
+- AG Grid di-load dari CDN untuk halaman Excel
+- Tom Select di-load via CDN untuk searchable select (portal + admin)
+- Fallback warna unit layanan: `tertiary (#4d51b2)` — semua kartu poliklinik dan aksen jadwal
 
 ---
 
@@ -233,20 +275,25 @@ resources/views/
 
 ### Selesai
 - [x] Arsitektur multi-tenant
-- [x] Admin panel Filament lengkap (24+ resource)
+- [x] Admin panel Filament (21 resource)
 - [x] Portal publik semua halaman
-- [x] Jadwal layanan mingguan (tabel + AG Grid Excel)
-- [x] Jadwal layanan harian (tabel + AG Grid Excel)
-- [x] Jadwal praktek dokter
-- [x] Chatbot widget
+- [x] **JadwalPraktek per poliklinik** (redesign arsitektur jadwal)
+- [x] Jadwal harian override (AG Grid Excel)
+- [x] Halaman jadwal 2 mode (Per Hari + Per Dokter)
+- [x] Filter poliklinik searchable (Tom Select)
 - [x] Promo dengan popup
 - [x] Halaman statis CMS
 - [x] Majalah digital
 - [x] FAQ
+- [x] SEO meta tags (artesaos/seotools)
+- [x] Landing page redesign (hero, Tom Select, no jQuery)
+- [x] Homepage RS: CTA + Promo section
+- [x] Login Filament custom (2 logo)
+- [x] Portal header dengan logo
 
 ### Dalam Pertimbangan
-- [ ] SEO meta tags (`artesaos/seotools`)
 - [ ] Sitemap otomatis per rumah sakit
 - [ ] Notifikasi jadwal (email/WhatsApp)
 - [ ] Export jadwal ke PDF/Excel
 - [ ] Dark mode portal publik
+- [ ] JadwalHarian rename & cleanup lanjutan

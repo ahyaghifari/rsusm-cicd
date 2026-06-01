@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="{{ asset('css/portal.css') }}">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2/dist/css/tom-select.css" rel="stylesheet">
 </head>
 
 <body class="bg-surface text-on-surface font-sans antialiased min-h-screen flex flex-col">
@@ -37,6 +38,7 @@
     <!-- Footer component -->
     <x-footer-portal />
 
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2/dist/js/tom-select.complete.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
     <script>

@@ -393,6 +393,69 @@
         </div>
     </section>
 
+    {{-- ============================================================ --}}
+    {{-- CTA — Siap Melayani                                          --}}
+    {{-- ============================================================ --}}
+    <section class="mt-24 relative overflow-hidden" data-aos="fade-up">
+
+        <div class="absolute inset-0"
+             style="background: linear-gradient(135deg, #4d51b2 0%, #3a3e99 50%, #2e3180 100%);"></div>
+        <div class="absolute inset-0 opacity-[0.06]"
+             style="background-image:radial-gradient(circle,white 1px,transparent 1px);background-size:24px 24px;"></div>
+        <div class="absolute -top-20 -right-20 w-80 h-80 rounded-full opacity-10" style="background:white;"></div>
+        <div class="absolute -bottom-20 -left-20 w-64 h-64 rounded-full opacity-10" style="background:white;"></div>
+
+        <div class="relative z-10 w-10/12 mx-auto py-16 flex flex-col lg:flex-row items-center justify-between gap-10">
+
+            {{-- Teks kiri --}}
+            <div class="text-center lg:text-left">
+                <span class="inline-block text-white/60 text-xs uppercase tracking-[0.2em] font-semibold mb-3">
+                    Layanan Kami
+                </span>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white leading-tight">
+                    Siap Melayani<br>Kesehatan Anda
+                </h2>
+                <div class="mt-4 h-1 w-12 bg-yellow-400 rounded-full lg:mx-0 mx-auto"></div>
+                <p class="mt-4 text-white/70 text-base max-w-md leading-relaxed">
+                    Tim dokter spesialis dan tenaga medis profesional kami siap memberikan
+                    pelayanan kesehatan terbaik untuk Anda dan keluarga.
+                </p>
+            </div>
+
+            {{-- Tombol kanan --}}
+            <div class="flex flex-col gap-3 shrink-0 w-full lg:w-auto">
+                @if($rs->link_pendaftaran_online)
+                <a href="{{ $rs->link_pendaftaran_online }}" target="_blank"
+                   class="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl
+                          font-bold text-primary bg-yellow-400 hover:bg-yellow-300
+                          shadow-xl transition-all duration-150 text-base">
+                    <span class="material-symbols-outlined text-[22px]">assignment</span>
+                    Buat Janji Sekarang
+                </a>
+                @endif
+                <div class="flex gap-3">
+                    @if($rs->no_emergency)
+                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $rs->no_emergency) }}"
+                       class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl
+                              bg-red-600 hover:bg-red-700 text-white font-semibold text-sm shadow-lg transition-all">
+                        <span class="material-symbols-outlined text-[18px]">emergency</span>
+                        {{ $rs->no_emergency }}
+                    </a>
+                    @endif
+                    @if($rs->no_hotline)
+                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $rs->no_hotline) }}"
+                       class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl
+                              bg-green-600 hover:bg-green-700 text-white font-semibold text-sm shadow-lg transition-all">
+                        <span class="material-symbols-outlined text-[18px]">call</span>
+                        {{ $rs->no_hotline }}
+                    </a>
+                    @endif
+                </div>
+            </div>
+
+        </div>
+    </section>
+
     <!-- asuransi dan perusahaan rekanan -->
     @if($partner_asuransi->count() > 0 || $partner_perusahaan->count() > 0)
     <section class="mt-24 py-16 bg-surface-container-low overflow-hidden">
@@ -456,6 +519,85 @@
             </div>
         </div>
         @endif
+    </section>
+    @endif
+
+    {{-- ============================================================ --}}
+    {{-- PROMO                                                        --}}
+    {{-- ============================================================ --}}
+    @if($promos->count() > 0)
+    <section class="mt-24" data-aos="fade-up">
+        <div class="w-11/12 lg:w-10/12 mx-auto">
+
+            <div class="flex items-end justify-between mb-8">
+                <div>
+                    <span class="text-xs text-on-surface-variant uppercase tracking-widest font-semibold">Penawaran Spesial</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-on-surface mt-1">Promo & Penawaran</h2>
+                </div>
+                <a wire:navigate href="{{ rumahsakit_route('rumahsakit.promo') }}"
+                   class="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:gap-2 transition-all shrink-0">
+                    Lihat Semua <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                @foreach($promos as $p)
+                <a wire:navigate
+                   href="{{ route('rumahsakit.promo_detail', ['rumahsakit' => $rs->slug, 'promo' => $p->slug]) }}"
+                   class="group bg-white rounded-2xl overflow-hidden shadow-sm border border-outline-variant/20
+                          hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col animate-fade-in"
+                   style="animation-delay: {{ $loop->index * 50 }}ms">
+
+                    @if($p->gambar)
+                    <div class="h-48 overflow-hidden relative bg-surface-container/30">
+                        <img src="{{ Storage::url($p->gambar) }}" alt="{{ $p->judul }}"
+                             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
+                        @if($p->popup)
+                        <div class="absolute top-3 right-3">
+                            <span class="inline-flex items-center gap-1 text-[10px] font-bold bg-yellow-400 text-primary px-2 py-0.5 rounded-full">
+                                <span class="material-symbols-outlined text-[10px]">star</span> Unggulan
+                            </span>
+                        </div>
+                        @endif
+                    </div>
+                    @else
+                    <div class="h-48 bg-primary/8 flex items-center justify-center relative">
+                        <span class="material-symbols-outlined text-6xl text-primary/30">local_offer</span>
+                        @if($p->popup)
+                        <div class="absolute top-3 right-3">
+                            <span class="inline-flex items-center gap-1 text-[10px] font-bold bg-yellow-400 text-primary px-2 py-0.5 rounded-full">
+                                <span class="material-symbols-outlined text-[10px]">star</span> Unggulan
+                            </span>
+                        </div>
+                        @endif
+                    </div>
+                    @endif
+
+                    <div class="p-4 flex flex-col flex-1">
+                        <h3 class="font-bold text-on-surface text-sm leading-snug mb-2 line-clamp-2
+                                   group-hover:text-primary transition-colors duration-200">
+                            {{ $p->judul }}
+                        </h3>
+                        @if($p->deskripsi)
+                        <p class="text-xs text-on-surface-variant line-clamp-2 flex-1 leading-relaxed">
+                            {{ strip_tags($p->deskripsi) }}
+                        </p>
+                        @else
+                        <div class="flex-1"></div>
+                        @endif
+                        <div class="flex items-center gap-1 mt-3 text-xs font-semibold text-primary
+                                    pt-3 border-t border-outline-variant/20">
+                            Lihat Detail
+                            <span class="material-symbols-outlined text-[13px] group-hover:translate-x-0.5 transition-transform">
+                                arrow_forward
+                            </span>
+                        </div>
+                    </div>
+                </a>
+                @endforeach
+            </div>
+
+        </div>
     </section>
     @endif
 
