@@ -134,13 +134,13 @@
                                 <span class="material-symbols-outlined text-[13px]">stethoscope</span>
                                 Dokter Kami
                             </a>
-                            <a href="/{{ $rs->slug }}/jadwal-poliklinik"
+                            <a href="/{{ $rs->slug }}/jadwal-praktek"
                                onclick="event.stopPropagation()"
                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium
                                       bg-surface-container border border-outline-variant/40 text-on-surface-variant
                                       hover:bg-surface-container-high hover:text-on-surface transition-colors">
                                 <span class="material-symbols-outlined text-[13px]">calendar_month</span>
-                                Jadwal Poliklinik
+                                Jadwal Praktek
                             </a>
                             @foreach($rs->linkLayanan as $ll)
                             <a href="{{ $ll->link }}" target="_blank" rel="noopener noreferrer"

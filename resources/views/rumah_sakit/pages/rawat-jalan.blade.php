@@ -88,68 +88,55 @@
                     </div>
 
                 @else
-                    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 lg:gap-5">
+                    @php $warna = $activeUnit?->warna ?: '#d606b0'; @endphp
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4">
                         @foreach($poliklinik as $poli)
                             <div
                                 onclick="window.location='{{ route('rumahsakit.rawat_jalan_show', ['rumahsakit' => $rsSlug, 'poliklinik' => $poli->slug]) }}'"
                                 wire:key="poli-card-{{ $poli->id }}"
+                                data-aos="fade-up"
+                                data-aos-delay="{{ $loop->index * 40 }}"
                                 class="group bg-white rounded-2xl shadow-sm border border-outline-variant/30
-                                       hover:shadow-xl hover:-translate-y-1 transition-all duration-300
-                                       overflow-hidden flex flex-col cursor-pointer">
+                                       hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300
+                                       overflow-hidden cursor-pointer">
 
                                 {{-- Aksen atas --}}
-                                <div class="h-1 w-full bg-linear-to-r from-primary to-secondary shrink-0"></div>
+                                <div class="h-1 w-full shrink-0"
+                                     style="background: linear-gradient(to right, {{ $warna }}, {{ $warna }}88);"></div>
 
-                                {{-- Gambar --}}
-                                @if($poli->gambar)
-                                    <a href="{{ Storage::url($poli->gambar) }}"
-                                       class="glightbox relative w-full h-40 overflow-hidden shrink-0 block"
-                                       data-gallery="poliklinik"
-                                       data-title="{{ $poli->nama }}"
-                                       onclick="event.stopPropagation()">
-                                        <img
-                                            src="{{ Storage::url($poli->gambar) }}"
-                                            alt="{{ $poli->nama }}"
-                                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                        <div class="absolute inset-0 bg-linear-to-t from-black/25 to-transparent"></div>
-                                        <span class="absolute top-2 right-2 material-symbols-outlined text-white text-xl
-                                                     opacity-0 group-hover:opacity-100 transition drop-shadow
-                                                     bg-black/30 rounded-full p-0.5">zoom_in</span>
-                                    </a>
-                                @else
-                                    <div class="relative w-full h-32 bg-linear-to-br from-primary/10 to-secondary/10
-                                                flex items-center justify-center overflow-hidden shrink-0">
-                                        <span class="material-symbols-outlined text-5xl text-primary/30">medical_services</span>
-                                        <div class="absolute -bottom-4 -right-4 w-16 h-16 bg-primary/5 rounded-full pointer-events-none"></div>
+                                {{-- Body: ikon kiri, nama + tombol kanan --}}
+                                <div class="flex items-center gap-5 px-5 py-5">
+
+                                    {{-- Ikon --}}
+                                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden"
+                                         style="background-color: {{ $warna }}12; border: 1px solid {{ $warna }}25;">
+                                        @if($poli->gambar)
+                                            <img src="{{ Storage::url($poli->gambar) }}"
+                                                 alt="{{ $poli->nama }}"
+                                                 class="w-11 h-11 object-contain
+                                                        group-hover:scale-105 transition-transform duration-300">
+                                        @else
+                                            <span class="material-symbols-outlined text-[30px]
+                                                         group-hover:scale-105 transition-transform duration-300"
+                                                  style="color: {{ $warna }};">medical_services</span>
+                                        @endif
                                     </div>
-                                @endif
 
-                                {{-- Konten --}}
-                                <div class="p-4 flex flex-col flex-1">
-                                    <h3 class="font-bold text-on-surface text-sm leading-snug
-                                               group-hover:text-primary transition-colors duration-200 mb-2">
-                                        {{ $poli->nama }}
-                                    </h3>
+                                    {{-- Nama + Tombol --}}
+                                    <div class="flex flex-col gap-2 flex-1 min-w-0">
+                                        <h3 class="font-bold text-on-surface text-sm leading-snug
+                                                   group-hover:text-primary transition-colors duration-200"
+                                            style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                            {{ $poli->nama }}
+                                        </h3>
+                                        <span class="inline-flex items-center gap-1 text-xs font-semibold w-fit
+                                                     group-hover:gap-2 transition-all duration-150"
+                                              style="color: {{ $warna }};">
+                                            Lihat Detail
+                                            <span class="material-symbols-outlined text-[13px]">arrow_forward</span>
+                                        </span>
+                                    </div>
 
-                                    @if($poli->deskripsi)
-                                        <p class="text-xs text-on-surface-variant leading-relaxed line-clamp-2 flex-1">
-                                            {{ strip_tags($poli->deskripsi) }}
-                                        </p>
-                                    @else
-                                        <p class="text-xs text-on-surface-variant/50 italic flex-1">
-                                            Informasi belum tersedia.
-                                        </p>
-                                    @endif
-                                </div>
-
-                                {{-- Footer tombol --}}
-                                <div class="px-4 pb-4 pt-0">
-                                    <div class="h-px bg-outline-variant/20 mb-3"></div>
-                                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-primary
-                                                 group-hover:gap-2 transition-all duration-150">
-                                        Lihat Detail
-                                        <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
-                                    </span>
                                 </div>
 
                             </div>
@@ -231,10 +218,3 @@
     {{-- END KONTEN UTAMA --}}
 </div>
 
-@script
-<script>
-    document.addEventListener('livewire:updated', () => {
-        if (window._glb) window._glb.reload();
-    });
-</script>
-@endscript

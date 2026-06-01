@@ -100,12 +100,6 @@
                                     <span class="material-symbols-outlined text-[13px]">calendar_month</span>
                                     Jadwal Praktek
                                 </a>
-                                <a wire:navigate href="{{ rumahsakit_route('rumahsakit.jadwal_poliklinik') }}"
-                                   class="inline-flex items-center gap-1.5 {{ $navClass }}
-                                          px-3 py-1.5 rounded-full text-xs font-semibold transition-colors">
-                                    <span class="material-symbols-outlined text-[13px]">local_hospital</span>
-                                    Jadwal Poli
-                                </a>
                                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.rawat_inap') }}"
                                    class="inline-flex items-center gap-1.5 {{ $navClass }}
                                           px-3 py-1.5 rounded-full text-xs font-semibold transition-colors">

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -12,6 +13,11 @@ class RolesAndPermissionsSeeder extends Seeder
 {
     public function run(): void
     {
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        // Generate semua permissions dari Filament Shield berdasarkan resources yang terdaftar
+        Artisan::call('shield:generate', ['--all' => true, '--panel' => 'admin']);
+
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $superAdmin = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
@@ -34,7 +40,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Humas: media & schedule focused
         $humasResources = [
-            'poli::klinik', 'jadwal::layanan', 'banner', 'promo', 'halaman',
+            'poli::klinik', 'banner', 'promo', 'halaman',
             'magazine', 'faq', 'layanan::unggulan', 'fasilitas::pendukung',
             'penunjang::medis', 'kontak',
         ];

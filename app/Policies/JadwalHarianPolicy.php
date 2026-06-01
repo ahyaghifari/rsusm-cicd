@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\JadwalLayananHarian;
+use App\Models\JadwalHarian;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class JadwalLayananHarianPolicy
+class JadwalHarianPolicy
 {
     use HandlesAuthorization;
 
@@ -15,15 +15,15 @@ class JadwalLayananHarianPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_jadwal::layanan::harian');
+        return $user->can('view_any_jadwal::harian');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, JadwalLayananHarian $jadwalLayananHarian): bool
+    public function view(User $user, JadwalHarian $jadwalHarian): bool
     {
-        return $user->can('view_jadwal::layanan::harian');
+        return $user->can('view_jadwal::harian');
     }
 
     /**
@@ -31,23 +31,23 @@ class JadwalLayananHarianPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_jadwal::layanan::harian');
+        return $user->can('create_jadwal::harian');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, JadwalLayananHarian $jadwalLayananHarian): bool
+    public function update(User $user, JadwalHarian $jadwalHarian): bool
     {
-        return $user->can('update_jadwal::layanan::harian');
+        return $user->can('update_jadwal::harian');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, JadwalLayananHarian $jadwalLayananHarian): bool
+    public function delete(User $user, JadwalHarian $jadwalHarian): bool
     {
-        return $user->can('delete_jadwal::layanan::harian');
+        return $user->can('delete_jadwal::harian');
     }
 
     /**
@@ -55,15 +55,15 @@ class JadwalLayananHarianPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_jadwal::layanan::harian');
+        return $user->can('delete_any_jadwal::harian');
     }
 
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user, JadwalLayananHarian $jadwalLayananHarian): bool
+    public function forceDelete(User $user, JadwalHarian $jadwalHarian): bool
     {
-        return $user->can('force_delete_jadwal::layanan::harian');
+        return $user->can('force_delete_jadwal::harian');
     }
 
     /**
@@ -71,15 +71,15 @@ class JadwalLayananHarianPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_jadwal::layanan::harian');
+        return $user->can('force_delete_any_jadwal::harian');
     }
 
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user, JadwalLayananHarian $jadwalLayananHarian): bool
+    public function restore(User $user, JadwalHarian $jadwalHarian): bool
     {
-        return $user->can('restore_jadwal::layanan::harian');
+        return $user->can('restore_jadwal::harian');
     }
 
     /**
@@ -87,15 +87,15 @@ class JadwalLayananHarianPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_jadwal::layanan::harian');
+        return $user->can('restore_any_jadwal::harian');
     }
 
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user, JadwalLayananHarian $jadwalLayananHarian): bool
+    public function replicate(User $user, JadwalHarian $jadwalHarian): bool
     {
-        return $user->can('replicate_jadwal::layanan::harian');
+        return $user->can('replicate_jadwal::harian');
     }
 
     /**
@@ -103,6 +103,6 @@ class JadwalLayananHarianPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_jadwal::layanan::harian');
+        return $user->can('reorder_jadwal::harian');
     }
 }

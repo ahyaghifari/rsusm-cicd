@@ -26,7 +26,6 @@ class DatabaseSeeder extends Seeder
             RumahSakitSeeder::class,
             SpesialisSeeder::class,
             DokterSeeder::class,
-            JadwalPraktekSeeder::class,
             GedungSeeder::class,
             RawatInapSeeder::class,
             FasilitasRawatInapSeeder::class,
@@ -37,6 +36,7 @@ class DatabaseSeeder extends Seeder
             LinkLayananSeeder::class,
             UnitLayananSeeder::class,
             PoliKlinikSeeder::class,
+            JadwalPraktekSeeder::class,
             HalamanSeeder::class,
         ]);
 

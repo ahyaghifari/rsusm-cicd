@@ -3,7 +3,7 @@
 namespace App\Livewire\Pages;
 
 use App\Livewire\RsPortalComponent;
-use App\Models\JadwalLayanan;
+use App\Models\JadwalPraktek;
 use App\Models\PoliKlinik;
 use Artesaos\SEOTools\Facades\OpenGraph;
 
@@ -34,11 +34,19 @@ class PoliKlinikDetail extends RsPortalComponent
 
     public function render()
     {
-        $hariOrder = ['SENIN' => 1, 'SELASA' => 2, 'RABU' => 3, 'KAMIS' => 4, 'JUMAT' => 5, 'SABTU' => 6, 'MINGGU' => 7];
-
-        $jadwalMingguan = JadwalLayanan::where('poliklinik_id', $this->poliklinik->id)
-            ->orderByRaw("FIELD(hari, 'SENIN','SELASA','RABU','KAMIS','JUMAT','SABTU','MINGGU')")
-            ->orderBy('jam_mulai')
+        // Gunakan CASE WHEN agar kompatibel MySQL dan SQLite
+        $jadwalMingguan = JadwalPraktek::where('poliklinik_id', $this->poliklinik->id)
+            ->orderByRaw("CASE hari
+                WHEN 'SENIN'   THEN 1
+                WHEN 'SELASA'  THEN 2
+                WHEN 'RABU'    THEN 3
+                WHEN 'KAMIS'   THEN 4
+                WHEN 'JUMAT'   THEN 5
+                WHEN 'SABTU'   THEN 6
+                WHEN 'MINGGU'  THEN 7
+                ELSE 8 END")
+            ->orderBy('waktu_mulai')
+            ->with('dokter')
             ->get()
             ->groupBy(fn ($j) => $j->hari->value);
 

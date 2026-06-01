@@ -75,11 +75,7 @@
                     <span class="{{ $gridIconClass }}">calendar_month</span>
                     <span class="{{ $gridLabelClass }}">Jadwal Praktek</span>
                 </a>
-                <a wire:navigate href="{{ rumahsakit_route('rumahsakit.jadwal_poliklinik') }}" class="{{ $gridItemClass }}">
-                    <span class="{{ $gridIconClass }}">event_available</span>
-                    <span class="{{ $gridLabelClass }}">Jadwal Poli</span>
-                </a>
-                <a wire:navigate href="{{ rumahsakit_route('rumahsakit.rawat_jalan') }}" class="{{ $gridItemClass }}">
+<a wire:navigate href="{{ rumahsakit_route('rumahsakit.rawat_jalan') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">local_hospital</span>
                     <span class="{{ $gridLabelClass }}">Rawat Jalan</span>
                 </a>
@@ -148,8 +144,6 @@
                                 href="{{ rumahsakit_route('rumahsakit.dokter_kami') }}">Cari Dokter</a>
                             <a wire:navigate class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200"
                                 href="{{ rumahsakit_route('rumahsakit.jadwal_praktek') }}">Jadwal Praktek</a>
-                            <a wire:navigate class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200"
-                                href="{{ rumahsakit_route('rumahsakit.jadwal_poliklinik') }}">Jadwal Poliklinik</a>
                         </div>
                     </div>
                 </div>

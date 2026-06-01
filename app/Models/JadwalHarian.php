@@ -7,15 +7,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class JadwalLayananHarian extends Model
+class JadwalHarian extends Model
 {
     use HasFactory;
 
-    protected $table = 'jadwal_layanan_harian';
+    protected $table = 'jadwal_harian';
 
     protected $fillable = [
         'poliklinik_id',
-        'jadwal_layanan_id',
         'tanggal',
         'dokter_id',
         'nama_dokter',
@@ -38,11 +37,6 @@ class JadwalLayananHarian extends Model
     public function poliklinik(): BelongsTo
     {
         return $this->belongsTo(PoliKlinik::class, 'poliklinik_id');
-    }
-
-    public function jadwalLayanan(): BelongsTo
-    {
-        return $this->belongsTo(JadwalLayanan::class, 'jadwal_layanan_id');
     }
 
     public function dokter(): BelongsTo

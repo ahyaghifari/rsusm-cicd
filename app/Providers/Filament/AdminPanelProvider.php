@@ -31,6 +31,9 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->profile()
+            ->brandLogo(fn () => view('filament.brand'))
+            ->brandLogoHeight('5rem')
+            ->brandName('RSU Syifa Medika')
             ->colors([
                 'primary' => '#d606b0',
                 'gray' => Color::Gray

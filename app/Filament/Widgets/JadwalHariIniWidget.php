@@ -2,7 +2,7 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\JadwalLayananHarian;
+use App\Models\JadwalHarian;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -29,7 +29,7 @@ class JadwalHariIniWidget extends BaseWidget
 
         return $table
             ->query(
-                JadwalLayananHarian::with(['poliklinik', 'dokter'])
+                JadwalHarian::with(['poliklinik', 'dokter'])
                     ->whereHas('poliklinik.unitLayanan', $scope)
                     ->whereDate('tanggal', today())
                     ->orderBy('jam_mulai')

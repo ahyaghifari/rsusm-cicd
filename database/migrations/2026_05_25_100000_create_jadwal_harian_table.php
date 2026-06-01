@@ -8,10 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('jadwal_layanan', function (Blueprint $table) {
+        Schema::create('jadwal_harian', function (Blueprint $table) {
             $table->id();
             $table->foreignId('poliklinik_id')->constrained('poliklinik')->cascadeOnDelete();
-            $table->enum('hari', ['SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU', 'MINGGU']);
+            $table->date('tanggal');
             $table->foreignId('dokter_id')->nullable()->constrained('dokter')->nullOnDelete();
             $table->string('nama_dokter', 255)->nullable();
             $table->time('jam_mulai')->nullable();
@@ -24,6 +24,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('jadwal_layanan');
+        Schema::dropIfExists('jadwal_harian');
     }
 };

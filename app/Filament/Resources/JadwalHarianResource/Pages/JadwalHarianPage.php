@@ -1,50 +1,44 @@
 <?php
 
-namespace App\Filament\Resources\JadwalLayananResource\Pages;
+namespace App\Filament\Resources\JadwalHarianResource\Pages;
 
 use App\Enums\Hari;
-use App\Filament\Resources\JadwalLayananResource;
+use App\Filament\Resources\JadwalHarianResource;
 use App\Models\Dokter;
-use App\Models\JadwalLayanan;
+use App\Models\JadwalHarian;
+use App\Models\JadwalPraktek;
 use App\Models\PoliKlinik;
 use App\Models\RumahSakit;
 use App\Models\UnitLayanan;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\DB;
 
-class JadwalLayananPage extends Page
+class JadwalHarianPage extends Page
 {
-    protected static string $resource = JadwalLayananResource::class;
+    protected static string $resource = JadwalHarianResource::class;
 
-    protected static string $view = 'filament.resources.jadwal-layanan-resource.pages.jadwal-layanan-page';
+    protected static string $view = 'filament.resources.jadwal-harian-resource.pages.jadwal-harian-page';
+
+    protected static ?string $title = 'Jadwal Harian';
 
     // =========================================================================
     // STATE / PROPERTIES
     // =========================================================================
 
-    // RS yang sedang aktif.
-    // Admin RS: diisi otomatis di mount() dari data user login, tidak bisa diubah.
-    // Super admin: diisi oleh Filament filterForm saat dropdown dipilih.
     public ?int $selectedRumahSakitId = null;
-
-    // Filter unit layanan opsional. Null = tampilkan semua poli dari RS aktif.
-    // Disembunyikan di UI jika RS hanya punya 1 unit layanan aktif.
     public ?int $selectedUnitLayananId = null;
-
-    // Tab hari yang sedang aktif, default Senin saat halaman pertama dibuka.
-    public string $activeHari = 'SENIN';
-
-    // Baris tabel yang sedang ditampilkan (sesuai $activeHari).
-    // Struktur tiap elemen: lihat addRow() di bawah.
+    public string $activeTanggal = '';
     public array $rows = [];
-
-    // Cache baris per hari agar tidak hilang saat pindah tab.
-    // Key = nilai Hari enum (mis. 'SENIN'), value = array rows atau null (belum di-load).
-    // null = belum pernah di-load dari DB untuk hari tersebut.
     public array $rowsCache = [];
+
+    protected const DAY_MAP = [
+        0 => 'MINGGU', 1 => 'SENIN', 2 => 'SELASA', 3 => 'RABU',
+        4 => 'KAMIS',  5 => 'JUMAT', 6 => 'SABTU',
+    ];
 
     // =========================================================================
     // LIFECYCLE
@@ -52,23 +46,16 @@ class JadwalLayananPage extends Page
 
     public function mount(): void
     {
-        // Inisialisasi cache untuk semua hari dengan null (belum di-load)
-        foreach (Hari::cases() as $h) {
-            $this->rowsCache[$h->value] = null;
-        }
+        $this->activeTanggal = now()->format('Y-m-d');
 
-        if (! JadwalLayananResource::isSuperAdmin()) {
-            // Admin RS: RS sudah diketahui dari data user login — kunci langsung.
-            $this->selectedRumahSakitId = JadwalLayananResource::rumahSakitId();
+        if (! JadwalHarianResource::isSuperAdmin()) {
+            $this->selectedRumahSakitId = JadwalHarianResource::rumahSakitId();
             $this->loadRows();
         }
-        // Super admin: tunggu pilihan dropdown di filterForm, rows tetap kosong.
     }
 
     // =========================================================================
-    // FILAMENT FORM: Filter RS & Unit Layanan
-    // Menggunakan statePath('') agar field form langsung terikat ke property komponen,
-    // bukan ke array 'data'. Pola ini sama dengan JadwalPraktekDokter.
+    // FILTER FORM
     // =========================================================================
 
     protected function getForms(): array
@@ -80,16 +67,14 @@ class JadwalLayananPage extends Page
     {
         return $form
             ->schema([
-                // Dropdown RS: hanya muncul untuk super admin
                 Forms\Components\Select::make('selectedRumahSakitId')
                     ->label('Rumah Sakit')
                     ->placeholder('— Pilih Rumah Sakit —')
                     ->options(fn () => RumahSakit::orderBy('nama')->pluck('nama', 'id'))
-                    ->required(fn () => JadwalLayananResource::isSuperAdmin())
-                    ->visible(fn () => JadwalLayananResource::isSuperAdmin())
+                    ->required(fn () => JadwalHarianResource::isSuperAdmin())
+                    ->visible(fn () => JadwalHarianResource::isSuperAdmin())
                     ->live(),
 
-                // Dropdown Unit Layanan: muncul jika RS aktif punya lebih dari 1 unit
                 Forms\Components\Select::make('selectedUnitLayananId')
                     ->label('Unit Layanan')
                     ->placeholder('— Semua Unit Layanan —')
@@ -97,7 +82,7 @@ class JadwalLayananPage extends Page
                     ->visible(fn () => count($this->getUnitLayananOptions()) > 1)
                     ->live(),
             ])
-            ->statePath('') // State langsung ke property komponen, bukan ke $data
+            ->statePath('')
             ->columns(2);
     }
 
@@ -110,7 +95,19 @@ class JadwalLayananPage extends Page
         return $this->selectedRumahSakitId;
     }
 
-    // Kembalikan [id => nama] poliklinik aktif milik RS + unit layanan yang aktif.
+    public function getNamaHariAktif(): string
+    {
+        if (! $this->activeTanggal) return '';
+        $hariValue = self::DAY_MAP[Carbon::parse($this->activeTanggal)->dayOfWeek];
+        return Hari::from($hariValue)->getLabel();
+    }
+
+    protected function getHariDariTanggal(?string $tanggal = null): string
+    {
+        $tgl = $tanggal ?? $this->activeTanggal;
+        return self::DAY_MAP[Carbon::parse($tgl)->dayOfWeek];
+    }
+
     public function getPoliklinikOptions(): array
     {
         $rsId = $this->getActiveRumahSakitId();
@@ -128,7 +125,6 @@ class JadwalLayananPage extends Page
             ->toArray();
     }
 
-    // Kembalikan [id => nama] dokter aktif milik RS aktif.
     public function getDokterOptions(): array
     {
         $rsId = $this->getActiveRumahSakitId();
@@ -141,8 +137,6 @@ class JadwalLayananPage extends Page
             ->toArray();
     }
 
-    // Kembalikan [id => nama] unit layanan aktif milik RS aktif.
-    // Digunakan filterForm untuk menentukan apakah dropdown unit perlu ditampilkan.
     public function getUnitLayananOptions(): array
     {
         $rsId = $this->getActiveRumahSakitId();
@@ -159,17 +153,16 @@ class JadwalLayananPage extends Page
     // DATA LOADING
     // =========================================================================
 
-    // Muat data JadwalLayanan dari DB ke $rows dan simpan ke cache $activeHari.
     public function loadRows(): void
     {
         $rsId = $this->getActiveRumahSakitId();
 
-        if (! $rsId) {
+        if (! $rsId || ! $this->activeTanggal) {
             $this->rows = [];
             return;
         }
 
-        $jadwals = JadwalLayanan::where('hari', $this->activeHari)
+        $jadwals = JadwalHarian::where('tanggal', $this->activeTanggal)
             ->whereHas('poliklinik.unitLayanan', function ($q) use ($rsId) {
                 $q->where('rumah_sakit_id', $rsId);
                 if ($this->selectedUnitLayananId) {
@@ -188,87 +181,117 @@ class JadwalLayananPage extends Page
             'catatan'        => $j->catatan,
         ])->toArray();
 
-        // Simpan hasil load ke cache hari ini
-        $this->rowsCache[$this->activeHari] = $this->rows;
+        $this->rowsCache[$this->activeTanggal] = $this->rows;
     }
 
     // =========================================================================
-    // TAB HARI — Pergantian tab dengan preservasi cache
+    // NAVIGASI TANGGAL
     // =========================================================================
 
-    // Dipanggil dari blade saat tab hari diklik.
-    // Menyimpan rows saat ini ke cache SEBELUM switch, lalu load dari cache atau DB.
-    // Ini yang mencegah rows hilang saat pindah tab.
-    public function setActiveHari(string $hari): void
+    public function setActiveTanggal(string $tanggal): void
     {
-        // Simpan rows hari aktif saat ini ke cache sebelum berpindah
-        $this->rowsCache[$this->activeHari] = $this->rows;
+        if (! $tanggal) return;
 
-        // Pindah ke hari baru
-        $this->activeHari = $hari;
+        $this->rowsCache[$this->activeTanggal] = $this->rows;
+        $this->activeTanggal = $tanggal;
 
-        // Gunakan cache jika sudah ada (tidak null), hindari re-query DB yang sia-sia
-        if ($this->rowsCache[$hari] !== null) {
-            $this->rows = $this->rowsCache[$hari];
+        if (isset($this->rowsCache[$tanggal]) && $this->rowsCache[$tanggal] !== null) {
+            $this->rows = $this->rowsCache[$tanggal];
         } else {
-            // Belum pernah di-load untuk hari ini → ambil dari DB
             $this->loadRows();
         }
     }
 
+    public function prevDay(): void
+    {
+        $this->setActiveTanggal(Carbon::parse($this->activeTanggal)->subDay()->format('Y-m-d'));
+    }
+
+    public function nextDay(): void
+    {
+        $this->setActiveTanggal(Carbon::parse($this->activeTanggal)->addDay()->format('Y-m-d'));
+    }
+
     // =========================================================================
-    // LIVEWIRE HOOKS (updated*)
+    // MUAT DARI JADWAL PRAKTEK MINGGUAN
     // =========================================================================
 
-    // Dipanggil oleh Filament filterForm saat super admin mengganti RS
+    public function muatDariJadwalMingguan(): void
+    {
+        $rsId = $this->getActiveRumahSakitId();
+        if (! $rsId) return;
+
+        $hari     = $this->getHariDariTanggal();
+        $namaHari = Hari::from($hari)->getLabel();
+
+        $jadwals = JadwalPraktek::where('hari', $hari)
+            ->whereHas('poliklinik.unitLayanan', function ($q) use ($rsId) {
+                $q->where('rumah_sakit_id', $rsId);
+                if ($this->selectedUnitLayananId) {
+                    $q->where('id', $this->selectedUnitLayananId);
+                }
+            })
+            ->get();
+
+        if ($jadwals->isEmpty()) {
+            Notification::make()
+                ->title("Tidak ada jadwal praktek untuk hari {$namaHari}")
+                ->warning()->send();
+            return;
+        }
+
+        $this->rows = $jadwals->map(fn ($j) => [
+            'poliklinik_id'  => $j->poliklinik_id,
+            'dokter_id'      => $j->dokter_id,
+            'nama_dokter'    => $j->nama_dokter,
+            'jam_mulai'      => $j->waktu_mulai?->format('H:i'),
+            'jam_selesai'    => $j->waktu_selesai?->format('H:i'),
+            'status_layanan' => 'BUKA',
+            'catatan'        => $j->catatan,
+        ])->toArray();
+
+        Notification::make()
+            ->title("{$jadwals->count()} baris dimuat dari jadwal praktek {$namaHari}")
+            ->body('Silakan review dan edit sebelum menyimpan.')
+            ->success()->send();
+    }
+
+    // =========================================================================
+    // LIVEWIRE HOOKS
+    // =========================================================================
+
     public function updatedSelectedRumahSakitId(): void
     {
-        // Hapus semua cache karena RS berubah — data lama tidak relevan
-        foreach (Hari::cases() as $h) {
-            $this->rowsCache[$h->value] = null;
-        }
+        $this->rowsCache           = [];
         $this->selectedUnitLayananId = null;
-        $this->rows = [];
+        $this->rows                = [];
 
         if ($this->selectedRumahSakitId) {
             $this->loadRows();
         }
     }
 
-    // Dipanggil oleh Filament filterForm saat filter unit layanan berubah
     public function updatedSelectedUnitLayananId(): void
     {
-        // Hapus semua cache karena filter unit berubah — semua hari perlu di-load ulang
-        foreach (Hari::cases() as $h) {
-            $this->rowsCache[$h->value] = null;
-        }
+        $this->rowsCache = [];
         $this->loadRows();
     }
 
-    // Dipanggil otomatis setiap kali nilai dalam array $rows berubah.
-    // $key formatnya: "{index}.{field}", contoh: "0.dokter_id"
     public function updatedRows(mixed $value, string $key): void
     {
-        // Hanya tangani kolom dokter_id untuk fitur auto-fill nama_dokter
-        if (! str_ends_with($key, '.dokter_id')) {
-            return;
-        }
+        if (! str_ends_with($key, '.dokter_id')) return;
 
         $index = (int) explode('.', $key)[0];
 
-        if ($value) {
-            // Pilih dokter → isi nama_dokter otomatis dari tabel dokter
-            $this->rows[$index]['nama_dokter'] = Dokter::find($value)?->nama;
-        } else {
-            $this->rows[$index]['nama_dokter'] = null;
-        }
+        $this->rows[$index]['nama_dokter'] = $value
+            ? Dokter::find($value)?->nama
+            : null;
     }
 
     // =========================================================================
     // ROW MANAGEMENT
     // =========================================================================
 
-    // Tambah 1 baris kosong ke bagian bawah tabel
     public function addRow(): void
     {
         $this->rows[] = [
@@ -282,15 +305,25 @@ class JadwalLayananPage extends Page
         ];
     }
 
-    // Hapus baris dan reindex agar wire:model binding tidak kacau akibat gap index
     public function removeRow(int $index): void
     {
         unset($this->rows[$index]);
         $this->rows = array_values($this->rows);
     }
 
+    public function resetJadwal(): void
+    {
+        $this->rows = [];
+        $this->rowsCache[$this->activeTanggal] = [];
+
+        Notification::make()
+            ->title('Jadwal dikosongkan')
+            ->body('Semua baris telah dihapus dari tampilan. Belum ada perubahan yang tersimpan ke database.')
+            ->info()->send();
+    }
+
     // =========================================================================
-    // SAVE — Replace-All Logic
+    // SAVE — Replace-All per Tanggal
     // =========================================================================
 
     public function saveJadwal(): void
@@ -301,40 +334,31 @@ class JadwalLayananPage extends Page
             return;
         }
 
-        // Langkah 1: Periksa baris kosong (poliklinik_id null).
-        // Tidak diizinkan menyimpan jika masih ada baris yang belum diisi polikliniknya.
         foreach ($this->rows as $i => $row) {
             if (empty($row['poliklinik_id'])) {
-                $nomor = $i + 1;
                 Notification::make()
-                    ->title("Baris ke-{$nomor} belum lengkap")
+                    ->title("Baris ke-" . ($i + 1) . " belum lengkap")
                     ->body('Pilih poliklinik atau hapus baris tersebut sebelum menyimpan.')
-                    ->warning()
-                    ->send();
+                    ->warning()->send();
                 return;
             }
         }
 
-        // Langkah 2: Validasi field wajib lain pada baris yang sudah ada polikliniknya
         foreach ($this->rows as $i => $row) {
-            $nomor = $i + 1;
-
             if (empty($row['jam_mulai'])) {
                 Notification::make()
-                    ->title("Baris ke-{$nomor}: Jam Mulai wajib diisi")
+                    ->title("Baris ke-" . ($i + 1) . ": Jam Mulai wajib diisi")
                     ->danger()->send();
                 return;
             }
-
             if (empty($row['status_layanan'])) {
                 Notification::make()
-                    ->title("Baris ke-{$nomor}: Status Layanan wajib diisi")
+                    ->title("Baris ke-" . ($i + 1) . ": Status Layanan wajib diisi")
                     ->danger()->send();
                 return;
             }
         }
 
-        // Langkah 3: Kumpulkan ID poliklinik scope RS/unit untuk batas DELETE
         $poliIds = PoliKlinik::whereHas('unitLayanan', function ($q) use ($rsId) {
                 $q->where('rumah_sakit_id', $rsId);
                 if ($this->selectedUnitLayananId) {
@@ -344,16 +368,15 @@ class JadwalLayananPage extends Page
             ->pluck('id')
             ->toArray();
 
-        // Langkah 4: Replace-all dalam transaksi
         DB::transaction(function () use ($poliIds) {
-            JadwalLayanan::where('hari', $this->activeHari)
+            JadwalHarian::where('tanggal', $this->activeTanggal)
                 ->whereIn('poliklinik_id', $poliIds)
                 ->delete();
 
             foreach ($this->rows as $row) {
-                JadwalLayanan::create([
+                JadwalHarian::create([
                     'poliklinik_id'  => $row['poliklinik_id'],
-                    'hari'           => $this->activeHari,
+                    'tanggal'        => $this->activeTanggal,
                     'dokter_id'      => $row['dokter_id'] ?: null,
                     'nama_dokter'    => $row['nama_dokter'] ?: null,
                     'jam_mulai'      => $row['jam_mulai'],
@@ -364,13 +387,12 @@ class JadwalLayananPage extends Page
             }
         });
 
-        // Invalidasi cache hari ini lalu reload dari DB untuk sinkronisasi
-        $this->rowsCache[$this->activeHari] = null;
+        $this->rowsCache[$this->activeTanggal] = null;
         $this->loadRows();
 
+        $tanggalFormatted = Carbon::parse($this->activeTanggal)->translatedFormat('d F Y');
         Notification::make()
-            ->title('Jadwal ' . Hari::from($this->activeHari)->getLabel() . ' berhasil disimpan')
-            ->success()
-            ->send();
+            ->title("Jadwal {$this->getNamaHariAktif()}, {$tanggalFormatted} berhasil disimpan")
+            ->success()->send();
     }
 }

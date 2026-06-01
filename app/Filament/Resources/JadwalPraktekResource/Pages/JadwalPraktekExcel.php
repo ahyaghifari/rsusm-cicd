@@ -1,27 +1,27 @@
 <?php
 
-namespace App\Filament\Resources\JadwalLayananResource\Pages;
+namespace App\Filament\Resources\JadwalPraktekResource\Pages;
 
 use App\Enums\Hari;
-use App\Models\JadwalLayanan;
+use App\Models\JadwalPraktek;
 use App\Models\PoliKlinik;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 
-class JadwalLayananExcel extends JadwalLayananPage
+class JadwalPraktekExcel extends JadwalPraktekPage
 {
-    protected static string $view = 'filament.resources.jadwal-layanan-resource.pages.jadwal-layanan-excel';
+    protected static string $view = 'filament.resources.jadwal-praktek-resource.pages.jadwal-praktek-excel';
 
-    protected static ?string $title = 'Jadwal Mingguan (Excel)';
+    protected static ?string $title = 'Jadwal Praktek (Excel)';
 
-    protected static ?string $navigationLabel = 'Jadwal Mingguan · Excel';
+    protected static ?string $navigationLabel = 'Jadwal Praktek · Excel';
 
     protected static ?string $navigationIcon = 'heroicon-o-table-cells';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 
     // =========================================================================
-    // OVERRIDE NAVIGASI — dispatch gridRows event setelah rows diperbarui
+    // OVERRIDE — dispatch gridRows event setelah rows diperbarui
     // =========================================================================
 
     public function setActiveHari(string $hari): void
@@ -43,7 +43,7 @@ class JadwalLayananExcel extends JadwalLayananPage
     }
 
     // =========================================================================
-    // SAVE — menerima rows dari AG Grid (bukan dari $this->rows)
+    // SAVE — menerima rows dari AG Grid
     // =========================================================================
 
     public function saveFromGrid(array $rows): void
@@ -63,14 +63,6 @@ class JadwalLayananExcel extends JadwalLayananPage
                     ->warning()->send();
                 return;
             }
-            if (empty($row['jam_mulai'])) {
-                Notification::make()->title("Baris ke-{$nomor}: Jam Mulai wajib diisi")->danger()->send();
-                return;
-            }
-            if (empty($row['status_layanan'])) {
-                Notification::make()->title("Baris ke-{$nomor}: Status wajib diisi")->danger()->send();
-                return;
-            }
         }
 
         $poliIds = PoliKlinik::whereHas('unitLayanan', function ($q) use ($rsId) {
@@ -81,20 +73,20 @@ class JadwalLayananExcel extends JadwalLayananPage
         })->pluck('id')->toArray();
 
         DB::transaction(function () use ($rows, $poliIds) {
-            JadwalLayanan::where('hari', $this->activeHari)
+            JadwalPraktek::where('hari', $this->activeHari)
                 ->whereIn('poliklinik_id', $poliIds)
                 ->delete();
 
             foreach ($rows as $row) {
-                JadwalLayanan::create([
-                    'poliklinik_id'  => $row['poliklinik_id'],
-                    'hari'           => $this->activeHari,
-                    'dokter_id'      => $row['dokter_id'] ?: null,
-                    'nama_dokter'    => $row['nama_dokter'] ?: null,
-                    'jam_mulai'      => $row['jam_mulai'],
-                    'jam_selesai'    => $row['jam_selesai'] ?: null,
-                    'status_layanan' => $row['status_layanan'],
-                    'catatan'        => $row['catatan'] ?: null,
+                JadwalPraktek::create([
+                    'poliklinik_id'     => $row['poliklinik_id'],
+                    'hari'              => $this->activeHari,
+                    'dokter_id'         => $row['dokter_id'] ?: null,
+                    'nama_dokter'       => $row['nama_dokter'] ?: null,
+                    'waktu_mulai'       => $row['waktu_mulai'] ?: null,
+                    'waktu_selesai'     => $row['waktu_selesai'] ?: null,
+                    'sesuai_perjanjian' => ! empty($row['sesuai_perjanjian']),
+                    'catatan'           => $row['catatan'] ?: null,
                 ]);
             }
         });

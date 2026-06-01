@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Models;
 
-use App\Models\JadwalLayanan;
+use App\Models\JadwalPraktek;
 use App\Models\PoliKlinik;
 use App\Models\RumahSakit;
 use App\Models\UnitLayanan;
@@ -30,9 +30,9 @@ class PoliKlinikTest extends TestCase
         $this->assertInstanceOf(BelongsTo::class, (new PoliKlinik)->unitLayanan());
     }
 
-    public function test_jadwal_layanan_is_has_many(): void
+    public function test_jadwal_praktek_is_has_many(): void
     {
-        $this->assertInstanceOf(HasMany::class, (new PoliKlinik)->jadwalLayanan());
+        $this->assertInstanceOf(HasMany::class, (new PoliKlinik)->jadwalPraktek());
     }
 
     public function test_belongs_to_unit_layanan(): void

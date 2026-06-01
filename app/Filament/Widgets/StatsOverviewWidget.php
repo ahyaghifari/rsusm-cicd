@@ -5,7 +5,7 @@ namespace App\Filament\Widgets;
 use App\Models\Banner;
 use App\Models\Dokter;
 use App\Models\Halaman;
-use App\Models\JadwalLayananHarian;
+use App\Models\JadwalHarian;
 use App\Models\Magazine;
 use App\Models\PoliKlinik;
 use App\Models\Promo;
@@ -78,7 +78,7 @@ class StatsOverviewWidget extends BaseWidget
                 ->description('Unit layanan RS ini')
                 ->descriptionIcon('heroicon-m-squares-2x2')
                 ->color('info'),
-            Stat::make('Jadwal Hari Ini', JadwalLayananHarian::whereHas('poliklinik.unitLayanan', $scope)->whereDate('tanggal', today())->count())
+            Stat::make('Jadwal Hari Ini', JadwalHarian::whereHas('poliklinik.unitLayanan', $scope)->whereDate('tanggal', today())->count())
                 ->description('Entri jadwal harian')
                 ->descriptionIcon('heroicon-m-calendar-days')
                 ->color('warning'),

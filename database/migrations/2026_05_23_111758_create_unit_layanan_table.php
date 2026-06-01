@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('unit_layanan', function (Blueprint $table) {
             $table->id();
-            // Foreign key terhubung langsung ke tabel rumah_sakit
             $table->foreignId('rumah_sakit_id')->constrained('rumah_sakit')->cascadeOnDelete();
             $table->string('nama', 255);
             $table->text('deskripsi')->nullable();
             $table->string('gambar', 255)->nullable();
             $table->boolean('aktif')->default(true);
+            $table->string('warna', 20)->nullable();
             $table->timestamps();
         });
     }

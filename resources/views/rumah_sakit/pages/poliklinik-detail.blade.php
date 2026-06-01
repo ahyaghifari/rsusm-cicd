@@ -5,19 +5,12 @@
     <div class="relative overflow-hidden min-h-48 flex items-end bg-primary">
 
         {{-- Gambar background (jika ada) --}}
-        @if($poliklinik->gambar)
-            <img
-                src="{{ Storage::url($poliklinik->gambar) }}"
-                alt="{{ $poliklinik->nama }}"
-                class="absolute inset-0 w-full h-full object-cover">
-            <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-black/10"></div>
-        @else
-            {{-- Dekorasi fallback --}}
-            <div class="absolute inset-0 pointer-events-none opacity-[0.04]"
-                 style="background-image: radial-gradient(circle, white 1.5px, transparent 1.5px); background-size: 28px 28px;"></div>
-            <div class="absolute -top-10 -right-10 w-56 h-56 bg-white/8 rounded-full pointer-events-none"></div>
-            <div class="absolute -bottom-14 -left-14 w-64 h-64 bg-white/5 rounded-full pointer-events-none"></div>
-        @endif
+       
+        {{-- Dekorasi fallback --}}
+        <div class="absolute inset-0 pointer-events-none opacity-[0.04]"
+                style="background-image: radial-gradient(circle, white 1.5px, transparent 1.5px); background-size: 28px 28px;"></div>
+        <div class="absolute -top-10 -right-10 w-56 h-56 bg-white/8 rounded-full pointer-events-none"></div>
+        <div class="absolute -bottom-14 -left-14 w-64 h-64 bg-white/5 rounded-full pointer-events-none"></div>
 
         <div class="relative z-10 w-10/12 mx-auto pb-10">
            
@@ -29,9 +22,18 @@
             </span>
 
             {{-- Judul --}}
-            <h1 class="text-3xl md:text-4xl font-bold text-white leading-tight">
-                {{ $poliklinik->nama }}
-            </h1>
+            <div class="flex items-center gap-4">
+                @if($poliklinik->gambar)
+                    <div class="w-14 h-14 rounded-2xl bg-white/90 flex items-center justify-center shrink-0 overflow-hidden shadow-lg">
+                        <img src="{{ Storage::url($poliklinik->gambar) }}"
+                             alt="{{ $poliklinik->nama }}"
+                             class="w-10 h-10 object-contain">
+                    </div>
+                @endif
+                <h1 class="text-3xl md:text-4xl font-bold text-white leading-tight">
+                    {{ $poliklinik->nama }}
+                </h1>
+            </div>
         </div>
     </div>
     {{-- END HERO --}}
@@ -52,7 +54,7 @@
                         <h2 class="text-xl font-bold text-on-surface">Tentang Layanan Ini</h2>
                     </div>
                     <div class="bg-white rounded-2xl border border-outline-variant/20 shadow-sm p-8
-                                text-sm text-on-surface-variant leading-relaxed prose prose-sm max-w-none">
+                                text-base text-on-surface-variant leading-relaxed prose prose-sm max-w-none">
                         {!! str($poliklinik->deskripsi)->sanitizeHtml() !!}
                     </div>
                 @else
@@ -85,8 +87,8 @@
                             @foreach($jadwalMingguan as $hari => $sesi)
                                 @php
                                     $hariLabel = \App\Enums\Hari::from($hari)->getLabel();
-                                    $hariIni   = strtoupper(now()->locale('id')->dayName);
-                                    $isToday   = $hari === $hariIni;
+                                    $hariIniMap = ['MINGGU','SENIN','SELASA','RABU','KAMIS','JUMAT','SABTU'];
+                                    $isToday   = $hari === $hariIniMap[now()->dayOfWeek];
                                 @endphp
                                 <div class="bg-white rounded-xl border overflow-hidden shadow-sm"
                                      style="{{ $isToday
@@ -111,30 +113,58 @@
                                     {{-- Daftar sesi --}}
                                     <div class="divide-y divide-outline-variant/20">
                                         @foreach($sesi as $s)
+                                            @php
+                                                $namaTampil = $s->nama_dokter ?? $s->dokter?->nama ?? '—';
+                                            @endphp
                                             <div class="px-4 py-3">
-                                                <div class="flex items-start justify-between gap-2">
-                                                    <span class="font-semibold text-sm text-on-surface leading-snug">
-                                                        {{ $s->nama_dokter }}
-                                                    </span>
-                                                    <span @class([
-                                                        'shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide',
-                                                        'bg-green-100 text-green-700' => $s->status_layanan->value === 'BUKA',
-                                                        'bg-red-100 text-red-700'     => $s->status_layanan->value === 'LIBUR',
-                                                    ])>{{ $s->status_layanan->getLabel() }}</span>
+                                                <div class="flex items-center gap-2.5">
+                                                    {{-- Avatar dokter --}}
+                                                    @if($s->dokter?->foto)
+                                                        <img src="{{ Storage::url($s->dokter->foto) }}"
+                                                             alt="{{ $namaTampil }}"
+                                                             class="w-8 h-8 rounded-full object-cover shrink-0">
+                                                    @else
+                                                        <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                                                             style="background-color: {{ $warna }}18;">
+                                                            <span class="material-symbols-outlined text-[15px]"
+                                                                  style="color: {{ $warna }};">person</span>
+                                                        </div>
+                                                    @endif
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="font-semibold text-sm text-on-surface leading-snug truncate">
+                                                            {{ $namaTampil }}
+                                                        </p>
+                                                        <div class="flex items-center gap-1.5 flex-wrap mt-0.5">
+                                                            @if($s->waktu_mulai)
+                                                                <span class="flex items-center gap-1 text-xs text-on-surface-variant">
+                                                                    <span class="material-symbols-outlined text-[12px]"
+                                                                          style="color: {{ $warna }}; opacity: 0.7;">schedule</span>
+                                                                    <span class="tabular-nums">
+                                                                        {{ $s->waktu_mulai->format('H:i') }}
+                                                                        @if($s->waktu_selesai)
+                                                                            &ndash; {{ $s->waktu_selesai->format('H:i') }}
+                                                                        @else
+                                                                            &ndash; Selesai
+                                                                        @endif
+                                                                    </span>
+                                                                </span>
+                                                            @endif
+                                                            @if($s->sesuai_perjanjian)
+                                                                <span class="inline-flex items-center gap-0.5 text-[10px] font-bold
+                                                                             text-amber-700 bg-amber-50 border border-amber-200
+                                                                             px-1.5 py-0.5 rounded-full shrink-0">
+                                                                    <span class="material-symbols-outlined text-[10px]">calendar_clock</span>
+                                                                    Perjanjian
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                        @if($s->catatan)
+                                                            <p class="text-[11px] text-on-surface-variant/60 italic mt-0.5 leading-snug">
+                                                                {{ $s->catatan }}
+                                                            </p>
+                                                        @endif
+                                                    </div>
                                                 </div>
-                                                <div class="flex items-center gap-1.5 mt-1">
-                                                    <span class="material-symbols-outlined text-[13px]"
-                                                          style="color: {{ $warna }}; opacity: 0.7;">schedule</span>
-                                                    <span class="text-xs text-on-surface-variant">
-                                                        {{ $s->jam_mulai?->format('H:i') }}
-                                                        @if($s->jam_selesai) – {{ $s->jam_selesai->format('H:i') }} @endif
-                                                    </span>
-                                                </div>
-                                                @if($s->catatan)
-                                                    <p class="text-xs text-on-surface-variant/70 mt-1.5 italic leading-snug">
-                                                        {{ $s->catatan }}
-                                                    </p>
-                                                @endif
                                             </div>
                                         @endforeach
                                     </div>

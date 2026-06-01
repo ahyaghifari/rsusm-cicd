@@ -2,7 +2,7 @@
 <div class="space-y-4">
 
     {{-- =====================================================================
-         SEKSI FILTER: Rumah Sakit + Unit Layanan
+         SEKSI FILTER: RS + Unit Layanan via Filament filterForm
     ====================================================================== --}}
     <div class="rounded-xl overflow-hidden shadow-sm ring-1 ring-primary-200 dark:ring-primary-700/50">
         <div class="bg-linear-to-r from-primary-600 to-primary-500 dark:from-primary-700 dark:to-primary-600 px-4 py-3 flex items-center gap-2">
@@ -23,42 +23,111 @@
     @if($this->getActiveRumahSakitId())
 
         {{-- =================================================================
-             TAB HARI: SENIN – MINGGU
+             NAVIGASI TANGGAL — gradient banner dengan tombol ghost
         ================================================================= --}}
-        <div class="flex items-end gap-1 overflow-x-auto px-3 pt-3 rounded-t-xl
-                    bg-linear-to-b from-primary-50 to-transparent
-                    dark:from-primary-950/40 dark:to-transparent
-                    border-b border-primary-200 dark:border-primary-800/60">
-            @foreach(\App\Enums\Hari::cases() as $hari)
-                <button
-                    wire:click="setActiveHari('{{ $hari->value }}')"
-                    @class([
-                        'px-6 py-3 text-sm font-semibold rounded-t-lg border border-b-0 whitespace-nowrap transition-all',
-                        'bg-white dark:bg-gray-900 border-primary-300 dark:border-primary-600 text-primary-700 dark:text-primary-300 -mb-px z-10 shadow-sm shadow-primary-100 dark:shadow-none'
-                            => $activeHari === $hari->value,
-                        'bg-white/50 dark:bg-gray-800/50 border-transparent text-gray-500 dark:text-gray-400 hover:bg-white/80 dark:hover:bg-gray-700/60 hover:text-primary-600 dark:hover:text-primary-400 mb-0'
-                            => $activeHari !== $hari->value,
-                    ])
-                >
-                    {{ $hari->getLabel() }}
-                </button>
-            @endforeach
+        <div class="rounded-xl overflow-hidden shadow-md">
+            <div class="bg-linear-to-r from-primary-600 via-primary-500 to-fuchsia-500
+                        dark:from-primary-800 dark:via-primary-700 dark:to-fuchsia-700
+                        px-5 py-5">
+                <div class="flex flex-col sm:flex-row items-center gap-4">
+
+                    <button
+                        wire:click="prevDay"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg
+                               bg-white/20 hover:bg-white/30 text-white border border-white/30 transition shrink-0"
+                    >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        Kemarin
+                    </button>
+
+                    <div class="flex flex-col items-center gap-1.5 flex-1">
+                        <input
+                            type="date"
+                            value="{{ $activeTanggal }}"
+                            x-on:change="$wire.setActiveTanggal($event.target.value)"
+                            class="rounded-lg bg-white/90 border-0 text-gray-700 text-sm px-3 py-1.5
+                                   shadow focus:ring-2 focus:ring-white/70 focus:outline-none"
+                        />
+                        @if($activeTanggal)
+                            <span class="text-base font-bold text-white drop-shadow">
+                                {{ $this->getNamaHariAktif() }},
+                                {{ \Carbon\Carbon::parse($activeTanggal)->translatedFormat('d F Y') }}
+                            </span>
+                        @endif
+                    </div>
+
+                    <button
+                        wire:click="nextDay"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg
+                               bg-white/20 hover:bg-white/30 text-white border border-white/30 transition shrink-0"
+                    >
+                        Besok
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+
+                </div>
+            </div>
         </div>
 
         {{-- =================================================================
-             PANEL TABEL JADWAL per Hari Aktif
+             PANEL TABEL JADWAL
         ================================================================= --}}
         <x-filament::section>
             <x-slot name="heading">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold
                                  bg-primary-100 dark:bg-primary-900/60 text-primary-700 dark:text-primary-300
                                  ring-1 ring-primary-200 dark:ring-primary-700">
-                        Jadwal Mingguan
+                        Jadwal Harian
                     </span>
                     <span class="font-bold text-primary-600 dark:text-primary-400">
-                        {{ \App\Enums\Hari::from($activeHari)->getLabel() }}
+                        {{ $this->getNamaHariAktif() }}
                     </span>
+                    <span class="text-gray-400 dark:text-gray-500 font-normal text-sm">
+                        — {{ $activeTanggal ? \Carbon\Carbon::parse($activeTanggal)->translatedFormat('d F Y') : '' }}
+                    </span>
+                </div>
+            </x-slot>
+
+            <x-slot name="headerEnd">
+                <div class="flex items-center gap-2">
+
+                    {{-- Kosongkan: hapus semua baris dari tampilan (belum tersimpan) --}}
+                    <x-filament::button
+                        color="danger"
+                        icon="heroicon-m-trash"
+                        outlined
+                        x-on:click="
+                            if ($wire.rows.length > 0 &&
+                                window.confirm('Yakin ingin mengosongkan semua baris? Perubahan yang belum disimpan akan hilang.')) {
+                                $wire.resetJadwal()
+                            }
+                        "
+                    >
+                        Kosongkan
+                    </x-filament::button>
+
+                    {{-- Muat dari Jadwal Mingguan: konfirmasi hanya jika baris sudah ada --}}
+                    <x-filament::button
+                        color="gray"
+                        icon="heroicon-m-arrow-down-tray"
+                        x-on:click="
+                            if ($wire.rows.length > 0) {
+                                if (window.confirm('Jadwal {{ $this->getNamaHariAktif() }} yang sudah ada akan diganti dengan template dari jadwal mingguan. Lanjutkan?')) {
+                                    $wire.muatDariJadwalMingguan()
+                                }
+                            } else {
+                                $wire.muatDariJadwalMingguan()
+                            }
+                        "
+                    >
+                        Muat dari Jadwal Mingguan
+                    </x-filament::button>
+
                 </div>
             </x-slot>
 
@@ -201,11 +270,11 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                                       d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                             </svg>
-                                            <p class="text-sm">
-                                                Belum ada jadwal untuk hari
-                                                <strong>{{ \App\Enums\Hari::from($activeHari)->getLabel() }}</strong>.
+                                            <p class="text-sm">Belum ada jadwal untuk tanggal ini.</p>
+                                            <p class="text-xs">
+                                                Klik <strong>Muat dari Jadwal Mingguan</strong> untuk mengisi otomatis,
+                                                atau <strong>+ Tambah Baris</strong> untuk isi manual.
                                             </p>
-                                            <p class="text-xs">Klik <strong>+ Tambah Baris</strong> di bawah untuk mulai mengisi.</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -230,14 +299,14 @@
                     </button>
 
                     <x-filament::button wire:click="saveJadwal" icon="heroicon-m-cloud-arrow-up">
-                        Simpan Jadwal {{ \App\Enums\Hari::from($activeHari)->getLabel() }}
+                        Simpan Jadwal
+                        {{ $activeTanggal ? \Carbon\Carbon::parse($activeTanggal)->translatedFormat('d F Y') : '' }}
                     </x-filament::button>
                 </div>
 
                 <p class="text-xs text-gray-400 dark:text-gray-500">
                     <span class="text-red-400 font-bold">*</span> Wajib diisi. &nbsp;
-                    Kolom <strong>Jam Selesai</strong> bersifat opsional —
-                    jika dikosongkan akan ditampilkan sebagai <em>"Selesai"</em> di halaman publik.
+                    <strong>Jam Selesai</strong> opsional — jika kosong ditampilkan sebagai <em>"Selesai"</em>.
                 </p>
 
             </div>
@@ -252,8 +321,7 @@
                               d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
                     <p class="text-sm">
-                        Silakan pilih <strong>Rumah Sakit</strong> terlebih dahulu
-                        untuk melihat dan mengatur jadwal layanan.
+                        Silakan pilih <strong>Rumah Sakit</strong> terlebih dahulu.
                     </p>
                 </div>
             </div>

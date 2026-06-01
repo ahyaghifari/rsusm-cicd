@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('kelas', 255);
             $table->decimal('harga', 10, 2);
             $table->smallInteger('kapasitas');
-            $table->text('fasilitas');
             $table->string('thumbnail', 255)->nullable();
             $table->integer('sort_order');
             $table->boolean('aktif')->default(true);

@@ -343,7 +343,6 @@ function jadwalHarianGrid(poliklinikOptions, dokterOptions, statusOptions, initi
             gridApi.applyTransaction({
                 add: [{
                     poliklinik_id: null,
-                    jadwal_layanan_id: null,
                     dokter_id: null,
                     nama_dokter: '',
                     jam_mulai: '',

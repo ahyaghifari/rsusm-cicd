@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('rumah_sakit_id')->constrained('rumah_sakit')->cascadeOnDelete();
             $table->string('judul', 255);
+            $table->string('slug', 255)->nullable()->unique();
             $table->longText('deskripsi')->nullable();
             $table->string('gambar', 255)->nullable();
             $table->boolean('popup')->default(false);

@@ -23,23 +23,14 @@
                    placeholder="Cari nama dokter...">
         </div>
 
-        {{-- Filter spesialis --}}
-        <div class="relative">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">
-                stethoscope
-            </span>
-            <select wire:model.live="spesialis"
-                    class="w-full pl-10 pr-8 py-2.5 bg-gray-100 border-transparent rounded-lg text-sm
-                           text-gray-700 focus:border-primary focus:ring-2 focus:ring-primary/30
-                           outline-none appearance-none cursor-pointer transition">
-                <option value="">— Semua Spesialis —</option>
-                @foreach ($data_spesialis as $s)
-                    <option value="{{ $s->slug }}">{{ $s->nama }}</option>
-                @endforeach
-            </select>
-            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2
-                         text-primary pointer-events-none text-[18px]">expand_more</span>
-        </div>
+        {{-- Filter spesialis (searchable) --}}
+        @include('rumah_sakit.pages._searchable-select', [
+            'property'     => 'spesialis',
+            'options'      => $data_spesialis->map(fn($s) => ['value' => (string)$s->id, 'label' => $s->nama])->values()->toArray(),
+            'placeholder'  => '— Semua Spesialis —',
+            'currentValue' => $spesialis,
+            'wrapperClass' => 'w-full',
+        ])
     </div>
 
     {{-- Daftar Dokter --}}

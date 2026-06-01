@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Filament\Resources\JadwalLayananHarianResource\Pages;
+namespace App\Filament\Resources\JadwalHarianResource\Pages;
 
-use App\Models\JadwalLayananHarian;
+use App\Models\JadwalHarian;
 use App\Models\PoliKlinik;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 
-class JadwalLayananHarianExcel extends JadwalLayananHarianPage
+class JadwalHarianExcel extends JadwalHarianPage
 {
-    protected static string $view = 'filament.resources.jadwal-layanan-harian-resource.pages.jadwal-layanan-harian-excel';
+    protected static string $view = 'filament.resources.jadwal-harian-resource.pages.jadwal-harian-excel';
 
     protected static ?string $title = 'Jadwal Harian (Excel)';
 
@@ -21,7 +21,7 @@ class JadwalLayananHarianExcel extends JadwalLayananHarianPage
     protected static ?int $navigationSort = 3;
 
     // =========================================================================
-    // OVERRIDE NAVIGASI — dispatch gridRows setelah data berubah
+    // OVERRIDE — dispatch gridRows setelah data berubah
     // =========================================================================
 
     public function setActiveTanggal(string $tanggal): void
@@ -55,7 +55,7 @@ class JadwalLayananHarianExcel extends JadwalLayananHarianPage
     }
 
     // =========================================================================
-    // SAVE — menerima rows dari AG Grid (bukan dari $this->rows)
+    // SAVE — menerima rows dari AG Grid
     // =========================================================================
 
     public function saveFromGrid(array $rows): void
@@ -93,21 +93,20 @@ class JadwalLayananHarianExcel extends JadwalLayananHarianPage
         })->pluck('id')->toArray();
 
         DB::transaction(function () use ($rows, $poliIds) {
-            JadwalLayananHarian::where('tanggal', $this->activeTanggal)
+            JadwalHarian::where('tanggal', $this->activeTanggal)
                 ->whereIn('poliklinik_id', $poliIds)
                 ->delete();
 
             foreach ($rows as $row) {
-                JadwalLayananHarian::create([
-                    'poliklinik_id'     => $row['poliklinik_id'],
-                    'tanggal'           => $this->activeTanggal,
-                    'jadwal_layanan_id' => $row['jadwal_layanan_id'] ?: null,
-                    'dokter_id'         => $row['dokter_id'] ?: null,
-                    'nama_dokter'       => $row['nama_dokter'] ?: null,
-                    'jam_mulai'         => $row['jam_mulai'],
-                    'jam_selesai'       => $row['jam_selesai'] ?: null,
-                    'status_layanan'    => $row['status_layanan'],
-                    'catatan'           => $row['catatan'] ?: null,
+                JadwalHarian::create([
+                    'poliklinik_id'  => $row['poliklinik_id'],
+                    'tanggal'        => $this->activeTanggal,
+                    'dokter_id'      => $row['dokter_id'] ?: null,
+                    'nama_dokter'    => $row['nama_dokter'] ?: null,
+                    'jam_mulai'      => $row['jam_mulai'],
+                    'jam_selesai'    => $row['jam_selesai'] ?: null,
+                    'status_layanan' => $row['status_layanan'],
+                    'catatan'        => $row['catatan'] ?: null,
                 ]);
             }
         });
@@ -119,7 +118,6 @@ class JadwalLayananHarianExcel extends JadwalLayananHarianPage
         $tanggalFormatted = Carbon::parse($this->activeTanggal)->translatedFormat('d F Y');
         Notification::make()
             ->title("Jadwal {$this->getNamaHariAktif()}, {$tanggalFormatted} berhasil disimpan")
-            ->success()
-            ->send();
+            ->success()->send();
     }
 }

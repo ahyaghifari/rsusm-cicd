@@ -3,13 +3,13 @@
 namespace Database\Factories;
 
 use App\Enums\StatusLayanan;
-use App\Models\JadwalLayananHarian;
+use App\Models\JadwalHarian;
 use App\Models\PoliKlinik;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class JadwalLayananHarianFactory extends Factory
+class JadwalHarianFactory extends Factory
 {
-    protected $model = JadwalLayananHarian::class;
+    protected $model = JadwalHarian::class;
 
     public function definition(): array
     {

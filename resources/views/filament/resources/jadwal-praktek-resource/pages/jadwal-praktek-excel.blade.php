@@ -24,7 +24,7 @@
 
     @if($this->getActiveRumahSakitId())
 
-        {{-- Tab Hari --}}
+        {{-- TAB HARI --}}
         <div class="flex items-end gap-1 overflow-x-auto px-3 pt-3 rounded-t-xl
                     bg-linear-to-b from-primary-50 to-transparent
                     dark:from-primary-950/40 dark:to-transparent
@@ -39,7 +39,9 @@
                         'bg-white/50 dark:bg-gray-800/50 border-transparent text-gray-500 dark:text-gray-400 hover:bg-white/80 dark:hover:bg-gray-700/60 hover:text-primary-600 dark:hover:text-primary-400 mb-0'
                             => $activeHari !== $hari->value,
                     ])
-                >{{ $hari->getLabel() }}</button>
+                >
+                    {{ $hari->getLabel() }}
+                </button>
             @endforeach
         </div>
 
@@ -47,15 +49,11 @@
         @php
             $poliklinikOptions = $this->getPoliklinikOptions();
             $dokterOptions     = $this->getDokterOptions();
-            $statusOptions     = collect(\App\Enums\StatusLayanan::cases())
-                ->mapWithKeys(fn ($s) => [$s->value => $s->getLabel()])
-                ->toArray();
         @endphp
 
-        <div x-data="jadwalMingguanGrid(
+        <div x-data="jadwalPraktekGrid(
             @js($poliklinikOptions),
             @js($dokterOptions),
-            @js($statusOptions),
             @js($this->rows)
         )">
             <x-filament::section>
@@ -64,7 +62,7 @@
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold
                                      bg-primary-100 dark:bg-primary-900/60 text-primary-700 dark:text-primary-300
                                      ring-1 ring-primary-200 dark:ring-primary-700">
-                            Jadwal Mingguan · Excel
+                            Jadwal Praktek · Excel
                         </span>
                         <span class="font-bold text-primary-600 dark:text-primary-400">
                             {{ \App\Enums\Hari::from($activeHari)->getLabel() }}
@@ -88,7 +86,7 @@
                             Tambah Baris
                         </button>
                         <x-filament::button x-on:click="saveGrid()" icon="heroicon-m-cloud-arrow-up" size="sm">
-                            Simpan {{ \App\Enums\Hari::from($activeHari)->getLabel() }}
+                            Simpan Jadwal {{ \App\Enums\Hari::from($activeHari)->getLabel() }}
                         </x-filament::button>
                     </div>
                 </x-slot>
@@ -100,12 +98,11 @@
                 ></div>
 
                 <p class="mt-3 text-xs text-gray-400 dark:text-gray-500">
-                    <span class="text-red-400 font-bold">*</span> Wajib diisi. &nbsp;
                     Klik sel untuk mengedit langsung. &nbsp;
-                    Kolom <strong>Jam Selesai</strong> bersifat opsional.
+                    Kolom <strong>Dokter</strong>, <strong>Jam</strong>, dan <strong>Catatan</strong> bersifat opsional.
                     <span class="ml-2 inline-flex items-center gap-1">
                         <span class="inline-block w-3 h-3 rounded-sm" style="background:#fef9c3;border:1px solid #fde047;"></span>
-                        = kolom wajib yang belum diisi.
+                        = Poliklinik belum dipilih.
                     </span>
                 </p>
             </x-filament::section>
@@ -120,8 +117,7 @@
                               d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
                     <p class="text-sm">
-                        Silakan pilih <strong>Rumah Sakit</strong> terlebih dahulu
-                        untuk melihat dan mengatur jadwal layanan.
+                        Silakan pilih <strong>Rumah Sakit</strong> terlebih dahulu.
                     </p>
                 </div>
             </div>
@@ -130,8 +126,9 @@
 
 </div>
 
+@script
 <script>
-window.jadwalMingguanGrid = function(poliklinikOptions, dokterOptions, statusOptions, initialRows) {
+function jadwalPraktekGrid(poliklinikOptions, dokterOptions, initialRows) {
     let gridApi = null;
     let wireOff  = null;
 
@@ -193,7 +190,7 @@ window.jadwalMingguanGrid = function(poliklinikOptions, dokterOptions, statusOpt
                     field: 'dokter_id',
                     headerName: 'Dokter',
                     editable: true,
-                    minWidth: 160,
+                    minWidth: 150,
                     flex: 2,
                     cellEditor: 'agSelectCellEditor',
                     cellEditorParams: { values: ['', ...Object.values(dokterOptions)] },
@@ -213,39 +210,32 @@ window.jadwalMingguanGrid = function(poliklinikOptions, dokterOptions, statusOpt
                     flex: 2,
                 },
                 {
-                    field: 'jam_mulai',
-                    headerName: 'Jam Mulai *',
+                    field: 'waktu_mulai',
+                    headerName: 'Jam Mulai',
                     editable: true,
-                    width: 115,
-                    cellStyle: p => hl(p.data.jam_mulai),
+                    width: 110,
                 },
                 {
-                    field: 'jam_selesai',
+                    field: 'waktu_selesai',
                     headerName: 'Jam Selesai',
                     editable: true,
-                    width: 115,
+                    width: 110,
                 },
                 {
-                    field: 'status_layanan',
-                    headerName: 'Status *',
+                    field: 'sesuai_perjanjian',
+                    headerName: 'Perjanjian',
                     editable: true,
-                    width: 120,
+                    width: 110,
                     cellEditor: 'agSelectCellEditor',
-                    cellEditorParams: { values: ['', ...Object.values(statusOptions)] },
-                    valueGetter:  p => statusOptions[p.data.status_layanan] || '',
-                    valueSetter:  p => {
-                        if (!p.newValue) { p.data.status_layanan = ''; return true; }
-                        const e = Object.entries(statusOptions).find(([, v]) => v === p.newValue);
-                        if (e) { p.data.status_layanan = e[0]; return true; }
-                        return false;
-                    },
-                    cellStyle: p => hl(p.data.status_layanan),
+                    cellEditorParams: { values: ['Tidak', 'Ya'] },
+                    valueGetter:  p => p.data.sesuai_perjanjian ? 'Ya' : 'Tidak',
+                    valueSetter:  p => { p.data.sesuai_perjanjian = p.newValue === 'Ya'; return true; },
                 },
                 {
                     field: 'catatan',
                     headerName: 'Catatan',
                     editable: true,
-                    minWidth: 160,
+                    minWidth: 150,
                     flex: 3,
                 },
                 {
@@ -285,9 +275,9 @@ window.jadwalMingguanGrid = function(poliklinikOptions, dokterOptions, statusOpt
                     poliklinik_id: null,
                     dokter_id: null,
                     nama_dokter: '',
-                    jam_mulai: '',
-                    jam_selesai: '',
-                    status_layanan: 'BUKA',
+                    waktu_mulai: '',
+                    waktu_selesai: '',
+                    sesuai_perjanjian: false,
                     catatan: '',
                 }]
             });
@@ -308,6 +298,7 @@ window.jadwalMingguanGrid = function(poliklinikOptions, dokterOptions, statusOpt
             }
         },
     };
-};
+}
 </script>
+@endscript
 </x-filament-panels::page>

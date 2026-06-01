@@ -14,8 +14,8 @@ class Find extends Component
 {
     use WithPagination;
 
-    public $search = '';
-    public $spesialis = '';
+    public string $search    = '';
+    public string $spesialis = '';
     
     // 1. UBAH INI: Cukup simpan ID-nya saja (integer/string), jangan simpan utuh satu objek Model
     public int $rumah_sakit_id; 

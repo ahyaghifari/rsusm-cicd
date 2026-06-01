@@ -23,6 +23,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="{{ asset('css/rumah-sakit.css') }}">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2/dist/css/tom-select.css" rel="stylesheet">
 </head>
 
 <body class="bg-surface text-on-surface font-sans antialiased min-h-screen flex flex-col pb-20 lg:pb-0">
@@ -51,6 +52,7 @@
     {{-- @include('rumah_sakit.chatbot.floating') --}}
 
     @livewireScripts
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2/dist/js/tom-select.complete.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
         AOS.init()

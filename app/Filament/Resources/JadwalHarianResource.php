@@ -2,11 +2,10 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\Hari;
 use App\Enums\StatusLayanan;
-use App\Filament\Resources\JadwalLayananResource\Pages;
+use App\Filament\Resources\JadwalHarianResource\Pages;
 use App\Models\Dokter;
-use App\Models\JadwalLayanan;
+use App\Models\JadwalHarian;
 use App\Models\PoliKlinik;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -14,16 +13,16 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class JadwalLayananResource extends BaseResource
+class JadwalHarianResource extends BaseResource
 {
-    protected static ?string $model = JadwalLayanan::class;
+    protected static ?string $model = JadwalHarian::class;
 
     protected static ?int $navigationSort = 3;
     protected static string|null $navigationGroup = 'Poliklinik / Rawat Jalan';
-    protected static ?string $navigationIcon = 'fas-calendar-week';
-    protected static ?string $navigationLabel = 'Jadwal Layanan';
-    protected static ?string $modelLabel = 'Jadwal Layanan';
-    protected static ?string $pluralModelLabel = 'Jadwal Layanan';
+    protected static ?string $navigationIcon = 'fas-calendar-day';
+    protected static ?string $navigationLabel = 'Jadwal Harian';
+    protected static ?string $modelLabel = 'Jadwal Harian';
+    protected static ?string $pluralModelLabel = 'Jadwal Harian';
 
     public static function getEloquentQuery(): Builder
     {
@@ -68,15 +67,16 @@ class JadwalLayananResource extends BaseResource
                             })
                             ->required()
                             ->searchable()
+                            ->live()
                             ->disabled(fn (Forms\Get $get) => static::isSuperAdmin() && ! $get('rumah_sakit_id')),
                     ])->columns(2),
 
                 Forms\Components\Section::make('Detail Jadwal')
                     ->schema([
-                        Forms\Components\Select::make('hari')
-                            ->options(Hari::class)
+                        Forms\Components\DatePicker::make('tanggal')
                             ->required()
-                            ->native(false),
+                            ->native(false)
+                            ->displayFormat('d F Y'),
 
                         Forms\Components\Select::make('status_layanan')
                             ->options(StatusLayanan::class)
@@ -134,8 +134,12 @@ class JadwalLayananResource extends BaseResource
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('hari')
+            ->defaultSort('tanggal', 'desc')
             ->columns([
+                Tables\Columns\TextColumn::make('tanggal')
+                    ->date('d M Y')
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('poliklinik.nama')
                     ->label('Poliklinik')
                     ->searchable()
@@ -146,10 +150,6 @@ class JadwalLayananResource extends BaseResource
                     ->searchable()
                     ->sortable()
                     ->visible(fn () => static::isSuperAdmin()),
-
-                Tables\Columns\TextColumn::make('hari')
-                    ->badge()
-                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('nama_dokter')
                     ->label('Dokter')
@@ -175,9 +175,16 @@ class JadwalLayananResource extends BaseResource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('hari')
-                    ->options(Hari::class)
-                    ->label('Filter Hari'),
+                Tables\Filters\Filter::make('tanggal')
+                    ->form([
+                        Forms\Components\DatePicker::make('dari')->label('Dari Tanggal')->native(false),
+                        Forms\Components\DatePicker::make('sampai')->label('Sampai Tanggal')->native(false),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query
+                            ->when($data['dari'], fn ($q, $v) => $q->whereDate('tanggal', '>=', $v))
+                            ->when($data['sampai'], fn ($q, $v) => $q->whereDate('tanggal', '<=', $v));
+                    }),
 
                 Tables\Filters\SelectFilter::make('status_layanan')
                     ->options(StatusLayanan::class)
@@ -210,9 +217,8 @@ class JadwalLayananResource extends BaseResource
     public static function getPages(): array
     {
         return [
-            // Halaman index diganti ke halaman custom spreadsheet
-            'index' => Pages\JadwalLayananPage::route('/'),
-            'excel' => Pages\JadwalLayananExcel::route('/excel'),
+            'index' => Pages\JadwalHarianPage::route('/'),
+            'excel' => Pages\JadwalHarianExcel::route('/excel'),
         ];
     }
 }
