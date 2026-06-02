@@ -51,7 +51,7 @@
                     {{-- Deskripsi singkat unit aktif (di atas tab) --}}
                     @if($activeUnit?->deskripsi)
                         <div class="mt-5 p-4 bg-primary/5 border-l-4 border-primary rounded-r-xl max-w-2xl"
-                             data-aos="fade-right">
+                             >
                             <p class="text-on-surface-variant text-sm leading-relaxed">{{ $activeUnit->deskripsi }}</p>
                         </div>
                     @endif
@@ -59,7 +59,7 @@
 
             @else
                 {{-- Judul unit tunggal --}}
-                <div class="mb-10" data-aos="fade-up">
+                <div class="mb-10">
                     <div class="flex items-center gap-3 mb-2">
                         <span class="w-1.5 h-8 bg-primary rounded-full inline-block"></span>
                         <h2 class="text-2xl font-bold text-on-surface">{{ $units->first()->nama }}</h2>
@@ -94,8 +94,7 @@
                             <div
                                 onclick="window.location='{{ route('rumahsakit.rawat_jalan_show', ['rumahsakit' => $rsSlug, 'poliklinik' => $poli->slug]) }}'"
                                 wire:key="poli-card-{{ $poli->id }}"
-                                data-aos="fade-up"
-                                data-aos-delay="{{ $loop->index * 40 }}"
+                               
                                 class="group bg-white rounded-2xl shadow-sm border border-outline-variant/30
                                        hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300
                                        overflow-hidden cursor-pointer">
@@ -153,7 +152,7 @@
             @if($units->count() > 1 && $activeUnit && ($activeUnit->deskripsi || $activeUnit->gambar))
                 @php $warna = $activeUnit->warnaHex() ?? '#4d51b2'; @endphp
                 <div class="mt-12 rounded-2xl overflow-hidden border border-outline-variant/20 shadow-sm"
-                     data-aos="fade-up"
+                     
                      wire:key="unit-desc-{{ $activeUnit->id }}">
 
                     {{-- Accent bar warna unit --}}
