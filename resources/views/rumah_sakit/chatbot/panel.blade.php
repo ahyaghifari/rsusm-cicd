@@ -77,20 +77,26 @@
         <div class="flex flex-col flex-1 h-full min-h-0">
 
             {{-- ==================== MESSAGES AREA (PERBAIKAN SYSTEM SCROLL) ==================== --}}
-            <div 
+            <div
                 id="chat-msgs"
                 class="flex-1 overflow-y-auto p-3.5 flex flex-col gap-3"
-                {{-- Menggunakan vanilla JS langsung saat elemen di-init oleh Alpine --}}
                 x-init="
                     $el.scrollTop = $el.scrollHeight;
-                    
-                    // Membuat observer untuk memantau perubahan isi (pesan baru) di dalam div ini
+
+                    const scrollToLastMsg = () => {
+                        const last = $el.lastElementChild;
+                        if (!last) return;
+                        // Hitung posisi relatif terhadap container agar bubble terlihat dari atas
+                        const childRect = last.getBoundingClientRect();
+                        const containerRect = $el.getBoundingClientRect();
+                        const relTop = childRect.top - containerRect.top + $el.scrollTop;
+                        $el.scrollTo({ top: relTop - 16, behavior: 'smooth' });
+                    };
+
                     const observer = new MutationObserver(() => {
-                        setTimeout(() => {
-                            $el.scrollTop = $el.scrollHeight;
-                        }, 30);
+                        setTimeout(scrollToLastMsg, 60);
                     });
-                    
+
                     observer.observe($el, { childList: true, subtree: true });
                 "
             >
@@ -142,20 +148,34 @@
 
             {{-- Input Footer --}}
             <div class="bg-white border-t border-[#d6c0ce] px-3 py-2.5 flex-shrink-0"
-                 x-data="{ max: 50, get remaining() { return this.max - ($wire.inputMessage?.length ?? 0); } }">
+                 x-data="{
+                     msg: '',
+                     get remaining() { return 50 - this.msg.length; },
+                     send() {
+                         const text = this.msg.trim();
+                         if (!text) return;
+                         $wire.set('inputMessage', text);
+                         this.msg = '';
+                         $wire.call('sendMessage');
+                     }
+                 }">
                 <div class="flex gap-2 items-center">
                     <input
-                        wire:model="inputMessage"
-                        wire:keydown.enter="sendMessage"
+                        x-model="msg"
+                        @keydown.enter="send()"
+                        wire:loading.attr="disabled"
+                        wire:target="sendMessage,sendQuick"
                         type="text"
                         placeholder="Ketik pertanyaan Anda..."
                         maxlength="50"
-                        class="flex-1 border border-[#d6c0ce] rounded-full px-4 py-2 text-[13px] font-sans text-[#0b1c30] bg-[#eff4ff] outline-none focus:border-[#d606b0] focus:bg-white placeholder-[#84727e] transition-colors"
+                        class="flex-1 border border-[#d6c0ce] rounded-full px-4 py-2 text-[13px] font-sans text-[#0b1c30] bg-[#eff4ff] outline-none focus:border-[#d606b0] focus:bg-white placeholder-[#84727e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label="Kotak pesan"
                     />
                     <button
-                        wire:click="sendMessage"
-                        class="w-9 h-9 rounded-full bg-[#d606b0] hover:bg-[#b649a9] active:scale-95 border-none flex items-center justify-center cursor-pointer flex-shrink-0 transition-all"
+                        @click="send()"
+                        wire:loading.attr="disabled"
+                        wire:target="sendMessage,sendQuick"
+                        class="w-9 h-9 rounded-full bg-[#d606b0] hover:bg-[#b649a9] active:scale-95 border-none flex items-center justify-center cursor-pointer flex-shrink-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label="Kirim pesan"
                     >
                         <span class="material-symbols-outlined text-white text-[16px]" aria-hidden="true">send</span>
