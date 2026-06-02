@@ -53,7 +53,7 @@ class RawatInapTest extends TestCase
 
     public function test_filament_resource_pages_requires_auth(): void
     {
-        $response = $this->get('/admin/rawat-inaps');
+        $response = $this->get($this->adminUrl('rawat-inaps'));
         $response->assertStatus(302); // Redirect to login
     }
 }

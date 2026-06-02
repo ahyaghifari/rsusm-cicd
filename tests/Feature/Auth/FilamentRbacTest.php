@@ -19,22 +19,22 @@ class FilamentRbacTest extends TestCase
 
     public function test_unauthenticated_redirects_to_login(): void
     {
-        $this->get('/admin')->assertRedirect('/admin/login');
-        $this->get('/admin/dokters')->assertRedirect('/admin/login');
-        $this->get('/admin/users')->assertRedirect('/admin/login');
+        $this->get($this->adminUrl())->assertRedirect($this->adminUrl('login'));
+        $this->get($this->adminUrl('dokters'))->assertRedirect($this->adminUrl('login'));
+        $this->get($this->adminUrl('users'))->assertRedirect($this->adminUrl('login'));
     }
 
     public function test_user_without_role_cannot_access_panel(): void
     {
         // Filament returns 403 (not redirect) for authenticated users without panel access
         $user = User::factory()->create();
-        $this->actingAs($user)->get('/admin')->assertForbidden();
+        $this->actingAs($user)->get($this->adminUrl())->assertForbidden();
     }
 
     public function test_super_admin_can_access_panel(): void
     {
         $this->actingAs($this->superAdmin())
-            ->get('/admin')
+            ->get($this->adminUrl())
             ->assertOk();
     }
 
@@ -42,7 +42,7 @@ class FilamentRbacTest extends TestCase
     {
         $rs = RumahSakit::factory()->create();
         $this->actingAs($this->adminUser($rs->id))
-            ->get('/admin')
+            ->get($this->adminUrl())
             ->assertOk();
     }
 
@@ -50,7 +50,7 @@ class FilamentRbacTest extends TestCase
     {
         $rs = RumahSakit::factory()->create();
         $this->actingAs($this->humasUser($rs->id))
-            ->get('/admin')
+            ->get($this->adminUrl())
             ->assertOk();
     }
 
@@ -58,21 +58,21 @@ class FilamentRbacTest extends TestCase
     {
         $rs = RumahSakit::factory()->create();
         $this->actingAs($this->informasiUser($rs->id))
-            ->get('/admin')
+            ->get($this->adminUrl())
             ->assertOk();
     }
 
     public function test_super_admin_can_access_rumah_sakit_resource(): void
     {
         $this->actingAs($this->superAdmin())
-            ->get('/admin/rumah-sakits')
+            ->get($this->adminUrl('rumah-sakits'))
             ->assertOk();
     }
 
     public function test_super_admin_can_access_user_resource(): void
     {
         $this->actingAs($this->superAdmin())
-            ->get('/admin/users')
+            ->get($this->adminUrl('users'))
             ->assertOk();
     }
 }

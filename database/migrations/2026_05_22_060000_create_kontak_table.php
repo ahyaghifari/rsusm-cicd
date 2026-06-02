@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('gambar', 255)->nullable();
             $table->longText('logo')->nullable();
             $table->longText('link')->nullable();
-            $table->enum('kategori', ['SOSIAL MEDIA', 'OPERASIONAL']);
+            $table->enum('kategori', ['SOSIAL MEDIA', 'OPERASIONAL', 'PENDAFTARAN']);
             $table->boolean('aktif')->default(true);
             $table->timestamps();
         });

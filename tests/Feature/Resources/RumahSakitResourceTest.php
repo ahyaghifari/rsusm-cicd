@@ -18,13 +18,13 @@ class RumahSakitResourceTest extends TestCase
 
     public function test_unauthenticated_redirects(): void
     {
-        $this->get('/admin/rumah-sakits')->assertRedirect('/admin/login');
+        $this->get($this->adminUrl('rumah-sakits'))->assertRedirect($this->adminUrl('login'));
     }
 
     public function test_super_admin_can_list(): void
     {
         $this->actingAs($this->superAdmin())
-            ->get('/admin/rumah-sakits')
+            ->get($this->adminUrl('rumah-sakits'))
             ->assertOk();
     }
 
@@ -32,14 +32,14 @@ class RumahSakitResourceTest extends TestCase
     {
         $rs = RumahSakit::factory()->create();
         $this->actingAs($this->adminUser($rs->id))
-            ->get('/admin/rumah-sakits')
+            ->get($this->adminUrl('rumah-sakits'))
             ->assertOk();
     }
 
     public function test_super_admin_can_access_create_page(): void
     {
         $this->actingAs($this->superAdmin())
-            ->get('/admin/rumah-sakits/create')
+            ->get($this->adminUrl('rumah-sakits/create'))
             ->assertOk();
     }
 

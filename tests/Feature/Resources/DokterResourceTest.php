@@ -20,26 +20,24 @@ class DokterResourceTest extends TestCase
 
     public function test_unauthenticated_redirects_to_login(): void
     {
-        $this->get('/admin/dokters')->assertRedirect('/admin/login');
+        $this->get($this->adminUrl('dokters'))->assertRedirect($this->adminUrl('login'));
     }
 
     public function test_super_admin_can_list_dokters(): void
     {
         $this->actingAs($this->superAdmin())
-            ->get('/admin/dokters')
+            ->get($this->adminUrl('dokters'))
             ->assertOk();
     }
 
     public function test_admin_can_list_dokters_with_permission(): void
     {
-        // Shield requires view_any_dokter permission for non-super_admin roles.
-        // We grant it explicitly here since we don't run the full Shield seeder in tests.
         $rs    = RumahSakit::factory()->create();
         $user  = $this->adminUser($rs->id);
         $perm  = \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'view_any_dokter', 'guard_name' => 'web']);
         $user->givePermissionTo($perm);
 
-        $this->actingAs($user)->get('/admin/dokters')->assertOk();
+        $this->actingAs($user)->get($this->adminUrl('dokters'))->assertOk();
     }
 
     public function test_super_admin_sees_all_dokters(): void
@@ -96,7 +94,7 @@ class DokterResourceTest extends TestCase
     public function test_super_admin_can_access_create_page(): void
     {
         $this->actingAs($this->superAdmin())
-            ->get('/admin/dokters/create')
+            ->get($this->adminUrl('dokters/create'))
             ->assertOk();
     }
 }

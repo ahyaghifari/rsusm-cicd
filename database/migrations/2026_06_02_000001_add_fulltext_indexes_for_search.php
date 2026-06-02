@@ -7,6 +7,8 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (DB::getDriverName() !== 'mysql') return;
+
         DB::statement('ALTER TABLE dokter     ADD FULLTEXT INDEX ft_search (nama)');
         DB::statement('ALTER TABLE poliklinik ADD FULLTEXT INDEX ft_search (nama, deskripsi)');
         DB::statement('ALTER TABLE promo      ADD FULLTEXT INDEX ft_search (judul, deskripsi)');
@@ -17,6 +19,8 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (DB::getDriverName() !== 'mysql') return;
+
         DB::statement('ALTER TABLE dokter     DROP INDEX ft_search');
         DB::statement('ALTER TABLE poliklinik DROP INDEX ft_search');
         DB::statement('ALTER TABLE promo      DROP INDEX ft_search');

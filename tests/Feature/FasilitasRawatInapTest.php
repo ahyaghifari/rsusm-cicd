@@ -58,7 +58,7 @@ class FasilitasRawatInapTest extends TestCase
 
     public function test_filament_resource_pages_requires_auth(): void
     {
-        $response = $this->get('/admin/fasilitas-rawat-inaps');
+        $response = $this->get($this->adminUrl('fasilitas-rawat-inaps'));
         $response->assertStatus(302); // Redirect to login
     }
 }
