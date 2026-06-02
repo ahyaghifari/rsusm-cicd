@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {!! SEO::generate() !!}
+    <link rel="icon" href="/img/favicon.png" sizes="192x192">
 
     @livewireStyles
     <!-- Fonts -->
