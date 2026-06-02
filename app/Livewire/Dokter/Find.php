@@ -71,6 +71,7 @@ class Find extends Component
             })
 
             ->with('spesialis')
+            ->orderBy('nama')
             ->paginate(10);
 
         $data_spesialis = Spesialis::where('rumah_sakit_id', $this->rumah_sakit_id) // Gunakan ID langsung
