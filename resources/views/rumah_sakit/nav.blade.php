@@ -92,7 +92,7 @@
                 </a>
                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.rawat_inap') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">bed</span>
-                    <span class="{{ $gridLabelClass }}">Rawat Inappp</span>
+                    <span class="{{ $gridLabelClass }}">Rawat Inap</span>
                 </a>
                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.unggulan') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">star</span>
