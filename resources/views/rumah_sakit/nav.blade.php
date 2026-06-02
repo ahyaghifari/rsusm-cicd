@@ -84,7 +84,7 @@
                 </a>
                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.jadwal_praktek') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">calendar_month</span>
-                    <span class="{{ $gridLabelClass }}">Jadwal Praktek</span>
+                    <span class="{{ $gridLabelClass }}">Jadwal Praktesk</span>
                 </a>
 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.rawat_jalan') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">local_hospital</span>
