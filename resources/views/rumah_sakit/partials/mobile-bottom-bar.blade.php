@@ -3,7 +3,7 @@
 <div class="fixed bottom-0 left-0 right-0 z-50 lg:hidden
             bg-white border-t border-outline-variant/30
             shadow-[0_-4px_24px_rgba(0,0,0,0.09)]">
-    <div class="grid grid-cols-2 divide-x divide-outline-variant/20">
+    <div class="grid grid-cols-3 divide-x divide-outline-variant/20">
 
         {{-- Emergency --}}
         @if($currentRumahSakit->no_emergency)
@@ -52,7 +52,7 @@
         @endif
 
         {{-- Chatbot --}}
-        {{-- <button
+        <button
             x-data
             @click="$store.chatbot.toggle()"
             :aria-expanded="$store.chatbot.open"
@@ -70,7 +70,7 @@
                 <p class="text-[10px] font-bold text-primary uppercase tracking-wide">Asisten</p>
                 <p class="text-xs font-medium text-on-surface">Tanya Kami</p>
             </div>
-        </button> --}}
+        </button>
 
     </div>
 </div>

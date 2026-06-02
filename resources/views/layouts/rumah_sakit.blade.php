@@ -53,7 +53,7 @@
     @include('rumah_sakit.partials.promo-popup')
 
     <!-- Chatbot Floating Button -->
-    {{-- @include('rumah_sakit.chatbot.floating') --}}
+    @include('rumah_sakit.chatbot.floating')
 
     @livewireScripts
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2/dist/js/tom-select.complete.min.js"></script>
