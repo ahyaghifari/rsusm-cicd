@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\FontProviders\GoogleFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -29,12 +30,20 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->profile()
+            ->brandLogo(fn () => view('filament.brand'))
+            ->brandLogoHeight('5rem')
+            ->brandName('RSU Syifa Medika')
             ->colors([
                 'primary' => '#d606b0',
                 'gray' => Color::Gray
             ])
             ->font('Plus Jakarta Sans', provider: GoogleFontProvider::class)
             ->navigationGroups([
+                NavigationGroup::make()
+                    ->label('Media Informasi')
+                    ->collapsed()
+                    ,
                 NavigationGroup::make()
                     ->label('Dokter'),
                 NavigationGroup::make()
@@ -51,6 +60,9 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Lainnya')
                     ->collapsed()
             ])
+            ->plugins([
+                FilamentShieldPlugin::make(),
+            ])
             ->sidebarWidth('18rem')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -60,7 +72,6 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
             ])
             ->renderHook(
                 'panels::sidebar.nav.start',

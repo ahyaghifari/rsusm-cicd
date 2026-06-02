@@ -2,78 +2,75 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PromoResource\Pages;
+use App\Filament\Resources\PromoResource\Pages\ManagePromo;
 use App\Models\Promo;
-use Filament\Forms;
+
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Toggle;
 
-class PromoResource extends Resource
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+
+use Filament\Tables\Filters\SelectFilter;
+
+class PromoResource extends BaseRumahSakitResource
 {
     protected static ?string $model = Promo::class;
 
-    protected static ?int $navigationSort = 3;
     protected static ?string $navigationIcon = 'heroicon-o-megaphone';
 
     protected static ?string $navigationLabel = 'Promo';
+    protected static ?int $navigationSort = 3;
+    protected static string | null $navigationGroup = 'Media Informasi';
 
-    protected static ?string $modelLabel = 'Promo';
+
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('rumah_sakit_id')
-                    ->relationship('rumahSakit', 'nama')
+                static::rsFormField(),
+
+                TextInput::make('judul')
                     ->required()
-                    ->searchable()
-                    ->preload(),
+                    ->maxLength(255)
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(function ($state, callable $set, $record) {
+                        if (! $record) {
+                            $set('slug', \Illuminate\Support\Str::slug($state));
+                        }
+                    }),
 
-                Forms\Components\TextInput::make('judul')
+                TextInput::make('slug')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true)
+                    ->helperText('Otomatis dari judul. Bisa diubah manual.'),
 
-                Forms\Components\Select::make('tipe')
-                    ->options([
-                        'POPUP'  => 'Popup',
-                        'SLIDER' => 'Slider',
-                    ])
-                    ->required(),
+                Toggle::make('popup')
+                    ->label('Popup Promo')
+                    ->helperText('Jika aktif, promo popup lainnya otomatis dinonaktifkan.')
+                    ->default(false),
 
-                Forms\Components\TextInput::make('sort_order')
-                    ->numeric()
-                    ->default(0)
-                    ->required(),
+                Toggle::make('aktif')
+                    ->default(true),
 
-                Forms\Components\FileUpload::make('gambar')
-                    ->image()
-                    ->directory('promo/gambar')
-                    ->maxSize(2048)
-                    ->nullable(),
-
-                Forms\Components\RichEditor::make('deskripsi')
-                    ->toolbarButtons([
-                        'bold',
-                        'italic',
-                        'underline',
-                        'strike',
-                        'link',
-                        'bulletList',
-                        'orderedList',
-                        'h2',
-                        'h3',
-                        'blockquote',
-                        'redo',
-                        'undo',
-                    ])
-                    ->nullable()
+                RichEditor::make('deskripsi')
                     ->columnSpanFull(),
 
-                Forms\Components\Toggle::make('aktif')
-                    ->default(true)
-                    ->required(),
+                FileUpload::make('gambar')
+                    ->image()
+                    ->disk('public')
+                    ->directory('promo')
+                    ->imageEditor()
+                    ->nullable(),
+
             ]);
     }
 
@@ -81,72 +78,96 @@ class PromoResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('rumahSakit.nama')
-                    ->label('Rumah Sakit')
-                    ->sortable()
-                    ->searchable(),
 
-                Tables\Columns\TextColumn::make('judul')
+                ImageColumn::make('gambar')
+                    ->disk('public')
+                    ->square(),
+
+                TextColumn::make('judul')
                     ->searchable()
-                    ->sortable()
-                    ->limit(50),
-
-                Tables\Columns\TextColumn::make('tipe')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'POPUP'  => 'warning',
-                        'SLIDER' => 'info',
-                        default  => 'gray',
-                    })
                     ->sortable(),
 
-                Tables\Columns\ImageColumn::make('gambar')
-                    ->label('Gambar'),
+                static::rsTableColumn(),
 
-                Tables\Columns\TextColumn::make('sort_order')
-                    ->label('Urutan')
-                    ->sortable(),
-
-                Tables\Columns\IconColumn::make('aktif')
+                IconColumn::make('popup')
                     ->boolean()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                IconColumn::make('aktif')
+                    ->boolean()
+                    ->sortable(),
+
+                TextColumn::make('created_at')
+                    ->dateTime('d M Y H:i')
+                    ->sortable(),
+
             ])
-            ->defaultSort('sort_order', 'asc')
             ->filters([
-                Tables\Filters\SelectFilter::make('rumah_sakit_id')
-                    ->relationship('rumahSakit', 'nama')
-                    ->label('Filter Rumah Sakit'),
 
-                Tables\Filters\SelectFilter::make('tipe')
+                SelectFilter::make('aktif')
                     ->options([
-                        'POPUP'  => 'Popup',
-                        'SLIDER' => 'Slider',
-                    ])
-                    ->label('Filter Tipe'),
+                        1 => 'Aktif',
+                        0 => 'Tidak Aktif',
+                    ]),
 
-                Tables\Filters\TernaryFilter::make('aktif')
-                    ->label('Status Aktif'),
+                SelectFilter::make('popup')
+                    ->options([
+                        1 => 'Popup',
+                        0 => 'Bukan Popup',
+                    ]),
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
+    }
+
+    public static function mutateFormDataBeforeCreate(array $data): array
+    {
+        if (! static::isSuperAdmin()) {
+
+            $data['rumah_sakit_id'] = static::rumahSakitId();
+
+        }
+        
+        if ($data['popup'] ?? false) {
+
+            Promo::where('popup', true)
+                ->update([
+                    'popup' => false,
+                ]);
+        }
+
+        return $data;
+    }
+
+    public static function mutateFormDataBeforeSave(array $data, Promo $record): array
+    {
+        if (! static::isSuperAdmin()) {
+
+            $data['rumah_sakit_id'] = static::rumahSakitId();
+
+        }
+
+        if ($data['popup'] ?? false) {
+
+            Promo::where('id', '!=', $record->id)
+                ->where('popup', true)
+                ->update([
+                    'popup' => false,
+                ]);
+        }
+
+        return $data;
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManagePromo::route('/'),
+            'index' => ManagePromo::route('/'),
         ];
     }
 }

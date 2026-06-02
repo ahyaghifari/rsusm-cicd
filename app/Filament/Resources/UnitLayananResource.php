@@ -14,7 +14,7 @@ class UnitLayananResource extends BaseResource
 {
     protected static ?string $model = UnitLayanan::class;
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 4;
     protected static string | null $navigationGroup = 'Poliklinik / Rawat Jalan';
     protected static ?string $navigationIcon = 'fas-building-un';
     
@@ -50,6 +50,11 @@ class UnitLayananResource extends BaseResource
                     ->default(true)
                     ->required(),
 
+                Forms\Components\ColorPicker::make('warna')
+                    ->label('Warna Unit Layanan')
+                    ->helperText('Warna header kartu di halaman Jadwal Poliklinik. Kosongkan untuk menggunakan warna default.')
+                    ->nullable(),
+
                 // Deskripsi Unit Layanan
                 Forms\Components\Textarea::make('deskripsi')
                     ->nullable()
@@ -75,6 +80,10 @@ class UnitLayananResource extends BaseResource
                 Tables\Columns\ImageColumn::make('gambar'),
                 
                 // Menampilkan status aktif berupa ikon boolean
+                Tables\Columns\ColorColumn::make('warna')
+                    ->label('Warna')
+                    ->toggleable(),
+
                 Tables\Columns\IconColumn::make('aktif')
                     ->boolean()
                     ->sortable(),

@@ -21,6 +21,10 @@ return new class extends Migration
             $table->string('no_hotline', 20)->nullable();
             $table->string('gambar', 255)->nullable();
             $table->string('logo', 255)->nullable();
+            $table->text('link_pendaftaran_online')->nullable();
+            $table->text('lokasi_google_map')->nullable();
+            $table->text('tentang_kami')->nullable();
+            $table->string('gambar_tentang', 255)->nullable();
             $table->boolean('aktif')->default(true);
             $table->timestamps();
         });

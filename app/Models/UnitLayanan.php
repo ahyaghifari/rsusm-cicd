@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class UnitLayanan extends Model
 {
+    use HasFactory;
+
     // Deklarasi nama tabel database secara eksplisit
     protected $table = 'unit_layanan';
 
@@ -18,7 +21,20 @@ class UnitLayanan extends Model
         'deskripsi',
         'gambar',
         'aktif',
+        'warna',
     ];
+
+    // Nilai warna hex mentah, fallback ke tertiary
+    public function warnaHex(): string
+    {
+        return $this->warna ?? '#4d51b2';
+    }
+
+    // Inline style background-color
+    public function warnaStyle(): string
+    {
+        return "background-color: {$this->warnaHex()};";
+    }
 
     public function rumahSakit(): BelongsTo
     {

@@ -1,13 +1,20 @@
-<footer class="bg-primary/15 px-10 py-24 grid grid-cols-6 gap-5">
-    <div class="col-span-2">
-        <img src="{{ asset('img/syifa-medika-banjarbaru.png') }}" class="w-52" alt="">
-        <p class="mt-2 text-on-surface text-sm mb-5"> Jl. RO Ulin No.93, Loktabat Selatan, Kec. Banjarbaru Selatan, Kota Banjar Baru, Kalimantan Selatan, 70712</p>
+<footer class="bg-primary/15 px-10 py-20 md:py-22 lg:py-24 flex flex-col lg:grid lg:grid-cols-5 gap-5">
+    <div class="lg:col-span-2">
+        <img src="{{ Storage::url($currentRumahSakit->logo) }}" class="w-full md:w-52" alt="">
+        <p class="mt-2 text-on-surface text-sm mb-5">{{ $currentRumahSakit->alamat }}</p>
         
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3985.83410305978!2d115.39570239999999!3d-2.5607591!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2de569004ef9aa4f%3A0xbcf05d96238cf8b7!2sRSU%20Syifa%20Medika%20Barabai!5e0!3m2!1sid!2sid!4v1779529871230!5m2!1sid!2sid" width="350" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        @if($currentRumahSakit->lokasi_google_map)
+            <div class="mt-3 rounded-lg overflow-hidden" style="height:220px;">
+                <style>.map-wrapper iframe { width:100% !important; height:100% !important; border:0; display:block; }</style>
+                <div class="map-wrapper" style="width:100%;height:100%;">
+                    {!! $currentRumahSakit->lokasi_google_map !!}
+                </div>
+            </div>
+        @endif
     </div>
-    <div class="col-span-3 border-l border-primary/50 pl-4">
-        <p class="font-semibold text-xl text-on-surface">Hubungi Kami</p>
-        <table class="border-separate border-spacing-2 mt-4 w-full text-sm">
+    <div class="mt-5 lg:mt-0 lg:col-span-3 lg:border-l-2 border-primary/50 lg:pl-4">
+        <p class="font-semibold text-lg lg:text-xl text-on-surface">Hubungi Kami</p>
+        <table class="border-separate border-spacing-2 mt-4 w-full text-xs md:text-sm lg:text-base">
             <tbody>
                 @foreach($kontakRumahSakit as $kontak)
                 <tr>
@@ -34,12 +41,5 @@
                 @endforeach
             </tbody>
         </table>
-    </div>
-    <div class="border-l border-primary/50 pl-4">
-        <p class="font-semibold text-xl text-on-surface">Tentang Kami</p>
-        <div class="mt-4 flex flex-col gap-y-2">
-            <a href="">Tentang Perusahaan</a>
-            <a href="">Partner Kami</a>
-        </div>
     </div>
 </footer>

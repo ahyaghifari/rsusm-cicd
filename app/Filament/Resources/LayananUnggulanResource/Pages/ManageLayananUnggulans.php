@@ -14,7 +14,17 @@ class ManageLayananUnggulans extends ManageRecords
     {
         return [
             // Membuka modal form saat tombol "Create" diklik
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+            ->mutateFormDataUsing(function (array $data): array {
+
+                if (!LayananUnggulanResource::isSuperAdmin()) {
+
+                    $data['rumah_sakit_id'] = LayananUnggulanResource::rumahSakitId();
+
+                }
+
+                return $data;
+            }),
         ];
     }
 }

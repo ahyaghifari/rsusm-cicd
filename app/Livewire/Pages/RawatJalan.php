@@ -2,21 +2,17 @@
 
 namespace App\Livewire\Pages;
 
+use App\Livewire\RsPortalComponent;
 use App\Models\PoliKlinik;
 use App\Models\UnitLayanan;
-use App\Models\RumahSakit;
-use Livewire\Attributes\Locked;
-use Livewire\Component;
 
-class RawatJalan extends Component
+class RawatJalan extends RsPortalComponent
 {
-    #[Locked]
-    public ?RumahSakit $rs = null;
     public ?int $activeUnitId = null;
 
     public function mount(): void
     {
-        $this->rs = current_rumahsakit();
+        $this->seo('Rawat Jalan', 'Layanan rawat jalan dan jadwal poliklinik di ' . $this->rs->nama . '.');
 
         $firstUnit = UnitLayanan::where('rumah_sakit_id', $this->rs->id)
             ->where('aktif', true)
@@ -46,9 +42,13 @@ class RawatJalan extends Component
                 ->get();
         }
 
+        $activeUnit = $units->firstWhere('id', $this->activeUnitId);
+
         return view('rumah_sakit.pages.rawat-jalan', [
             'units'      => $units,
             'poliklinik' => $poliklinik,
+            'rsSlug'     => $this->rs->slug,
+            'activeUnit' => $activeUnit,
         ]);
     }
 }

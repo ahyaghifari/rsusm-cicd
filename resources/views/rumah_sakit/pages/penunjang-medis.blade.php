@@ -1,25 +1,8 @@
 <div>
-    {{-- ============================================================ --}}
-    {{-- HERO --}}
-    {{-- ============================================================ --}}
-    <div id="hero" class="relative overflow-hidden bg-primary py-16 px-6">
-        {{-- Dekorasi geometris --}}
-        <div class="absolute -top-16 -right-16 w-72 h-72 bg-white/5 rounded-full pointer-events-none"></div>
-        <div class="absolute -bottom-20 -left-20 w-80 h-80 bg-white/5 rounded-full pointer-events-none"></div>
-        <div class="absolute top-6 right-1/4 w-24 h-24 border-2 border-white/10 rounded-xl rotate-12 pointer-events-none"></div>
-        <div class="absolute bottom-8 left-1/3 w-16 h-16 border-2 border-white/10 rounded-full pointer-events-none"></div>
-        <div class="absolute top-1/2 -translate-y-1/2 left-8 w-3 h-32 bg-yellow-400/40 rounded-full pointer-events-none"></div>
-        <div class="absolute top-1/2 -translate-y-1/2 left-14 w-3 h-20 bg-yellow-400/20 rounded-full pointer-events-none"></div>
-
-        <div class="relative z-10 text-center max-w-2xl mx-auto">
-            <span class="material-symbols-outlined text-5xl text-white/60 block mb-3">lab_panel</span>
-            <h1 class="text-4xl md:text-5xl font-bold text-white leading-tight mb-4">Penunjang Medis</h1>
-            <p class="text-white/65 text-base leading-relaxed">
-                Layanan penunjang diagnostik dan medis berkualitas tinggi untuk mendukung proses perawatan Anda.
-            </p>
-        </div>
-    </div>
-    {{-- END HERO --}}
+    <x-page-hero
+        title="Penunjang Medis"
+        subtitle="Layanan penunjang diagnostik dan medis berkualitas tinggi untuk mendukung proses perawatan Anda."
+    />
 
     {{-- ============================================================ --}}
     {{-- KONTEN UTAMA --}}
@@ -43,7 +26,10 @@
 
                         @if($loop->odd)
                             {{-- Gambar kiri --}}
-                            <div class="relative overflow-hidden min-h-64">
+                            <a href="{{ Storage::url($medis->gambar) }}"
+                               class="glightbox relative overflow-hidden min-h-64 block"
+                               data-gallery="penunjang-medis"
+                               data-title="{{ $medis->nama }}">
                                 <img
                                     src="{{ Storage::url($medis->gambar) }}"
                                     alt="{{ $medis->nama }}"
@@ -56,7 +42,8 @@
                                         Layanan
                                     </span>
                                 </div>
-                            </div>
+                                <span class="absolute top-4 right-4 material-symbols-outlined text-white text-3xl opacity-0 group-hover:opacity-100 transition drop-shadow">zoom_in</span>
+                            </a>
 
                             {{-- Teks kanan --}}
                             <div class="bg-white p-8 flex flex-col justify-center">
@@ -94,7 +81,10 @@
                             </div>
 
                             {{-- Gambar kanan --}}
-                            <div class="relative overflow-hidden min-h-64 order-1 md:order-2">
+                            <a href="{{ Storage::url($medis->gambar) }}"
+                               class="glightbox relative overflow-hidden min-h-64 block order-1 md:order-2"
+                               data-gallery="penunjang-medis"
+                               data-title="{{ $medis->nama }}">
                                 <img
                                     src="{{ Storage::url($medis->gambar) }}"
                                     alt="{{ $medis->nama }}"
@@ -107,7 +97,8 @@
                                         Layanan
                                     </span>
                                 </div>
-                            </div>
+                                <span class="absolute top-4 left-4 material-symbols-outlined text-white text-3xl opacity-0 group-hover:opacity-100 transition drop-shadow">zoom_in</span>
+                            </a>
                         @endif
 
                     </div>

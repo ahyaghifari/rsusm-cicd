@@ -1,7 +1,5 @@
 <div>
-    <div id="hero" class="relative px-10 py-16 bg-primary">
-        <h1 class="text-center text-4xl font-bold text-white">Rawat Inap</h1>
-    </div>
+    <x-page-hero title="Rawat Inap" />
 
     <div class="mt-5 w-10/12 mx-auto">
         @if($hasGedung)
@@ -30,7 +28,9 @@
         @else
                 @foreach($rawatInap as $room)
 
-                    <h1>DUA</h1>
+                    <div data-aos="fade-up"> 
+                        <x-rawat-inap :rawat-inap="$room" />
+                    </div>
 
                 @endforeach
         @endif

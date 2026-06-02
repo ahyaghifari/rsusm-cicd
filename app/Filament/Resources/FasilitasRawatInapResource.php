@@ -3,17 +3,16 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\FasilitasRawatInapResource\Pages;
-use App\Filament\Resources\FasilitasRawatInapResource\RelationManagers;
 use App\Models\FasilitasRawatInap;
+use App\Models\RawatInap;
+use App\Models\RumahSakit;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class FasilitasRawatInapResource extends Resource
+class FasilitasRawatInapResource extends BaseResource
 {
     protected static ?string $model = FasilitasRawatInap::class;
 
@@ -22,18 +21,56 @@ class FasilitasRawatInapResource extends Resource
     protected static string | null $navigationGroup = 'Rawat Inap';
     protected static ?string $navigationIcon = 'fas-house-medical';
 
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        if (static::isSuperAdmin()) {
+            return $query;
+        }
+
+        return $query->whereHas('rawatInap', fn ($q) => $q->where('rumah_sakit_id', static::rumahSakitId()));
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
+                // Superadmin: pilih RS dulu, lalu rawat inap
+                Forms\Components\Select::make('rumah_sakit_id')
+                    ->label('Rumah Sakit')
+                    ->options(RumahSakit::pluck('nama', 'id'))
+                    ->required()
+                    ->live()
+                    ->visible(fn () => static::isSuperAdmin())
+                    ->afterStateHydrated(function ($component, $record) {
+                        if ($record && static::isSuperAdmin()) {
+                            $component->state($record->rawatInap?->rumah_sakit_id);
+                        }
+                    })
+                    ->afterStateUpdated(fn (Forms\Set $set) => $set('rawat_inap_id', null)),
+
                 Forms\Components\Select::make('rawat_inap_id')
-                    ->relationship('rawatInap', 'nama')
+                    ->label('Rawat Inap')
+                    ->options(function (Forms\Get $get) {
+                        $rsId = static::isSuperAdmin()
+                            ? $get('rumah_sakit_id')
+                            : static::rumahSakitId();
+
+                        if (! $rsId) return [];
+
+                        return RawatInap::where('rumah_sakit_id', $rsId)
+                            ->orderBy('nama')
+                            ->pluck('nama', 'id');
+                    })
                     ->searchable()
-                    ->preload()
-                    ->required(),
+                    ->required()
+                    ->disabled(fn (Forms\Get $get) => static::isSuperAdmin() && ! $get('rumah_sakit_id')),
+
                 Forms\Components\TextInput::make('nama')
                     ->required()
                     ->maxLength(255),
+
                 Forms\Components\Toggle::make('aktif')
                     ->required()
                     ->default(true),
@@ -44,6 +81,11 @@ class FasilitasRawatInapResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('rawatInap.rumahSakit.nama')
+                    ->label('Rumah Sakit')
+                    ->sortable()
+                    ->searchable()
+                    ->visible(fn () => static::isSuperAdmin()),
                 Tables\Columns\TextColumn::make('rawatInap.nama')
                     ->label('Rawat Inap')
                     ->searchable()
@@ -58,17 +100,18 @@ class FasilitasRawatInapResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('rawat_inap_id')
-                    ->relationship('rawatInap', 'nama')
                     ->label('Rawat Inap')
-                    ->searchable()
-                    ->preload(),
+                    ->options(fn () => RawatInap::when(
+                            ! static::isSuperAdmin(),
+                            fn ($q) => $q->where('rumah_sakit_id', static::rumahSakitId())
+                        )
+                        ->orderBy('nama')
+                        ->pluck('nama', 'id')
+                    )
+                    ->searchable(),
                 Tables\Filters\TernaryFilter::make('aktif')
                     ->label('Status Aktif'),
             ])
@@ -89,4 +132,5 @@ class FasilitasRawatInapResource extends Resource
             'index' => Pages\ManageFasilitasRawatInaps::route('/'),
         ];
     }
+
 }

@@ -49,21 +49,6 @@ class KontakSeeder extends Seeder
                 'value' => 'info.rsusyifamedika@gmail.com',
                 'link' => null,
             ],
-            [
-                'label' => 'Email Alternatif',
-                'value' => 'rs.syifamedika@gmail.com',
-                'link' => null,
-            ],
-            [
-                'label' => 'Pendaftaran Online',
-                'value' => 'simgos.rsusyifamedika.co.id',
-                'link' => 'https://simgos.rsusyifamedika.co.id/apps/RegOnline/',
-            ],
-            [
-                'label' => 'Alamat',
-                'value' => 'Jl. R.O. Ulin No. 93, Loktabat Selatan, Kota Banjarbaru',
-                'link' => 'https://maps.app.goo.gl/ijm4pkR693c9sCeC7',
-            ],
         ];
 
         foreach ($operasional as $data) {

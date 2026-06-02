@@ -32,7 +32,7 @@ class DokterResource extends BaseRumahSakitResource
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (string $operation, $state, Forms\Set $set) => $operation === 'create' ? $set('slug', \Illuminate\Support\Str::slug($state)) : null),
+                            ->afterStateUpdated(fn ($state, Forms\Set $set) => $set('slug', \Illuminate\Support\Str::slug($state))),
                         Forms\Components\TextInput::make('slug')
                             ->required()
                             ->maxLength(255)
@@ -94,11 +94,7 @@ class DokterResource extends BaseRumahSakitResource
                 Tables\Columns\TextColumn::make('nama')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('rumahSakit.nama')
-                    ->label('Rumah Sakit')
-                    ->searchable()
-                    ->sortable()
-                    ->visible(fn () => static::isSuperAdmin()),
+                static::rsTableColumn(),
                 Tables\Columns\TextColumn::make('spesialis.nama')
                     ->label('Spesialis')
                     ->searchable()
@@ -116,11 +112,7 @@ class DokterResource extends BaseRumahSakitResource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('rumah_sakit_id')
-                    ->relationship('rumahSakit', 'nama')
-                    ->label('Rumah Sakit')
-                    ->visible(fn () => static::isSuperAdmin())
-                    ,
+                static::rsTableFilter(),
                 Tables\Filters\SelectFilter::make('spesialis_id')
                     ->relationship('spesialis', 'nama')
                     ->label('Spesialis'),

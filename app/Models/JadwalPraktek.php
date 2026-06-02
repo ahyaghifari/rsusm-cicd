@@ -2,40 +2,40 @@
 
 namespace App\Models;
 
+use App\Enums\Hari;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class JadwalPraktek extends Model
 {
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
     protected $table = 'jadwal_praktek';
 
-    public static $hari = ['SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU', 'MINGGU'];
-
-    /**
-     * The attributes that aren't mass assignable.
-     *
-     * @var array
-     */
-    protected $guarded = ['id'];
-
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'sesuai_perjanjian' => 'boolean',
-        'libur' => 'boolean',
+    protected $fillable = [
+        'poliklinik_id',
+        'hari',
+        'dokter_id',
+        'nama_dokter',
+        'waktu_mulai',
+        'waktu_selesai',
+        'sesuai_perjanjian',
+        'catatan',
     ];
 
-    /**
-     * Get the dokter that owns the jadwal praktek.
-     */
+    protected function casts(): array
+    {
+        return [
+            'hari'              => Hari::class,
+            'waktu_mulai'       => 'datetime:H:i',
+            'waktu_selesai'     => 'datetime:H:i',
+            'sesuai_perjanjian' => 'boolean',
+        ];
+    }
+
+    public function poliklinik(): BelongsTo
+    {
+        return $this->belongsTo(PoliKlinik::class, 'poliklinik_id');
+    }
+
     public function dokter(): BelongsTo
     {
         return $this->belongsTo(Dokter::class, 'dokter_id');

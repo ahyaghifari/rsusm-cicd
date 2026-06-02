@@ -1,8 +1,5 @@
 <div>
-    {{-- Hero --}}
-    <div id="hero" class="relative px-10 py-16">
-        <h1 class="text-center text-4xl font-bold bg-primary text-white p-3 w-fit mx-auto">Hubungi Kami</h1>
-    </div>
+    <x-page-hero title="Hubungi Kami" />
 
     <div class="w-10/12 mx-auto pb-20 mt-10">
 

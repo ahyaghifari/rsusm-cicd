@@ -13,7 +13,17 @@ class ManagePenunjangMedis extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+            ->mutateFormDataUsing(function (array $data): array {
+
+                if (!PenunjangMedisResource::isSuperAdmin()) {
+
+                    $data['rumah_sakit_id'] = PenunjangMedisResource::rumahSakitId();
+
+                }
+
+                return $data;
+            }),
         ];
     }
 }

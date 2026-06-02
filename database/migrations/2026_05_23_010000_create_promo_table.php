@@ -12,10 +12,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('rumah_sakit_id')->constrained('rumah_sakit')->cascadeOnDelete();
             $table->string('judul', 255);
+            $table->string('slug', 255)->nullable()->unique();
             $table->longText('deskripsi')->nullable();
             $table->string('gambar', 255)->nullable();
-            $table->enum('tipe', ['POPUP', 'SLIDER']);
-            $table->smallInteger('sort_order')->default(0);
+            $table->boolean('popup')->default(false);
             $table->boolean('aktif')->default(true);
             $table->timestamps();
         });

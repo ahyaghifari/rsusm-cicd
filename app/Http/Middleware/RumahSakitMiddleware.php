@@ -4,7 +4,9 @@ namespace App\Http\Middleware;
 
 use Closure;
 use App\Models\RumahSakit;
+use App\Models\Halaman;
 use App\Models\Kontak;
+use App\Models\Promo;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -19,7 +21,7 @@ class RumahSakitMiddleware
     {
         $slug = $request->route('rumahsakit');
 
-        $rumahSakits = RumahSakit::select("id", "lokasi", "slug")->where('aktif', true)->get();
+        $rumahSakits = RumahSakit::select("id", "nama", "lokasi", "slug")->where('aktif', true)->get();
 
         view()->share('daftarRS', $rumahSakits);
 
@@ -33,8 +35,22 @@ class RumahSakitMiddleware
 
         // SHARE KONTAK
         $kontakRS = Kontak::where('rumah_sakit_id', $hospital->id)->where('aktif', true)->get();
-
         view()->share('kontakRumahSakit', $kontakRS);
+
+        // SHARE PROMO POPUP
+        $promoPopup = Promo::where('rumah_sakit_id', $hospital->id)
+            ->aktif()
+            ->popup()
+            ->orderByDesc('created_at')
+            ->get();
+        view()->share('promo_popup', $promoPopup);
+
+        // SHARE HALAMAN NAV (untuk dropdown Tentang Kami)
+        $halamanNav = Halaman::where('rumah_sakit_id', $hospital->id)
+            ->where('aktif', true)
+            ->orderBy('judul')
+            ->get(['id', 'slug', 'judul']);
+        view()->share('halaman_nav', $halamanNav);
 
         return $next($request);
     }

@@ -122,11 +122,7 @@ class RawatInapResource extends BaseRumahSakitResource
                 Tables\Columns\TextColumn::make('nama')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('rumahSakit.nama')
-                    ->label('Rumah Sakit')
-                    ->searchable()
-                    ->sortable()
-                    ->visible(fn () => static::isSuperAdmin()),
+                static::rsTableColumn(),
                 Tables\Columns\TextColumn::make('gedung.nama')
                     ->label('Gedung')
                     ->searchable()
@@ -152,11 +148,7 @@ class RawatInapResource extends BaseRumahSakitResource
             ->defaultSort('sort_order', 'asc')
             ->reorderable('sort_order')
             ->filters([
-                Tables\Filters\SelectFilter::make('rumah_sakit_id')
-                    ->relationship('rumahSakit', 'nama')
-                    ->label('Rumah Sakit')
-                    ->searchable()
-                    ->preload(),
+                static::rsTableFilter()->searchable()->preload(),
                 Tables\Filters\SelectFilter::make('gedung_id')
                     ->relationship('gedung', 'nama')
                     ->label('Gedung')

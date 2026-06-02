@@ -2,26 +2,56 @@
 
 namespace App\Filament\Resources;
 
-use App\Models\User;
-use Filament\Resources\Resource;
+use Filament\Forms;
+use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 
-// Class ini akan dipakai oleh semua resource
 abstract class BaseRumahSakitResource extends BaseResource
 {
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
 
-        // jika superadmin maka ambil seluruh data tanpa lihat rumah sakit mana
         if (static::isSuperAdmin()) {
             return $query;
         }
 
-        // jika admin rumah sakit maka ambil setiap query dengan rumah sakit id yang sama dengan user
-        return $query->where(
-            'rumah_sakit_id',
-            static::rumahSakitId()
-        );
+        return $query->where('rumah_sakit_id', static::rumahSakitId());
+    }
+
+    // ---------------------------------------------------------------
+    // Helper: field Select rumah_sakit_id untuk form
+    // ---------------------------------------------------------------
+    public static function rsFormField(): Forms\Components\Select
+    {
+        return Forms\Components\Select::make('rumah_sakit_id')
+            ->relationship('rumahSakit', 'nama')
+            ->required()
+            ->label('Rumah Sakit')
+            ->default(fn () => static::rumahSakitId())
+            ->visible(fn () => static::isSuperAdmin());
+    }
+
+    // ---------------------------------------------------------------
+    // Helper: kolom rumahSakit.nama untuk tabel
+    // ---------------------------------------------------------------
+    public static function rsTableColumn(): Tables\Columns\TextColumn
+    {
+        return Tables\Columns\TextColumn::make('rumahSakit.nama')
+            ->label('Rumah Sakit')
+            ->searchable()
+            ->sortable()
+            ->visible(fn () => static::isSuperAdmin());
+    }
+
+    // ---------------------------------------------------------------
+    // Helper: filter rumah_sakit_id untuk tabel
+    // ---------------------------------------------------------------
+    public static function rsTableFilter(): Tables\Filters\SelectFilter
+    {
+        return Tables\Filters\SelectFilter::make('rumah_sakit_id')
+            ->relationship('rumahSakit', 'nama')
+            ->label('Rumah Sakit')
+            ->visible(fn () => static::isSuperAdmin());
     }
 }

@@ -7,11 +7,8 @@ use App\Filament\Resources\SpesialisResource\RelationManagers;
 use App\Models\Spesialis;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class SpesialisResource extends BaseRumahSakitResource
 {
@@ -25,11 +22,7 @@ class SpesialisResource extends BaseRumahSakitResource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('rumah_sakit_id')
-                    ->relationship('rumahSakit', 'nama')
-                    ->required(fn () => static::isSuperAdmin())
-                    ->visible(fn () => static::isSuperAdmin())
-                    ->default(1),
+                static::rsFormField(),
                 Forms\Components\TextInput::make('nama')
                     ->required()
                     ->maxLength(100)
@@ -53,10 +46,7 @@ class SpesialisResource extends BaseRumahSakitResource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('rumahSakit.nama')
-                    ->visible(fn () => static::isSuperAdmin())
-                    ->searchable()
-                    ->sortable(),
+                static::rsTableColumn(),
                 Tables\Columns\TextColumn::make('nama')
                     ->searchable()
                     ->sortable(),

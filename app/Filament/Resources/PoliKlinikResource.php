@@ -13,7 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 
-class PoliKlinikResource extends Resource
+class PoliKlinikResource extends BaseResource
 {
     protected static ?string $model = PoliKlinik::class;
 
@@ -95,8 +95,12 @@ class PoliKlinikResource extends Resource
                 Tables\Columns\TextColumn::make('slug')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('unitLayanan.nama')
-                    ->label('Unit Layanan')
-                    ->sortable(),
+                ->label('Unit Layanan')
+                ->sortable(),
+                Tables\Columns\TextColumn::make('unitLayanan.rumahSakit.nama')
+                    ->label('RS')
+                    ->sortable()
+                    ->visible(fn () => static::isSuperAdmin()),
                 Tables\Columns\IconColumn::make('aktif')
                     ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
@@ -105,7 +109,11 @@ class PoliKlinikResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+
+                Tables\Filters\SelectFilter::make('rumah_sakit_id')
+                    ->relationship('unitLayanan.rumahSakit', 'nama')
+                    ->label('Rumah Sakit')
+                    ->visible(fn () => static::isSuperAdmin())
             ])
             ->actions([
                 Tables\Actions\EditAction::make()

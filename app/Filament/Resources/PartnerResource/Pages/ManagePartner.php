@@ -13,7 +13,16 @@ class ManagePartner extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+            ->mutateFormDataUsing(function (array $data): array {
+                if (! static::isSuperAdmin()) {
+
+                    $data['rumah_sakit_id'] = static::rumahSakitId();
+
+                }
+
+                return $data;
+            }),
         ];
     }
 }

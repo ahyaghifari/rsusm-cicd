@@ -6,11 +6,11 @@ use App\Filament\Resources\LinkLayananResource\Pages;
 use App\Models\LinkLayanan;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
+
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class LinkLayananResource extends Resource
+class LinkLayananResource extends BaseRumahSakitResource
 {
     protected static ?string $model = LinkLayanan::class;
 
@@ -26,11 +26,7 @@ class LinkLayananResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('rumah_sakit_id')
-                    ->relationship('rumahSakit', 'nama')
-                    ->required()
-                    ->searchable()
-                    ->preload(),
+                static::rsFormField(),
 
                 Forms\Components\TextInput::make('label')
                     ->required()
@@ -64,10 +60,7 @@ class LinkLayananResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('rumahSakit.nama')
-                    ->label('Rumah Sakit')
-                    ->sortable()
-                    ->searchable(),
+                static::rsTableColumn(),
 
                 Tables\Columns\TextColumn::make('label')
                     ->searchable()
@@ -93,15 +86,24 @@ class LinkLayananResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('rumah_sakit_id')
-                    ->relationship('rumahSakit', 'nama')
-                    ->label('Filter Rumah Sakit'),
+                static::rsTableFilter(),
 
                 Tables\Filters\TernaryFilter::make('aktif')
                     ->label('Status Aktif'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                ->mutateFormDataUsing(function (array $data): array {
+
+                        if (! static::isSuperAdmin()) {
+
+                            $data['rumah_sakit_id']
+                                = static::rumahSakitId();
+
+                        }
+
+                        return $data;
+                    }),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([

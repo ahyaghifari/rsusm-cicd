@@ -6,7 +6,7 @@ use App\Filament\Resources\KontakResource\Pages;
 use App\Models\Kontak;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
+
 use Filament\Tables;
 use Filament\Tables\Table;
 
@@ -25,11 +25,7 @@ class KontakResource extends BaseRumahSakitResource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('rumah_sakit_id')
-                    ->relationship('rumahSakit', 'nama')
-                    ->required(fn () => static::isSuperAdmin())
-                    ->visible(fn () => static::isSuperAdmin())
-                    ->preload(),
+                static::rsFormField(),
 
                 Forms\Components\Select::make('kategori')
                     ->options([
@@ -70,12 +66,7 @@ class KontakResource extends BaseRumahSakitResource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('rumahSakit.nama')
-                    ->label('Rumah Sakit')
-                    ->sortable()
-                    ->searchable()
-                    ->visible(fn () => static::isSuperAdmin())
-                    ,
+                static::rsTableColumn(),
 
                 Tables\Columns\TextColumn::make('kategori')
                     ->badge()
@@ -106,9 +97,7 @@ class KontakResource extends BaseRumahSakitResource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('rumah_sakit_id')
-                    ->relationship('rumahSakit', 'nama')
-                    ->label('Filter Rumah Sakit')->visible(fn () => static::isSuperAdmin()),
+                static::rsTableFilter(),
 
                 Tables\Filters\SelectFilter::make('kategori')
                     ->options([

@@ -2,17 +2,14 @@
 
 namespace App\Livewire\Pages;
 
+use App\Livewire\RsPortalComponent;
 use App\Models\Kontak;
-use App\Models\RumahSakit;
-use Livewire\Component;
 
-class HubungiKami extends Component
+class HubungiKami extends RsPortalComponent
 {
-    public RumahSakit $rs;
-
     public function mount(): void
     {
-        $this->rs = current_rumahsakit();
+        $this->seo('Hubungi Kami', 'Informasi kontak, lokasi, dan jam operasional ' . $this->rs->nama . '.');
     }
 
     public function render()

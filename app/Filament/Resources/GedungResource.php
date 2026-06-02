@@ -13,7 +13,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class GedungResource extends Resource
+class GedungResource extends BaseResource
 {
     protected static ?string $model = Gedung::class;
 
@@ -85,5 +85,10 @@ class GedungResource extends Resource
         return [
             'index' => Pages\ManageGedungs::route('/'),
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return static::isSuperAdmin();
     }
 }

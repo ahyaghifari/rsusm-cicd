@@ -2,19 +2,16 @@
 
 namespace App\Livewire\Pages;
 
+use App\Livewire\RsPortalComponent;
 use App\Models\Partner;
-use App\Models\RumahSakit;
-use Livewire\Component;
 
-class PartnerKami extends Component
+class PartnerKami extends RsPortalComponent
 {
-    public RumahSakit $rs;
-
     public string $search = '';
 
     public function mount(): void
     {
-        $this->rs = current_rumahsakit();
+        $this->seo('Partner Kami', 'Mitra asuransi dan perusahaan rekanan ' . $this->rs->nama . '.');
     }
 
     public function render()

@@ -13,7 +13,18 @@ class ManageLinkLayanan extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+            ->mutateFormDataUsing(function (array $data): array {
+
+                if (!LinkLayananResource::isSuperAdmin()) {
+
+                    $data['rumah_sakit_id']
+                        = LinkLayananResource::rumahSakitId();
+
+                }
+
+                return $data;
+            }),
         ];
     }
 }

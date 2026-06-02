@@ -1,29 +1,13 @@
 <div>
-    {{-- ============================================================ --}}
-    {{-- HERO --}}
-    {{-- ============================================================ --}}
-    <div id="hero" class="relative overflow-hidden bg-primary py-16 px-6">
-        {{-- Dekorasi geometris --}}
-        <div class="absolute -top-16 -right-16 w-72 h-72 bg-white/5 rounded-full pointer-events-none"></div>
-        <div class="absolute -bottom-20 -left-20 w-80 h-80 bg-white/5 rounded-full pointer-events-none"></div>
-        <div class="absolute top-6 right-1/4 w-24 h-24 border-2 border-white/10 rounded-xl rotate-12 pointer-events-none"></div>
-        <div class="absolute bottom-8 left-1/3 w-16 h-16 border-2 border-white/10 rounded-full pointer-events-none"></div>
-        <div class="absolute top-1/2 -translate-y-1/2 left-8 w-3 h-32 bg-yellow-400/40 rounded-full pointer-events-none"></div>
-        <div class="absolute top-1/2 -translate-y-1/2 left-14 w-3 h-20 bg-yellow-400/20 rounded-full pointer-events-none"></div>
-
-        <div class="relative z-10 text-center max-w-2xl mx-auto">
-            <h1 class="text-4xl md:text-5xl font-bold text-white leading-tight mb-4">Rawat Jalan</h1>
-            <p class="text-white/65 text-base leading-relaxed">
-                Temukan berbagai layanan poliklinik spesialis yang tersedia untuk mendukung kesehatan Anda dan keluarga.
-            </p>
-        </div>
-    </div>
-    {{-- END HERO --}}
+    <x-page-hero
+        title="Rawat Jalan"
+        subtitle="Temukan berbagai layanan poliklinik spesialis yang tersedia untuk mendukung kesehatan Anda dan keluarga."
+    />
 
     {{-- ============================================================ --}}
     {{-- KONTEN UTAMA --}}
     {{-- ============================================================ --}}
-    <div class="w-10/12 mx-auto py-16">
+    <div class="w-11/12 lg:w-10/12 mx-auto py-16">
 
         @if($units->isEmpty())
 
@@ -64,8 +48,7 @@
                         @endforeach
                     </div>
 
-                    {{-- Deskripsi unit aktif --}}
-                    @php $activeUnit = $units->firstWhere('id', $activeUnitId); @endphp
+                    {{-- Deskripsi singkat unit aktif (di atas tab) --}}
                     @if($activeUnit?->deskripsi)
                         <div class="mt-5 p-4 bg-primary/5 border-l-4 border-primary rounded-r-xl max-w-2xl"
                              data-aos="fade-right">
@@ -92,7 +75,11 @@
             {{-- ==================================================== --}}
             {{-- GRID POLIKLINIK --}}
             {{-- ==================================================== --}}
-            <div wire:key="poli-{{ $activeUnitId }}">
+            <div wire:key="poli-{{ $activeUnitId }}"
+                 x-data
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-3"
+                 x-transition:enter-end="opacity-100 translate-y-0">
 
                 @if($poliklinik->isEmpty())
                     <div class="text-center py-20 border-2 border-dashed border-outline-variant rounded-2xl">
@@ -101,96 +88,57 @@
                     </div>
 
                 @else
-                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    @php $warna = $activeUnit?->warna ?: '#d606b0'; @endphp
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4">
                         @foreach($poliklinik as $poli)
                             <div
+                                onclick="window.location='{{ route('rumahsakit.rawat_jalan_show', ['rumahsakit' => $rsSlug, 'poliklinik' => $poli->slug]) }}'"
+                                wire:key="poli-card-{{ $poli->id }}"
                                 data-aos="fade-up"
-                                data-aos-delay="{{ $loop->index * 60 }}"
-                                x-data="{ expanded: false }"
-                                class="group bg-white rounded-2xl shadow-sm border border-outline-variant/40
-                                       hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden
-                                       flex flex-col">
+                                data-aos-delay="{{ $loop->index * 40 }}"
+                                class="group bg-white rounded-2xl shadow-sm border border-outline-variant/30
+                                       hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300
+                                       overflow-hidden cursor-pointer">
 
                                 {{-- Aksen atas --}}
-                                <div class="h-1.5 w-full bg-linear-to-r from-primary to-secondary"></div>
+                                <div class="h-1 w-full shrink-0"
+                                     style="background: linear-gradient(to right, {{ $warna }}, {{ $warna }}88);"></div>
 
-                                {{-- Gambar (jika ada) --}}
-                                @if($poli->gambar)
-                                    <div class="relative w-full h-48 overflow-hidden">
-                                        <img
-                                            src="{{ Storage::url($poli->gambar) }}"
-                                            alt="{{ $poli->nama }}"
-                                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                        <div class="absolute inset-0 bg-linear-to-t from-black/30 to-transparent"></div>
-                                    </div>
-                                @else
-                                    {{-- Placeholder ikon jika tidak ada gambar --}}
-                                    <div class="relative w-full h-36 bg-linear-to-br from-primary/10 to-secondary/10 flex items-center justify-center overflow-hidden">
-                                        <span class="material-symbols-outlined text-6xl text-primary/30">medical_services</span>
-                                        <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-primary/5 rounded-full"></div>
-                                        <div class="absolute -top-4 -left-4 w-16 h-16 bg-secondary/5 rounded-full"></div>
-                                    </div>
-                                @endif
+                                {{-- Body: ikon kiri, nama + tombol kanan --}}
+                                <div class="flex items-center gap-5 px-5 py-5">
 
-                                {{-- Konten --}}
-                                <div class="p-6 flex flex-col flex-1">
-                                    {{-- Badge unit (khusus multi-unit agar jelas) --}}
-                                    @if($units->count() > 1)
-                                        @php $unitNama = $units->firstWhere('id', $poli->unit_layanan_id)?->nama; @endphp
-                                        @if($unitNama)
-                                            <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-2.5 py-1 rounded-full w-fit mb-3">
-                                                <span class="material-symbols-outlined text-[12px]">domain</span>
-                                                {{ $unitNama }}
-                                            </span>
+                                    {{-- Ikon --}}
+                                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden"
+                                         style="background-color: {{ $warna }}12; border: 1px solid {{ $warna }}25;">
+                                        @if($poli->gambar)
+                                            <img src="{{ Storage::url($poli->gambar) }}"
+                                                 alt="{{ $poli->nama }}"
+                                                 class="w-11 h-11 object-contain
+                                                        group-hover:scale-105 transition-transform duration-300">
+                                        @else
+                                            <span class="material-symbols-outlined text-[30px]
+                                                         group-hover:scale-105 transition-transform duration-300"
+                                                  style="color: {{ $warna }};">medical_services</span>
                                         @endif
-                                    @endif
-
-                                    {{-- Nama poliklinik --}}
-                                    <h3 class="text-lg font-bold text-on-surface mb-3 leading-snug group-hover:text-primary transition-colors duration-200">
-                                        {{ $poli->nama }}
-                                    </h3>
-
-                                    {{-- Deskripsi dengan expand/collapse --}}
-                                    @if($poli->deskripsi)
-                                        <div class="flex-1">
-                                            {{-- Teks pendek (default) --}}
-                                            <div x-show="!expanded"
-                                                 class="text-on-surface-variant text-sm leading-relaxed line-clamp-4">
-                                                {!! str($poli->deskripsi)->sanitizeHtml() !!}
-                                            </div>
-
-                                            {{-- Teks lengkap --}}
-                                            <div x-show="expanded"
-                                                 x-transition:enter="transition ease-out duration-200"
-                                                 x-transition:enter-start="opacity-0"
-                                                 x-transition:enter-end="opacity-100"
-                                                 class="text-on-surface-variant text-sm leading-relaxed">
-                                                {!! str($poli->deskripsi)->sanitizeHtml() !!}
-                                            </div>
-
-                                            {{-- Toggle button --}}
-                                            <button
-                                                @click="expanded = !expanded"
-                                                class="mt-3 inline-flex items-center gap-1 text-primary text-xs font-semibold
-                                                       hover:underline focus:outline-none transition-colors duration-150">
-                                                <span x-text="expanded ? 'Sembunyikan' : 'Selengkapnya'"></span>
-                                                <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
-                                                      :class="expanded ? 'rotate-180' : ''">expand_more</span>
-                                            </button>
-                                        </div>
-                                    @else
-                                        <p class="flex-1 text-on-surface-variant/50 text-sm italic">Informasi belum tersedia.</p>
-                                    @endif
-                                </div>
-
-                                {{-- Footer card --}}
-                                <div class="px-6 pb-5 pt-0">
-                                    <div class="h-px bg-outline-variant/30 mb-4"></div>
-                                    <div class="flex items-center gap-2 text-xs text-on-surface-variant/60">
-                                        <span class="material-symbols-outlined text-[14px] text-primary">schedule</span>
-                                        Lihat jadwal di halaman Jadwal Praktek
                                     </div>
+
+                                    {{-- Nama + Tombol --}}
+                                    <div class="flex flex-col gap-2 flex-1 min-w-0">
+                                        <h3 class="font-bold text-on-surface text-sm leading-snug
+                                                   group-hover:text-primary transition-colors duration-200"
+                                            style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                            {{ $poli->nama }}
+                                        </h3>
+                                        <span class="inline-flex items-center gap-1 text-xs font-semibold w-fit
+                                                     group-hover:gap-2 transition-all duration-150"
+                                              style="color: {{ $warna }};">
+                                            Lihat Detail
+                                            <span class="material-symbols-outlined text-[13px]">arrow_forward</span>
+                                        </span>
+                                    </div>
+
                                 </div>
+
                             </div>
                         @endforeach
                     </div>
@@ -199,8 +147,74 @@
             </div>
             {{-- END GRID POLIKLINIK --}}
 
+            {{-- ==================================================== --}}
+            {{-- DESKRIPSI UNIT LAYANAN — hanya jika unit > 1 --}}
+            {{-- ==================================================== --}}
+            @if($units->count() > 1 && $activeUnit && ($activeUnit->deskripsi || $activeUnit->gambar))
+                @php $warna = $activeUnit->warnaHex() ?? '#4d51b2'; @endphp
+                <div class="mt-12 rounded-2xl overflow-hidden border border-outline-variant/20 shadow-sm"
+                     data-aos="fade-up"
+                     wire:key="unit-desc-{{ $activeUnit->id }}">
+
+                    {{-- Accent bar warna unit --}}
+                    <div class="h-1 shrink-0"
+                         style="background: linear-gradient(to right, {{ $warna }}, {{ $warna }}60);"></div>
+
+                    <div class="bg-white">
+                        @if($activeUnit->gambar)
+                            {{-- Layout: gambar kiri + teks kanan --}}
+                            <div class="grid grid-cols-1 md:grid-cols-3">
+
+                                {{-- Gambar --}}
+                                <div class="relative overflow-hidden min-h-56">
+                                    <img src="{{ Storage::url($activeUnit->gambar) }}"
+                                         alt="{{ $activeUnit->nama }}"
+                                         class="w-full h-full object-cover">
+                                    <div class="absolute inset-0"
+                                         style="background: linear-gradient(to right, transparent, white 95%);"></div>
+                                </div>
+
+                                {{-- Teks --}}
+                                <div class="md:col-span-2 p-8 flex flex-col justify-center">
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <span class="w-1 h-10 rounded-full shrink-0"
+                                              style="background-color: {{ $warna }};"></span>
+                                        <h3 class="text-2xl font-bold text-on-surface">
+                                            {{ $activeUnit->nama }}
+                                        </h3>
+                                    </div>
+                                    @if($activeUnit->deskripsi)
+                                        <p class="text-sm text-on-surface-variant leading-relaxed">
+                                            {{ $activeUnit->deskripsi }}
+                                        </p>
+                                    @endif
+                                </div>
+                            </div>
+
+                        @else
+                            {{-- Layout: teks saja --}}
+                            <div class="p-8">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <span class="w-1 h-10 rounded-full shrink-0"
+                                          style="background-color: {{ $warna }};"></span>
+                                    <h3 class="text-2xl font-bold text-on-surface">
+                                        {{ $activeUnit->nama }}
+                                    </h3>
+                                </div>
+                                @if($activeUnit->deskripsi)
+                                    <p class="text-sm text-on-surface-variant leading-relaxed max-w-3xl">
+                                        {{ $activeUnit->deskripsi }}
+                                    </p>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
         @endif
 
     </div>
     {{-- END KONTEN UTAMA --}}
 </div>
+

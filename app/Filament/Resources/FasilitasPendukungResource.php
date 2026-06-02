@@ -6,11 +6,11 @@ use App\Filament\Resources\FasilitasPendukungResource\Pages;
 use App\Models\FasilitasPendukung;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
+
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class FasilitasPendukungResource extends Resource
+class FasilitasPendukungResource extends BaseRumahSakitResource
 {
     protected static ?string $model = FasilitasPendukung::class;
 
@@ -26,12 +26,7 @@ class FasilitasPendukungResource extends Resource
     {
         return $form
             ->schema([
-                // Field Select untuk rumah_sakit_id yang menampilkan nama rumah sakit
-                Forms\Components\Select::make('rumah_sakit_id')
-                    ->relationship('rumahSakit', 'nama')
-                    ->required()
-                    ->searchable()
-                    ->preload(),
+                static::rsFormField(),
                 
                 // Text input maksimal 255 karakter
                 Forms\Components\TextInput::make('nama')
@@ -59,11 +54,7 @@ class FasilitasPendukungResource extends Resource
     {
         return $table
             ->columns([
-                // Menampilkan nama rumah sakit dari relasi
-                Tables\Columns\TextColumn::make('rumahSakit.nama')
-                    ->label('Rumah Sakit')
-                    ->sortable()
-                    ->searchable(),
+                static::rsTableColumn(),
                 
                 Tables\Columns\TextColumn::make('nama')
                     ->searchable()
@@ -83,12 +74,20 @@ class FasilitasPendukungResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('rumah_sakit_id')
-                    ->relationship('rumahSakit', 'nama')
-                    ->label('Filter Rumah Sakit'),
+                static::rsTableFilter(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                ->mutateFormDataUsing(function (array $data): array {
+
+                        if (! static::isSuperAdmin()) {
+
+                            $data['rumah_sakit_id'] = static::rumahSakitId();
+
+                        }
+
+                        return $data;
+                    }),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([

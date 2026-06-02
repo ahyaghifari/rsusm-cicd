@@ -17,7 +17,7 @@
     @else
 
         <div class="text-xs text-gray-500">
-            ADMIN - {{ $user->name}}
+            {{ str($user->roles->first()?->name)->replace('_', ' ')->title() }} - {{ $user->name}}
         </div>
 
         <div class="font-bold">

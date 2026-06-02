@@ -2,6 +2,9 @@
 
 namespace App\Livewire\Dokter;
 
+use Artesaos\SEOTools\Facades\OpenGraph;
+use Artesaos\SEOTools\Facades\SEOMeta;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Dokter;
@@ -12,9 +15,11 @@ class Find extends Component
 {
     use WithPagination;
 
-    public $search = '';
-    public $spesialis = '';
-    public ?RumahSakit $rumah_sakit = null;
+    public string $search    = '';
+    public string $spesialis = '';
+
+    #[Locked]
+    public int $rumah_sakit_id;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -23,7 +28,18 @@ class Find extends Component
 
     public function mount()
     {
-        $this->rumah_sakit = current_rumahsakit();
+        // 2. Ambil ID-nya saja saat pertama kali dimuat
+        $rs = current_rumahsakit();
+        $this->rumah_sakit_id = $rs->id;
+
+        $desc      = 'Temukan dokter spesialis terpercaya di ' . $rs->nama . '.';
+        $fullTitle = 'Dokter Kami - ' . $rs->nama;
+        SEOMeta::setTitle($fullTitle);
+        SEOMeta::setDescription($desc);
+        OpenGraph::setTitle($fullTitle);
+        OpenGraph::setDescription($desc);
+        OpenGraph::setUrl(request()->url());
+        OpenGraph::addProperty('site_name', $rs->nama);
     }
 
     public function updatingSearch()
@@ -38,9 +54,11 @@ class Find extends Component
 
     public function render()
     {
+        // 3. Ambil data Rumah Sakit di dalam render() agar tidak ikut bolak-balik di-hydrate oleh Livewire
+        $rumah_sakit = RumahSakit::find($this->rumah_sakit_id);
 
         $dokter = Dokter::query()
-            ->where('rumah_sakit_id', $this->rumah_sakit->id)
+            ->where('rumah_sakit_id', $this->rumah_sakit_id) // Gunakan ID langsung
 
             // cari nama dokter
             ->when($this->search, function ($query) {
@@ -55,12 +73,14 @@ class Find extends Component
             ->with('spesialis')
             ->paginate(10);
 
-        $data_spesialis = Spesialis::where('rumah_sakit_id', $this->rumah_sakit->id)->whereHas('dokter')->get();
+        $data_spesialis = Spesialis::where('rumah_sakit_id', $this->rumah_sakit_id) // Gunakan ID langsung
+            ->whereHas('dokter')
+            ->get();
 
         return view('rumah_sakit.dokter.find', [
             'dokter' => $dokter,
             'data_spesialis' => $data_spesialis,
-            'rumahsakit' => $this->rumah_sakit
+            'rumahsakit' => $rumah_sakit,
         ]);
     }
 }

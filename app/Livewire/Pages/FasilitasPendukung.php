@@ -2,21 +2,22 @@
 
 namespace App\Livewire\Pages;
 
+use App\Livewire\RsPortalComponent;
 use App\Models\FasilitasPendukung as ModelsFasilitasPendukung;
-use App\Models\RumahSakit;
-use Livewire\Component;
 
-class FasilitasPendukung extends Component
+class FasilitasPendukung extends RsPortalComponent
 {
-    public RumahSakit $rs;
-
-    public function mount(){
-        $this->rs = current_rumahsakit();
+    public function mount(): void
+    {
+        $this->seo('Fasilitas Pendukung', 'Fasilitas pendukung lengkap di ' . $this->rs->nama . '.');
     }
 
     public function render()
     {
-        $fasilitas = ModelsFasilitasPendukung::where('rumah_sakit_id', $this->rs->id)->get();
+        $fasilitas = ModelsFasilitasPendukung::where('rumah_sakit_id', $this->rs->id)
+            ->where('aktif', true)
+            ->get();
+
         return view('rumah_sakit.pages.fasilitas-pendukung', ['fasilitas' => $fasilitas]);
     }
 }

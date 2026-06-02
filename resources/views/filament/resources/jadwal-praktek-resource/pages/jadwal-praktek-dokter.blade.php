@@ -25,7 +25,7 @@
                         <div class="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
                             <table class="w-full text-left border-collapse">
                                 <thead>
-                                    <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                                    <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                                         <th class="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-200 w-1/4">Hari</th>
                                         <th class="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-200">Jam Praktek</th>
                                         <th class="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-200 w-1/4">Sesuai Perjanjian</th>
@@ -45,7 +45,11 @@
                                                     </span>
                                                     <span class="mx-2 text-gray-400">-</span>
                                                     <span class="font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                                                        @if($item['waktu_selesai'] == null)
+                                                        Selesai
+                                                        @else
                                                         {{ \Carbon\Carbon::parse($item['waktu_selesai'])->format('H:i') }}
+                                                        @endif
                                                     </span>
                                                 
                                             </td>
