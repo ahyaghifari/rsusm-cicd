@@ -61,16 +61,25 @@ class GlobalSearch extends Component
 
         $q = trim($this->query);
 
+        $isMySQL = \Illuminate\Support\Facades\DB::getDriverName() === 'mysql';
+
         if (mb_strlen($q) >= 2) {
             $bq   = $this->toBooleanQuery($q);
             $rsId = $this->rs->id;
 
-            // Dokter — FULLTEXT pada nama, ATAU cocok via spesialis
-            $results['dokter'] = Dokter::where(function ($query) use ($bq) {
-                    $query->whereFullText('nama', $bq, ['mode' => 'boolean'])
-                          ->orWhereHas('spesialis', fn ($s) =>
-                              $s->whereFullText('nama', $bq, ['mode' => 'boolean'])
-                          );
+            $like = '%' . $q . '%';
+
+            // Dokter
+            $results['dokter'] = Dokter::where(function ($query) use ($bq, $like, $isMySQL) {
+                    if ($isMySQL) {
+                        $query->whereFullText('nama', $bq, ['mode' => 'boolean'])
+                              ->orWhereHas('spesialis', fn ($s) =>
+                                  $s->whereFullText('nama', $bq, ['mode' => 'boolean'])
+                              );
+                    } else {
+                        $query->where('nama', 'like', $like)
+                              ->orWhereHas('spesialis', fn ($s) => $s->where('nama', 'like', $like));
+                    }
                 })
                 ->where('rumah_sakit_id', $rsId)
                 ->where('aktif', true)
@@ -79,7 +88,10 @@ class GlobalSearch extends Component
                 ->get(['id', 'nama', 'slug', 'foto', 'spesialis_id']);
 
             // Poliklinik
-            $results['poliklinik'] = PoliKlinik::whereFullText(['nama', 'deskripsi'], $bq, ['mode' => 'boolean'])
+            $results['poliklinik'] = PoliKlinik::when($isMySQL,
+                    fn ($q2) => $q2->whereFullText(['nama', 'deskripsi'], $bq, ['mode' => 'boolean']),
+                    fn ($q2) => $q2->where('nama', 'like', $like)
+                )
                 ->where('aktif', true)
                 ->whereHas('unitLayanan', fn ($u) => $u->where('rumah_sakit_id', $rsId)->where('aktif', true))
                 ->with('unitLayanan')
@@ -87,21 +99,36 @@ class GlobalSearch extends Component
                 ->get(['id', 'nama', 'slug', 'gambar', 'unit_layanan_id']);
 
             // Promo
-            $results['promo'] = Promo::whereFullText(['judul', 'deskripsi'], $bq, ['mode' => 'boolean'])
+            $results['promo'] = Promo::when($isMySQL,
+                    fn ($q2) => $q2->whereFullText(['judul', 'deskripsi'], $bq, ['mode' => 'boolean']),
+                    fn ($q2) => $q2->where('judul', 'like', $like)
+                )
                 ->where('rumah_sakit_id', $rsId)
                 ->aktif()
                 ->limit(5)
                 ->get(['id', 'judul', 'slug', 'gambar']);
 
             // FAQ
-            $results['faq'] = Faq::whereFullText(['judul', 'deskripsi'], $bq, ['mode' => 'boolean'])
+            $results['faq'] = Faq::when($isMySQL,
+                    fn ($q2) => $q2->whereFullText(['judul', 'deskripsi', 'kata_kunci'], $bq, ['mode' => 'boolean']),
+                    fn ($q2) => $q2->where(fn ($q3) => $q3
+                        ->where('judul', 'like', $like)
+                        ->orWhere('kata_kunci', 'like', $like)
+                    )
+                )
                 ->where('rumah_sakit_id', $rsId)
                 ->aktif()
                 ->limit(5)
                 ->get(['id', 'judul']);
 
             // Halaman statis
-            $results['halaman'] = Halaman::whereFullText('judul', $bq, ['mode' => 'boolean'])
+            $results['halaman'] = Halaman::when($isMySQL,
+                    fn ($q2) => $q2->whereFullText(['judul', 'kata_kunci'], $bq, ['mode' => 'boolean']),
+                    fn ($q2) => $q2->where(fn ($q3) => $q3
+                        ->where('judul', 'like', $like)
+                        ->orWhere('kata_kunci', 'like', $like)
+                    )
+                )
                 ->where('rumah_sakit_id', $rsId)
                 ->where('aktif', true)
                 ->limit(5)

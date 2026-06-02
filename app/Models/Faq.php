@@ -13,6 +13,7 @@ class Faq extends Model
         'rumah_sakit_id',
         'judul',
         'deskripsi',
+        'kata_kunci',
         'sort_order',
         'aktif',
     ];

@@ -47,6 +47,14 @@ class FaqResource extends BaseRumahSakitResource
                     ->required()
                     ->columnSpanFull(),
 
+                TextInput::make('kata_kunci')
+                    ->label('Kata Kunci')
+                    ->nullable()
+                    ->maxLength(500)
+                    ->columnSpanFull()
+                    ->placeholder('Contoh: BPJS, asuransi, biaya, pembayaran, tagihan')
+                    ->helperText('Kata kunci tambahan untuk pencarian, dipisah koma.'),
+
                 Toggle::make('aktif')
                     ->default(true),
             ]);
