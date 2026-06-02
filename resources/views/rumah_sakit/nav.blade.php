@@ -154,7 +154,7 @@
                             <a wire:navigate class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200"
                                 href="{{ rumahsakit_route('rumahsakit.dokter_kami') }}">Cari Dokter</a>
                             <a wire:navigate class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200"
-                                href="{{ rumahsakit_route('rumahsakit.jadwal_praktek') }}">Jadwal Praktek</a>
+                                href="{{ rumahsakit_route('rumahsakit.jadwal_praktek') }}">Jadwal Praktes</a>
                         </div>
                     </div>
                 </div>
