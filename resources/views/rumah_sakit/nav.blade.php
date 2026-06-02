@@ -76,7 +76,7 @@
 
                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.home') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">home</span>
-                    <span class="{{ $gridLabelClass }}">Beranda</span>
+                    <span class="{{ $gridLabelClass }}">Berandas</span>
                 </a>
                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.dokter_kami') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">stethoscope</span>
