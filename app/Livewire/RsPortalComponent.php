@@ -6,10 +6,12 @@ use App\Models\RumahSakit;
 use Artesaos\SEOTools\Facades\JsonLd;
 use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\SEOMeta;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 abstract class RsPortalComponent extends Component
 {
+    #[Locked]
     public ?RumahSakit $rs = null;
 
     // Diisi oleh mount() tiap halaman agar booted() bisa build full title dengan benar

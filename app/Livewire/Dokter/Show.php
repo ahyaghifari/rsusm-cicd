@@ -8,9 +8,11 @@ use App\Models\JadwalPraktek;
 use App\Models\UnitLayanan;
 use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\SEOMeta;
+use Livewire\Attributes\Locked;
 
 class Show extends RsPortalComponent
 {
+    #[Locked]
     public Dokter $dokter;
 
     public function mount(Dokter $dokter): void

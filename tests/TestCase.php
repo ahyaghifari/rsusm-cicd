@@ -9,6 +9,14 @@ use Spatie\Permission\PermissionRegistrar;
 
 abstract class TestCase extends BaseTestCase
 {
+    /** URL prefix admin panel sesuai ADMIN_PATH env. */
+    protected function adminUrl(string $path = ''): string
+    {
+        $base = '/' . env('ADMIN_PATH', 'manage');
+        return $path ? $base . '/' . ltrim($path, '/') : $base;
+    }
+
+
     protected function setUp(): void
     {
         parent::setUp();

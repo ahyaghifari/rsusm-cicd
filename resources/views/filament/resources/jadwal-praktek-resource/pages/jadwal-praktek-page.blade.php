@@ -230,13 +230,20 @@
         ================================================================= --}}
         @elseif($viewMode === 'per_dokter')
 
+            {{-- Dokter selector — di sini agar ganti dokter = ganti di konten, bukan filter --}}
+            <x-filament::section>
+                <div class="py-1">
+                    {{ $this->dokterForm }}
+                </div>
+            </x-filament::section>
+
             @if(! $selectedDokterId)
                 <x-filament::section>
                     <div class="py-12 text-center flex flex-col items-center gap-3 text-gray-400">
                         <svg class="w-10 h-10 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
                         </svg>
-                        <p class="text-sm">Pilih <strong>Dokter</strong> di atas untuk melihat dan mengatur jadwalnya.</p>
+                        <p class="text-sm">Pilih <strong>Dokter</strong> untuk melihat dan mengatur jadwalnya.</p>
                     </div>
                 </x-filament::section>
             @else

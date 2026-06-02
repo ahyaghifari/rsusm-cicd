@@ -34,12 +34,13 @@ class PortalController extends Controller
 
     public function spesialis(Request $request)
     {
-        $rsSlug = $request->input('rs');
+        $validated = $request->validate([
+            'rs' => ['required', 'string', 'max:100', 'alpha_dash'],
+        ]);
 
-        $daftarSpesialis = Spesialis::whereHas('rumahsakit', function($q) use ($rsSlug) {
-            $q->where('slug', $rsSlug);
-        })->whereHas('dokter')->get();
-        
+        $daftarSpesialis = Spesialis::whereHas('rumahsakit', function ($q) use ($validated) {
+            $q->where('slug', $validated['rs'])->where('aktif', true);
+        })->whereHas('dokter')->get(['id', 'nama']);
 
         return response()->json($daftarSpesialis);
     }

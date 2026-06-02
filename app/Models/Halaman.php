@@ -13,6 +13,7 @@ class Halaman extends Model
         'slug',
         'judul',
         'konten',
+        'kata_kunci',
         'aktif',
     ];
 

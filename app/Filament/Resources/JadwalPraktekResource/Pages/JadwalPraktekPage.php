@@ -60,14 +60,12 @@ class JadwalPraktekPage extends Page
 
     protected function getForms(): array
     {
-        return ['filterForm'];
+        return ['filterForm', 'dokterForm'];
     }
 
     public function filterForm(Form $form): Form
     {
-        $rsSet      = (bool) $this->getActiveRumahSakitId();
-        $multiUnit  = $rsSet && count($this->getUnitLayananOptions()) > 1;
-        $perDokter  = $this->viewMode === 'per_dokter';
+        $rsSet = (bool) $this->getActiveRumahSakitId();
 
         return $form
             ->schema([
@@ -79,16 +77,7 @@ class JadwalPraktekPage extends Page
                     ->required(fn () => JadwalPraktekResource::isSuperAdmin())
                     ->visible(fn () => JadwalPraktekResource::isSuperAdmin())
                     ->live()
-                    ->columnSpan($multiUnit ? 1 : 2),
-
-                // ── Unit Layanan (jika > 1) ────────────────────────────────
-                Forms\Components\Select::make('selectedUnitLayananId')
-                    ->label('Unit Layanan')
-                    ->placeholder('— Pilih Unit Layanan —')
-                    ->options(fn () => $this->getUnitLayananOptions())
-                    ->required(fn () => count($this->getUnitLayananOptions()) > 1)
-                    ->visible(fn () => count($this->getUnitLayananOptions()) > 1)
-                    ->live(),
+                    ->columnSpanFull(),
 
                 // ── Mode View ──────────────────────────────────────────────
                 Forms\Components\ToggleButtons::make('viewMode')
@@ -106,19 +95,35 @@ class JadwalPraktekPage extends Page
                     ->visible(fn () => $rsSet)
                     ->columnSpanFull(),
 
-                // ── Pilih Dokter (per_dokter mode) ─────────────────────────
+                // ── Unit Layanan (jika > 1, muncul setelah mode dipilih) ───
+                Forms\Components\Select::make('selectedUnitLayananId')
+                    ->label('Unit Layanan')
+                    ->placeholder('— Pilih Unit Layanan —')
+                    ->options(fn () => $this->getUnitLayananOptions())
+                    ->required(fn () => count($this->getUnitLayananOptions()) > 1)
+                    ->visible(fn () => $rsSet && count($this->getUnitLayananOptions()) > 1)
+                    ->live()
+                    ->columnSpanFull(),
+            ])
+            ->statePath('')
+            ->columns(2);
+    }
+
+    // Dokter selector ditaruh terpisah agar bisa dirender di area konten
+    public function dokterForm(Form $form): Form
+    {
+        return $form
+            ->schema([
                 Forms\Components\Select::make('selectedDokterId')
-                    ->label('Dokter')
+                    ->label('Pilih Dokter')
                     ->placeholder('— Cari & pilih dokter —')
                     ->options(fn () => $this->getDokterOptions())
                     ->searchable()
                     ->preload()
                     ->live()
-                    ->visible(fn () => (bool) $this->getActiveRumahSakitId() && $this->viewMode === 'per_dokter')
                     ->columnSpanFull(),
             ])
-            ->statePath('')
-            ->columns(2);
+            ->statePath('');
     }
 
     // =========================================================================
@@ -403,7 +408,7 @@ class JadwalPraktekPage extends Page
                     'nama_dokter'       => $row['nama_dokter'] ?: null,
                     'waktu_mulai'       => $row['waktu_mulai'] ?: null,
                     'waktu_selesai'     => $row['waktu_selesai'] ?: null,
-                    'sesuai_perjanjian' => ($row['sesuai_perjanjian'] ?? '0') === '1',
+                    'sesuai_perjanjian' => (bool) ($row['sesuai_perjanjian'] ?? false),
                     'catatan'           => $row['catatan'] ?: null,
                 ]);
             }
@@ -458,7 +463,7 @@ class JadwalPraktekPage extends Page
                     'nama_dokter'       => $dokter->nama,
                     'waktu_mulai'       => $row['waktu_mulai'] ?: null,
                     'waktu_selesai'     => $row['waktu_selesai'] ?: null,
-                    'sesuai_perjanjian' => ($row['sesuai_perjanjian'] ?? '0') === '1',
+                    'sesuai_perjanjian' => (bool) ($row['sesuai_perjanjian'] ?? false),
                     'catatan'           => $row['catatan'] ?: null,
                 ]);
             }

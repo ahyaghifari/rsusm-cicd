@@ -4,11 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PortalController;
 use App\Http\Middleware\RumahSakitMiddleware;
 
-Route::get('/', [PortalController::class, 'index'])->name('home');
-Route::get('/cari-spesialis', [PortalController::class, 'spesialis'])->name('cari_spesialis');
+Route::get('/', [PortalController::class, 'index'])->middleware('throttle:portal')->name('home');
+Route::get('/cari-spesialis', [PortalController::class, 'spesialis'])->middleware('throttle:public-api')->name('cari_spesialis');
 
 Route::prefix('{rumahsakit}')
-    ->middleware(RumahSakitMiddleware::class)
+    ->middleware([RumahSakitMiddleware::class, 'throttle:portal'])
     ->group(function () {
 
         Route::get('/', App\Livewire\RumahSakit\Index::class)->name('rumahsakit.home');
@@ -16,7 +16,7 @@ Route::prefix('{rumahsakit}')
         Route::get('dokter-kami', App\Livewire\Dokter\Find::class)->name('rumahsakit.dokter_kami');
         Route::get('dokter-kami/{dokter}', App\Livewire\Dokter\Show::class)->name('rumahsakit.dokter_show');
         Route::get('jadwal-praktek', App\Livewire\Pages\JadwalPraktek::class)->name('rumahsakit.jadwal_praktek');
-Route::get('rawat-jalan', App\Livewire\Pages\RawatJalan::class)->name('rumahsakit.rawat_jalan');
+        Route::get('rawat-jalan', App\Livewire\Pages\RawatJalan::class)->name('rumahsakit.rawat_jalan');
         Route::get('rawat-jalan/{poliklinik}', App\Livewire\Pages\PoliKlinikDetail::class)->name('rumahsakit.rawat_jalan_show');
         Route::get('rawat-inap', App\Livewire\Pages\RawatInap::class)->name('rumahsakit.rawat_inap');
         Route::get('unggulan', App\Livewire\Pages\LayananUnggulan::class)->name('rumahsakit.unggulan');

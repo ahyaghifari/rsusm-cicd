@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {!! SEO::generate() !!}
+    <link rel="icon" href="/img/favicon.png" sizes="192x192">
 
     @livewireStyles
     <!-- Fonts -->
@@ -44,12 +45,15 @@
     <!-- Copyright component -->
     @include('rumah_sakit.copyright')
 
+    <!-- Global Search Modal -->
+    <livewire:global-search />
+
     <!-- Promo FAB — floating mandiri -->
     @include('rumah_sakit.partials.promo-fab')
     @include('rumah_sakit.partials.promo-popup')
 
     <!-- Chatbot Floating Button -->
-    {{-- @include('rumah_sakit.chatbot.floating') --}}
+    @include('rumah_sakit.chatbot.floating')
 
     @livewireScripts
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2/dist/js/tom-select.complete.min.js"></script>

@@ -3,25 +3,36 @@
         <div class="sm:order-3 flex items-center gap-x-2">
             {{-- Hamburger — mobile only, ditaruh paling kiri agar Promo & Daftar di sebelah kanannya --}}
             <button type="button"
-                class="sm:hidden hs-collapse-toggle relative size-9 flex justify-center items-center gap-x-2 rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none"
+                class="sm:hidden hs-collapse-toggle relative size-11 flex justify-center items-center gap-x-2 rounded-xl bg-white/15 border border-white/25 text-white shadow-sm hover:bg-white/25 active:bg-white/30 focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none transition-colors"
                 id="hs-navbar-alignment-collapse" aria-expanded="false" aria-controls="hs-navbar-alignment"
                 aria-label="Toggle navigation" data-hs-collapse="#hs-navbar-alignment">
-                <svg class="hs-collapse-open:hidden shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
-                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                <svg class="hs-collapse-open:hidden shrink-0 size-6" xmlns="http://www.w3.org/2000/svg" width="24"
+                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     stroke-linecap="round" stroke-linejoin="round">
                     <line x1="3" x2="21" y1="6" y2="6" />
                     <line x1="3" x2="21" y1="12" y2="12" />
                     <line x1="3" x2="21" y1="18" y2="18" />
                 </svg>
-                <svg class="hs-collapse-open:block hidden shrink-0 size-4" xmlns="http://www.w3.org/2000/svg"
+                <svg class="hs-collapse-open:block hidden shrink-0 size-6" xmlns="http://www.w3.org/2000/svg"
                     width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M18 6 6 18" />
                     <path d="m6 6 12 12" />
                 </svg>
                 <span class="sr-only">Toggle</span>
             </button>
-            {{-- Link Promo — selalu tampil kecuali di halaman beranda --}}
+            {{-- Pendaftaran Online — selalu tampil, tidak ikut collapse --}}
+            @if($currentRumahSakit->link_pendaftaran_online != NULL)
+            <a href="{{ $currentRumahSakit->link_pendaftaran_online }}" target="_blank"
+               class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold
+                      bg-white/15 text-white hover:bg-white/25 border border-white/25
+                      transition-colors duration-150 shadow-sm">
+                <span class="material-symbols-outlined text-[14px]">assignment</span>
+                <span class="hidden sm:inline">Pendaftaran Online</span>
+                <span class="sm:hidden">Pendaftaran Online</span>
+            </a>
+            @endif
+            {{-- Link Promo — selalu tampil --}}
             <a wire:navigate
                href="{{ rumahsakit_route('rumahsakit.promo') }}"
                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold
@@ -35,32 +46,32 @@
                     </span>
                 @endif
             </a>
-            {{-- Pendaftaran Online — selalu tampil, tidak ikut collapse --}}
-            @if($currentRumahSakit->link_pendaftaran_online != NULL)
-            <a href="{{ $currentRumahSakit->link_pendaftaran_online }}" target="_blank"
-               class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold
-                      bg-white/15 text-white hover:bg-white/25 border border-white/25
-                      transition-colors duration-150 shadow-sm">
-                <span class="material-symbols-outlined text-[14px]">assignment</span>
-                <span class="hidden sm:inline">Pendaftaran Online</span>
-                <span class="sm:hidden">Pendaftaran Online</span>
-            </a>
-            @endif
             <button type="button"
+                onclick="Livewire.dispatch('open-search')"
+                title="Cari (Ctrl+K)"
                 class="p-2 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg text-layer-foreground shadow-2xs hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none">
                 <span class="material-symbols-outlined text-[16px]">search</span>
             </button>
+
+            <script>
+                document.addEventListener('keydown', function (e) {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                        e.preventDefault();
+                        Livewire.dispatch('open-search');
+                    }
+                });
+            </script>
         </div>
         <div id="hs-navbar-alignment"
             class="hs-collapse hidden overflow-hidden transition-all duration-300 basis-full grow sm:grow-0 sm:basis-auto sm:block sm:order-2"
             aria-labelledby="hs-navbar-alignment-collapse" role="region">
 
             {{-- ===== MOBILE: flat grid (tersembunyi di sm ke atas) ===== --}}
-            <div class="sm:hidden grid grid-cols-3 gap-1.5 py-3 px-1">
+            <div class="sm:hidden grid grid-cols-3 gap-2 py-4 px-2">
                 @php
-                    $gridItemClass = 'flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl text-white/90 hover:bg-white/15 active:bg-white/20 transition-colors text-center';
-                    $gridIconClass = 'material-symbols-outlined text-[20px]';
-                    $gridLabelClass = 'text-[10px] font-medium leading-tight';
+                    $gridItemClass = 'flex flex-col items-center gap-1.5 py-3.5 px-2 rounded-2xl text-white/90 hover:bg-white/15 active:bg-white/20 transition-colors text-center';
+                    $gridIconClass = 'material-symbols-outlined text-[26px]';
+                    $gridLabelClass = 'text-[11px] font-semibold leading-tight';
                 @endphp
 
                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.home') }}" class="{{ $gridItemClass }}">

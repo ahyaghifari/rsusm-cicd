@@ -49,6 +49,14 @@ class HalamanResource extends BaseRumahSakitResource
                     ->nullable()
                     ->columnSpanFull()
                     ->helperText('Gunakan Heading untuk judul, List untuk poin-poin seperti visi & misi.'),
+
+                Forms\Components\TextInput::make('kata_kunci')
+                    ->label('Kata Kunci')
+                    ->nullable()
+                    ->maxLength(500)
+                    ->columnSpanFull()
+                    ->placeholder('Contoh: visi, misi, sejarah, profil, tentang kami')
+                    ->helperText('Kata kunci tambahan untuk pencarian, dipisah koma.'),
             ]);
     }
 

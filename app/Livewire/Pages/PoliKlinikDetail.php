@@ -6,9 +6,11 @@ use App\Livewire\RsPortalComponent;
 use App\Models\JadwalPraktek;
 use App\Models\PoliKlinik;
 use Artesaos\SEOTools\Facades\OpenGraph;
+use Livewire\Attributes\Locked;
 
 class PoliKlinikDetail extends RsPortalComponent
 {
+    #[Locked]
     public PoliKlinik $poliklinik;
 
     public function mount(PoliKlinik $poliklinik): void

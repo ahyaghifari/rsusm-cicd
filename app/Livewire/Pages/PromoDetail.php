@@ -5,9 +5,11 @@ namespace App\Livewire\Pages;
 use App\Livewire\RsPortalComponent;
 use App\Models\Promo as PromoModel;
 use Artesaos\SEOTools\Facades\OpenGraph;
+use Livewire\Attributes\Locked;
 
 class PromoDetail extends RsPortalComponent
 {
+    #[Locked]
     public PromoModel $promo;
 
     public function mount(PromoModel $promo): void

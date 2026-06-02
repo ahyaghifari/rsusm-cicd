@@ -4,6 +4,7 @@ namespace App\Livewire\Dokter;
 
 use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\SEOMeta;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Dokter;
@@ -16,9 +17,9 @@ class Find extends Component
 
     public string $search    = '';
     public string $spesialis = '';
-    
-    // 1. UBAH INI: Cukup simpan ID-nya saja (integer/string), jangan simpan utuh satu objek Model
-    public int $rumah_sakit_id; 
+
+    #[Locked]
+    public int $rumah_sakit_id;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -70,6 +71,7 @@ class Find extends Component
             })
 
             ->with('spesialis')
+            ->orderBy('nama')
             ->paginate(10);
 
         $data_spesialis = Spesialis::where('rumah_sakit_id', $this->rumah_sakit_id) // Gunakan ID langsung

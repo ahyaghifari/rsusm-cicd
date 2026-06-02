@@ -19,13 +19,13 @@ class UserResourceTest extends TestCase
 
     public function test_unauthenticated_redirects(): void
     {
-        $this->get('/admin/users')->assertRedirect('/admin/login');
+        $this->get($this->adminUrl('users'))->assertRedirect($this->adminUrl('login'));
     }
 
     public function test_super_admin_can_list_users(): void
     {
         $this->actingAs($this->superAdmin())
-            ->get('/admin/users')
+            ->get($this->adminUrl('users'))
             ->assertOk();
     }
 
@@ -72,7 +72,7 @@ class UserResourceTest extends TestCase
     public function test_super_admin_can_access_create_user_page(): void
     {
         $this->actingAs($this->superAdmin())
-            ->get('/admin/users/create')
+            ->get($this->adminUrl('users/create'))
             ->assertOk();
     }
 

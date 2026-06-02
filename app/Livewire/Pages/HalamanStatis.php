@@ -5,9 +5,11 @@ namespace App\Livewire\Pages;
 use App\Livewire\RsPortalComponent;
 use App\Models\Halaman;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Locked;
 
 class HalamanStatis extends RsPortalComponent
 {
+    #[Locked]
     public ?Halaman $halaman = null;
 
     public function mount(string $slug): void

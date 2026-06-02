@@ -11,10 +11,12 @@ use App\Models\Promo;
 use App\Models\RumahSakit;
 use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\SEOMeta;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class Index extends Component
 {
+    #[Locked]
     public RumahSakit $rs;
 
     public function mount(): void
