@@ -28,6 +28,12 @@ class GlobalSearch extends Component
         if ($this->rs === null) {
             $this->rs = current_rumahsakit();
         }
+
+        // Re-bind ke container agar rumahsakit_route() bekerja pada Livewire AJAX request
+        // (RumahSakitMiddleware tidak jalan di /livewire/update)
+        if ($this->rs) {
+            app()->instance('currentRumahSakit', $this->rs);
+        }
     }
 
     #[On('open-search')]
@@ -108,6 +114,7 @@ class GlobalSearch extends Component
             'results'    => $results,
             'hasResults' => $hasResults,
             'searched'   => mb_strlen($q) >= 2,
+            'rsSlug'     => $this->rs?->slug ?? '',
         ]);
     }
 
