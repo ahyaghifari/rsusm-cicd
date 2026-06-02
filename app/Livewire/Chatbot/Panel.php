@@ -96,7 +96,7 @@ class Panel extends Component
     }
 
     private function sendToAi($text){
-        $response = Http::post("https://n8n.syifaglobalgroup.com/webhook/beb22058-f89c-4b21-9a8e-683583b10d5d", [
+        $response = Http::timeout(60)->post("https://n8n.syifaglobalgroup.com/webhook-test/beb22058-f89c-4b21-9a8e-683583b10d5d", [
             'chatInput' => $text,
             'branch'    => $this->activeBranch->slug,
             'sessionKey' => Str::random(10)
