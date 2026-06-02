@@ -76,7 +76,7 @@
 
                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.home') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">home</span>
-                    <span class="{{ $gridLabelClass }}">Berandas</span>
+                    <span class="{{ $gridLabelClass }}">Beranda</span>
                 </a>
                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.dokter_kami') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">stethoscope</span>
@@ -84,7 +84,7 @@
                 </a>
                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.jadwal_praktek') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">calendar_month</span>
-                    <span class="{{ $gridLabelClass }}">Jadwal Praktesk</span>
+                    <span class="{{ $gridLabelClass }}">Jadwal Praktek</span>
                 </a>
 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.rawat_jalan') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">local_hospital</span>
