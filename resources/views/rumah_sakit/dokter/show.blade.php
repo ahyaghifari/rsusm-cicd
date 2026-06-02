@@ -9,7 +9,7 @@
             <div class="flex justify-center md:block">
                 @if($dokter->foto)
                     <img src="{{ Storage::url($dokter->foto) }}" alt="{{ $dokter->nama }}"
-                         class="w-48 md:w-full max-h-80 md:max-h-96 object-contain rounded-2xl">
+                         class="w-48 md:w-full max-h-80 object-contain rounded-2xl">
                 @else
                     <div class="w-48 md:w-full max-h-80 md:max-h-96 bg-primary/10 rounded-2xl
                                 flex items-center justify-center aspect-square">
@@ -132,6 +132,8 @@
             @endif
 
         @endif
+
+        @include('rumah_sakit.partials._jadwal-disclaimer')
 
         {{-- ============================================================ --}}
         {{-- Pendidikan & Pelatihan --}}

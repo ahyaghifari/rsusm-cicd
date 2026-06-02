@@ -240,6 +240,8 @@
             @endif
         @endif
 
+        @include('rumah_sakit.partials._jadwal-disclaimer')
+
     </div>
 </div>
 

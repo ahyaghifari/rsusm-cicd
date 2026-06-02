@@ -29,6 +29,7 @@ class KontakResource extends BaseRumahSakitResource
 
                 Forms\Components\Select::make('kategori')
                     ->options([
+                        'PENDAFTARAN' => 'Pendaftaran (tampil di halaman jadwal)',
                         'OPERASIONAL' => 'Operasional',
                         'SOSIAL MEDIA' => 'Sosial Media',
                     ])
@@ -71,6 +72,7 @@ class KontakResource extends BaseRumahSakitResource
                 Tables\Columns\TextColumn::make('kategori')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
+                        'PENDAFTARAN' => 'warning',
                         'OPERASIONAL' => 'success',
                         'SOSIAL MEDIA' => 'info',
                         default => 'gray',
@@ -101,6 +103,7 @@ class KontakResource extends BaseRumahSakitResource
 
                 Tables\Filters\SelectFilter::make('kategori')
                     ->options([
+                        'PENDAFTARAN' => 'Pendaftaran',
                         'OPERASIONAL' => 'Operasional',
                         'SOSIAL MEDIA' => 'Sosial Media',
                     ])
