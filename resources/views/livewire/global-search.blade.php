@@ -61,10 +61,9 @@
                             <p class="px-4 pt-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Dokter</p>
                             @foreach($results['dokter'] as $dokter)
                                 <a wire:navigate
-                                   href="{{ rumahsakit_route('rumahsakit.dokter_show', ['dokter' => $dokter->slug]) }}"
+                                   href="{{ route('rumahsakit.dokter_show', ['rumahsakit' => $rsSlug, 'dokter' => $dokter->slug]) }}"
                                    wire:click="close"
                                    class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-variant transition-colors">
-                                    {{-- Avatar --}}
                                     <div class="shrink-0 w-9 h-9 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center">
                                         @if($dokter->foto)
                                             <img src="{{ asset('storage/' . $dokter->foto) }}"
@@ -90,7 +89,7 @@
                             <p class="px-4 pt-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Poliklinik</p>
                             @foreach($results['poliklinik'] as $poli)
                                 <a wire:navigate
-                                   href="{{ rumahsakit_route('rumahsakit.rawat_jalan_show', ['poliklinik' => $poli->slug]) }}"
+                                   href="{{ route('rumahsakit.rawat_jalan_show', ['rumahsakit' => $rsSlug, 'poliklinik' => $poli->slug]) }}"
                                    wire:click="close"
                                    class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-variant transition-colors">
                                     <div class="shrink-0 w-9 h-9 rounded-full overflow-hidden bg-secondary/10 flex items-center justify-center">
@@ -118,7 +117,7 @@
                             <p class="px-4 pt-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Promo</p>
                             @foreach($results['promo'] as $promo)
                                 <a wire:navigate
-                                   href="{{ rumahsakit_route('rumahsakit.promo_detail', ['promo' => $promo->slug]) }}"
+                                   href="{{ route('rumahsakit.promo_detail', ['rumahsakit' => $rsSlug, 'promo' => $promo->slug]) }}"
                                    wire:click="close"
                                    class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-variant transition-colors">
                                     <div class="shrink-0 w-9 h-9 rounded-full bg-yellow-100 flex items-center justify-center">
@@ -135,7 +134,7 @@
                             <p class="px-4 pt-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">FAQ</p>
                             @foreach($results['faq'] as $faq)
                                 <a wire:navigate
-                                   href="{{ rumahsakit_route('rumahsakit.faq') }}"
+                                   href="{{ route('rumahsakit.faq', ['rumahsakit' => $rsSlug]) }}"
                                    wire:click="close"
                                    class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-variant transition-colors">
                                     <div class="shrink-0 w-9 h-9 rounded-full bg-tertiary/10 flex items-center justify-center">
@@ -152,7 +151,7 @@
                             <p class="px-4 pt-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Halaman</p>
                             @foreach($results['halaman'] as $halaman)
                                 <a wire:navigate
-                                   href="{{ rumahsakit_route('rumahsakit.halaman_statis', ['slug' => $halaman->slug]) }}"
+                                   href="{{ route('rumahsakit.halaman_statis', ['rumahsakit' => $rsSlug, 'slug' => $halaman->slug]) }}"
                                    wire:click="close"
                                    class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-variant transition-colors">
                                     <div class="shrink-0 w-9 h-9 rounded-full bg-on-surface/10 flex items-center justify-center">
