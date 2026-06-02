@@ -96,7 +96,7 @@ class Panel extends Component
     }
 
     private function sendToAi($text){
-        $response = Http::withBasicAuth('rsusyifamedika', 'SGG2025!#')->post(env('N8N_URL', 'production'), [
+        $response = Http::post(env('N8N_URL', 'production'), [
             'chatInput' => $text,
             'branch'    => $this->activeBranch->slug,
             'sessionKey' => Str::random(10)
