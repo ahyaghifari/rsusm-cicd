@@ -648,7 +648,7 @@
                         <div>
                             <p class="font-bold text-on-surface text-lg">Masih ada pertanyaan?</p>
                             <p class="text-on-surface-variant text-sm mt-1 leading-relaxed">
-                                Tim kami siap membantu kamu kapan saja.
+                                Kami siap membantu anda kapan saja.
                             </p>
                         </div>
                         <a wire:navigate href="{{ rumahsakit_route('rumahsakit.hubungi_kami') }}"
