@@ -1,4 +1,4 @@
-<div>
+﻿<div>
     <x-page-hero
         title="Penunjang Medis"
         subtitle="Layanan penunjang diagnostik dan medis berkualitas tinggi untuk mendukung proses perawatan Anda."
@@ -28,8 +28,7 @@
                             {{-- Gambar kiri --}}
                             <a href="{{ Storage::url($medis->gambar) }}"
                                class="glightbox relative overflow-hidden min-h-64 block"
-                               data-gallery="penunjang-medis"
-                               data-title="{{ $medis->nama }}">
+                               data-gallery="penunjang-medis">
                                 <img
                                     src="{{ Storage::url($medis->gambar) }}"
                                     alt="{{ $medis->nama }}"
@@ -83,8 +82,7 @@
                             {{-- Gambar kanan --}}
                             <a href="{{ Storage::url($medis->gambar) }}"
                                class="glightbox relative overflow-hidden min-h-64 block order-1 md:order-2"
-                               data-gallery="penunjang-medis"
-                               data-title="{{ $medis->nama }}">
+                               data-gallery="penunjang-medis">
                                 <img
                                     src="{{ Storage::url($medis->gambar) }}"
                                     alt="{{ $medis->nama }}"
@@ -109,3 +107,4 @@
     </div>
     {{-- END KONTEN UTAMA --}}
 </div>
+

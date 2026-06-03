@@ -27,10 +27,6 @@ class GambarRelationManager extends RelationManager
                 Forms\Components\Textarea::make('deskripsi')
                     ->rows(3)
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('sort_order')
-                    ->required()
-                    ->numeric()
-                    ->default(0),
                 Forms\Components\Toggle::make('aktif')
                     ->required()
                     ->default(true),

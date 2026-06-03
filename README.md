@@ -384,9 +384,15 @@ CACHE_STORE=database               # Gunakan redis di production untuk performa
 - [x] Halaman jadwal 2 mode (Per Hari + Per Poli)
 - [x] Filter poliklinik searchable (Tom Select)
 - [x] Global search (FULLTEXT MySQL + LIKE fallback)
-- [x] Chatbot AI (persistent session, fullscreen mobile, smart scroll)
+- [x] Chatbot AI (persistent session, fullscreen mobile, smart scroll, reset percakapan)
 - [x] Security hardening (rate limit, headers, session encrypt, Livewire Locked, admin path)
 - [x] Disclaimer jadwal dengan nomor kontak PENDAFTARAN
+- [x] Lightbox galeri foto (GLightbox — rawat inap, fasilitas, layanan unggulan, penunjang medis)
+- [x] Sort order drag-drop di 6 resource (Magazine, LinkLayanan, LayananUnggulan, FasilitasPendukung, PenunjangMedis, Gedung)
+- [x] Redirect ke list setelah Create/Edit di semua resource
+- [x] FAQ section di homepage RS
+- [x] Redesign card rawat inap & section layanan unggulan
+- [x] Test suite (Unit + Feature, 185+ passing)
 - [x] Kontak 3 kategori (SOSIAL MEDIA, OPERASIONAL, PENDAFTARAN)
 - [x] Kata kunci pencarian di FAQ dan Halaman Statis
 - [x] Footer redesign (ikon sosmed + card kontak)

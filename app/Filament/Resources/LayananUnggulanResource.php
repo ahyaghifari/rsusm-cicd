@@ -54,8 +54,14 @@ class LayananUnggulanResource extends BaseRumahSakitResource
     public static function table(Table $table): Table
     {
         return $table
+            ->reorderable('sort_order')
+            ->defaultSort('sort_order', 'asc')
             ->columns([
                 static::rsTableColumn(),
+
+                Tables\Columns\TextColumn::make('sort_order')
+                    ->label('Urutan')
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('nama')
                     ->searchable()

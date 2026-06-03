@@ -16,6 +16,7 @@ class Magazines extends RsPortalComponent
     {
         $magazines = Magazine::where('rumah_sakit_id', $this->rs->id)
             ->aktif()
+            ->orderBy('sort_order')
             ->orderByDesc('published_at')
             ->get();
 

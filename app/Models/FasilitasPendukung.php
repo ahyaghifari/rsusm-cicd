@@ -12,6 +12,7 @@ class FasilitasPendukung extends Model
 
     // Allowed fields semua kolom kecuali kolom id
     protected $fillable = [
+        'sort_order',
         'rumah_sakit_id',
         'nama',
         'gambar',

@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateGambarRawatInap extends CreateRecord
 {
     protected static string $resource = GambarRawatInapResource::class;
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }
+

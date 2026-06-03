@@ -12,6 +12,7 @@ class LayananUnggulan extends Model
 
     // Allowed fields (Semua kolom kecuali id)
     protected $fillable = [
+        'sort_order',
         'rumah_sakit_id',
         'nama',
         'gambar',

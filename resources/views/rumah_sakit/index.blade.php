@@ -308,7 +308,7 @@
                 alt="">
             <h2 class="text-on-surface text-lg lg:text-xl">Kenapa harus memilih</h2>
             @if($rs->logo)
-                <img src="{{ Storage::url($rs->logo) }}" class="h-24 lg:h-32 mt-2 object-contain" alt="{{ $rs->nama }}">
+                <img src="{{ Storage::url($rs->logo) }}" class="h-24 lg:h-28 mt-2 object-contain" alt="{{ $rs->nama }}">
             @endif
             <div class="text-sm lg:text-base text-on-surface mt-6 leading-7">
                 {!! str($rs->tentang_kami)->sanitizeHtml() !!}
@@ -319,19 +319,68 @@
 
     <!-- layanan unggulan -->
     @if(count($layanan_unggulan) > 0)
-    <section id="unggulan" class="bg-secondary p-6 mt-24 relative">
-        <h1 class="text-white font-bold text-center text-2xl lg:text-3xl">LAYANAN UNGGULAN KAMI</h1>
-        <div class="grid grid-cols-4 w-10/12 mx-auto mt-10">
+    <section id="unggulan" class="bg-secondary mt-24 relative overflow-hidden py-16">
 
-            @foreach($layanan_unggulan as $lu)
-            <div class="p-6">
-                <div class="bg-white">
-                    <img src="{{ Storage::url($lu->gambar) }}" class="aspect-square w-full object-cover"
-                    alt="">
-                </div>
-                <p class="text-white mt-3 text-center font-semibold">{{ $lu->nama }}</p>
+        {{-- Dekorasi background --}}
+        <div class="absolute inset-0 opacity-[0.06] pointer-events-none"
+             style="background-image:radial-gradient(circle, white 1.5px, transparent 1.5px); background-size:28px 28px;"></div>
+        <div class="absolute -top-16 -right-16 w-64 h-64 bg-white/8 rounded-full pointer-events-none"></div>
+        <div class="absolute -bottom-20 -left-20 w-80 h-80 bg-white/5 rounded-full pointer-events-none"></div>
+
+        <div class="relative z-10 w-11/12 lg:w-10/12 mx-auto">
+
+            {{-- Header --}}
+            <div class="text-center mb-12">
+                <span class="inline-flex items-center gap-2 bg-white/15 text-white/80
+                             text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-4">
+                    <span class="material-symbols-outlined text-[13px]">star</span>
+                    Keunggulan Kami
+                </span>
+                <h2 class="text-white font-bold text-2xl md:text-3xl leading-tight">Layanan Unggulan</h2>
+                <div class="h-0.5 w-12 bg-white/40 rounded-full mx-auto mt-4"></div>
             </div>
-            @endforeach
+
+            {{-- Grid kartu --}}
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+                @foreach($layanan_unggulan as $lu)
+                <a wire:navigate href="{{ rumahsakit_route('rumahsakit.unggulan') }}"
+                   class="group flex flex-col items-center bg-white/10 hover:bg-white/20
+                          border border-white/15 hover:border-white/30
+                          rounded-2xl p-5 text-center backdrop-blur-sm
+                          transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/20">
+
+                    {{-- Gambar bulat --}}
+                    <div class="w-20 h-20 rounded-full overflow-hidden border-4 border-white/25
+                                group-hover:border-white/50 transition-colors duration-300
+                                shadow-md mb-4 shrink-0">
+                        <img src="{{ Storage::url($lu->gambar) }}"
+                             alt="{{ $lu->nama }}"
+                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                    </div>
+
+                    {{-- Nama --}}
+                    <p class="text-white font-semibold text-sm leading-snug">{{ $lu->nama }}</p>
+
+                    {{-- Arrow hint --}}
+                    <span class="material-symbols-outlined text-white/40 group-hover:text-white/80
+                                 group-hover:translate-x-0.5 text-[15px] mt-2 transition-all duration-200">
+                        arrow_forward
+                    </span>
+                </a>
+                @endforeach
+            </div>
+
+            {{-- Lihat semua --}}
+            <div class="text-center mt-10">
+                <a wire:navigate href="{{ rumahsakit_route('rumahsakit.unggulan') }}"
+                   class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full
+                          border-2 border-white/40 text-white text-sm font-semibold
+                          hover:bg-white hover:text-secondary transition-all duration-200">
+                    Lihat Semua Layanan
+                    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </a>
+            </div>
+
         </div>
     </section>
     @endif

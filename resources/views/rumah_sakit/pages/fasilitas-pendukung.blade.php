@@ -1,4 +1,4 @@
-<div>
+﻿<div>
     <x-page-hero
         title="Fasilitas Pendukung"
         subtitle="Berbagai fasilitas lengkap kami hadirkan untuk mendukung kenyamanan dan kemudahan selama kunjungan Anda."
@@ -31,8 +31,7 @@
                 {{-- Gambar kiri --}}
                 <a href="{{ Storage::url($featured->gambar) }}"
                    class="glightbox relative overflow-hidden min-h-72 block"
-                   data-gallery="fasilitas"
-                   data-title="{{ $featured->nama }}">
+                   data-gallery="fasilitas">
                     <img
                         src="{{ Storage::url($featured->gambar) }}"
                         alt="{{ $featured->nama }}"
@@ -74,8 +73,7 @@
                             {{-- Gambar --}}
                             <a href="{{ Storage::url($f->gambar) }}"
                                class="glightbox relative overflow-hidden h-52 block"
-                               data-gallery="fasilitas"
-                               data-title="{{ $f->nama }}">
+                               data-gallery="fasilitas">
                                 <img
                                     src="{{ Storage::url($f->gambar) }}"
                                     alt="{{ $f->nama }}"
@@ -103,3 +101,4 @@
     </div>
     {{-- END KONTEN UTAMA --}}
 </div>
+

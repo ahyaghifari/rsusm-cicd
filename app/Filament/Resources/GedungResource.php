@@ -41,11 +41,18 @@ class GedungResource extends BaseResource
     public static function table(Table $table): Table
     {
         return $table
+            ->reorderable('sort_order')
+            ->defaultSort('sort_order', 'asc')
             ->columns([
                 Tables\Columns\TextColumn::make('rumahSakit.nama')
                     ->label('Rumah Sakit')
                     ->searchable()
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('sort_order')
+                    ->label('Urutan')
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('nama')
                     ->searchable()
                     ->sortable(),

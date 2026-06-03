@@ -47,7 +47,9 @@ class Index extends Component
             ->orderBy('sort_order')
             ->get();
 
-        $layananUnggulan = LayananUnggulan::where('rumah_sakit_id', $this->rs->id)->get();
+        $layananUnggulan = LayananUnggulan::where('rumah_sakit_id', $this->rs->id)
+            ->orderBy('sort_order')
+            ->get();
 
         $dokterKami = Dokter::where('rumah_sakit_id', $this->rs->id)
             ->with('spesialis')
@@ -58,6 +60,7 @@ class Index extends Component
 
         $linkLayanan = LinkLayanan::where('rumah_sakit_id', $this->rs->id)
             ->where('aktif', true)
+            ->orderBy('sort_order')
             ->get();
 
         $partnerAsuransi = Partner::where('rumah_sakit_id', $this->rs->id)

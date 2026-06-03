@@ -14,7 +14,9 @@ class LayananUnggulan extends RsPortalComponent
 
     public function render()
     {
-        $layanan = ModelsLayananUnggulan::where('rumah_sakit_id', $this->rs->id)->get();
+        $layanan = ModelsLayananUnggulan::where('rumah_sakit_id', $this->rs->id)
+            ->orderBy('sort_order')
+            ->get();
 
         return view('rumah_sakit.pages.layanan-unggulan', ['data' => $layanan]);
     }
