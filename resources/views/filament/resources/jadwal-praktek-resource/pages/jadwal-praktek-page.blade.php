@@ -29,6 +29,29 @@
                 <span class="text-sm font-semibold text-gray-700 dark:text-white tracking-wide">Filter</span>
             </div>
 
+            <div class="flex items-center gap-2">
+
+            {{-- Export PDF — tampil jika filter sudah valid --}}
+            @if($this->getActiveRumahSakitId() && !$this->mustPickUnit())
+                @if($viewMode === 'per_hari' || ($viewMode === 'per_dokter' && $selectedDokterId))
+                    <button
+                        wire:click="exportPdf"
+                        wire:loading.attr="disabled"
+                        wire:target="exportPdf"
+                        type="button"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-green-500 hover:green-600 text-white transition disabled:opacity-50"
+                        title="Export jadwal ke PDF"
+                    >
+                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <span wire:loading.remove wire:target="exportPdf">Export PDF</span>
+                        <span wire:loading wire:target="exportPdf">Membuat...</span>
+                    </button>
+                @endif
+            @endif
+
             {{-- Fullscreen: sembunyikan sidebar Filament --}}
             <button
                 type="button"
@@ -47,6 +70,8 @@
                 </svg>
                 <span x-text="isFs ? 'Tampilkan Sidebar' : 'Layar Penuh'"></span>
             </button>
+
+            </div>{{-- end flex buttons --}}
         </div>
         <div class="bg-white dark:bg-gray-900 px-4 py-4">
             {{ $this->filterForm }}

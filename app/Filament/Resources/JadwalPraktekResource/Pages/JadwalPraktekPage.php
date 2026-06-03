@@ -9,11 +9,14 @@ use App\Models\JadwalPraktek;
 use App\Models\PoliKlinik;
 use App\Models\RumahSakit;
 use App\Models\UnitLayanan;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class JadwalPraktekPage extends Page
 {
@@ -474,5 +477,84 @@ class JadwalPraktekPage extends Page
         Notification::make()
             ->title("Jadwal {$dokter->nama} berhasil disimpan")
             ->success()->send();
+    }
+
+    // =========================================================================
+    // EXPORT PDF
+    // =========================================================================
+
+    public function exportPdf(): StreamedResponse
+    {
+        $rsId = $this->getActiveRumahSakitId();
+
+        if (! $rsId) {
+            Notification::make()->title('Pilih Rumah Sakit terlebih dahulu')->warning()->send();
+            return response()->streamDownload(fn () => '', 'error.pdf');
+        }
+
+        $rs   = RumahSakit::find($rsId);
+        $unit = $this->selectedUnitLayananId
+            ? UnitLayanan::find($this->selectedUnitLayananId)?->nama
+            : null;
+
+        if ($this->viewMode === 'per_hari') {
+            $jadwals = JadwalPraktek::where('hari', $this->activeHari)
+                ->whereHas('poliklinik.unitLayanan', function ($q) use ($rsId) {
+                    $q->where('rumah_sakit_id', $rsId);
+                    if ($this->selectedUnitLayananId) {
+                        $q->where('id', $this->selectedUnitLayananId);
+                    }
+                })
+                ->orderBy('waktu_mulai')
+                ->with('poliklinik', 'dokter')
+                ->get();
+
+            $hariLabel  = Hari::from($this->activeHari)->getLabel();
+            $title      = "Jadwal Praktek — {$hariLabel}";
+            $filename   = "jadwal-" . strtolower($this->activeHari) . "-" . now()->format('Ymd') . ".pdf";
+            $dokterNama = null;
+
+        } else {
+            if (! $this->selectedDokterId) {
+                Notification::make()->title('Pilih Dokter terlebih dahulu')->warning()->send();
+                return response()->streamDownload(fn () => '', 'error.pdf');
+            }
+
+            $dokter     = Dokter::find($this->selectedDokterId);
+            $hariOrder  = array_flip(['SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU', 'MINGGU']);
+
+            $jadwals = JadwalPraktek::where('dokter_id', $this->selectedDokterId)
+                ->whereIn('poliklinik_id', $this->getPoliIds())
+                ->with('poliklinik')
+                ->get()
+                ->sortBy(fn ($j) => $hariOrder[$j->hari->value] ?? 9)
+                ->values();
+
+            $dokterNama = $dokter?->nama ?? '-';
+            $hariLabel  = null;
+            $title      = "Jadwal Praktek — {$dokterNama}";
+            $filename   = "jadwal-dokter-" . Str::slug($dokterNama) . "-" . now()->format('Ymd') . ".pdf";
+        }
+
+        $pdf = Pdf::loadView('pdf.jadwal-praktek', [
+            'jadwals'    => $jadwals,
+            'title'      => $title,
+            'rsName'     => $rs?->nama ?? '-',
+            'unit'       => $unit,
+            'viewMode'   => $this->viewMode,
+            'hariLabel'  => $hariLabel ?? '',
+            'dokterNama' => $dokterNama ?? '',
+            'tanggal'    => now()->translatedFormat('d F Y, H:i') . ' WITA',
+        ])->setPaper('a4', 'landscape')
+          ->setOption('margin_top', 10)
+          ->setOption('margin_bottom', 10)
+          ->setOption('margin_left', 12)
+          ->setOption('margin_right', 12);
+
+        return response()->streamDownload(
+            fn () => print($pdf->output()),
+            $filename,
+            ['Content-Type' => 'application/pdf']
+        );
     }
 }
