@@ -4,6 +4,7 @@ namespace App\Livewire\RumahSakit;
 
 use App\Models\Banner;
 use App\Models\Dokter;
+use App\Models\Faq;
 use App\Models\LayananUnggulan;
 use App\Models\LinkLayanan;
 use App\Models\Partner;
@@ -80,6 +81,12 @@ class Index extends Component
             ->limit(6)
             ->get();
 
+        $faqs = Faq::where('rumah_sakit_id', $this->rs->id)
+            ->aktif()
+            ->orderBy('sort_order')
+            ->limit(5)
+            ->get();
+
         return view('rumah_sakit.index', [
             'banner'             => $banner,
             'layanan_unggulan'   => $layananUnggulan,
@@ -88,6 +95,7 @@ class Index extends Component
             'partner_asuransi'   => $partnerAsuransi,
             'partner_perusahaan' => $partnerPerusahaan,
             'promos'             => $promos,
+            'faqs'               => $faqs,
         ]);
     }
 }
