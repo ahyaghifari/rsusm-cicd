@@ -142,7 +142,7 @@ class Panel extends Component
             $this->sessionKey = Str::uuid()->toString();
         }
 
-        $response = Http::timeout(60)->post(env("N8N_URL", "http://localhost:5678"), [
+        $response = Http::timeout(60)->post("http://127.0.0.1:5678/webhook/beb22058-f89c-4b21-9a8e-683583b10d5d", [
             'chatInput'  => $text,
             'branch'     => $this->activeBranch->slug,
             'sessionKey' => $this->sessionKey,
