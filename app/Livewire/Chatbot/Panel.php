@@ -53,7 +53,7 @@ class Panel extends Component
     }
 
     protected function getWelcomeMessage($branch){
-            "Halo! Selamat datang di <strong>{$branch->nama}</strong>.<br>
+            return "Halo! Selamat datang di <strong>{$branch->nama}</strong>.<br>
             Saya dapat membantu anda untuk memberikan informasi mengenai : <br>
              - 🧑🏻‍⚕️ Dokter Kami, Spesialis, dan Jadwal Prakteknya <br>
              - 🛏️ Rawat Inap kami dan fasilitasnya <br>
@@ -76,7 +76,7 @@ class Panel extends Component
         $this->branchSelected = true;
         $this->messages = [];
 
-        $this->addBotMessage($branch);
+        $this->addBotMessage($this->getWelcomeMessage($branch));
 
         $this->saveState();
     }
