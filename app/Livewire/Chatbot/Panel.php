@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 class Panel extends Component
 {
     private const SESSION_KEY  = 'chatbot_state';
-    private const MAX_MESSAGES = 80;
+    private const MAX_MESSAGES = 100;
 
     public bool $branchSelected = false;
     public ?string $activeBranchSlug = null;
@@ -142,7 +142,7 @@ class Panel extends Component
             $this->sessionKey = Str::uuid()->toString();
         }
 
-        $response = Http::timeout(60)->post(env("N8N_URL", "http://127.0.0.1:5678/webhook/beb22058-f89c-4b21-9a8e-683583b10d5d"), [
+        $response = Http::timeout(60)->post(env("N8N_URL", "http://localhost:5678"), [
             'chatInput'  => $text,
             'branch'     => $this->activeBranch->slug,
             'sessionKey' => $this->sessionKey,
