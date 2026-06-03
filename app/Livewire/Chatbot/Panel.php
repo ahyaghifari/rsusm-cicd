@@ -52,53 +52,18 @@ class Panel extends Component
         ]]);
     }
 
-    protected array $responses = [
-        'jadwal dokter' => [
-            'card' => [
-                ['icon' => 'ti-calendar', 'text' => 'Senin – Sabtu, 07.00 – 21.00 WITA'],
-                ['icon' => 'ti-stethoscope', 'text' => 'Poli Umum & berbagai Spesialis'],
-            ],
-            'opts' => ['Daftar spesialis', 'Buat janji temu'],
-        ],
-        'pendaftaran' => [
-            'card' => [
-                ['icon' => 'ti-device-mobile', 'text' => 'Hubungi hotline atau datang langsung'],
-                ['icon' => 'ti-clock', 'text' => 'Daftar minimal 1 hari sebelumnya'],
-                ['icon' => 'ti-id-badge', 'text' => 'Siapkan KTP & kartu BPJS (jika ada)'],
-            ],
-            'opts' => ['Hubungi admin', 'Info BPJS'],
-        ],
-        'info igd' => [
-            'card' => [
-                ['icon' => 'ti-ambulance', 'text' => 'Buka 24 jam, 7 hari seminggu'],
-                ['icon' => 'ti-alert-triangle', 'text' => 'Segera hubungi untuk kondisi darurat'],
-            ],
-            'opts' => ['Lokasi rumah sakit', 'Fasilitas IGD'],
-        ],
-        'fasilitas' => [
-            'card' => [
-                ['icon' => 'ti-microscope', 'text' => 'Laboratorium & Radiologi 24 jam'],
-                ['icon' => 'ti-bed', 'text' => 'Rawat inap kelas I, II, III & VIP'],
-                ['icon' => 'ti-heart-rate-monitor', 'text' => 'ICU, kamar operasi & poli spesialis'],
-            ],
-            'opts' => ['Info rawat inap', 'Poli spesialis'],
-        ],
-        'biaya' => [
-            'card' => [
-                ['icon' => 'ti-credit-card', 'text' => 'Menerima BPJS Kesehatan'],
-                ['icon' => 'ti-building-bank', 'text' => 'Kerjasama asuransi swasta'],
-                ['icon' => 'ti-receipt', 'text' => 'Informasi tarif detail via admin/hotline'],
-            ],
-            'opts' => ['Info BPJS', 'Hubungi admin keuangan'],
-        ],
-        'lokasi' => [
-            'card' => [
-                ['icon' => 'ti-clock', 'text' => 'IGD & rawat inap buka 24 jam'],
-                ['icon' => 'ti-parking', 'text' => 'Tersedia parkir kendaraan'],
-            ],
-            'opts' => ['Petunjuk arah', 'Kontak rumah sakit'],
-        ],
-    ];
+    protected function getWelcomeMessage($branch){
+            "Halo! Selamat datang di <strong>{$branch->nama}</strong>.<br>
+            Saya dapat membantu anda untuk memberikan informasi mengenai : <br>
+             - 🧑🏻‍⚕️ Dokter Kami, Spesialis, dan Jadwal Prakteknya <br>
+             - 🛏️ Rawat Inap kami dan fasilitasnya <br>
+             - 🩺 Rawat Jalan dan Poli <br>
+             - ⭐ Fasilitas Kami (Unggulan, Pendukung, dan Penunjang Medis)
+             - 📢 Promo
+             - 🏥 Profil dan Partner Kami
+             - 📞 Kontak Kami <br>
+            <br>Ada yang bisa saya bantu hari ini?";
+    }
 
     public function selectBranch(string $slug): void
     {
@@ -111,16 +76,7 @@ class Panel extends Component
         $this->branchSelected = true;
         $this->messages = [];
 
-        $this->addBotMessage(
-            "Halo! Selamat datang di <strong>{$branch->nama}</strong>.<br>Ada yang bisa saya bantu hari ini?",
-            [
-                ['icon' => 'ti-map-pin', 'text' => $branch->lokasi],
-                ['icon' => 'ti-phone', 'text' => 'Hotline: ' . ($branch->no_hotline !== '-' ? $branch->no_hotline : 'Belum tersedia')],
-                ['icon' => 'ti-ambulance', 'text' => 'IGD: ' . ($branch->no_emergency !== '-' ? $branch->no_emergency : 'Datang langsung')],
-                ['icon' => 'ti-clock-24', 'text' => 'Layanan 24 jam'],
-            ],
-            ['Jadwal dokter', 'Pendaftaran', 'Info IGD']
-        );
+        $this->addBotMessage($branch);
 
         $this->saveState();
     }
@@ -136,29 +92,32 @@ class Panel extends Component
         $this->saveState();
     }
 
-    private function sendToAi($text){
-        // Generate sekali saat pesan pertama, simpan untuk sesi berikutnya
+    public function resetConversation(): void
+    {
+        if (count($this->messages) < 10) return;
+
+        $this->messages   = [];
+        $this->sessionKey = '';
+        $this->saveState();
+    }
+
+    private function sendToAi(string $text): string
+    {
         if (empty($this->sessionKey)) {
             $this->sessionKey = Str::uuid()->toString();
         }
 
-        $response = Http::timeout(60)->post("http://127.0.0.1:5678/webhook/beb22058-f89c-4b21-9a8e-683583b10d5d", [
+        $response = Http::timeout(60)->post(env('N8N_URL', 'http://127.0.0.1:5678/webhook/beb22058-f89c-4b21-9a8e-683583b10d5d'), [
             'chatInput'  => $text,
             'branch'     => $this->activeBranch->slug,
             'sessionKey' => $this->sessionKey,
         ]);
 
         if ($response->successful()) {
-            // Status code 200 - 299
-            $json = $response->json();
-            return $json['output'];
+            return $response->json('output') ?? 'Maaf, tidak ada respons dari asisten.';
         }
 
-        if ($response->failed()) {
-            return 'ERROR';
-            // Status code 400 atau 500 ke atas
-            // Log::error('API bermasalah');
-        }
+        return 'Maaf, terjadi gangguan. Silakan coba lagi.';
     }
 
     public function sendMessage(string $text = ''): void
@@ -196,7 +155,7 @@ class Panel extends Component
         ];
     }
 
-    protected function addBotMessage(string $text, array $card = [], array $opts = []): void
+    protected function addBotMessage(string $text): void
     {
         $this->messages[] = [
             'type' => 'bot',

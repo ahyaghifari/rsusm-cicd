@@ -21,6 +21,17 @@
             </div>
             <div class="flex gap-1.5 flex-shrink-0">
                 @if($this->branchSelected)
+                    {{-- Reset percakapan — hanya muncul jika sudah ada ≥ 10 pesan --}}
+                    @if(count($this->messages) >= 10)
+                        <button
+                            wire:click="resetConversation"
+                            wire:confirm="Mulai percakapan baru? Riwayat chat akan dihapus."
+                            class="bg-white/15 hover:bg-white/28 border-none rounded-lg w-8 h-8 flex items-center justify-center cursor-pointer text-white transition-colors p-1"
+                            title="Reset percakapan" aria-label="Reset percakapan"
+                        >
+                            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">restart_alt</span>
+                        </button>
+                    @endif
                     <button
                         wire:click="changeBranch"
                         class="bg-white/15 hover:bg-white/28 border-none rounded-lg w-8 h-8 flex items-center justify-center cursor-pointer text-white transition-colors p-1"
