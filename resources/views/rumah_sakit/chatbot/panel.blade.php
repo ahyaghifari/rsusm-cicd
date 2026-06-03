@@ -1,5 +1,7 @@
-<div class="font-sans flex justify-center w-full">
-    <div class="w-full max-w-sm lg:max-w-md lg:w-105 h-130 lg:h-[min(580px,calc(100dvh-7.5rem))] rounded-2xl border border-outline-variant overflow-hidden flex flex-col bg-[#f8f9ff] shadow-xl">
+<div class="font-sans flex justify-center w-full h-full">
+    <div class="w-full h-full rounded-none
+                lg:w-105 lg:max-w-md lg:h-[calc(100dvh-3rem)] lg:rounded-2xl lg:self-end
+                border border-outline-variant overflow-hidden flex flex-col bg-[#f8f9ff] shadow-xl">
 
         {{-- Header --}}
         <div class="bg-[#d606b0] px-4 py-3 flex items-center gap-3 flex-shrink-0">
@@ -65,17 +67,35 @@
                         @endif
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="text-sm font-medium text-[#0b1c30] mb-0.5">{{ $branch->nama }}</div>
+                        <div class="text-sm font-medium text-[#0b1c30]">{{ $branch->nama }}</div>
                     </div>
-                    <span class="material-symbols-outlined text-[#d6c0ce] text-[20px] flex-shrink-0" aria-hidden="true">chevron_right</span>
+                    <span class="material-symbols-outlined text-[#d6c0ce] text-[20px] shrink-0" aria-hidden="true">chevron_right</span>
                 </button>
                 @endforeach
             </div>
 
-            <p class="text-[11.5px] text-[#84727e] text-center mt-auto flex items-center justify-center gap-1">
-                <span class="material-symbols-outlined text-[15px] text-[#84727e]" aria-hidden="true">info</span>
-                <span>Untuk kondisi darurat, langsung hubungi IGD atau call 119</span>
-            </p>
+            <div class="mt-auto border-t border-outline-variant/50 pt-3">
+                <p class="text-[11px] text-outline text-center mb-1.5 flex items-center justify-center gap-1">
+                    <span class="material-symbols-outlined text-[13px] text-red-400" aria-hidden="true">emergency</span>
+                    <span>Kondisi darurat? Hubungi IGD langsung:</span>
+                </p>
+                <div class="flex flex-wrap justify-center gap-x-4 gap-y-1">
+                    @foreach($branches as $branch)
+                        @php
+                            $noGawat = ($branch->no_emergency && $branch->no_emergency !== '-')
+                                ? $branch->no_emergency
+                                : (($branch->no_hotline && $branch->no_hotline !== '-') ? $branch->no_hotline : null);
+                        @endphp
+                        @if($noGawat)
+                            <a href="tel:{{ preg_replace('/[^0-9+]/', '', $noGawat) }}"
+                               class="inline-flex items-center gap-1 text-[12px] font-bold text-red-500 hover:text-red-700 transition-colors">
+                                <span class="material-symbols-outlined text-[12px]" aria-hidden="true">call</span>
+                                {{ $noGawat }}
+                            </a>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
         </div>
         @endif
 
@@ -186,16 +206,16 @@
 
             {{-- Input Footer --}}
             <div
-                class="bg-white border-t border-[#d6c0ce] px-3 py-2.5 flex-shrink-0"
+                class="bg-white border-t border-[#d6c0ce] px-3 pt-2.5 pb-2.5 shrink-0"
+                style="padding-bottom: max(0.625rem, env(safe-area-inset-bottom, 0))"
                 x-data="{
                     msg: '',
                     get remaining() { return 50 - this.msg.length; },
                     send() {
                         const text = this.msg.trim();
                         if (!text) return;
-                        $wire.set('inputMessage', text);
                         this.msg = '';
-                        $wire.call('sendMessage');
+                        $wire.call('sendMessage', text);
                         // Scroll ke bawah segera agar typing indicator terlihat
                         const chatEl = document.getElementById('chat-msgs');
                         if (chatEl) setTimeout(() => chatEl.scrollTo({ top: chatEl.scrollHeight, behavior: 'smooth' }), 60);

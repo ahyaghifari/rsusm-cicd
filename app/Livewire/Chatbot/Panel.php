@@ -9,11 +9,48 @@ use Illuminate\Support\Str;
 
 class Panel extends Component
 {
+    private const SESSION_KEY  = 'chatbot_state';
+    private const MAX_MESSAGES = 100;
+
     public bool $branchSelected = false;
     public ?string $activeBranchSlug = null;
     public ?RumahSakit $activeBranch = null;
     public array $messages = [];
     public string $inputMessage = '';
+    public string $sessionKey = '';
+
+    public function mount(): void
+    {
+        $saved = session(self::SESSION_KEY, []);
+        if (empty($saved)) return;
+
+        $this->sessionKey      = $saved['sessionKey'] ?? '';
+        $this->activeBranchSlug = $saved['activeBranchSlug'] ?? null;
+        $this->messages        = array_slice($saved['messages'] ?? [], -self::MAX_MESSAGES);
+        $this->branchSelected  = $saved['branchSelected'] ?? false;
+
+        if ($this->activeBranchSlug) {
+            $this->activeBranch = RumahSakit::where('slug', $this->activeBranchSlug)
+                ->where('aktif', true)
+                ->first();
+
+            if (! $this->activeBranch) {
+                $this->branchSelected   = false;
+                $this->activeBranchSlug = null;
+                $this->messages         = [];
+            }
+        }
+    }
+
+    private function saveState(): void
+    {
+        session([self::SESSION_KEY => [
+            'sessionKey'       => $this->sessionKey,
+            'activeBranchSlug' => $this->activeBranchSlug,
+            'branchSelected'   => $this->branchSelected,
+            'messages'         => array_slice($this->messages, -self::MAX_MESSAGES),
+        ]]);
+    }
 
     protected array $responses = [
         'jadwal dokter' => [
@@ -84,22 +121,31 @@ class Panel extends Component
             ],
             ['Jadwal dokter', 'Pendaftaran', 'Info IGD']
         );
+
+        $this->saveState();
     }
 
     public function changeBranch(): void
     {
-        $this->branchSelected = false;
-        $this->activeBranch = null;
+        $this->branchSelected   = false;
+        $this->activeBranch     = null;
         $this->activeBranchSlug = null;
-        $this->messages = [];
-        $this->inputMessage = '';
+        $this->messages         = [];
+        $this->inputMessage     = '';
+        $this->sessionKey       = '';
+        $this->saveState();
     }
 
     private function sendToAi($text){
+        // Generate sekali saat pesan pertama, simpan untuk sesi berikutnya
+        if (empty($this->sessionKey)) {
+            $this->sessionKey = Str::uuid()->toString();
+        }
+
         $response = Http::timeout(60)->post(env("N8N_URL", "http://127.0.0.1:5678/webhook/beb22058-f89c-4b21-9a8e-683583b10d5d"), [
-            'chatInput' => $text,
-            'branch'    => $this->activeBranch->slug,
-            'sessionKey' => Str::random(10)
+            'chatInput'  => $text,
+            'branch'     => $this->activeBranch->slug,
+            'sessionKey' => $this->sessionKey,
         ]);
 
         if ($response->successful()) {
@@ -115,17 +161,22 @@ class Panel extends Component
         }
     }
 
-    public function sendMessage(): void
+    public function sendMessage(string $text = ''): void
     {
-        $text = trim(mb_substr($this->inputMessage, 0, 150));
+        // Teks bisa datang langsung sebagai parameter (dari Alpine) atau dari $inputMessage
+        if ($text === '') {
+            $text = $this->inputMessage;
+        }
+        $text = trim(mb_substr($text, 0, 150));
         if (! $text || ! $this->branchSelected) return;
+
         $this->inputMessage = '';
 
         $this->addUserMessage($text);
 
-
         $respon = $this->sendToAi($text);
         $this->addBotMessage($respon);
+        $this->saveState();
     }
 
     public function sendQuick(string $text): void
@@ -133,50 +184,8 @@ class Panel extends Component
         if (! $this->branchSelected) return;
         $this->addUserMessage($text);
         $this->generateReply($text);
+        $this->saveState();
     }
-
-    // protected function generateReply(string $text): void
-    // {
-    //     $lower = mb_strtolower($text);
-    //     $matched = null;
-
-    //     foreach ($this->responses as $keyword => $data) {
-    //         if (str_contains($lower, $keyword)) {
-    //             $matched = $data;
-    //             break;
-    //         }
-    //     }
-
-    //     if ($matched) { 
-    //         // inject alamat for lokasi keyword
-    //         if (str_contains($lower, 'lokasi') && $this->activeBranch) {
-    //             array_unshift($matched['card'], [
-    //                 'icon' => 'ti-map-pin',
-    //                 'text' => $this->activeBranch->alamat,
-    //             ]);
-    //         }
-    //         // inject nomor IGD untuk info igd
-    //         if (str_contains($lower, 'igd') && $this->activeBranch && $this->activeBranch->no_emergency !== '-') {
-    //             $matched['card'][] = ['icon' => 'ti-phone', 'text' => 'IGD: ' . $this->activeBranch->no_emergency];
-    //         }
-
-    //         $this->addBotMessage(
-    //             'Berikut informasi yang Anda butuhkan:',
-    //             $matched['card'],
-    //             $matched['opts']
-    //         );
-    //     } else {
-    //         $this->addBotMessage(
-    //             'Untuk informasi lebih lanjut, silakan hubungi kami langsung.',
-    //             [
-    //                 ['icon' => 'ti-phone', 'text' => 'Hotline: ' . ($this->activeBranch->no_hotline !== '-' ? $this->activeBranch->no_hotline : 'Belum tersedia')],
-    //                 ['icon' => 'ti-ambulance', 'text' => 'IGD: ' . ($this->activeBranch->no_emergency !== '-' ? $this->activeBranch->no_emergency : 'Datang langsung')],
-    //                 ['icon' => 'ti-clock-24', 'text' => 'Layanan 24 jam'],
-    //             ],
-    //             ['Lihat semua layanan', 'Jadwal dokter', 'Fasilitas']
-    //         );
-    //     }
-    // }
 
     protected function addUserMessage(string $text): void
     {
