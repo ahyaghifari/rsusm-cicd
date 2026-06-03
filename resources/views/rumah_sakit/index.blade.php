@@ -331,11 +331,6 @@
 
             {{-- Header --}}
             <div class="text-center mb-12">
-                <span class="inline-flex items-center gap-2 bg-white/15 text-white/80
-                             text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-4">
-                    <span class="material-symbols-outlined text-[13px]">star</span>
-                    Keunggulan Kami
-                </span>
                 <h2 class="text-white font-bold text-2xl md:text-3xl leading-tight">Layanan Unggulan</h2>
                 <div class="h-0.5 w-12 bg-white/40 rounded-full mx-auto mt-4"></div>
             </div>
