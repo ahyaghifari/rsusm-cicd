@@ -58,9 +58,9 @@ class Panel extends Component
              - 🧑🏻‍⚕️ Dokter Kami, Spesialis, dan Jadwal Prakteknya <br>
              - 🛏️ Rawat Inap kami dan fasilitasnya <br>
              - 🩺 Rawat Jalan dan Poli <br>
-             - ⭐ Fasilitas Kami (Unggulan, Pendukung, dan Penunjang Medis)
-             - 📢 Promo
-             - 🏥 Profil dan Partner Kami
+             - ⭐ Fasilitas Kami (Unggulan, Pendukung, dan Penunjang Medis)<br>
+             - 📢 Promo<br>
+             - 🏥 Profil dan Partner Kami<br>
              - 📞 Kontak Kami <br>
             <br>Ada yang bisa saya bantu hari ini?";
     }
