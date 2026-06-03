@@ -26,7 +26,7 @@
         {{-- Filter spesialis (searchable) --}}
         @include('rumah_sakit.pages._searchable-select', [
             'property'     => 'spesialis',
-            'options'      => $data_spesialis->map(fn($s) => ['value' => (string)$s->id, 'label' => $s->nama])->values()->toArray(),
+            'options'      => $data_spesialis->map(fn($s) => ['value' => $s->slug, 'label' => $s->nama])->values()->toArray(),
             'placeholder'  => '— Semua Spesialis —',
             'currentValue' => $spesialis,
             'wrapperClass' => 'w-full',

@@ -34,13 +34,13 @@
                 {{-- Label atas --}}
                 <span class="inline-flex items-center gap-2 text-white/70 text-xs uppercase tracking-[0.22em] font-semibold mb-4">
                     <span class="w-8 h-px bg-white/40 inline-block"></span>
-                    Selamat Datang di
+                    Rumah Sakit Umum
                     <span class="w-8 h-px bg-white/40 inline-block"></span>
                 </span>
 
                 {{-- Nama RS --}}
                 <h1 class="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight uppercase drop-shadow-md">
-                    RSU SYIFA MEDIKA
+                    SYIFA MEDIKA
                 </h1>
 
                 {{-- Divider + slogan --}}
@@ -169,9 +169,11 @@
                     <div class="p-6 flex flex-col flex-1">
 
                         <div class="flex items-start justify-between gap-3 mb-2">
-                            <h2 class="text-lg font-bold text-primary leading-snug group-hover:text-primary/80 transition-colors">
-                                {{ $rs->nama }}
-                            </h2>
+                            <div>
+                                <h2 class="text-lg font-bold text-primary leading-snug group-hover:text-primary/80 transition-colors">
+                                    {{ $rs->nama }}
+                                </h2>
+                            </div>
                             @if($rs->logo)
                                 <img alt="{{ $rs->nama }}"
                                      class="h-8 w-auto object-contain shrink-0"
