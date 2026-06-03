@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 class Panel extends Component
 {
     private const SESSION_KEY  = 'chatbot_state';
-    private const MAX_MESSAGES = 80;
+    private const MAX_MESSAGES = 100;
 
     public bool $branchSelected = false;
     public ?string $activeBranchSlug = null;
