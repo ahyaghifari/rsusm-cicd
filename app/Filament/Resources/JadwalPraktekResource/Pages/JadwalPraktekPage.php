@@ -147,7 +147,8 @@ class JadwalPraktekPage extends Page
                             ->label('Poliklinik')
                             ->options(fn () => $this->getPoliklinikOptions())
                             ->searchable()
-                            ->required(),
+                            ->required()
+                            ->columnSpan(2),
 
                         Forms\Components\TimePicker::make('waktu_mulai')
                             ->label('Jam Mulai')
@@ -169,7 +170,7 @@ class JadwalPraktekPage extends Page
                             ->nullable()
                             ->columnSpanFull(),
                     ])
-                    ->columns(5)
+                    ->columns(3)
                     ->defaultItems(0)
                     ->addActionLabel('+ Tambah Baris')
                     ->reorderable(false),

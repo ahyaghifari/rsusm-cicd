@@ -81,6 +81,9 @@ class AdminPanelProvider extends PanelProvider
                         .fi-sidebar-item.fi-active .fi-sidebar-item-button {
                             background-color: #ffe4fe !important; /* Ganti warna di sini */
                         }
+                        .fi-section-content-ctn ..fi-section-content{
+                            background-color: #ffe4fe !important; /* Ganti warna di sini */
+                        }
                     </style>
                 ')
             )

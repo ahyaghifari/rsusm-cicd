@@ -32,10 +32,10 @@ class SpesialisResource extends BaseRumahSakitResource
                     ->required()
                     ->maxLength(100)
                     ->unique(Spesialis::class, ignoreRecord: true),
-                Forms\Components\FileUpload::make('logo')
-                    ->image()
-                    ->directory('spesialis/logo')
-                    ->disk('public'),
+                // Forms\Components\FileUpload::make('logo')
+                //     ->image()
+                //     ->directory('spesialis/logo')
+                //     ->disk('public'),
                 Forms\Components\Toggle::make('aktif')
                     ->required()
                     ->default(true),
@@ -53,8 +53,8 @@ class SpesialisResource extends BaseRumahSakitResource
                 Tables\Columns\TextColumn::make('slug')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\ImageColumn::make('logo')
-                    ->disk('public'),
+                // Tables\Columns\ImageColumn::make('logo')
+                //     ->disk('public'),
                 Tables\Columns\IconColumn::make('aktif')
                     ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
