@@ -16,8 +16,6 @@ return new class extends Migration
                   ->constrained('jadwal_harian')
                   ->cascadeOnDelete();
 
-            $table->enum('jenis', ['GENERATE', 'TAMBAH', 'UBAH']);
-
             $table->foreignId('user_id')
                   ->nullable()
                   ->constrained('users')

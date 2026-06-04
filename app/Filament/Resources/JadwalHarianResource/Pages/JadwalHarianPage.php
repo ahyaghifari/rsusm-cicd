@@ -101,6 +101,13 @@ class JadwalHarianPage extends Page
         return $this->selectedRumahSakitId;
     }
 
+    public function mustPickUnit(): bool
+    {
+        return (bool) $this->getActiveRumahSakitId()
+            && count($this->getUnitLayananOptions()) > 1
+            && ! $this->selectedUnitLayananId;
+    }
+
     public function getNamaHariAktif(): string
     {
         if (! $this->activeTanggal) return '';
@@ -285,9 +292,9 @@ class JadwalHarianPage extends Page
         $this->loadRows();
     }
 
-    public function updatedRows(mixed $value, string $key): void
+    public function updatedRows(mixed $value, ?string $key = null): void
     {
-        if (! str_ends_with($key, '.dokter_id')) return;
+        if (! $key || ! str_ends_with($key, '.dokter_id')) return;
 
         $index = (int) explode('.', $key)[0];
 

@@ -52,7 +52,30 @@
     {{-- =====================================================================
          AREA JADWAL: Hanya tampil setelah RS dipilih
     ====================================================================== --}}
-    @if($this->getActiveRumahSakitId())
+    @if(! $this->getActiveRumahSakitId())
+        <x-filament::section>
+            <div class="py-10 text-center flex flex-col items-center gap-3 text-gray-400 dark:text-gray-500">
+                <svg class="w-10 h-10 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+                <p class="text-sm">Pilih <strong>Rumah Sakit</strong> terlebih dahulu.</p>
+            </div>
+        </x-filament::section>
+
+    @elseif($this->mustPickUnit())
+        <x-filament::section>
+            <div class="py-10 text-center flex flex-col items-center gap-3 text-gray-400 dark:text-gray-500">
+                <svg class="w-10 h-10 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/>
+                </svg>
+                <p class="text-sm font-medium text-gray-600 dark:text-gray-300">Pilih <strong>Unit Layanan</strong> terlebih dahulu</p>
+                <p class="text-xs text-gray-400">Rumah sakit ini memiliki lebih dari satu unit layanan. Pilih salah satu untuk melanjutkan.</p>
+            </div>
+        </x-filament::section>
+
+    @elseif($this->getActiveRumahSakitId())
 
         {{-- =================================================================
              NAVIGASI TANGGAL — gradient banner dengan tombol ghost
