@@ -29,7 +29,7 @@ return new class extends Migration
 
         // Recreate dengan kata_kunci disertakan
         DB::statement('ALTER TABLE faq     ADD FULLTEXT INDEX ft_search (judul, deskripsi, kata_kunci)');
-        DB::statement('ALTER TABLE halaman ADD FULLTEXT INDEX ft_search (judul, kata_kunci)');
+        DB::statement('ALTER TABLE halaman ADD FULLTEXT INDEX ft_search (judul, konten, kata_kunci)');
     }
 
     public function down(): void

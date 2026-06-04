@@ -74,6 +74,8 @@ class MagazineResource extends BaseRumahSakitResource
     public static function table(Table $table): Table
     {
         return $table
+            ->reorderable('sort_order')
+            ->defaultSort('sort_order', 'asc')
             ->columns([
                 Tables\Columns\ImageColumn::make('cover')
                     ->disk('public')
@@ -84,6 +86,10 @@ class MagazineResource extends BaseRumahSakitResource
                     ->sortable(),
 
                 static::rsTableColumn(),
+
+                Tables\Columns\TextColumn::make('sort_order')
+                    ->label('Urutan')
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('published_at')
                     ->label('Tanggal Terbit')
@@ -108,12 +114,12 @@ class MagazineResource extends BaseRumahSakitResource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
+            // ->bulkActions([
+            //     Tables\Actions\BulkActionGroup::make([
+            //         Tables\Actions\DeleteBulkAction::make(),
+            //     ]),
+            // ]);
     }
 
     public static function mutateFormDataBeforeCreate(array $data): array

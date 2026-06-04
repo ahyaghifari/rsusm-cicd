@@ -1,4 +1,4 @@
-<div>
+﻿<div>
     <x-page-hero
         title="Fasilitas Pendukung"
         subtitle="Berbagai fasilitas lengkap kami hadirkan untuk mendukung kenyamanan dan kemudahan selama kunjungan Anda."
@@ -31,8 +31,7 @@
                 {{-- Gambar kiri --}}
                 <a href="{{ Storage::url($featured->gambar) }}"
                    class="glightbox relative overflow-hidden min-h-72 block"
-                   data-gallery="fasilitas"
-                   data-title="{{ $featured->nama }}">
+                   data-gallery="fasilitas">
                     <img
                         src="{{ Storage::url($featured->gambar) }}"
                         alt="{{ $featured->nama }}"
@@ -74,8 +73,7 @@
                             {{-- Gambar --}}
                             <a href="{{ Storage::url($f->gambar) }}"
                                class="glightbox relative overflow-hidden h-52 block"
-                               data-gallery="fasilitas"
-                               data-title="{{ $f->nama }}">
+                               data-gallery="fasilitas">
                                 <img
                                     src="{{ Storage::url($f->gambar) }}"
                                     alt="{{ $f->nama }}"
@@ -85,13 +83,22 @@
                             </a>
 
                             {{-- Konten --}}
-                            <div class="p-6">
+                            <div class="p-6" x-data="{ expanded: false }">
                                 <h3 class="text-lg font-bold text-on-surface group-hover:text-primary transition-colors duration-200 mb-3 leading-snug">
                                     {{ $f->nama }}
                                 </h3>
-                                <div class="text-sm text-on-surface-variant leading-relaxed line-clamp-4">
+                                <div class="text-sm text-on-surface-variant leading-relaxed"
+                                     :class="expanded ? '' : 'line-clamp-4'">
                                     {!! str($f->deskripsi)->sanitizeHtml() !!}
                                 </div>
+                                <button
+                                    @click="expanded = !expanded"
+                                    class="mt-2 text-xs font-semibold text-primary hover:text-primary/70
+                                           flex items-center gap-0.5 transition-colors">
+                                    <span x-text="expanded ? 'Sembunyikan' : 'Selengkapnya'"></span>
+                                    <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
+                                          :class="expanded ? 'rotate-180' : ''">expand_more</span>
+                                </button>
                             </div>
                         </div>
                     @endforeach
@@ -103,3 +110,4 @@
     </div>
     {{-- END KONTEN UTAMA --}}
 </div>
+

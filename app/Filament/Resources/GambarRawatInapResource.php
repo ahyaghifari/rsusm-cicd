@@ -83,14 +83,10 @@ class GambarRawatInapResource extends BaseResource
 
                 Forms\Components\Section::make('Pengaturan')
                     ->schema([
-                        Forms\Components\TextInput::make('sort_order')
-                            ->required()
-                            ->numeric()
-                            ->default(0),
                         Forms\Components\Toggle::make('aktif')
                             ->required()
                             ->default(true),
-                    ])->columns(2),
+                    ]),
             ]);
     }
 
@@ -140,12 +136,12 @@ class GambarRawatInapResource extends BaseResource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
+            // ->bulkActions([
+            //     Tables\Actions\BulkActionGroup::make([
+            //         Tables\Actions\DeleteBulkAction::make(),
+            //     ]),
+            // ]);
     }
 
     public static function getRelations(): array

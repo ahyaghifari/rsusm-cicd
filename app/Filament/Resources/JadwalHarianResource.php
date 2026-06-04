@@ -218,7 +218,6 @@ class JadwalHarianResource extends BaseResource
     {
         return [
             'index' => Pages\JadwalHarianPage::route('/'),
-            'excel' => Pages\JadwalHarianExcel::route('/excel'),
         ];
     }
 }

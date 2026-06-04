@@ -10,6 +10,7 @@ class PenunjangMedis extends Model
     protected $table = 'penunjang_medis';
 
     protected $fillable = [
+        'sort_order',
         'rumah_sakit_id',
         'nama',
         'gambar',
@@ -22,3 +23,4 @@ class PenunjangMedis extends Model
         return $this->belongsTo(RumahSakit::class, 'rumah_sakit_id');
     }
 }
+

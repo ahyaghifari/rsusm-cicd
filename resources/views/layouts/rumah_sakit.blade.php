@@ -25,9 +25,10 @@
     <link rel="stylesheet" href="{{ asset('css/rumah-sakit.css') }}">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2/dist/css/tom-select.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" rel="stylesheet">
 </head>
 
-<body class="bg-surface text-on-surface font-sans antialiased min-h-screen flex flex-col pb-20 lg:pb-0">
+<body class="bg-surface text-on-surface font-sans antialiased min-h-screen flex flex-col pb-20 lg:pb-0 overflow-x-hidden">
 
     <!-- TopNavBar component -->
     @include('rumah_sakit.header')
@@ -58,8 +59,18 @@
     @livewireScripts
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2/dist/js/tom-select.complete.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
     <script>
-        AOS.init()
+        AOS.init();
+
+        function initGlightbox() {
+            if (window._glb) { try { window._glb.destroy(); } catch(e) {} }
+            window._glb = GLightbox({ selector: '.glightbox', touchNavigation: true, loop: true });
+        }
+        initGlightbox();
+
+        document.addEventListener('livewire:navigated', initGlightbox);
+        document.addEventListener('livewire:update', () => setTimeout(initGlightbox, 80));
     </script>
 
     @include('rumah_sakit.partials.mobile-bottom-bar')

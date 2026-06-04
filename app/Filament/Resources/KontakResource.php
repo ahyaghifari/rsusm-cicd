@@ -14,7 +14,7 @@ class KontakResource extends BaseRumahSakitResource
 {
     protected static ?string $model = Kontak::class;
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 4;
     protected static ?string $navigationIcon = 'heroicon-o-phone';
 
     protected static ?string $navigationLabel = 'Kontak';
@@ -66,6 +66,8 @@ class KontakResource extends BaseRumahSakitResource
     public static function table(Table $table): Table
     {
         return $table
+            ->reorderable('sort_order')
+            ->defaultSort('sort_order', 'asc')
             ->columns([
                 static::rsTableColumn(),
 
@@ -123,12 +125,12 @@ class KontakResource extends BaseRumahSakitResource
                         return $data;
                     }),
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
+            // ->bulkActions([
+            //     Tables\Actions\BulkActionGroup::make([
+            //         Tables\Actions\DeleteBulkAction::make(),
+            //     ]),
+            // ]);
     }
 
     public static function getPages(): array

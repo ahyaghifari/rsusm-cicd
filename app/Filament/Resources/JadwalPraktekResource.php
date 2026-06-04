@@ -203,7 +203,6 @@ class JadwalPraktekResource extends BaseResource
     {
         return [
             'index' => Pages\JadwalPraktekPage::route('/'),
-            'excel' => Pages\JadwalPraktekExcel::route('/excel'),
         ];
     }
 }

@@ -8,13 +8,13 @@
         <div class="mb-16">
             <div class="flex items-center gap-3 mb-8">
                 <div class="w-1 h-7 bg-primary rounded-full"></div>
-                <h2 class="text-on-surface font-bold text-2xl">Operasional</h2>
+                <h2 class="text-on-surface font-bold text-2xl">Operasional & Pendaftaran</h2>
                 <span class="ml-1 bg-primary/10 text-primary text-xs font-semibold px-2.5 py-1 rounded-full">
                     {{ $operasional->count() }} kontak
                 </span>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                 @foreach($operasional as $item)
                 @php
                     $icon = 'call';

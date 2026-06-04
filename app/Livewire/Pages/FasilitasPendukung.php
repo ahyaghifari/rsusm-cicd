@@ -16,6 +16,7 @@ class FasilitasPendukung extends RsPortalComponent
     {
         $fasilitas = ModelsFasilitasPendukung::where('rumah_sakit_id', $this->rs->id)
             ->where('aktif', true)
+            ->orderBy('sort_order')
             ->get();
 
         return view('rumah_sakit.pages.fasilitas-pendukung', ['fasilitas' => $fasilitas]);

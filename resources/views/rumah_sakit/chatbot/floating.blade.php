@@ -22,8 +22,8 @@ document.addEventListener('alpine:init', () => {
     x-transition:leave-start="opacity-100 scale-100"
     x-transition:leave-end="opacity-0 scale-90 translate-y-4"
     class="fixed z-150
-           inset-x-2 bottom-18
-           lg:inset-x-auto lg:bottom-6 lg:right-6"
+           inset-0
+           lg:inset-x-auto lg:inset-y-auto lg:bottom-6 lg:right-6"
     style="transform-origin: bottom right;"
 >
     <livewire:chatbot.panel />

@@ -13,12 +13,14 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -42,7 +44,6 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label('Media Informasi')
-                    ->collapsed()
                     ,
                 NavigationGroup::make()
                     ->label('Dokter'),
@@ -50,15 +51,11 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Poliklinik / Rawat Jalan'),
                 NavigationGroup::make()
                     ->label('Layanan')
-                    ->collapsed()
                     ,
                 NavigationGroup::make()
                     ->label('Rawat Inap')
                     ->collapsed()
                     ,
-                NavigationGroup::make()
-                    ->label('Lainnya')
-                    ->collapsed()
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
@@ -76,6 +73,16 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 'panels::sidebar.nav.start',
                 fn () => view('filament.components.rumahsakit-context')
+            )
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn (): string => Blade::render('
+                    <style>
+                        .fi-sidebar-item.fi-active .fi-sidebar-item-button {
+                            background-color: #ffe4fe !important; /* Ganti warna di sini */
+                        }
+                    </style>
+                ')
             )
             ->middleware([
                 EncryptCookies::class,

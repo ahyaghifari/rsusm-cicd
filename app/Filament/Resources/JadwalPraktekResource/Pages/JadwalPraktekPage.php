@@ -9,11 +9,14 @@ use App\Models\JadwalPraktek;
 use App\Models\PoliKlinik;
 use App\Models\RumahSakit;
 use App\Models\UnitLayanan;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class JadwalPraktekPage extends Page
 {
@@ -60,7 +63,118 @@ class JadwalPraktekPage extends Page
 
     protected function getForms(): array
     {
-        return ['filterForm', 'dokterForm'];
+        return ['filterForm', 'dokterForm', 'rowsForm', 'dokterRowsForm'];
+    }
+
+    public function rowsForm(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Repeater::make('rows')
+                    ->schema([
+                        Forms\Components\Select::make('poliklinik_id')
+                            ->label('Poliklinik')
+                            ->options(fn () => $this->getPoliklinikOptions())
+                            ->searchable()
+                            ->required()
+                            ->columnSpan(2),
+
+                        Forms\Components\Select::make('dokter_id')
+                            ->label('Dokter')
+                            ->options(fn () => $this->getDokterOptions())
+                            ->searchable()
+                            ->nullable()
+                            ->live()
+                            ->afterStateUpdated(fn (Forms\Set $set, ?int $state) =>
+                                $set('nama_dokter', $state ? Dokter::find($state)?->nama : null)
+                            )
+                            ->columnSpan(2),
+
+                        Forms\Components\TextInput::make('nama_dokter')
+                            ->label('Nama Dokter')
+                            ->nullable()
+                            ->columnSpan(2),
+
+                        Forms\Components\TimePicker::make('waktu_mulai')
+                            ->label('Jam Mulai')
+                            ->seconds(false)
+                            ->nullable(),
+
+                        Forms\Components\TimePicker::make('waktu_selesai')
+                            ->label('Jam Selesai (opsional)')
+                            ->seconds(false)
+                            ->nullable()
+                            ->placeholder('—'),
+
+                        Forms\Components\Toggle::make('sesuai_perjanjian')
+                            ->label('Perjanjian')
+                            ->default(false),
+
+                        Forms\Components\TextInput::make('catatan')
+                            ->label('Catatan')
+                            ->nullable()
+                            ->columnSpan(5),
+
+                        Forms\Components\Hidden::make('sumber')->default('GENERATE'),
+                        Forms\Components\Hidden::make('id')->default(null),
+                    ])
+                    ->columns(5)
+                    ->defaultItems(0)
+                    ->addActionLabel('+ Tambah Baris')
+                    ->reorderable(false)
+                    ->itemLabel(fn (array $state): ?string =>
+                        $state['poliklinik_id']
+                            ? (PoliKlinik::find($state['poliklinik_id'])?->nama ?? null)
+                            : null
+                    ),
+            ])
+            ->statePath('');
+    }
+
+    public function dokterRowsForm(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Repeater::make('dokterRows')
+                    ->schema([
+                        Forms\Components\Select::make('hari')
+                            ->label('Hari')
+                            ->options(Hari::class)
+                            ->required()
+                            ->native(false),
+
+                        Forms\Components\Select::make('poliklinik_id')
+                            ->label('Poliklinik')
+                            ->options(fn () => $this->getPoliklinikOptions())
+                            ->searchable()
+                            ->required(),
+
+                        Forms\Components\TimePicker::make('waktu_mulai')
+                            ->label('Jam Mulai')
+                            ->seconds(false)
+                            ->nullable(),
+
+                        Forms\Components\TimePicker::make('waktu_selesai')
+                            ->label('Jam Selesai (opsional)')
+                            ->seconds(false)
+                            ->nullable()
+                            ->placeholder('—'),
+
+                        Forms\Components\Toggle::make('sesuai_perjanjian')
+                            ->label('Perjanjian')
+                            ->default(false),
+
+                        Forms\Components\TextInput::make('catatan')
+                            ->label('Catatan')
+                            ->nullable()
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(5)
+                    ->defaultItems(0)
+                    ->addActionLabel('+ Tambah Baris')
+                    ->reorderable(false),
+            ])
+            ->statePath('');
     }
 
     public function filterForm(Form $form): Form
@@ -319,58 +433,6 @@ class JadwalPraktekPage extends Page
         $this->loadDokterRows();
     }
 
-    public function updatedRows(mixed $value, string $key): void
-    {
-        if (! str_ends_with($key, '.dokter_id')) return;
-        $index = (int) explode('.', $key)[0];
-        $this->rows[$index]['nama_dokter'] = $value ? Dokter::find($value)?->nama : null;
-    }
-
-    // =========================================================================
-    // ROW MANAGEMENT — Per Hari
-    // =========================================================================
-
-    public function addRow(): void
-    {
-        $this->rows[] = [
-            'poliklinik_id'     => null,
-            'dokter_id'         => null,
-            'nama_dokter'       => null,
-            'waktu_mulai'       => null,
-            'waktu_selesai'     => null,
-            'sesuai_perjanjian' => '0',
-            'catatan'           => null,
-        ];
-    }
-
-    public function removeRow(int $index): void
-    {
-        unset($this->rows[$index]);
-        $this->rows = array_values($this->rows);
-    }
-
-    // =========================================================================
-    // ROW MANAGEMENT — Per Dokter
-    // =========================================================================
-
-    public function addDokterRow(): void
-    {
-        $this->dokterRows[] = [
-            'hari'              => 'SENIN',
-            'poliklinik_id'     => null,
-            'waktu_mulai'       => null,
-            'waktu_selesai'     => null,
-            'sesuai_perjanjian' => '0',
-            'catatan'           => null,
-        ];
-    }
-
-    public function removeDokterRow(int $index): void
-    {
-        unset($this->dokterRows[$index]);
-        $this->dokterRows = array_values($this->dokterRows);
-    }
-
     // =========================================================================
     // SAVE — Per Hari
     // =========================================================================
@@ -474,5 +536,84 @@ class JadwalPraktekPage extends Page
         Notification::make()
             ->title("Jadwal {$dokter->nama} berhasil disimpan")
             ->success()->send();
+    }
+
+    // =========================================================================
+    // EXPORT PDF
+    // =========================================================================
+
+    public function exportPdf(): StreamedResponse
+    {
+        $rsId = $this->getActiveRumahSakitId();
+
+        if (! $rsId) {
+            Notification::make()->title('Pilih Rumah Sakit terlebih dahulu')->warning()->send();
+            return response()->streamDownload(fn () => '', 'error.pdf');
+        }
+
+        $rs   = RumahSakit::find($rsId);
+        $unit = $this->selectedUnitLayananId
+            ? UnitLayanan::find($this->selectedUnitLayananId)?->nama
+            : null;
+
+        if ($this->viewMode === 'per_hari') {
+            $jadwals = JadwalPraktek::where('hari', $this->activeHari)
+                ->whereHas('poliklinik.unitLayanan', function ($q) use ($rsId) {
+                    $q->where('rumah_sakit_id', $rsId);
+                    if ($this->selectedUnitLayananId) {
+                        $q->where('id', $this->selectedUnitLayananId);
+                    }
+                })
+                ->orderBy('waktu_mulai')
+                ->with('poliklinik', 'dokter')
+                ->get();
+
+            $hariLabel  = Hari::from($this->activeHari)->getLabel();
+            $title      = "Jadwal Praktek — {$hariLabel}";
+            $filename   = "jadwal-" . strtolower($this->activeHari) . "-" . now()->format('Ymd') . ".pdf";
+            $dokterNama = null;
+
+        } else {
+            if (! $this->selectedDokterId) {
+                Notification::make()->title('Pilih Dokter terlebih dahulu')->warning()->send();
+                return response()->streamDownload(fn () => '', 'error.pdf');
+            }
+
+            $dokter     = Dokter::find($this->selectedDokterId);
+            $hariOrder  = array_flip(['SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU', 'MINGGU']);
+
+            $jadwals = JadwalPraktek::where('dokter_id', $this->selectedDokterId)
+                ->whereIn('poliklinik_id', $this->getPoliIds())
+                ->with('poliklinik')
+                ->get()
+                ->sortBy(fn ($j) => $hariOrder[$j->hari->value] ?? 9)
+                ->values();
+
+            $dokterNama = $dokter?->nama ?? '-';
+            $hariLabel  = null;
+            $title      = "Jadwal Praktek — {$dokterNama}";
+            $filename   = "jadwal-dokter-" . Str::slug($dokterNama) . "-" . now()->format('Ymd') . ".pdf";
+        }
+
+        $pdf = Pdf::loadView('pdf.jadwal-praktek', [
+            'jadwals'    => $jadwals,
+            'title'      => $title,
+            'rsName'     => $rs?->nama ?? '-',
+            'unit'       => $unit,
+            'viewMode'   => $this->viewMode,
+            'hariLabel'  => $hariLabel ?? '',
+            'dokterNama' => $dokterNama ?? '',
+            'tanggal'    => now()->translatedFormat('d F Y, H:i') . ' WITA',
+        ])->setPaper('a4', 'landscape')
+          ->setOption('margin_top', 10)
+          ->setOption('margin_bottom', 10)
+          ->setOption('margin_left', 12)
+          ->setOption('margin_right', 12);
+
+        return response()->streamDownload(
+            fn () => print($pdf->output()),
+            $filename,
+            ['Content-Type' => 'application/pdf']
+        );
     }
 }

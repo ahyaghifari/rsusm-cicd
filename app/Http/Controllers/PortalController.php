@@ -40,7 +40,7 @@ class PortalController extends Controller
 
         $daftarSpesialis = Spesialis::whereHas('rumahsakit', function ($q) use ($validated) {
             $q->where('slug', $validated['rs'])->where('aktif', true);
-        })->whereHas('dokter')->get(['id', 'nama']);
+        })->whereHas('dokter')->get(['id', 'nama', 'slug']);
 
         return response()->json($daftarSpesialis);
     }

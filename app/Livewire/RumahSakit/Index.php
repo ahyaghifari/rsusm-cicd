@@ -4,6 +4,7 @@ namespace App\Livewire\RumahSakit;
 
 use App\Models\Banner;
 use App\Models\Dokter;
+use App\Models\Faq;
 use App\Models\LayananUnggulan;
 use App\Models\LinkLayanan;
 use App\Models\Partner;
@@ -46,7 +47,9 @@ class Index extends Component
             ->orderBy('sort_order')
             ->get();
 
-        $layananUnggulan = LayananUnggulan::where('rumah_sakit_id', $this->rs->id)->get();
+        $layananUnggulan = LayananUnggulan::where('rumah_sakit_id', $this->rs->id)
+            ->orderBy('sort_order')
+            ->get();
 
         $dokterKami = Dokter::where('rumah_sakit_id', $this->rs->id)
             ->with('spesialis')
@@ -57,6 +60,7 @@ class Index extends Component
 
         $linkLayanan = LinkLayanan::where('rumah_sakit_id', $this->rs->id)
             ->where('aktif', true)
+            ->orderBy('sort_order')
             ->get();
 
         $partnerAsuransi = Partner::where('rumah_sakit_id', $this->rs->id)
@@ -80,6 +84,12 @@ class Index extends Component
             ->limit(6)
             ->get();
 
+        $faqs = Faq::where('rumah_sakit_id', $this->rs->id)
+            ->aktif()
+            ->orderBy('sort_order')
+            ->limit(5)
+            ->get();
+
         return view('rumah_sakit.index', [
             'banner'             => $banner,
             'layanan_unggulan'   => $layananUnggulan,
@@ -88,6 +98,7 @@ class Index extends Component
             'partner_asuransi'   => $partnerAsuransi,
             'partner_perusahaan' => $partnerPerusahaan,
             'promos'             => $promos,
+            'faqs'               => $faqs,
         ]);
     }
 }

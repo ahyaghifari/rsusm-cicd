@@ -119,10 +119,10 @@ class PromoResource extends BaseRumahSakitResource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
             ]);
+            // ->bulkActions([
+            //     Tables\Actions\DeleteBulkAction::make(),
+            // ]);
     }
 
     public static function mutateFormDataBeforeCreate(array $data): array

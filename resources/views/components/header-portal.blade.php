@@ -4,8 +4,8 @@
 
         {{-- Logo kiri: Syifa Medika --}}
         <a href="/" class="shrink-0">
-            @if(file_exists(public_path('img/syifa-medika-banjarbaru.png')))
-                <img src="{{ asset('img/syifa-medika-banjarbaru.png') }}"
+            @if(file_exists(public_path('img/syifa-medika.png')))
+                <img src="{{ asset('img/syifa-medika.png') }}"
                      alt="RSU Syifa Medika"
                      class="h-12 md:h-14 w-auto object-contain">
             @else

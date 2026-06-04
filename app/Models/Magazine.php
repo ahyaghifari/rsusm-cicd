@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Magazine extends Model
 {
     protected $fillable = [
+        'sort_order',
         'rumah_sakit_id',
         'judul',
         'slug',
@@ -32,3 +33,4 @@ class Magazine extends Model
         return $query->where('aktif', true);
     }
 }
+

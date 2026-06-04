@@ -17,6 +17,7 @@ class RawatInap extends RsPortalComponent
     {
         $gedungs = Gedung::query()
             ->where('rumah_sakit_id', $this->rs->id)
+            ->orderBy('sort_order')
             ->with(['rawatInap' => function ($query) {
                 $query->orderBy('sort_order')
                     ->with(['fasilitasRawatInap', 'gambar' => fn ($q) => $q->where('aktif', true)->orderBy('sort_order')])

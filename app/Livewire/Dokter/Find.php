@@ -65,14 +65,14 @@ class Find extends Component
                 $query->where('nama', 'like', '%' . $this->search . '%');
             })
 
-            // filter spesialis
+            // filter spesialis by slug
             ->when($this->spesialis != '', function ($query) {
-                $query->where('spesialis_id', $this->spesialis);
+                $query->whereHas('spesialis', fn ($q) => $q->where('slug', $this->spesialis));
             })
 
             ->with('spesialis')
             ->orderBy('nama')
-            ->paginate(10);
+            ->paginate(9);
 
         $data_spesialis = Spesialis::where('rumah_sakit_id', $this->rumah_sakit_id) // Gunakan ID langsung
             ->whereHas('dokter')

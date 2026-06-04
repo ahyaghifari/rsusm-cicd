@@ -17,7 +17,9 @@ class PenunjangMedis extends RsPortalComponent
 
     public function render()
     {
-        $penunjang_medis = ModelsPenunjangMedis::where('rumah_sakit_id', $this->rs->id)->get();
+        $penunjang_medis = ModelsPenunjangMedis::where('rumah_sakit_id', $this->rs->id)
+            ->orderBy('sort_order')
+            ->get();
 
         return view('rumah_sakit.pages.penunjang-medis', ['data' => $penunjang_medis]);
     }
