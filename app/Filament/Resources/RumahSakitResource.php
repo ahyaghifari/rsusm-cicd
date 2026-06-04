@@ -117,7 +117,7 @@ class RumahSakitResource extends BaseResource
                     ->label('Pengaturan')
                     ->icon('heroicon-o-cog-6-tooth')
                     ->color('gray')
-                    ->visible(fn () => static::user()->hasAnyRole('admin', 'super_admin', 'informasi'))
+                    ->visible(fn () => static::user()->hasAnyRole('admin', 'informasi'))
                     ->fillForm(fn (RumahSakit $record): array => [
                         'no_emergency'  => $record->no_emergency,
                         'no_hotline'    => $record->no_hotline,
