@@ -2,7 +2,7 @@
     <x-page-hero title="Dokter Kami" subtitle="Temukan dokter spesialis terbaik kami untuk kebutuhan kesehatan Anda." />
 
     {{-- Filter --}}
-    <div class="bg-white border-2 border-primary shadow-lg -translate-y-5
+    <div class="relative z-20 bg-white border-2 border-primary shadow-lg -translate-y-5
                 p-4 rounded-xl w-10/12 md:w-9/12 mx-auto
                 grid grid-cols-1 sm:grid-cols-2 gap-3">
 
