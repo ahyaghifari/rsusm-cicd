@@ -16,6 +16,10 @@
                               text-primary hover:bg-primary hover:text-white transition-colors shrink-0">
                         @if($kontak->logo)
                             <span class="size-5 flex items-center justify-center">{!! $kontak->logo !!}</span>
+                        @elseif($kontak->gambar)
+                            <img src="{{ Storage::url($kontak->gambar) }}"
+                                             alt="{{ $kontak->label }}"
+                                             class="w-8 h-8 object-contain">
                         @else
                             <span class="material-symbols-outlined text-[18px]">share</span>
                         @endif
