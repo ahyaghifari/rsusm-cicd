@@ -28,7 +28,7 @@
     <link href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" rel="stylesheet">
 </head>
 
-<body class="bg-surface text-on-surface font-sans antialiased min-h-screen flex flex-col pb-20 lg:pb-0">
+<body class="bg-surface text-on-surface font-sans antialiased min-h-screen flex flex-col pb-20 lg:pb-0 overflow-x-hidden">
 
     <!-- TopNavBar component -->
     @include('rumah_sakit.header')

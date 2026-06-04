@@ -6,6 +6,7 @@ use App\Enums\Hari;
 use App\Filament\Resources\JadwalHarianResource;
 use App\Models\Dokter;
 use App\Models\JadwalHarian;
+use App\Models\JadwalHarianPerubahan;
 use App\Models\JadwalPraktek;
 use App\Models\PoliKlinik;
 use App\Models\RumahSakit;
@@ -15,6 +16,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class JadwalHarianPage extends Page
@@ -34,6 +36,10 @@ class JadwalHarianPage extends Page
     public string $activeTanggal = '';
     public array $rows = [];
     public array $rowsCache = [];
+
+    // Modal perubahan
+    public bool  $showPerubahan  = false;
+    public array $dataPerubahan  = ['ditambah' => [], 'diubah' => []];
 
     protected const DAY_MAP = [
         0 => 'MINGGU', 1 => 'SENIN', 2 => 'SELASA', 3 => 'RABU',
@@ -172,6 +178,7 @@ class JadwalHarianPage extends Page
             ->get();
 
         $this->rows = $jadwals->map(fn ($j) => [
+            'id'             => $j->id,
             'poliklinik_id'  => $j->poliklinik_id,
             'dokter_id'      => $j->dokter_id,
             'nama_dokter'    => $j->nama_dokter,
@@ -179,6 +186,7 @@ class JadwalHarianPage extends Page
             'jam_selesai'    => $j->jam_selesai?->format('H:i'),
             'status_layanan' => $j->status_layanan->value,
             'catatan'        => $j->catatan,
+            'sumber'         => $j->sumber,
         ])->toArray();
 
         $this->rowsCache[$this->activeTanggal] = $this->rows;
@@ -295,6 +303,7 @@ class JadwalHarianPage extends Page
     public function addRow(): void
     {
         $this->rows[] = [
+            'id'             => null,
             'poliklinik_id'  => null,
             'dokter_id'      => null,
             'nama_dokter'    => null,
@@ -302,6 +311,7 @@ class JadwalHarianPage extends Page
             'jam_selesai'    => null,
             'status_layanan' => 'BUKA',
             'catatan'        => null,
+            'sumber'         => 'MANUAL',
         ];
     }
 
@@ -373,8 +383,12 @@ class JadwalHarianPage extends Page
                 ->whereIn('poliklinik_id', $poliIds)
                 ->delete();
 
+            $userId = Auth::id();
+
             foreach ($this->rows as $row) {
-                JadwalHarian::create([
+                $sumber = $row['sumber'] ?? 'MANUAL';
+
+                $jh = JadwalHarian::create([
                     'poliklinik_id'  => $row['poliklinik_id'],
                     'tanggal'        => $this->activeTanggal,
                     'dokter_id'      => $row['dokter_id'] ?: null,
@@ -383,7 +397,24 @@ class JadwalHarianPage extends Page
                     'jam_selesai'    => $row['jam_selesai'] ?: null,
                     'status_layanan' => $row['status_layanan'],
                     'catatan'        => $row['catatan'] ?: null,
+                    'sumber'         => $sumber,
                 ]);
+
+                $jhId = $jh->getKey();
+
+                if ($sumber === 'GENERATE' && $row['status_layanan'] === 'LIBUR') {
+                    // Baris generate yang diubah jadi LIBUR → catat perubahan
+                    JadwalHarianPerubahan::create([
+                        'jadwal_harian_id' => $jhId,
+                        'user_id'          => $userId,
+                        'jam_mulai'        => $row['jam_mulai'] ?: null,
+                        'jam_selesai'      => $row['jam_selesai'] ?: null,
+                        'status_layanan'   => $row['status_layanan'],
+                        'catatan'          => $row['catatan'] ?: null,
+                    ]);
+                }
+                // Baris MANUAL → cukup dari sumber=MANUAL di jadwal_harian
+                // Baris GENERATE BUKA → tidak perlu dicatat
             }
         });
 
@@ -394,5 +425,48 @@ class JadwalHarianPage extends Page
         Notification::make()
             ->title("Jadwal {$this->getNamaHariAktif()}, {$tanggalFormatted} berhasil disimpan")
             ->success()->send();
+    }
+
+    // =========================================================================
+    // MODAL PERUBAHAN
+    // =========================================================================
+
+    public function openPerubahan(): void
+    {
+        $rsId = $this->getActiveRumahSakitId();
+        if (! $rsId) return;
+
+        $scope = function ($q) use ($rsId) {
+            $q->where('tanggal', $this->activeTanggal)
+              ->whereHas('poliklinik.unitLayanan', function ($q2) use ($rsId) {
+                  $q2->where('rumah_sakit_id', $rsId);
+                  if ($this->selectedUnitLayananId) {
+                      $q2->where('id', $this->selectedUnitLayananId);
+                  }
+              });
+        };
+
+        // DITAMBAH: baris manual dari jadwal_harian langsung
+        $ditambah = JadwalHarian::where('sumber', 'MANUAL')
+            ->where($scope)
+            ->with('poliklinik')
+            ->get();
+
+        // DIUBAH: semua record di jadwal_harian_perubahan (semuanya adalah perubahan)
+        $diubah = JadwalHarianPerubahan::whereHas('jadwalHarian', $scope)
+            ->with('jadwalHarian.poliklinik', 'user')
+            ->get();
+
+        $this->dataPerubahan = [
+            'ditambah' => $ditambah->toArray(),
+            'diubah'   => $diubah->toArray(),
+        ];
+
+        $this->showPerubahan = true;
+    }
+
+    public function closePerubahan(): void
+    {
+        $this->showPerubahan = false;
     }
 }

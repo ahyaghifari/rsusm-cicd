@@ -6,6 +6,7 @@ use App\Enums\StatusLayanan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class JadwalHarian extends Model
 {
@@ -22,6 +23,7 @@ class JadwalHarian extends Model
         'jam_selesai',
         'status_layanan',
         'catatan',
+        'sumber',
     ];
 
     protected function casts(): array
@@ -42,5 +44,10 @@ class JadwalHarian extends Model
     public function dokter(): BelongsTo
     {
         return $this->belongsTo(Dokter::class, 'dokter_id');
+    }
+
+    public function perubahan(): HasOne
+    {
+        return $this->hasOne(JadwalHarianPerubahan::class, 'jadwal_harian_id');
     }
 }
