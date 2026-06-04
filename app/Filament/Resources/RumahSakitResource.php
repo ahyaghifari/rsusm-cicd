@@ -109,8 +109,8 @@ class RumahSakitResource extends BaseResource
                 Tables\Actions\EditAction::make()
                     ->visible(fn () => static::isSuperAdmin()),
 
-                Tables\Actions\DeleteAction::make()
-                    ->visible(fn () => static::isSuperAdmin()),
+                // Tables\Actions\DeleteAction::make()
+                //     ->visible(fn () => static::isSuperAdmin()),
 
                 // Admin: hanya bisa ubah field operasional via modal
                 Tables\Actions\Action::make('pengaturan')
