@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\JadwalHarianResource\Pages;
 
 use App\Enums\Hari;
+use App\Enums\StatusLayanan;
 use App\Filament\Resources\JadwalHarianResource;
 use App\Models\Dokter;
 use App\Models\JadwalHarian;
@@ -66,7 +67,71 @@ class JadwalHarianPage extends Page
 
     protected function getForms(): array
     {
-        return ['filterForm'];
+        return ['filterForm', 'rowsForm'];
+    }
+
+    public function rowsForm(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Repeater::make('rows')
+                    ->schema([
+                        Forms\Components\Select::make('poliklinik_id')
+                            ->label('Poliklinik')
+                            ->options(fn () => $this->getPoliklinikOptions())
+                            ->searchable()
+                            ->required()
+                            ->columnSpan(2),
+
+                        Forms\Components\Select::make('dokter_id')
+                            ->label('Dokter')
+                            ->options(fn () => $this->getDokterOptions())
+                            ->searchable()
+                            ->nullable()
+                            ->live()
+                            ->afterStateUpdated(fn (Forms\Set $set, ?int $state) =>
+                                $set('nama_dokter', $state ? Dokter::find($state)?->nama : null)
+                            )
+                            ->columnSpan(2),
+
+                        Forms\Components\TextInput::make('nama_dokter')
+                            ->label('Nama Dokter')
+                            ->nullable()
+                            ->columnSpan(2),
+
+                        Forms\Components\TimePicker::make('jam_mulai')
+                            ->label('Jam Mulai')
+                            ->seconds(false)
+                            ->required(),
+
+                        Forms\Components\TimePicker::make('jam_selesai')
+                            ->label('Jam Selesai (opsional)')
+                            ->seconds(false)
+                            ->nullable()
+                            ->placeholder('—'),
+
+                        Forms\Components\Select::make('status_layanan')
+                            ->label('Status')
+                            ->options(StatusLayanan::class)
+                            ->required()
+                            ->default('BUKA'),
+
+                        // Field tersembunyi — dipertahankan agar tidak hilang dari state
+                        Forms\Components\Hidden::make('sumber')->default('MANUAL'),
+                        Forms\Components\Hidden::make('id')->default(null),
+                    ])
+                    ->columns(3)
+                    ->defaultItems(0)
+                    ->addActionLabel('+ Tambah Baris')
+                    ->reorderable(false)
+                    ->deletable(true)
+                    ->itemLabel(fn (array $state): ?string =>
+                        $state['poliklinik_id']
+                            ? (PoliKlinik::find($state['poliklinik_id'])?->nama ?? null)
+                            : null
+                    ),
+            ])
+            ->statePath('');
     }
 
     public function filterForm(Form $form): Form
@@ -292,41 +357,9 @@ class JadwalHarianPage extends Page
         $this->loadRows();
     }
 
-    public function updatedRows(mixed $value, ?string $key = null): void
-    {
-        if (! $key || ! str_ends_with($key, '.dokter_id')) return;
-
-        $index = (int) explode('.', $key)[0];
-
-        $this->rows[$index]['nama_dokter'] = $value
-            ? Dokter::find($value)?->nama
-            : null;
-    }
-
     // =========================================================================
     // ROW MANAGEMENT
     // =========================================================================
-
-    public function addRow(): void
-    {
-        $this->rows[] = [
-            'id'             => null,
-            'poliklinik_id'  => null,
-            'dokter_id'      => null,
-            'nama_dokter'    => null,
-            'jam_mulai'      => null,
-            'jam_selesai'    => null,
-            'status_layanan' => 'BUKA',
-            'catatan'        => null,
-            'sumber'         => 'MANUAL',
-        ];
-    }
-
-    public function removeRow(int $index): void
-    {
-        unset($this->rows[$index]);
-        $this->rows = array_values($this->rows);
-    }
 
     public function resetJadwal(): void
     {

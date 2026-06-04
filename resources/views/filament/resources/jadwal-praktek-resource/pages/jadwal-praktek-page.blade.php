@@ -146,107 +146,13 @@
                     </div>
                 </x-slot>
 
-                <div class="flex flex-col gap-4">
-                    <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
-                        <table class="w-full text-left border-collapse min-w-250">
-                            <thead>
-                                <tr class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                                    <th class="px-3 py-3 text-xs font-semibold text-gray-400 w-8 text-center">#</th>
-                                    <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-45">Poliklinik <span class="text-red-400">*</span></th>
-                                    <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-40">Dokter</th>
-                                    <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-40">Nama Dokter</th>
-                                    <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 w-28">Jam Mulai</th>
-                                    <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 w-28">Jam Selesai</th>
-                                    <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 w-24 text-center">Perjanjian</th>
-                                    <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-36">Catatan</th>
-                                    <th class="px-3 py-3 w-10"></th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                                @forelse($rows as $i => $row)
-                                    <tr class="bg-white dark:bg-gray-900 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors">
-                                        <td class="px-3 py-2 text-xs text-gray-400 text-center select-none">{{ $i + 1 }}</td>
+                {{-- Rows via Filament Repeater --}}
+                {{ $this->rowsForm }}
 
-                                        <td class="px-2 py-1.5">
-                                            <select wire:model="rows.{{ $i }}.poliklinik_id"
-                                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500">
-                                                <option value="">— Pilih —</option>
-                                                @foreach($this->getPoliklinikOptions() as $pId => $pNama)
-                                                    <option value="{{ $pId }}" @selected((string)$row['poliklinik_id'] === (string)$pId)>{{ $pNama }}</option>
-                                                @endforeach
-                                            </select>
-                                        </td>
-
-                                        <td class="px-2 py-1.5">
-                                            <select wire:model.live="rows.{{ $i }}.dokter_id"
-                                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500">
-                                                <option value="">— Opsional —</option>
-                                                @foreach($this->getDokterOptions() as $dId => $dNama)
-                                                    <option value="{{ $dId }}" @selected((string)$row['dokter_id'] === (string)$dId)>{{ $dNama }}</option>
-                                                @endforeach
-                                            </select>
-                                        </td>
-
-                                        <td class="px-2 py-1.5">
-                                            <input type="text" wire:model="rows.{{ $i }}.nama_dokter" placeholder="Nama dokter..."
-                                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500"/>
-                                        </td>
-
-                                        <td class="px-2 py-1.5">
-                                            <input type="time" wire:model="rows.{{ $i }}.waktu_mulai"
-                                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500 font-mono"/>
-                                        </td>
-
-                                        <td class="px-2 py-1.5">
-                                            <input type="time" wire:model="rows.{{ $i }}.waktu_selesai"
-                                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500 font-mono"/>
-                                        </td>
-
-                                        <td class="px-2 py-1.5 text-center">
-                                            <input type="checkbox" wire:model="rows.{{ $i }}.sesuai_perjanjian" value="1"
-                                                class="rounded border-gray-300 text-primary-600 shadow-sm focus:ring-primary-500 cursor-pointer"/>
-                                        </td>
-
-                                        <td class="px-2 py-1.5">
-                                            <input type="text" wire:model="rows.{{ $i }}.catatan" placeholder="Catatan..."
-                                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500"/>
-                                        </td>
-
-                                        <td class="px-2 py-1.5 text-center">
-                                            <button wire:click="removeRow({{ $i }})" wire:confirm="Hapus baris ini?"
-                                                class="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
-                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                </svg>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="9" class="px-6 py-10 text-center text-gray-400 text-sm">
-                                            Belum ada jadwal untuk hari <strong>{{ \App\Enums\Hari::from($activeHari)->getLabel() }}</strong>.
-                                            Klik <strong>+ Tambah Baris</strong> untuk mulai.
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="flex items-center justify-between">
-                        <button wire:click="addRow"
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
-                                   border border-dashed border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400
-                                   hover:border-primary-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                            </svg>
-                            Tambah Baris
-                        </button>
-                        <x-filament::button wire:click="saveJadwal" icon="heroicon-m-cloud-arrow-up">
-                            Simpan Jadwal {{ \App\Enums\Hari::from($activeHari)->getLabel() }}
-                        </x-filament::button>
-                    </div>
+                <div class="flex justify-end mt-2">
+                    <x-filament::button wire:click="saveJadwal" icon="heroicon-m-cloud-arrow-up">
+                        Simpan Jadwal {{ \App\Enums\Hari::from($activeHari)->getLabel() }}
+                    </x-filament::button>
                 </div>
             </x-filament::section>
 
@@ -288,100 +194,13 @@
                         </div>
                     </x-slot>
 
-                    <div class="flex flex-col gap-4">
-                        <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
-                            <table class="w-full text-left border-collapse min-w-200">
-                                <thead>
-                                    <tr class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                                        <th class="px-3 py-3 text-xs font-semibold text-gray-400 w-8 text-center">#</th>
-                                        <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 w-32">Hari <span class="text-red-400">*</span></th>
-                                        <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-45">Poliklinik <span class="text-red-400">*</span></th>
-                                        <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 w-28">Jam Mulai</th>
-                                        <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 w-28">Jam Selesai</th>
-                                        <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 w-24 text-center">Perjanjian</th>
-                                        <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-36">Catatan</th>
-                                        <th class="px-3 py-3 w-10"></th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                                    @forelse($dokterRows as $i => $row)
-                                        <tr class="bg-white dark:bg-gray-900 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors">
-                                            <td class="px-3 py-2 text-xs text-gray-400 text-center select-none">{{ $i + 1 }}</td>
+                    {{-- Rows via Filament Repeater --}}
+                    {{ $this->dokterRowsForm }}
 
-                                            <td class="px-2 py-1.5">
-                                                <select wire:model="dokterRows.{{ $i }}.hari"
-                                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500">
-                                                    @foreach(\App\Enums\Hari::cases() as $h)
-                                                        <option value="{{ $h->value }}" @selected($row['hari'] === $h->value)>{{ $h->getLabel() }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </td>
-
-                                            <td class="px-2 py-1.5">
-                                                <select wire:model="dokterRows.{{ $i }}.poliklinik_id"
-                                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500">
-                                                    <option value="">— Pilih —</option>
-                                                    @foreach($this->getPoliklinikOptions() as $pId => $pNama)
-                                                        <option value="{{ $pId }}" @selected((string)$row['poliklinik_id'] === (string)$pId)>{{ $pNama }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </td>
-
-                                            <td class="px-2 py-1.5">
-                                                <input type="time" wire:model="dokterRows.{{ $i }}.waktu_mulai"
-                                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500 font-mono"/>
-                                            </td>
-
-                                            <td class="px-2 py-1.5">
-                                                <input type="time" wire:model="dokterRows.{{ $i }}.waktu_selesai"
-                                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500 font-mono"/>
-                                            </td>
-
-                                            <td class="px-2 py-1.5 text-center">
-                                                <input type="checkbox" wire:model="dokterRows.{{ $i }}.sesuai_perjanjian" value="1"
-                                                    class="rounded border-gray-300 text-primary-600 shadow-sm focus:ring-primary-500 cursor-pointer"/>
-                                            </td>
-
-                                            <td class="px-2 py-1.5">
-                                                <input type="text" wire:model="dokterRows.{{ $i }}.catatan" placeholder="Catatan..."
-                                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500"/>
-                                            </td>
-
-                                            <td class="px-2 py-1.5 text-center">
-                                                <button wire:click="removeDokterRow({{ $i }})" wire:confirm="Hapus baris ini?"
-                                                    class="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
-                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                    </svg>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="8" class="px-6 py-10 text-center text-gray-400 text-sm">
-                                                Belum ada jadwal untuk <strong>{{ $dokterTerpilih?->nama }}</strong>.
-                                                Klik <strong>+ Tambah Baris</strong> untuk mulai.
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="flex items-center justify-between">
-                            <button wire:click="addDokterRow"
-                                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
-                                       border border-dashed border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400
-                                       hover:border-primary-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                </svg>
-                                Tambah Baris
-                            </button>
-                            <x-filament::button wire:click="saveDokterJadwal" icon="heroicon-m-cloud-arrow-up">
-                                Simpan Jadwal {{ $dokterTerpilih?->nama }}
-                            </x-filament::button>
-                        </div>
+                    <div class="flex justify-end mt-2">
+                        <x-filament::button wire:click="saveDokterJadwal" icon="heroicon-m-cloud-arrow-up">
+                            Simpan Jadwal {{ $dokterTerpilih?->nama }}
+                        </x-filament::button>
                     </div>
                 </x-filament::section>
             @endif

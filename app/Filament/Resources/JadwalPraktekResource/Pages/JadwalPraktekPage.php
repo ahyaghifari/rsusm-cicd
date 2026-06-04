@@ -63,7 +63,118 @@ class JadwalPraktekPage extends Page
 
     protected function getForms(): array
     {
-        return ['filterForm', 'dokterForm'];
+        return ['filterForm', 'dokterForm', 'rowsForm', 'dokterRowsForm'];
+    }
+
+    public function rowsForm(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Repeater::make('rows')
+                    ->schema([
+                        Forms\Components\Select::make('poliklinik_id')
+                            ->label('Poliklinik')
+                            ->options(fn () => $this->getPoliklinikOptions())
+                            ->searchable()
+                            ->required()
+                            ->columnSpan(2),
+
+                        Forms\Components\Select::make('dokter_id')
+                            ->label('Dokter')
+                            ->options(fn () => $this->getDokterOptions())
+                            ->searchable()
+                            ->nullable()
+                            ->live()
+                            ->afterStateUpdated(fn (Forms\Set $set, ?int $state) =>
+                                $set('nama_dokter', $state ? Dokter::find($state)?->nama : null)
+                            )
+                            ->columnSpan(2),
+
+                        Forms\Components\TextInput::make('nama_dokter')
+                            ->label('Nama Dokter')
+                            ->nullable()
+                            ->columnSpan(2),
+
+                        Forms\Components\TimePicker::make('waktu_mulai')
+                            ->label('Jam Mulai')
+                            ->seconds(false)
+                            ->nullable(),
+
+                        Forms\Components\TimePicker::make('waktu_selesai')
+                            ->label('Jam Selesai (opsional)')
+                            ->seconds(false)
+                            ->nullable()
+                            ->placeholder('—'),
+
+                        Forms\Components\Toggle::make('sesuai_perjanjian')
+                            ->label('Perjanjian')
+                            ->default(false),
+
+                        Forms\Components\TextInput::make('catatan')
+                            ->label('Catatan')
+                            ->nullable()
+                            ->columnSpan(3),
+
+                        Forms\Components\Hidden::make('sumber')->default('GENERATE'),
+                        Forms\Components\Hidden::make('id')->default(null),
+                    ])
+                    ->columns(3)
+                    ->defaultItems(0)
+                    ->addActionLabel('+ Tambah Baris')
+                    ->reorderable(false)
+                    ->itemLabel(fn (array $state): ?string =>
+                        $state['poliklinik_id']
+                            ? (PoliKlinik::find($state['poliklinik_id'])?->nama ?? null)
+                            : null
+                    ),
+            ])
+            ->statePath('');
+    }
+
+    public function dokterRowsForm(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Repeater::make('dokterRows')
+                    ->schema([
+                        Forms\Components\Select::make('hari')
+                            ->label('Hari')
+                            ->options(Hari::class)
+                            ->required()
+                            ->native(false),
+
+                        Forms\Components\Select::make('poliklinik_id')
+                            ->label('Poliklinik')
+                            ->options(fn () => $this->getPoliklinikOptions())
+                            ->searchable()
+                            ->required(),
+
+                        Forms\Components\TimePicker::make('waktu_mulai')
+                            ->label('Jam Mulai')
+                            ->seconds(false)
+                            ->nullable(),
+
+                        Forms\Components\TimePicker::make('waktu_selesai')
+                            ->label('Jam Selesai (opsional)')
+                            ->seconds(false)
+                            ->nullable()
+                            ->placeholder('—'),
+
+                        Forms\Components\Toggle::make('sesuai_perjanjian')
+                            ->label('Perjanjian')
+                            ->default(false),
+
+                        Forms\Components\TextInput::make('catatan')
+                            ->label('Catatan')
+                            ->nullable()
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(3)
+                    ->defaultItems(0)
+                    ->addActionLabel('+ Tambah Baris')
+                    ->reorderable(false),
+            ])
+            ->statePath('');
     }
 
     public function filterForm(Form $form): Form
@@ -320,58 +431,6 @@ class JadwalPraktekPage extends Page
     public function updatedSelectedDokterId(): void
     {
         $this->loadDokterRows();
-    }
-
-    public function updatedRows(mixed $value, string $key): void
-    {
-        if (! str_ends_with($key, '.dokter_id')) return;
-        $index = (int) explode('.', $key)[0];
-        $this->rows[$index]['nama_dokter'] = $value ? Dokter::find($value)?->nama : null;
-    }
-
-    // =========================================================================
-    // ROW MANAGEMENT — Per Hari
-    // =========================================================================
-
-    public function addRow(): void
-    {
-        $this->rows[] = [
-            'poliklinik_id'     => null,
-            'dokter_id'         => null,
-            'nama_dokter'       => null,
-            'waktu_mulai'       => null,
-            'waktu_selesai'     => null,
-            'sesuai_perjanjian' => '0',
-            'catatan'           => null,
-        ];
-    }
-
-    public function removeRow(int $index): void
-    {
-        unset($this->rows[$index]);
-        $this->rows = array_values($this->rows);
-    }
-
-    // =========================================================================
-    // ROW MANAGEMENT — Per Dokter
-    // =========================================================================
-
-    public function addDokterRow(): void
-    {
-        $this->dokterRows[] = [
-            'hari'              => 'SENIN',
-            'poliklinik_id'     => null,
-            'waktu_mulai'       => null,
-            'waktu_selesai'     => null,
-            'sesuai_perjanjian' => '0',
-            'catatan'           => null,
-        ];
-    }
-
-    public function removeDokterRow(int $index): void
-    {
-        unset($this->dokterRows[$index]);
-        $this->dokterRows = array_values($this->dokterRows);
     }
 
     // =========================================================================
