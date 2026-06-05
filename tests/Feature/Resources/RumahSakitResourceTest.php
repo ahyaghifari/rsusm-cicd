@@ -28,12 +28,12 @@ class RumahSakitResourceTest extends TestCase
             ->assertOk();
     }
 
-    public function test_admin_can_list(): void
+    public function test_admin_cannot_list(): void
     {
         $rs = RumahSakit::factory()->create();
         $this->actingAs($this->adminUser($rs->id))
             ->get($this->adminUrl('rumah-sakits'))
-            ->assertOk();
+            ->assertForbidden();
     }
 
     public function test_super_admin_can_access_create_page(): void

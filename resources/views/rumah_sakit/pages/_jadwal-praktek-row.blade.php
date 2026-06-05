@@ -1,6 +1,17 @@
 {{-- Partial: 1 baris dokter pada kartu jadwal praktek --}}
 {{-- Variables: $sesi (JadwalPraktek), $warna (hex string) --}}
+@php
+    $dokterUrl = $sesi->dokter?->slug
+        ? route('rumahsakit.dokter_show', ['rumahsakit' => $rs->slug, 'dokter' => $sesi->dokter->slug])
+        : null;
+@endphp
+
+@if($dokterUrl)
+<a wire:navigate href="{{ $dokterUrl }}"
+   class="flex items-center gap-3 px-4 py-3 hover:bg-black/4 transition-colors duration-150 group">
+@else
 <div class="flex items-center gap-3 px-4 py-3">
+@endif
 
     {{-- Avatar dokter --}}
     <div class="shrink-0">
@@ -21,8 +32,12 @@
 
     {{-- Info dokter + jam --}}
     <div class="flex-1 min-w-0">
-        <p class="font-semibold text-sm text-on-surface truncate leading-snug">
+        <p class="font-semibold text-sm text-on-surface truncate leading-snug
+                  {{ $dokterUrl ? 'group-hover:text-primary transition-colors duration-150' : '' }}">
             {{ $sesi->nama_dokter ?? $sesi->dokter?->nama ?? '—' }}
+            @if($dokterUrl)
+                <span class="material-symbols-outlined text-[11px] opacity-40 group-hover:opacity-70 align-middle ml-0.5">open_in_new</span>
+            @endif
         </p>
         <div class="flex items-center gap-2 mt-0.5 flex-wrap">
             @if($sesi->waktu_mulai)
@@ -55,4 +70,8 @@
         @endif
     </div>
 
+@if($dokterUrl)
+</a>
+@else
 </div>
+@endif

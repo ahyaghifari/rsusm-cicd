@@ -208,7 +208,7 @@
 
                 <div class="flex flex-col gap-4">
                     <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
-                        <table class="w-full text-left border-collapse min-w-[900px]">
+                        <table class="w-full text-left border-collapse min-w-225">
                             <thead>
                                 <tr class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                                     <th class="px-3 py-3 text-xs font-semibold text-gray-400 w-8 text-center">#</th>
@@ -289,7 +289,10 @@
                                         </td>
 
                                         <td class="px-2 py-1.5 text-center">
-                                            <input type="checkbox" wire:model="rows.{{ $uuid }}.sesuai_perjanjian" value="1"
+                                            <input type="checkbox"
+                                                @php $spVal = $row['sesuai_perjanjian'] ?? '0'; @endphp
+                                                {{ ($spVal === '1' || $spVal === true || $spVal === 1) ? 'checked' : '' }}
+                                                @change="$wire.set('rows.{{ $uuid }}.sesuai_perjanjian', $event.target.checked ? '1' : '0')"
                                                 class="rounded border-gray-300 text-primary-600 shadow-sm focus:ring-primary-500 cursor-pointer"/>
                                         </td>
 
@@ -432,7 +435,10 @@
                                             </td>
 
                                             <td class="px-2 py-1.5 text-center">
-                                                <input type="checkbox" wire:model="dokterRows.{{ $uuid }}.sesuai_perjanjian" value="1"
+                                                @php $spValD = $row['sesuai_perjanjian'] ?? '0'; @endphp
+                                                <input type="checkbox"
+                                                    {{ ($spValD === '1' || $spValD === true || $spValD === 1) ? 'checked' : '' }}
+                                                    @change="$wire.set('dokterRows.{{ $uuid }}.sesuai_perjanjian', $event.target.checked ? '1' : '0')"
                                                     class="rounded border-gray-300 text-primary-600 shadow-sm focus:ring-primary-500 cursor-pointer"/>
                                             </td>
 

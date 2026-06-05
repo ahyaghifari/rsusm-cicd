@@ -30,7 +30,7 @@ class JadwalPraktekPage extends Page
 
     public ?int    $selectedRumahSakitId  = null;
     public ?int    $selectedUnitLayananId = null;
-    public string  $viewMode             = 'per_hari'; // 'per_hari' | 'per_dokter'
+    public string  $viewMode             = 'per_dokter'; // 'per_hari' | 'per_dokter'
     public ?int    $selectedDokterId      = null;
 
     // Per-hari state
@@ -86,8 +86,8 @@ class JadwalPraktekPage extends Page
                 Forms\Components\ToggleButtons::make('viewMode')
                     ->label('Mode Tampilan')
                     ->options([
-                        'per_hari'   => 'Per Hari',
                         'per_dokter' => 'Per Dokter',
+                        'per_hari'   => 'Per Hari',
                     ])
                     ->icons([
                         'per_hari'   => 'heroicon-o-calendar-days',
@@ -182,7 +182,7 @@ class JadwalPraktekPage extends Page
 
         return UnitLayanan::where('rumah_sakit_id', $rsId)
             ->where('aktif', true)
-            ->orderBy('nama')
+            ->orderBy('id')
             ->pluck('nama', 'id')
             ->toArray();
     }

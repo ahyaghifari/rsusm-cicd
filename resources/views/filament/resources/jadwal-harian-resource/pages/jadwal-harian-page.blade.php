@@ -1,3 +1,12 @@
+@once
+    @push('styles')
+        <link href="https://cdn.jsdelivr.net/npm/tom-select@2/dist/css/tom-select.default.min.css" rel="stylesheet">
+    @endpush
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/tom-select@2/dist/js/tom-select.complete.min.js"></script>
+    @endpush
+@endonce
+
 <x-filament-panels::page>
 
 {{-- CSS: sembunyikan sidebar Filament saat mode layar penuh --}}
@@ -291,8 +300,8 @@
                                         },
                                         destroy() { if(this.ts) { this.ts.destroy(); this.ts = null; } }
                                     }">
-                                        <select x-ref="sel" placeholder="— Pilih Poliklinik —">
-                                            <option value=""></option>
+                                        <select x-ref="sel" class="w-full text-sm">
+                                            <option value="">— Pilih Poliklinik —</option>
                                             @foreach($this->getPoliklinikOptions() as $val => $label)
                                                 <option value="{{ $val }}">{{ $label }}</option>
                                             @endforeach
@@ -314,8 +323,8 @@
                                         },
                                         destroy() { if(this.ts) { this.ts.destroy(); this.ts = null; } }
                                     }">
-                                        <select x-ref="sel" placeholder="— Pilih Dokter —">
-                                            <option value=""></option>
+                                        <select x-ref="sel" class="w-full text-sm">
+                                            <option value="">— Opsional —</option>
                                             @foreach($this->getDokterOptions() as $val => $label)
                                                 <option value="{{ $val }}">{{ $label }}</option>
                                             @endforeach

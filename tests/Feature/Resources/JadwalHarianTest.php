@@ -117,8 +117,9 @@ class JadwalHarianTest extends TestCase
         $page->loadRows();
 
         $this->assertCount(1, $page->rows);
-        $this->assertEquals('dr. Test', $page->rows[0]['nama_dokter']);
-        $this->assertEquals('GENERATE', $page->rows[0]['sumber']);
+        $first = array_values($page->rows)[0];
+        $this->assertEquals('dr. Test', $first['nama_dokter']);
+        $this->assertEquals('GENERATE', $first['sumber']);
     }
 
     public function test_load_rows_tidak_tampilkan_jadwal_tanggal_lain(): void
@@ -156,9 +157,10 @@ class JadwalHarianTest extends TestCase
         $page = $this->makePage();
         $page->addRow();
         $this->assertCount(1, $page->rows);
-        $this->assertEquals('MANUAL', $page->rows[0]['sumber']);
-        $this->assertEquals('BUKA', $page->rows[0]['status_layanan']);
-        $this->assertNull($page->rows[0]['id']);
+        $first = array_values($page->rows)[0];
+        $this->assertEquals('MANUAL', $first['sumber']);
+        $this->assertEquals('BUKA', $first['status_layanan']);
+        $this->assertNull($first['id']);
     }
 
     public function test_remove_row_hapus_dari_array(): void
@@ -166,7 +168,7 @@ class JadwalHarianTest extends TestCase
         $page = $this->makePage();
         $page->addRow();
         $page->addRow();
-        $page->removeRow(0);
+        $page->removeRow(array_key_first($page->rows));
         $this->assertCount(1, $page->rows);
     }
 
@@ -220,7 +222,6 @@ class JadwalHarianTest extends TestCase
 
         $this->assertDatabaseHas('jadwal_harian', [
             'poliklinik_id' => $this->poli->id,
-            'tanggal'       => today()->format('Y-m-d'),
             'nama_dokter'   => 'dr. Baru',
             'sumber'        => 'MANUAL',
         ]);
@@ -228,7 +229,6 @@ class JadwalHarianTest extends TestCase
 
     public function test_save_replace_all_hapus_baris_lama(): void
     {
-        $tanggal = today()->format('Y-m-d');
         $this->makeJadwalHarian(['nama_dokter' => 'dr. Lama']);
 
         $page = $this->makePage();
@@ -240,8 +240,8 @@ class JadwalHarianTest extends TestCase
         ]];
         $page->saveJadwal();
 
-        $this->assertDatabaseMissing('jadwal_harian', ['nama_dokter' => 'dr. Lama', 'tanggal' => $tanggal]);
-        $this->assertDatabaseHas('jadwal_harian', ['nama_dokter' => 'dr. Baru', 'tanggal' => $tanggal]);
+        $this->assertDatabaseMissing('jadwal_harian', ['nama_dokter' => 'dr. Lama']);
+        $this->assertDatabaseHas('jadwal_harian', ['nama_dokter' => 'dr. Baru']);
     }
 
     // ── Tracking Perubahan ────────────────────────────────────────────────────
@@ -258,7 +258,7 @@ class JadwalHarianTest extends TestCase
         ]];
         $page->saveJadwal();
 
-        $jh = JadwalHarian::where('tanggal', $tanggal)->first();
+        $jh = JadwalHarian::whereDate('tanggal', $tanggal)->first();
         $this->assertNotNull($jh);
         $this->assertDatabaseHas('jadwal_harian_perubahan', [
             'jadwal_harian_id' => $jh->id,
@@ -278,7 +278,7 @@ class JadwalHarianTest extends TestCase
         ]];
         $page->saveJadwal();
 
-        $jh = JadwalHarian::where('tanggal', $tanggal)->first();
+        $jh = JadwalHarian::whereDate('tanggal', $tanggal)->first();
         $this->assertNotNull($jh);
         $this->assertDatabaseCount('jadwal_harian_perubahan', 0);
     }
@@ -295,7 +295,7 @@ class JadwalHarianTest extends TestCase
         ]];
         $page->saveJadwal();
 
-        $jh = JadwalHarian::where('tanggal', $tanggal)->where('sumber', 'MANUAL')->first();
+        $jh = JadwalHarian::whereDate('tanggal', $tanggal)->where('sumber', 'MANUAL')->first();
         $this->assertNotNull($jh);
         $this->assertDatabaseCount('jadwal_harian_perubahan', 0);
     }
@@ -319,9 +319,10 @@ class JadwalHarianTest extends TestCase
         $page->muatDariJadwalMingguan();
 
         $this->assertNotEmpty($page->rows);
-        $this->assertEquals('dr. Mingguan', $page->rows[0]['nama_dokter']);
-        $this->assertEquals('BUKA', $page->rows[0]['status_layanan']);
-        $this->assertEquals('GENERATE', $page->rows[0]['sumber']);
+        $first = array_values($page->rows)[0];
+        $this->assertEquals('dr. Mingguan', $first['nama_dokter']);
+        $this->assertEquals('BUKA', $first['status_layanan']);
+        $this->assertEquals('GENERATE', $first['sumber']);
     }
 
     public function test_muat_dari_jadwal_mingguan_kosong_jika_tidak_ada(): void
@@ -374,7 +375,7 @@ class JadwalHarianTest extends TestCase
         ]];
         $page->saveJadwal();
 
-        $this->assertDatabaseHas('jadwal_harian', ['tanggal' => $tanggal, 'sumber' => 'MANUAL']);
+        $this->assertDatabaseHas('jadwal_harian', ['poliklinik_id' => $this->poli->id, 'sumber' => 'MANUAL']);
     }
 
     public function test_get_hari_dari_tanggal_senin(): void

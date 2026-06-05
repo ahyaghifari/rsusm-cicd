@@ -29,12 +29,12 @@ Project ini menggunakan arsitektur **multi-tenant berbasis kolom** (`rumah_sakit
 ```
 RumahSakit
 ├── User (admin rumah sakit, terikat ke 1 RS)
-├── Dokter → Spesialis
-├── UnitLayanan → PoliKlinik
+├── Dokter → Spesialis                          (SoftDeletes)
+├── Spesialis                                   (SoftDeletes)
+├── UnitLayanan → PoliKlinik                    (SoftDeletes)
 │   └── JadwalPraktek (per poliklinik, per hari, opsional per dokter)
-│       → table: jadwal_praktek
 ├── JadwalHarian (override harian per tanggal)
-│   → table: jadwal_harian
+│   └── JadwalHarianPerubahan (1-to-1, tracking perubahan status)
 ├── RawatInap → Gedung
 │   ├── GambarRawatInap
 │   └── FasilitasRawatInap
@@ -42,8 +42,8 @@ RumahSakit
 ├── FasilitasPendukung
 ├── PenunjangMedis
 ├── Banner
-├── Promo
-├── Halaman (halaman statis, field: kata_kunci)
+├── Promo (slug unik per RS)
+├── Halaman statis (slug unik per RS, field: kata_kunci)
 ├── Magazine
 ├── Faq (field: kata_kunci)
 ├── Partner
@@ -51,7 +51,8 @@ RumahSakit
 └── LinkLayanan
 ```
 
-> **Arsitektur jadwal:** `JadwalPraktek` adalah jadwal rawat jalan per **poliklinik** (bukan per dokter). `JadwalLayanan` telah dihapus. `JadwalLayananHarian` diganti menjadi `JadwalHarian`.
+> **Arsitektur jadwal:** `JadwalPraktek` adalah jadwal rawat jalan per **poliklinik** (bukan per dokter).
+> `JadwalHarian` adalah override untuk tanggal spesifik, dapat dimuat otomatis dari `JadwalPraktek` via cron.
 
 ### Role
 
@@ -104,7 +105,9 @@ Dua mode tampilan:
 | **Per Hari** | Tab SENIN–MINGGU, kartu per poliklinik. Filter poliklinik via Tom Select. |
 | **Per Poli** | Pilih poliklinik → tampilkan semua 7 hari (grid horizontal di desktop). |
 
-Setiap jadwal menampilkan badge **Sesuai Perjanjian** jika berlaku. Di bawah jadwal terdapat **disclaimer** dengan nomor kontak PENDAFTARAN yang bisa diklik langsung (`tel:` / WhatsApp).
+- Badge **Sesuai Perjanjian** ditampilkan jika `sesuai_perjanjian = true`
+- Di bawah jadwal terdapat **disclaimer** dengan nomor kontak PENDAFTARAN (klik langsung `tel:` / WhatsApp)
+- Nama dokter yang terhubung ke profil dapat diklik → navigasi ke profil dokter
 
 #### Global Search
 
@@ -119,8 +122,7 @@ Setiap jadwal menampilkan badge **Sesuai Perjanjian** jika berlaku. Di bawah jad
 
 - **Mobile**: tombol di bottom bar, panel fullscreen
 - **Desktop**: FAB floating bottom-right dengan tooltip animasi, panel setinggi layar
-- State persisten: cabang, riwayat chat (max 100 pesan), session key — bertahan saat navigasi halaman maupun full reload
-- Session key unik di-generate saat pesan pertama, tidak berubah selama sesi
+- State persisten: cabang, riwayat chat (max 100 pesan), session key — bertahan saat navigasi maupun reload
 - Typing indicator (3 dots) saat menunggu respons AI
 - Smart scroll: scroll ke awal bubble bot saat respons panjang
 - Input langsung kosong saat kirim, disabled saat loading
@@ -129,7 +131,7 @@ Setiap jadwal menampilkan badge **Sesuai Perjanjian** jika berlaku. Di bawah jad
 #### Homepage RS
 
 Seksi berurutan:
-1. Hero Carousel
+1. Hero Carousel (Banner)
 2. Link Layanan Digital
 3. Tentang Kami
 4. Layanan Unggulan
@@ -141,7 +143,7 @@ Seksi berurutan:
 #### Footer
 
 - **Kiri**: Logo RS, alamat, ikon sosial media (kategori `SOSIAL MEDIA`)
-- **Kanan**: Kontak operasional sebagai card dengan link `tel:`/`wa.me` (kategori `OPERASIONAL` + `PENDAFTARAN`)
+- **Kanan**: Kontak operasional sebagai card dengan link `tel:`/`wa.me`
 
 #### Mobile Bottom Bar
 
@@ -160,50 +162,79 @@ Path admin dikonfigurasi via env: `ADMIN_PATH=manage` (default). Akses di `/{ADM
 
 | Modul | Keterangan |
 |---|---|
-| Rumah Sakit | CRUD data RS, logo, gambar, about |
-| Dokter | Manajemen dokter dengan foto & deskripsi |
-| Spesialis | Spesialisasi per RS |
+| Rumah Sakit | CRUD data RS, logo, gambar, about (super admin only) |
+| Dokter | Manajemen dokter + foto + deskripsi (SoftDelete + Restore) |
+| Spesialis | Spesialisasi per RS (SoftDelete + Restore) |
 | Unit Layanan | Kelompok layanan (poli, IGD, dll.) |
-| Poliklinik | Klinik per unit layanan (gambar/ikon) |
-| **Jadwal Praktek** | Jadwal rawat jalan per poliklinik — 2 mode |
-| **Jadwal Harian** | Override jadwal harian — tabel & AG Grid Excel |
+| Poliklinik | Klinik per unit layanan (SoftDelete + Restore) |
+| **Jadwal Praktek** | Jadwal rawat jalan per poliklinik — 2 mode editable |
+| **Jadwal Harian** | Override jadwal harian + tracking perubahan status |
 | Rawat Inap | Kelas kamar, fasilitas, galeri foto |
 | Gedung | Manajemen gedung |
 | Banner | Spanduk promosi beranda |
-| Promo | Promosi + popup |
-| Halaman Statis | CMS halaman statis (dengan `kata_kunci`) |
+| Promo | Promosi + popup (slug unik per RS) |
+| Halaman Statis | CMS halaman statis (kata_kunci, slug unik per RS) |
 | Majalah | Upload majalah digital |
 | FAQ | Kelola FAQ dengan `sort_order` dan `kata_kunci` |
-| Layanan Unggulan | Highlight layanan andalan |
-| Fasilitas Pendukung | Fasilitas non-medis |
-| Penunjang Medis | Lab, radiologi, farmasi |
+| Layanan Unggulan | Highlight layanan andalan (drag-drop sort) |
+| Fasilitas Pendukung | Fasilitas non-medis (drag-drop sort) |
+| Penunjang Medis | Lab, radiologi, farmasi (drag-drop sort) |
 | Partner | Mitra & rekanan |
 | Kontak | Nomor telepon, WhatsApp, sosial media (3 kategori) |
-| Link Layanan | Tautan cepat |
+| Link Layanan | Tautan cepat (drag-drop sort) |
 | User | Manajemen akun admin + penugasan RS |
 
 #### Jadwal Praktek — Fitur Khusus
 
 - **Urutan filter**: RS → Mode (Per Hari / Per Dokter) → Unit Layanan
-- **Mode Per Hari**: tab SENIN–MINGGU, tabel baris editable, simpan replace-all per hari
+- **Mode Per Hari**: tab SENIN–MINGGU, tabel baris editable (HTML table + Tom Select)
+  - Poliklinik dan Dokter menggunakan Tom Select untuk kemudahan pencarian
+  - Checkbox `sesuai_perjanjian` sync langsung via `$wire.set()` (bukan deferred wire:model)
+  - Simpan: replace-all per hari × scope poliklinik RS/unit
 - **Mode Per Dokter**: dropdown dokter di area konten, tabel jadwal lintas semua hari
+  - Poliklinik menggunakan Tom Select
+  - Simpan: replace-all WHERE `dokter_id` dalam scope RS
 - **Layar Penuh**: sembunyikan sidebar Filament
 - **Gate Unit Layanan**: wajib pilih unit jika RS punya >1 unit
-- **`sesuai_perjanjian`**: disimpan dengan cast boolean yang benar
+- Rows menggunakan UUID key untuk identifikasi unik
+
+#### Jadwal Harian — Fitur Khusus
+
+- **Tom Select** untuk poliklinik dan dokter di setiap baris
+- **Status Layanan**: BUKA / LIBUR (enum `StatusLayanan`)
+- **Sumber**: GENERATE (dari cron) / MANUAL (input admin)
+- **Tracking Perubahan** via `JadwalHarianPerubahan` (1-to-1 per baris):
+  - Record perubahan dibuat HANYA jika sumber GENERATE dan status bukan BUKA
+  - Manual tidak membuat record perubahan
+- **Cron**: `php artisan jadwal:generate-harian` berjalan otomatis `daily at 00:05`
+  - Memuat dari JadwalPraktek sesuai hari
+  - Skip jika jadwal harian untuk tanggal + poliklinik sudah ada
+- Query tanggal menggunakan `whereDate()` agar kompatibel dengan MySQL dan SQLite
+- Rows menggunakan UUID key
+
+#### Sort Order
+
+6 resource mendukung drag-drop reorder: Magazine, LinkLayanan, LayananUnggulan, FasilitasPendukung, PenunjangMedis, Gedung. Kolom `sort_order` tidak muncul di form — dikelola via drag.
 
 #### Kontak — Kategori
 
 | Kategori | Tampil di |
 |---|---|
 | `SOSIAL MEDIA` | Ikon di footer kiri |
-| `OPERASIONAL` | Card di footer kanan (Hubungi Kami) |
+| `OPERASIONAL` | Card di footer kanan + halaman Hubungi Kami |
 | `PENDAFTARAN` | Disclaimer halaman jadwal + footer kanan |
+
+#### Slug Uniqueness
+
+Slug bersifat unik **per RS** (composite unique), bukan global:
+- `promo`: unique `(slug, rumah_sakit_id)`
+- `spesialis`: unique `(slug, rumah_sakit_id)`
+- `halaman`: unique `(slug, rumah_sakit_id)`
+- `poliklinik`: unique `(slug, unit_layanan_id)`
 
 ---
 
 ## Security
-
-Fitur keamanan yang sudah diimplementasi:
 
 | Fitur | Detail |
 |---|---|
@@ -249,10 +280,10 @@ php artisan key:generate
 # DB_USERNAME=root
 # DB_PASSWORD=...
 #
-# ADMIN_PATH=manage          # path admin panel (ganti di production)
+# ADMIN_PATH=manage           # path admin panel (ganti di production)
 # SESSION_ENCRYPT=true
-# TRUSTED_PROXIES=           # IP load balancer di production
-# N8N_URL=https://...        # Webhook N8N untuk chatbot AI
+# TRUSTED_PROXIES=            # IP load balancer di production
+# N8N_URL=https://...         # Webhook N8N untuk chatbot AI
 
 # 5. Migrasi & seed
 php artisan migrate:fresh --seed
@@ -275,64 +306,11 @@ Akun yang dibuat otomatis oleh `DatabaseSeeder`:
 - **Superadmin** — `test@example.com` / `password`
 - **Admin RS** — `ahyaghifari288@gmail.com` / `password`
 
----
+### Testing
 
-## Struktur Direktori (Ringkasan)
-
-```
-app/
-├── Enums/                  # Hari, StatusLayanan
-├── Filament/
-│   └── Resources/          # 21 resource Filament
-│       ├── JadwalPraktekResource/
-│       │   └── Pages/      # JadwalPraktekPage (2 mode), JadwalPraktekExcel
-│       └── JadwalHarianResource/
-│           └── Pages/      # JadwalHarianPage, JadwalHarianExcel
-├── Http/
-│   ├── Controllers/        # PortalController
-│   └── Middleware/         # RumahSakitMiddleware, SecurityHeaders
-├── Livewire/
-│   ├── Chatbot/            # Panel (persistent state), Floating (Alpine store)
-│   ├── Dokter/             # Find (A-Z order), Show
-│   ├── Pages/              # 12 halaman portal
-│   ├── GlobalSearch.php    # Spotlight search (FULLTEXT + LIKE fallback)
-│   └── RumahSakit/         # Index
-├── Models/                 # 22 model Eloquent
-└── Providers/
-    └── AppServiceProvider  # Rate limiters terdaftar di sini
-
-resources/views/
-├── errors/429.blade.php              # Halaman Too Many Requests
-├── livewire/global-search.blade.php  # Spotlight search modal
-├── welcome.blade.php                 # Landing page (non-Livewire)
-├── layouts/                          # rumah_sakit.blade.php, portal-layout.blade.php
-├── rumah_sakit/
-│   ├── chatbot/
-│   │   ├── floating.blade.php        # Alpine store + FAB desktop
-│   │   └── panel.blade.php           # Chat UI (fullscreen mobile)
-│   ├── pages/
-│   │   ├── _jadwal-disclaimer.blade.php  # Disclaimer kontak PENDAFTARAN
-│   │   └── ...
-│   └── partials/
-│       ├── mobile-bottom-bar.blade.php   # Emergency + Hotline + Chatbot
-│       └── ...
-└── filament/
-    ├── brand.blade.php                   # Logo custom login Filament
-    └── resources/
-        ├── jadwal-praktek-resource/pages/
-        └── jadwal-harian-resource/pages/
-
-tests/
-├── Feature/
-│   ├── Auth/FilamentRbacTest.php
-│   ├── Livewire/
-│   │   ├── ChatbotPanelTest.php     # Session persistence, sendMessage, sessionKey
-│   │   └── GlobalSearchTest.php    # Search per kategori, min 2 char, scoping
-│   ├── Resources/                  # DokterResource, RumahSakitResource, UserResource
-│   ├── Security/SecurityHeadersTest.php
-│   └── AppServiceProviderTest.php  # Rate limiters, admin path
-└── Unit/
-    └── Models/                     # Faq, Halaman, JadwalPraktek, Kontak, dll.
+```bash
+php artisan test
+# 235+ tests passing (Unit + Feature)
 ```
 
 ---
@@ -346,10 +324,11 @@ tests/
 - Blade portal menggunakan Livewire full-page components
 - Tailwind v4: `bg-linear-to-r` (bukan `bg-gradient-to-r`), warna via CSS custom property
 - Route di Livewire view: gunakan `route('name', ['rumahsakit' => $rsSlug])`, **bukan** `rumahsakit_route()` (tidak bekerja di AJAX)
-- AG Grid di-load dari CDN untuk halaman Excel
-- Tom Select via CDN untuk searchable select (portal + admin)
-- Fallback warna unit layanan: `tertiary (#4d51b2)`
+- Tom Select via CDN — diintegrasikan dengan Livewire via `wire:ignore` + `$wire.set()` eksplisit
+- Checkbox di tabel editable: gunakan `@change="$wire.set(...)"` bukan `wire:model` (menghindari timing conflict dengan Tom Select)
+- Query kolom tanggal: selalu gunakan `whereDate()` bukan `where()` (kompatibel MySQL & SQLite)
 - `sesuai_perjanjian` disimpan dengan `(bool)` cast — **bukan** perbandingan `=== '1'`
+- Rows di JadwalPraktekPage dan JadwalHarianPage menggunakan UUID string sebagai array key
 
 ---
 
@@ -376,37 +355,37 @@ CACHE_STORE=database               # Gunakan redis di production untuk performa
 ## Status Pengembangan
 
 ### Selesai
-- [x] Arsitektur multi-tenant
+
+- [x] Arsitektur multi-tenant (slug URL per RS)
 - [x] Admin panel Filament (21 resource)
 - [x] Portal publik semua halaman
-- [x] JadwalPraktek per poliklinik (redesign arsitektur jadwal)
-- [x] Jadwal harian override (AG Grid Excel)
+- [x] JadwalPraktek — 2 mode (Per Hari & Per Dokter), HTML table + Tom Select
+- [x] JadwalPraktek — checkbox sesuai_perjanjian sync via `$wire.set()` (bug timing fix)
+- [x] JadwalHarian — override harian + tracking perubahan status (JadwalHarianPerubahan)
+- [x] JadwalHarian — Tom Select untuk poliklinik & dokter
+- [x] Cron GenerateJadwalHarian (daily 00:05, skip jika sudah ada)
+- [x] SoftDelete + Restore: Dokter, Spesialis, PoliKlinik
+- [x] Composite slug uniqueness per RS (Promo, Spesialis, Halaman, PoliKlinik)
 - [x] Halaman jadwal 2 mode (Per Hari + Per Poli)
-- [x] Filter poliklinik searchable (Tom Select)
-- [x] Global search (FULLTEXT MySQL + LIKE fallback)
-- [x] Chatbot AI (persistent session, fullscreen mobile, smart scroll, reset percakapan)
+- [x] Nama dokter di kartu jadwal dapat diklik → profil dokter
+- [x] Badge Sesuai Perjanjian di portal (Per Hari & Profil Dokter)
+- [x] Global search Ctrl+K (FULLTEXT MySQL + LIKE fallback)
+- [x] Chatbot AI (persistent session, fullscreen mobile, smart scroll)
 - [x] Security hardening (rate limit, headers, session encrypt, Livewire Locked, admin path)
 - [x] Disclaimer jadwal dengan nomor kontak PENDAFTARAN
-- [x] Lightbox galeri foto (GLightbox — rawat inap, fasilitas, layanan unggulan, penunjang medis)
-- [x] Sort order drag-drop di 6 resource (Magazine, LinkLayanan, LayananUnggulan, FasilitasPendukung, PenunjangMedis, Gedung)
+- [x] Lightbox galeri foto (GLightbox)
+- [x] Sort order drag-drop di 6 resource
 - [x] Redirect ke list setelah Create/Edit di semua resource
 - [x] FAQ section di homepage RS
-- [x] Redesign card rawat inap & section layanan unggulan
-- [x] Test suite (Unit + Feature, 185+ passing)
 - [x] Kontak 3 kategori (SOSIAL MEDIA, OPERASIONAL, PENDAFTARAN)
-- [x] Kata kunci pencarian di FAQ dan Halaman Statis
-- [x] Footer redesign (ikon sosmed + card kontak)
+- [x] Footer dengan ikon sosmed + card kontak
 - [x] Mobile bottom bar (Emergency + Hotline + Chatbot)
-- [x] Promo dengan popup
-- [x] Halaman statis CMS
-- [x] Majalah digital
 - [x] SEO meta tags (artesaos/seotools)
-- [x] Landing page redesign (hero, Tom Select, no jQuery)
-- [x] Homepage RS: CTA + Promo section
-- [x] Login Filament custom (2 logo)
-- [x] Test suite (Unit + Feature, 166+ passing)
+- [x] Landing page (hero, Tom Select, no jQuery)
+- [x] Test suite (Unit + Feature, 235+ passing)
 
 ### Dalam Pertimbangan
+
 - [ ] Sitemap otomatis per rumah sakit
 - [ ] Notifikasi jadwal (email/WhatsApp)
 - [ ] Export jadwal ke PDF/Excel

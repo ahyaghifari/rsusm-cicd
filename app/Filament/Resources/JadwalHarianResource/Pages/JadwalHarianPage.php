@@ -177,7 +177,7 @@ class JadwalHarianPage extends Page
             return;
         }
 
-        $jadwals = JadwalHarian::where('tanggal', $this->activeTanggal)
+        $jadwals = JadwalHarian::whereDate('tanggal', $this->activeTanggal)
             ->whereHas('poliklinik.unitLayanan', function ($q) use ($rsId) {
                 $q->where('rumah_sakit_id', $rsId);
                 if ($this->selectedUnitLayananId) {
@@ -395,7 +395,7 @@ class JadwalHarianPage extends Page
             ->toArray();
 
         DB::transaction(function () use ($poliIds) {
-            JadwalHarian::where('tanggal', $this->activeTanggal)
+            JadwalHarian::whereDate('tanggal', $this->activeTanggal)
                 ->whereIn('poliklinik_id', $poliIds)
                 ->delete();
 
@@ -448,9 +448,8 @@ class JadwalHarianPage extends Page
 
                 $jhId = $jh->getKey();
 
-                // Catat ke JadwalHarianPerubahan HANYA jika sumber GENERATE 
-                // tapi ada data yang tidak sama dengan aslinya (berubah jam/dokter/status)
-                if ($sumber === 'GENERATE' && (! $isSamaDenganAsli || $row['status_layanan'] !== 'BUKA')) {
+                // Catat ke JadwalHarianPerubahan hanya jika sumber GENERATE dan status bukan BUKA
+                if ($sumber === 'GENERATE' && $row['status_layanan'] !== 'BUKA') {
                     JadwalHarianPerubahan::create([
                         'jadwal_harian_id' => $jhId,
                         'user_id'          => $userId,
@@ -482,7 +481,7 @@ class JadwalHarianPage extends Page
         if (! $rsId) return;
 
         $scope = function ($q) use ($rsId) {
-            $q->where('tanggal', $this->activeTanggal)
+            $q->whereDate('tanggal', $this->activeTanggal)
               ->whereHas('poliklinik.unitLayanan', function ($q2) use ($rsId) {
                   $q2->where('rumah_sakit_id', $rsId);
                   if ($this->selectedUnitLayananId) {
