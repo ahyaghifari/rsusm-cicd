@@ -424,9 +424,39 @@ class JadwalHarianPage extends Page
                 ->delete();
 
             $userId = Auth::id();
+            $hariValue = $this->getHariDariTanggal();
 
             foreach ($this->rows as $row) {
                 $sumber = $row['sumber'] ?? 'MANUAL';
+
+                // Format jam untuk pencarian (tambahkan detik jika belum ada)
+                $jamMulaiRaw = $row['jam_mulai'];
+                $jamMulaiFormat = (strlen($jamMulaiRaw) === 5) ? $jamMulaiRaw . ':00' : $jamMulaiRaw;
+                
+                $jamSelesaiFormat = null;
+                if (!empty($row['jam_selesai'])) {
+                    $jamSelesaiRaw = $row['jam_selesai'];
+                    $jamSelesaiFormat = (strlen($jamSelesaiRaw) === 5) ? $jamSelesaiRaw . ':00' : $jamSelesaiRaw;
+                }
+
+                // Cek apakah data ini identik dengan JadwalPraktek (jadwal asli mingguan)
+                $isSamaDenganAsli = JadwalPraktek::where('hari', $hariValue)
+                    ->where('poliklinik_id', $row['poliklinik_id'])
+                    ->where('dokter_id', $row['dokter_id'])
+                    ->whereTime('waktu_mulai', $jamMulaiFormat)
+                    ->when($jamSelesaiFormat, function ($q, $v) {
+                        $q->whereTime('waktu_selesai', $v);
+                    }, function ($q) {
+                        $q->whereNull('waktu_selesai');
+                    })
+                    ->exists();
+
+                // Jika identik dengan nilai awal mingguan dan status BUKA,
+                // maka ini BUKAN perubahan. Set sumber kembali ke GENERATE agar tidak
+                // terhitung sebagai data MANUAL/DITAMBAH.
+                if ($isSamaDenganAsli && $row['status_layanan'] === 'BUKA') {
+                    $sumber = 'GENERATE';
+                }
 
                 $jh = JadwalHarian::create([
                     'poliklinik_id'  => $row['poliklinik_id'],
@@ -442,8 +472,9 @@ class JadwalHarianPage extends Page
 
                 $jhId = $jh->getKey();
 
-                if ($sumber === 'GENERATE' && $row['status_layanan'] === 'LIBUR') {
-                    // Baris generate yang diubah jadi LIBUR → catat perubahan
+                // Catat ke JadwalHarianPerubahan HANYA jika sumber GENERATE 
+                // tapi ada data yang tidak sama dengan aslinya (berubah jam/dokter/status)
+                if ($sumber === 'GENERATE' && (! $isSamaDenganAsli || $row['status_layanan'] !== 'BUKA')) {
                     JadwalHarianPerubahan::create([
                         'jadwal_harian_id' => $jhId,
                         'user_id'          => $userId,
@@ -453,8 +484,6 @@ class JadwalHarianPage extends Page
                         'catatan'          => $row['catatan'] ?: null,
                     ]);
                 }
-                // Baris MANUAL → cukup dari sumber=MANUAL di jadwal_harian
-                // Baris GENERATE BUKA → tidak perlu dicatat
             }
         });
 
