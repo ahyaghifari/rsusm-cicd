@@ -34,7 +34,7 @@ class RumahSakitMiddleware
         view()->share('currentRumahSakit', $hospital);
 
         // SHARE KONTAK
-        $kontakRS = Kontak::where('rumah_sakit_id', $hospital->id)->where('aktif', true)->get();
+        $kontakRS = Kontak::where('rumah_sakit_id', $hospital->id)->where('aktif', true)->get()->sortBy('sort_order');
         view()->share('kontakRumahSakit', $kontakRS);
 
         // SHARE PROMO POPUP
