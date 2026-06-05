@@ -1,5 +1,5 @@
 <!-- TopNavBar -->
-<header class="bg-white docked full-width top-0 z-50 border-b-4 border-primary grid grid-cols-3 lg:grid-cols-4 p-4 relative">
+<header class="bg-white docked full-width top-0 z-50 border-b-4 border-primary grid grid-cols-3 lg:grid-cols-4 p-4 relative gap-5 lg:gap-0">
     <img src="{{ asset('img/bg-header.png') }}" class="w-full absolute top-0 left-0 h-full object-cover -z-10 opacity-40" alt="">
 
     {{-- Logo RS --}}

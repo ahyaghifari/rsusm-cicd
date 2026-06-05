@@ -39,7 +39,17 @@ class HalamanResource extends BaseRumahSakitResource
                     ->required()
                     ->maxLength(100)
                     ->helperText('Otomatis dari judul. Bisa diubah manual.')
-                    ->unique(table: 'halaman', column: 'slug', ignoreRecord: true),
+                    ->unique(
+                        table: 'halaman',
+                        column: 'slug',
+                        ignoreRecord: true,
+                        modifyRuleUsing: function (\Illuminate\Validation\Rules\Unique $rule) {
+                            $rsId = static::isSuperAdmin()
+                                ? request()->input('data.rumah_sakit_id')
+                                : static::rumahSakitId();
+                            return $rsId ? $rule->where('rumah_sakit_id', $rsId) : $rule;
+                        }
+                    ),
 
                 Forms\Components\Toggle::make('aktif')
                     ->default(true)
@@ -83,12 +93,12 @@ class HalamanResource extends BaseRumahSakitResource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
+            // ->bulkActions([
+            //     Tables\Actions\BulkActionGroup::make([
+            //         Tables\Actions\DeleteBulkAction::make(),
+            //     ]),
+            // ]);
     }
 
     public static function getRelations(): array

@@ -1,6 +1,6 @@
 <!-- TopNavBar Portal -->
 <header class="bg-white sticky top-0 z-50 border-b-4 border-primary shadow-sm">
-    <div class="flex items-center justify-between px-4 md:px-8 py-3 max-w-7xl mx-auto">
+    <div class="flex items-center justify-between px-4 md:px-8 py-3 max-w-7xl mx-auto gap-5 md:gap-0">
 
         {{-- Logo kiri: Syifa Medika --}}
         <a href="/" class="shrink-0">

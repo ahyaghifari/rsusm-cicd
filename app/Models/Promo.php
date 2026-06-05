@@ -51,17 +51,19 @@ class Promo extends Model
 
         static::creating(function (self $model) {
             if (empty($model->slug)) {
-                $model->slug = static::generateUniqueSlug($model->judul);
+                $model->slug = static::generateUniqueSlug($model->judul, $model->rumah_sakit_id);
             }
         });
     }
 
-    protected static function generateUniqueSlug(string $title): string
+    protected static function generateUniqueSlug(string $title, ?int $rumahSakitId = null): string
     {
         $base = Str::slug($title) ?: 'promo';
         $slug = $base;
         $i    = 1;
-        while (static::where('slug', $slug)->exists()) {
+        while (static::where('slug', $slug)
+            ->when($rumahSakitId, fn ($q) => $q->where('rumah_sakit_id', $rumahSakitId))
+            ->exists()) {
             $slug = $base . '-' . $i++;
         }
         return $slug;

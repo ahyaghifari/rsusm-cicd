@@ -117,15 +117,26 @@ class DokterResource extends BaseRumahSakitResource
                     ->relationship('spesialis', 'nama')
                     ->label('Spesialis'),
             ])
+            ->filters([
+                static::rsTableFilter(),
+                Tables\Filters\SelectFilter::make('spesialis_id')
+                    ->relationship('spesialis', 'nama')
+                    ->label('Spesialis'),
+                Tables\Filters\TrashedFilter::make(),
+            ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\RestoreAction::make(),
+                Tables\Actions\ForceDeleteAction::make(),
             ]);
+            // ->bulkActions([
+            //     Tables\Actions\BulkActionGroup::make([
+            //         Tables\Actions\DeleteBulkAction::make(),
+            //         Tables\Actions\RestoreBulkAction::make(),
+            //         Tables\Actions\ForceDeleteBulkAction::make(),
+            //     ]),
+            // ]);
     }
 
     public static function getRelations(): array

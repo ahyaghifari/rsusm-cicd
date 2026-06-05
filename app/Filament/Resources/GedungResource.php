@@ -17,8 +17,7 @@ class GedungResource extends BaseResource
 {
     protected static ?string $model = Gedung::class;
 
-    protected static ?int $navigationSort = 2;
-    protected static string | null $navigationGroup = 'Lainnya';
+    protected static ?int $navigationSort = 3;
     protected static ?string $navigationIcon = 'fas-building';
 
     public static function form(Form $form): Form
@@ -79,12 +78,12 @@ class GedungResource extends BaseResource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
+            // ->bulkActions([
+            //     Tables\Actions\BulkActionGroup::make([
+            //         Tables\Actions\DeleteBulkAction::make(),
+            //     ]),
+            // ]);
     }
 
     public static function getPages(): array

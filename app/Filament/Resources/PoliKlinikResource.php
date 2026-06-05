@@ -8,7 +8,6 @@ use App\Models\UnitLayanan;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
-use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
@@ -40,7 +39,15 @@ class PoliKlinikResource extends BaseResource
                     ->disabled()
                     ->dehydrated()
                     ->maxLength(255)
-                    ->unique(PoliKlinik::class, 'slug', ignoreRecord: true),
+                    ->unique(
+                        table: 'poliklinik',
+                        column: 'slug',
+                        ignoreRecord: true,
+                        modifyRuleUsing: function (\Illuminate\Validation\Rules\Unique $rule, Forms\Get $get) {
+                            $ulId = $get('unit_layanan_id');
+                            return $ulId ? $rule->where('unit_layanan_id', $ulId) : $rule;
+                        }
+                    ),
 
                 // Step 1: Pilih Rumah Sakit terlebih dahulu (Tidak disimpan ke database)
                 Forms\Components\Select::make('rumah_sakit_id')
@@ -109,16 +116,15 @@ class PoliKlinikResource extends BaseResource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-
                 Tables\Filters\SelectFilter::make('rumah_sakit_id')
                     ->relationship('unitLayanan.rumahSakit', 'nama')
                     ->label('Rumah Sakit')
-                    ->visible(fn () => static::isSuperAdmin())
+                    ->visible(fn () => static::isSuperAdmin()),
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->mutateRecordDataUsing(function (array $data): array {
-                        // Mengisi nilai awal 'rumah_sakit_id' pada modal Edit berdasarkan unit_layanan yang tersimpan
                         $unitLayanan = UnitLayanan::find($data['unit_layanan_id']);
                         if ($unitLayanan) {
                             $data['rumah_sakit_id'] = $unitLayanan->rumah_sakit_id;
@@ -126,12 +132,16 @@ class PoliKlinikResource extends BaseResource
                         return $data;
                     }),
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\RestoreAction::make(),
+                Tables\Actions\ForceDeleteAction::make(),
             ]);
+            // ->bulkActions([
+            //     Tables\Actions\BulkActionGroup::make([
+            //         Tables\Actions\DeleteBulkAction::make(),
+            //         Tables\Actions\RestoreBulkAction::make(),
+            //         Tables\Actions\ForceDeleteBulkAction::make(),
+            //     ]),
+            // ]);
     }
 
     public static function getPages(): array

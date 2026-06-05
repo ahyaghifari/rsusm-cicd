@@ -109,15 +109,15 @@ class RumahSakitResource extends BaseResource
                 Tables\Actions\EditAction::make()
                     ->visible(fn () => static::isSuperAdmin()),
 
-                Tables\Actions\DeleteAction::make()
-                    ->visible(fn () => static::isSuperAdmin()),
+                // Tables\Actions\DeleteAction::make()
+                //     ->visible(fn () => static::isSuperAdmin()),
 
                 // Admin: hanya bisa ubah field operasional via modal
                 Tables\Actions\Action::make('pengaturan')
                     ->label('Pengaturan')
                     ->icon('heroicon-o-cog-6-tooth')
                     ->color('gray')
-                    ->visible(fn () => !static::isSuperAdmin())
+                    ->visible(fn () => static::user()->hasAnyRole('admin', 'informasi'))
                     ->fillForm(fn (RumahSakit $record): array => [
                         'no_emergency'  => $record->no_emergency,
                         'no_hotline'    => $record->no_hotline,
@@ -165,13 +165,13 @@ class RumahSakitResource extends BaseResource
                     ->modalHeading('Pengaturan Rumah Sakit')
                     ->modalSubmitActionLabel('Simpan')
                     ->slideOver(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
-                        ->visible(fn () => static::isSuperAdmin()),
-                ]),
             ]);
+            // ->bulkActions([
+            //     Tables\Actions\BulkActionGroup::make([
+            //         Tables\Actions\DeleteBulkAction::make()
+            //             ->visible(fn () => static::isSuperAdmin()),
+            //     ]),
+            // ]);
     }
 
     public static function getRelations(): array
@@ -188,28 +188,28 @@ class RumahSakitResource extends BaseResource
         ];
     }
 
-    public static function canAccess(): bool
-    {
-        return static::user()->hasAnyRole(['super_admin', 'admin']);
-    }
+    // public static function canAccess(): bool
+    // {
+    //     return static::user()->hasAnyRole(['super_admin', 'admin']);
+    // }
 
     public static function canCreate(): bool
     {
         return static::isSuperAdmin();
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
-    {
-        return static::isSuperAdmin();
-    }
+    // public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    // {
+    //     return static::isSuperAdmin();
+    // }
 
     public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
     {
         return static::isSuperAdmin();
     }
 
-    public static function canDeleteAny(): bool
-    {
-        return static::isSuperAdmin();
-    }
+    // public static function canDeleteAny(): bool
+    // {
+    //     return static::isSuperAdmin();
+    // }
 }

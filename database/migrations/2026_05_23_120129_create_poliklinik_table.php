@@ -16,7 +16,8 @@ return new class extends Migration
             // Asumsi foreign key merujuk ke tabel unit_layanan
             $table->foreignId('unit_layanan_id')->constrained('unit_layanan')->onDelete('cascade');
             $table->string('nama', 255);
-            $table->string('slug', 255)->unique();
+            $table->string('slug', 255);
+            $table->unique(['slug', 'unit_layanan_id']);
             $table->string('gambar', 255)->nullable();
             $table->text('deskripsi');
             $table->boolean('aktif')->default(true);

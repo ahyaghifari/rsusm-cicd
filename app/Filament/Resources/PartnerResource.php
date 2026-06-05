@@ -14,8 +14,8 @@ class PartnerResource extends BaseRumahSakitResource
 {
     protected static ?string $model = Partner::class;
 
-    protected static ?int $navigationSort = 2;
-    protected static string | null $navigationGroup = 'Lainnya';
+    protected static ?int $navigationSort = 6;
+    protected static string | null $navigationGroup = 'Media Informasi';
     protected static ?string $navigationIcon = 'fas-hand-holding-hand';
 
     protected static ?string $navigationLabel = 'Partner';
@@ -102,12 +102,12 @@ class PartnerResource extends BaseRumahSakitResource
                         return $data;
                     }),
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
+            // ->bulkActions([
+            //     Tables\Actions\BulkActionGroup::make([
+            //         Tables\Actions\DeleteBulkAction::make(),
+            //     ]),
+            // ]);
     }
 
     public static function getPages(): array

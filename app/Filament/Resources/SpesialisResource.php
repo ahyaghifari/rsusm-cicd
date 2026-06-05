@@ -31,11 +31,21 @@ class SpesialisResource extends BaseRumahSakitResource
                 Forms\Components\TextInput::make('slug')
                     ->required()
                     ->maxLength(100)
-                    ->unique(Spesialis::class, ignoreRecord: true),
-                Forms\Components\FileUpload::make('logo')
-                    ->image()
-                    ->directory('spesialis/logo')
-                    ->disk('public'),
+                    ->unique(
+                        table: 'spesialis',
+                        column: 'slug',
+                        ignoreRecord: true,
+                        modifyRuleUsing: function (\Illuminate\Validation\Rules\Unique $rule) {
+                            $rsId = static::isSuperAdmin()
+                                ? request()->input('data.rumah_sakit_id')
+                                : static::rumahSakitId();
+                            return $rsId ? $rule->where('rumah_sakit_id', $rsId) : $rule;
+                        }
+                    ),
+                // Forms\Components\FileUpload::make('logo')
+                //     ->image()
+                //     ->directory('spesialis/logo')
+                //     ->disk('public'),
                 Forms\Components\Toggle::make('aktif')
                     ->required()
                     ->default(true),
@@ -53,8 +63,8 @@ class SpesialisResource extends BaseRumahSakitResource
                 Tables\Columns\TextColumn::make('slug')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\ImageColumn::make('logo')
-                    ->disk('public'),
+                // Tables\Columns\ImageColumn::make('logo')
+                //     ->disk('public'),
                 Tables\Columns\IconColumn::make('aktif')
                     ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
@@ -67,28 +77,28 @@ class SpesialisResource extends BaseRumahSakitResource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                static::rsTableFilter(),
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
-
                         if (! static::isSuperAdmin()) {
-
-                            $data['rumah_sakit_id']
-                                = static::rumahSakitId();
-
+                            $data['rumah_sakit_id'] = static::rumahSakitId();
                         }
-
                         return $data;
                     }),
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\RestoreAction::make(),
+                Tables\Actions\ForceDeleteAction::make(),
             ]);
+            // ->bulkActions([
+            //     Tables\Actions\BulkActionGroup::make([
+            //         Tables\Actions\DeleteBulkAction::make(),
+            //         Tables\Actions\RestoreBulkAction::make(),
+            //         Tables\Actions\ForceDeleteBulkAction::make(),
+            //     ]),
+            // ]);
     }
 
     public static function getPages(): array
