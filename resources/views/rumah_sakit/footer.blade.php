@@ -78,7 +78,7 @@
 
                 {{-- Label + Value --}}
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold text-on-surface-variant uppercase tracking-wide leading-tight">
+                    <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wide leading-tight">
                         {{ $kontak->label }}
                     </p>
                     <p class="text-base font-medium text-on-surface leading-snug truncate
