@@ -34,14 +34,20 @@
                 {{-- Label atas --}}
                 <span class="inline-flex items-center gap-2 text-white/70 text-xs uppercase tracking-[0.22em] font-semibold mb-4">
                     <span class="w-8 h-px bg-white/40 inline-block"></span>
-                    Rumah Sakit Umum
+                    Selamat Datang di
                     <span class="w-8 h-px bg-white/40 inline-block"></span>
                 </span>
-
-                {{-- Nama RS --}}
-                <h1 class="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight uppercase drop-shadow-md">
-                    SYIFA MEDIKA
-                </h1>
+                @if(file_exists(public_path('img/syifa-medika.png')))
+                    
+                    <img src="{{ asset('img/syifa-medika.png') }}"
+                        alt="RSU Syifa Medika"
+                        class="h-24 md:h-28 lg:h-32 w-auto object-contain mx-auto drop-shadow-[0_0_7px_rgba(255,255,255,1)]">
+                @else
+                    {{-- Nama RS --}}
+                    <h1 class="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight uppercase drop-shadow-md">
+                        SYIFA MEDIKA
+                    </h1>
+                @endif
 
                 {{-- Divider + slogan --}}
                 <div class="flex items-center justify-center gap-3 mt-5 mb-4">
@@ -61,7 +67,7 @@
 
             {{-- ── Search Card ──────────────────────────────────────── --}}
             {{-- z-index tinggi agar Tom Select dropdown tidak tertutup section bawah --}}
-            <div class="w-full" style="z-index: 50; position: relative;" data-aos="fade-up" data-aos-delay="100">
+            <div class="w-full" style="z-index: 50; position: relative;">
                 <form id="searchForm"
                       class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-white/60 p-5 md:p-6">
 
