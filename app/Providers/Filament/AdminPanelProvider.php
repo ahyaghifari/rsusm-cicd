@@ -43,19 +43,15 @@ class AdminPanelProvider extends PanelProvider
             ->font('Plus Jakarta Sans', provider: GoogleFontProvider::class)
             ->navigationGroups([
                 NavigationGroup::make()
-                    ->label('Media Informasi')
-                    ,
+                    ->label('Media Informasi'),
                 NavigationGroup::make()
                     ->label('Dokter'),
                 NavigationGroup::make()
                     ->label('Poliklinik / Rawat Jalan'),
                 NavigationGroup::make()
-                    ->label('Layanan')
-                    ,
+                    ->label('Layanan'),
                 NavigationGroup::make()
-                    ->label('Rawat Inap')
-                    ->collapsed()
-                    ,
+                    ->label('Rawat Inap'),
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),

@@ -5,6 +5,57 @@
     .jp-fullscreen .fi-sidebar { display: none !important; }
     .jp-fullscreen .fi-main    { margin-inline-start: 0 !important; width: 100% !important; }
     .jp-fullscreen .fi-topbar  { padding-inline-start: 1rem !important; }
+
+    /* ── Tom Select — portal theme (Filament Adapted) ───────────────────────────── */
+    .ts-portal-wrapper .ts-wrapper.single .ts-control {
+        padding: 0.375rem 0.75rem;
+        border-radius: 0.375rem;
+        border: 1px solid #d1d5db;
+        background: #fff;
+        font-size: 0.875rem;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        cursor: pointer;
+        min-height: 36px;
+    }
+    .dark .ts-portal-wrapper .ts-wrapper.single .ts-control {
+        background: #1f2937;
+        border-color: #4b5563;
+        color: #e5e7eb;
+    }
+    .ts-portal-wrapper .ts-wrapper.single.focus .ts-control,
+    .ts-portal-wrapper .ts-wrapper.single .ts-control:hover {
+        border-color: #d606b0;
+        box-shadow: 0 0 0 1px #d606b0;
+    }
+    .ts-portal-wrapper .ts-dropdown {
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        font-size: 0.875rem;
+        margin-top: 4px;
+        background: #fff;
+    }
+    .dark .ts-portal-wrapper .ts-dropdown {
+        background: #1f2937;
+        border-color: #374151;
+        color: #e5e7eb;
+    }
+    .ts-portal-wrapper .ts-dropdown .option {
+        padding: 0.5rem 0.75rem;
+    }
+    .ts-portal-wrapper .ts-dropdown .option:hover,
+    .ts-portal-wrapper .ts-dropdown .option.active {
+        background: rgba(214, 6, 176, 0.1);
+        color: #d606b0;
+    }
+    .ts-portal-wrapper .ts-dropdown .option.selected {
+        background: rgba(214, 6, 176, 0.15);
+        color: #d606b0;
+        font-weight: 600;
+    }
+    .ts-portal-wrapper .ts-control > input {
+        display: inline-block !important;
+    }
 </style>
 
 <div class="space-y-4"
@@ -208,8 +259,140 @@
                 </div>
             </x-slot>
 
-            {{-- Form rows via Filament Repeater (searchable poliklinik & dokter) --}}
-            {{ $this->rowsForm }}
+            {{-- Custom Table for Jadwal Harian --}}
+            <div class="overflow-x-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm mt-4">
+                <table class="w-full text-left text-sm text-gray-700 dark:text-gray-300">
+                    <thead class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
+                        <tr>
+                            <th class="px-3 py-3 w-10 text-center text-xs font-semibold text-gray-600 dark:text-gray-300">No</th>
+                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-48">Poliklinik <span class="text-red-500">*</span></th>
+                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-48">Dokter</th>
+                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-40">Nama Dokter</th>
+                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-28">Jam Mulai <span class="text-red-500">*</span></th>
+                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-28">Jam Selesai</th>
+                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-32">Status <span class="text-red-500">*</span></th>
+                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-32">Catatan</th>
+                            <th class="px-3 py-3 w-10 text-center"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                        @forelse($rows as $uuid => $row)
+                            <tr wire:key="row-{{ $uuid }}" class="bg-white dark:bg-gray-900 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors">
+                                <td class="px-3 py-2 text-xs text-gray-400 text-center select-none">{{ $loop->iteration }}</td>
+                                
+                                {{-- Poliklinik --}}
+                                <td class="px-2 py-1.5">
+                                    <div class="ts-portal-wrapper" wire:ignore x-data="{
+                                        ts: null,
+                                        init() {
+                                            this.ts = new TomSelect(this.$refs.sel, { maxOptions: null });
+                                            this.ts.setValue('{{ $row['poliklinik_id'] ?? '' }}', true);
+                                            this.ts.on('change', (v) => $wire.set('rows.{{ $uuid }}.poliklinik_id', v || null));
+                                        },
+                                        destroy() { if(this.ts) { this.ts.destroy(); this.ts = null; } }
+                                    }">
+                                        <select x-ref="sel" placeholder="— Pilih Poliklinik —">
+                                            <option value=""></option>
+                                            @foreach($this->getPoliklinikOptions() as $val => $label)
+                                                <option value="{{ $val }}">{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </td>
+
+                                {{-- Dokter --}}
+                                <td class="px-2 py-1.5">
+                                    <div class="ts-portal-wrapper" wire:ignore x-data="{
+                                        ts: null,
+                                        init() {
+                                            this.ts = new TomSelect(this.$refs.sel, { maxOptions: null });
+                                            this.ts.setValue('{{ $row['dokter_id'] ?? '' }}', true);
+                                            this.ts.on('change', (v) => {
+                                                $wire.set('rows.{{ $uuid }}.dokter_id', v || null);
+                                                $wire.set('rows.{{ $uuid }}.nama_dokter', v ? (@js($this->getDokterOptions()))[v] || null : null);
+                                            });
+                                        },
+                                        destroy() { if(this.ts) { this.ts.destroy(); this.ts = null; } }
+                                    }">
+                                        <select x-ref="sel" placeholder="— Pilih Dokter —">
+                                            <option value=""></option>
+                                            @foreach($this->getDokterOptions() as $val => $label)
+                                                <option value="{{ $val }}">{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </td>
+
+                                {{-- Nama Dokter --}}
+                                <td class="px-2 py-1.5">
+                                    <input type="text" wire:model="rows.{{ $uuid }}.nama_dokter" placeholder="Nama dokter..."
+                                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500"/>
+                                </td>
+
+                                {{-- Jam Mulai --}}
+                                <td class="px-2 py-1.5">
+                                    <input type="time" wire:model="rows.{{ $uuid }}.jam_mulai"
+                                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500 font-mono"/>
+                                </td>
+
+                                {{-- Jam Selesai --}}
+                                <td class="px-2 py-1.5">
+                                    <input type="time" wire:model="rows.{{ $uuid }}.jam_selesai"
+                                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500 font-mono"
+                                        placeholder="Opsional"/>
+                                </td>
+
+                                {{-- Status --}}
+                                <td class="px-2 py-1.5">
+                                    <select wire:model="rows.{{ $uuid }}.status_layanan"
+                                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500">
+                                        @foreach(\App\Enums\StatusLayanan::cases() as $st)
+                                            <option value="{{ $st->value }}">{{ $st->getLabel() }}</option>
+                                        @endforeach
+                                    </select>
+                                </td>
+
+                                {{-- Catatan --}}
+                                <td class="px-2 py-1.5">
+                                    <input type="text" wire:model="rows.{{ $uuid }}.catatan" placeholder="Catatan..."
+                                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500"/>
+                                </td>
+
+                                {{-- Remove --}}
+                                <td class="px-2 py-1.5 text-center">
+                                    <button wire:click="removeRow('{{ $uuid }}')" wire:confirm="Hapus baris ini?"
+                                        class="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="9" class="px-4 py-8 text-center text-gray-400 dark:text-gray-500">
+                                    <div class="flex flex-col items-center justify-center gap-2">
+                                        <svg class="w-8 h-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                        </svg>
+                                        <span class="text-sm">Belum ada data jadwal. Klik <strong>Tambah Baris</strong> untuk memulai.</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+                @if(! $tanggalTerlalu)
+                <div class="bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-800 px-4 py-3 flex justify-center">
+                    <button wire:click="addRow" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-primary-600 bg-primary-50 hover:bg-primary-100 dark:text-primary-400 dark:bg-primary-900/30 dark:hover:bg-primary-900/50 transition border border-primary-200 dark:border-primary-800">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Tambah Baris
+                    </button>
+                </div>
+                @endif
+            </div>
 
             @if(! $tanggalTerlalu)
                 <div class="flex justify-end mt-2">

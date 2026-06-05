@@ -14,6 +14,57 @@
     .jp-fullscreen .fi-sidebar { display: none !important; }
     .jp-fullscreen .fi-main    { margin-inline-start: 0 !important; width: 100% !important; }
     .jp-fullscreen .fi-topbar  { padding-inline-start: 1rem !important; }
+
+    /* ── Tom Select — portal theme (Filament Adapted) ───────────────────────────── */
+    .ts-portal-wrapper .ts-wrapper.single .ts-control {
+        padding: 0.375rem 0.75rem;
+        border-radius: 0.375rem;
+        border: 1px solid #d1d5db;
+        background: #fff;
+        font-size: 0.875rem;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        cursor: pointer;
+        min-height: 36px;
+    }
+    .dark .ts-portal-wrapper .ts-wrapper.single .ts-control {
+        background: #1f2937;
+        border-color: #4b5563;
+        color: #e5e7eb;
+    }
+    .ts-portal-wrapper .ts-wrapper.single.focus .ts-control,
+    .ts-portal-wrapper .ts-wrapper.single .ts-control:hover {
+        border-color: #d606b0;
+        box-shadow: 0 0 0 1px #d606b0;
+    }
+    .ts-portal-wrapper .ts-dropdown {
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        font-size: 0.875rem;
+        margin-top: 4px;
+        background: #fff;
+    }
+    .dark .ts-portal-wrapper .ts-dropdown {
+        background: #1f2937;
+        border-color: #374151;
+        color: #e5e7eb;
+    }
+    .ts-portal-wrapper .ts-dropdown .option {
+        padding: 0.5rem 0.75rem;
+    }
+    .ts-portal-wrapper .ts-dropdown .option:hover,
+    .ts-portal-wrapper .ts-dropdown .option.active {
+        background: rgba(214, 6, 176, 0.1);
+        color: #d606b0;
+    }
+    .ts-portal-wrapper .ts-dropdown .option.selected {
+        background: rgba(214, 6, 176, 0.15);
+        color: #d606b0;
+        font-weight: 600;
+    }
+    .ts-portal-wrapper .ts-control > input {
+        display: inline-block !important;
+    }
 </style>
 
 <div
@@ -178,7 +229,7 @@
 
                                         {{-- Poliklinik — Tom Select --}}
                                         <td class="px-2 py-1.5">
-                                            <div wire:ignore x-data="{
+                                            <div class="ts-portal-wrapper" wire:ignore x-data="{
                                                 ts: null,
                                                 init() {
                                                     this.ts = new TomSelect(this.$refs.sel, { maxOptions: null });
@@ -198,7 +249,7 @@
 
                                         {{-- Dokter — Tom Select --}}
                                         <td class="px-2 py-1.5">
-                                            <div wire:ignore x-data="{
+                                            <div class="ts-portal-wrapper" wire:ignore x-data="{
                                                 ts: null,
                                                 init() {
                                                     this.ts = new TomSelect(this.$refs.sel, { maxOptions: null });
@@ -351,7 +402,7 @@
 
                                             {{-- Poliklinik — Tom Select --}}
                                             <td class="px-2 py-1.5">
-                                                <div wire:ignore x-data="{
+                                                <div class="ts-portal-wrapper" wire:ignore x-data="{
                                                     ts: null,
                                                     init() {
                                                         this.ts = new TomSelect(this.$refs.sel, { maxOptions: null });
