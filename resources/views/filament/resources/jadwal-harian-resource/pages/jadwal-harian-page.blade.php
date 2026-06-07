@@ -294,8 +294,23 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                         @forelse($rows as $uuid => $row)
-                            <tr wire:key="row-{{ $uuid }}" class="bg-white dark:bg-gray-900 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors">
-                                <td class="px-3 py-2 text-xs text-gray-400 text-center select-none">{{ $loop->iteration }}</td>
+                            <tr wire:key="row-{{ $uuid }}"
+                                @class([
+                                    'transition-colors',
+                                    'border-l-4 border-amber-400 bg-amber-50/70 dark:bg-amber-900/10 hover:bg-amber-100/70 dark:hover:bg-amber-900/20' => (bool) ($row['is_executive'] ?? false),
+                                    'bg-white dark:bg-gray-900 hover:bg-blue-50/30 dark:hover:bg-blue-900/10' => ! (bool) ($row['is_executive'] ?? false),
+                                ])>
+                                <td class="px-3 py-2 text-xs text-gray-400 text-center select-none">
+                                    <span class="inline-flex items-center justify-center gap-1">
+                                        {{ $loop->iteration }}
+                                        @if((bool) ($row['is_executive'] ?? false))
+                                            <svg class="w-3 h-3 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
+                                                <title>Executive Clinic</title>
+                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                            </svg>
+                                        @endif
+                                    </span>
+                                </td>
                                 
                                 {{-- Poliklinik --}}
                                 <td class="px-2 py-1.5">

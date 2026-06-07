@@ -361,6 +361,14 @@ class JadwalPraktekPage extends Page
                     ->warning()->send();
                 return;
             }
+
+            if (empty($row['waktu_mulai']) && ! (bool) ($row['sesuai_perjanjian'] ?? false)) {
+                Notification::make()
+                    ->title("Baris ke-" . ($i + 1) . ": Jam Mulai wajib diisi")
+                    ->body('Kosongkan hanya jika "Sesuai Perjanjian" dicentang.')
+                    ->danger()->send();
+                return;
+            }
         }
 
         $poliIds = $this->getPoliIds();
@@ -415,6 +423,14 @@ class JadwalPraktekPage extends Page
                 Notification::make()
                     ->title("Baris ke-" . ($i + 1) . ": Poliklinik wajib dipilih")
                     ->warning()->send();
+                return;
+            }
+
+            if (empty($row['waktu_mulai']) && ! (bool) ($row['sesuai_perjanjian'] ?? false)) {
+                Notification::make()
+                    ->title("Baris ke-" . ($i + 1) . ": Jam Mulai wajib diisi")
+                    ->body('Kosongkan hanya jika "Sesuai Perjanjian" dicentang.')
+                    ->danger()->send();
                 return;
             }
         }

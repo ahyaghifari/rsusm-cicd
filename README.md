@@ -202,6 +202,7 @@ Path admin dikonfigurasi via env: `ADMIN_PATH=manage` (default). Akses di `/{ADM
 - **Mode Per Dokter**: dropdown dokter di area konten, tabel jadwal lintas semua hari
   - Poliklinik menggunakan Tom Select
   - Simpan: replace-all WHERE `dokter_id` dalam scope RS
+- **Validasi `waktu_mulai`**: wajib diisi kecuali `sesuai_perjanjian` dicentang (berlaku di form Resource maupun kedua mode tabel — `saveJadwal()` & `saveDokterJadwal()`)
 - **Layar Penuh**: sembunyikan sidebar Filament
 - Rows menggunakan UUID key untuk identifikasi unik
 
@@ -213,6 +214,9 @@ Path admin dikonfigurasi via env: `ADMIN_PATH=manage` (default). Akses di `/{ADM
 - **Tracking Perubahan** via `JadwalHarianPerubahan` (1-to-1 per baris):
   - Record perubahan dibuat HANYA jika sumber GENERATE dan status bukan BUKA
   - Manual tidak membuat record perubahan
+  - **Snapshot nilai asli** (`jam_mulai_asli`, `jam_selesai_asli`, `status_layanan_asli`): di-capture sekali saat perubahan pertama kali terjadi, dan tidak ditimpa pada edit berikutnya
+  - **Deteksi "kembali ke semula"**: dibandingkan terhadap kolom `*_asli` di `jadwal_harian_perubahan` sendiri — **bukan** dengan query ke `JadwalPraktek` (agar histori tidak bergantung pada perubahan jadwal mingguan di kemudian hari). Jika sama persis, record perubahan dihapus otomatis dan `sumber` kembali ke `GENERATE`
+- **Penanda visual Executive**: baris `is_executive = true` di tabel admin diberi highlight background amber + ikon bintang pada kolom No, agar mudah dibedakan dari baris reguler
 - **Cron**: `php artisan jadwal:generate-harian` berjalan otomatis `daily at 00:05`
   - Memuat dari JadwalPraktek sesuai hari
   - Skip jika jadwal harian untuk tanggal + poliklinik sudah ada
@@ -328,7 +332,7 @@ Akun yang dibuat otomatis oleh `DatabaseSeeder`:
 
 ```bash
 php artisan test
-# 235+ tests passing (Unit + Feature)
+# 242+ tests passing (Unit + Feature)
 ```
 
 ---
@@ -406,7 +410,7 @@ CACHE_STORE=database               # Gunakan redis di production untuk performa
 - [x] Mobile bottom bar (Emergency + Hotline + Chatbot)
 - [x] SEO meta tags (artesaos/seotools)
 - [x] Landing page (hero, Tom Select, no jQuery)
-- [x] Test suite (Unit + Feature, 233+ passing)
+- [x] Test suite (Unit + Feature, 242+ passing)
 - [x] PosterTemplate — CRUD upload asset (background, logo, shape), zone editor drag-drop
 - [x] GeneratePosterPage — form + download PNG 1080×1920 via Browsershot
 - [x] Sitemap XML otomatis per rumah sakit (`/sitemap.xml` index + `/{rumahsakit}/sitemap.xml`, di-cache 6 jam)
@@ -414,6 +418,9 @@ CACHE_STORE=database               # Gunakan redis di production untuk performa
 - [x] Chatbot — rate limiting AI 2 lapis (burst per menit + kuota harian, via `RateLimiter`, angka dikonfigurasi sebagai konstanta)
 - [x] Chatbot — opsi pemulihan saat respons gagal (restart percakapan, kirim ulang pesan, daftar kontak non-emergency)
 - [x] Lazy loading (`loading="lazy"`) pada gambar below-the-fold di seluruh halaman publik
+- [x] JadwalHarianPerubahan — snapshot nilai asli (`*_asli`) untuk deteksi "kembali ke semula" tanpa bergantung pada `JadwalPraktek`
+- [x] JadwalHarian — penanda visual baris Executive (highlight background amber + ikon bintang) di tabel admin
+- [x] JadwalPraktek — validasi `waktu_mulai` wajib diisi kecuali `sesuai_perjanjian` dicentang (form & kedua mode tabel)
 
 ### Dalam Pengerjaan
 
