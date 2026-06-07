@@ -1,0 +1,378 @@
+<?php
+
+namespace App\Filament\Pages;
+
+use App\Models\JadwalHarian;
+use App\Models\JadwalPraktek;
+use App\Models\PoliKlinik;
+use App\Models\PosterTemplate;
+use Filament\Forms;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Spatie\Browsershot\Browsershot;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+class GeneratePosterPage extends Page
+{
+    use InteractsWithForms;
+
+    protected static ?string $navigationIcon  = 'heroicon-o-sparkles';
+    protected static ?string $navigationLabel = 'Generate Poster';
+    protected static ?string $title           = 'Generate Poster Jadwal';
+    protected static ?string $navigationGroup = 'Poster Jadwal';
+    protected static bool $shouldRegisterNavigation = false;
+    protected static string  $view            = 'filament.resources.poster-jadwal-resource.pages.generate-poster-page';
+
+    // ── State ─────────────────────────────────────────────────────────────────
+
+    // Semua form field ditampung di $data — standar Filament Page.
+    // FileUpload, Select, DatePicker semua bind ke sini via statePath('data').
+    public array $data = [];
+
+    /** @var array<int, array{id:int, nama:string, visible:bool, order:int}> */
+    public array $poli_list = [];
+
+    public function mount(): void
+    {
+        $this->form->fill([
+            'tanggal' => now()->format('Y-m-d'),
+        ]);
+    }
+
+    // ── Helpers akses $data ───────────────────────────────────────────────────
+
+    private function getTemplateId(): ?int
+    {
+        $val = $this->data['template_id'] ?? null;
+        return $val ? (int) $val : null;
+    }
+
+    private function getTanggal(): ?string
+    {
+        return $this->data['tanggal'] ?? null;
+    }
+
+    private function getFotoHero(): ?string
+    {
+        $val = $this->data['foto_hero'] ?? null;
+        if (is_array($val)) $val = array_values($val)[0] ?? null;
+        return is_string($val) && $val !== '' ? $val : null;
+    }
+
+    private function getFotoHeroDataUri(): ?string
+    {
+        $val = $this->getFotoHero();
+        if (! $val) return null;
+        $path = Storage::disk('public')->path($val);
+        return file_exists($path) ? $this->toDataUri($path) : null;
+    }
+
+    private function getKeterangan(): string
+    {
+        return $this->data['keterangan'] ?? '';
+    }
+
+    // ── Form ──────────────────────────────────────────────────────────────────
+
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Section::make()
+                    ->schema([
+                        Forms\Components\Select::make('template_id')
+                            ->label('1. Pilih Template')
+                            ->options(function () {
+                                return PosterTemplate::with('rumahSakit')
+                                    ->get()
+                                    ->mapWithKeys(fn ($t) =>
+                                        [$t->id => "[{$t->rumahSakit->lokasi}] {$t->nama}"]
+                                    );
+                            })
+                            ->searchable()
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(fn () => $this->loadPoliList()),
+
+                        Forms\Components\DatePicker::make('tanggal')
+                            ->label('2. Pilih Tanggal')
+                            ->required()
+                            ->native(false)
+                            ->live()
+                            ->afterStateUpdated(fn () => $this->loadPoliList()),
+
+                        Forms\Components\FileUpload::make('foto_hero')
+                            ->label('4. Upload Foto Hero')
+                            ->image()
+                            ->directory('poster-tmp')
+                            ->disk('public')
+                            ->maxSize(5120)
+                            ->acceptedFileTypes(['image/jpeg', 'image/png'])
+                            ->helperText('Foto yang akan menjadi background layer bawah poster.'),
+
+                        Forms\Components\Textarea::make('keterangan')
+                            ->label('5. Keterangan Hero')
+                            ->placeholder('Contoh: Tindakan EXILIS Aurora EC')
+                            ->rows(2),
+                    ])
+                    ->columns(2),
+            ])
+            ->statePath('data');  // ← kunci: binding ke $this->data
+    }
+
+    // ── Load Poli List ────────────────────────────────────────────────────────
+
+    public function loadPoliList(): void
+    {
+        $templateId = $this->getTemplateId();
+        $tanggal    = $this->getTanggal();
+
+        if (! $templateId || ! $tanggal) {
+            $this->poli_list = [];
+            return;
+        }
+
+        $template = PosterTemplate::find($templateId);
+        if (! $template) { $this->poli_list = []; return; }
+
+        $rsId = $template->rumah_sakit_id;
+
+        $this->poli_list = PoliKlinik::where('rumah_sakit_id', $rsId)
+            ->where('aktif', true)
+            ->orderBy('nama')
+            ->get()
+            ->map(fn ($poli) => [
+                'id'      => $poli->id,
+                'nama'    => $poli->nama,
+                'visible' => true,
+                'order'   => $poli->urutan ?? 999,
+            ])
+            ->values()
+            ->toArray();
+    }
+
+    // ── Poli List Actions ─────────────────────────────────────────────────────
+
+    public function togglePoli(int $index): void
+    {
+        if (isset($this->poli_list[$index])) {
+            $this->poli_list[$index]['visible'] = ! $this->poli_list[$index]['visible'];
+        }
+    }
+
+    public function reorderPoli(int $oldIndex, int $newIndex): void
+    {
+        if ($oldIndex === $newIndex) return;
+
+        $list = $this->poli_list;
+        $item = array_splice($list, $oldIndex, 1)[0];
+        array_splice($list, $newIndex, 0, [$item]);
+
+        foreach ($list as $i => &$row) {
+            $row['order'] = $i + 1;
+        }
+        unset($row);
+
+        $this->poli_list = $list;
+    }
+
+    public function previewPoster(): void
+    {
+        Storage::disk('public')->makeDirectory('poster-tmp');
+        $this->form->getState();
+
+        [$template, $tanggal] = $this->resolveTemplateAndTanggal();
+        if (! $template) return;
+
+        if (empty($this->poli_list)) {
+            Notification::make()->title('Pilih template dan tanggal terlebih dahulu.')->warning()->send();
+            return;
+        }
+
+        $html = $this->buildHtml($template, $tanggal);
+
+        $key  = Str::uuid()->toString();
+        $path = storage_path("app/poster-preview/{$key}.html");
+        @mkdir(dirname($path), 0755, true);
+        file_put_contents($path, $html);
+
+        $this->dispatch('open-preview', url: route('poster.preview', $key));
+    }
+
+    // ── Generate ──────────────────────────────────────────────────────────────
+
+    public function generate(): StreamedResponse|null
+    {
+        Storage::disk('public')->makeDirectory('poster-tmp');
+        $this->form->getState();
+
+        $visibleCount = collect($this->poli_list)->where('visible', true)->count();
+        if ($visibleCount === 0) {
+            Notification::make()
+                ->title('Minimal 1 poliklinik harus ditampilkan.')
+                ->danger()
+                ->send();
+            return null;
+        }
+
+        [$template, $tanggal] = $this->resolveTemplateAndTanggal();
+        if (! $template) return null;
+
+        $html     = $this->buildHtml($template, $tanggal);
+        $fotoHero = $this->getFotoHero();
+
+        $outputPath = storage_path('app/public/poster-output/poster-' . $tanggal->format('Ymd') . '-' . time() . '.png');
+        @mkdir(dirname($outputPath), 0755, true);
+
+        Browsershot::html($html)
+            ->windowSize(1080, 1920)
+            ->deviceScaleFactor(1)
+            ->fullPage()
+            ->waitUntilNetworkIdle()
+            ->save($outputPath);
+
+        if ($fotoHero) {
+            Storage::disk('public')->delete($fotoHero);
+        }
+
+        return response()->streamDownload(function () use ($outputPath) {
+            readfile($outputPath);
+            @unlink($outputPath);
+        }, 'poster-jadwal-' . $tanggal->format('d-m-Y') . '.png', [
+            'Content-Type' => 'image/png',
+        ]);
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+ 
+    /**
+     * Konversi file lokal ke data URI base64.
+     * Browsershot tidak mengizinkan file:// — data URI adalah solusinya.
+     */
+    private function toDataUri(string $absolutePath): ?string
+    {
+        if (! file_exists($absolutePath)) {
+            return null;
+        }
+ 
+        $mime = mime_content_type($absolutePath) ?: 'application/octet-stream';
+        $b64  = base64_encode(file_get_contents($absolutePath));
+ 
+        return "data:{$mime};base64,{$b64}";
+    }
+ 
+    /**
+     * Resolve upload fonts ke data URI agar bisa di-embed via @font-face di HTML.
+     * Return: ['alias' => 'data:font/...;base64,...']
+     */
+    private function resolveUploadFonts(PosterTemplate $template): array
+    {
+        $cfg    = $template->config ?? [];
+        $result = [];
+ 
+        $slots = [
+            'FontTanggal'    => $cfg['font_tanggal']          ?? [],
+            'FontKeterangan' => $cfg['font_keterangan']       ?? [],
+            'FontIsi'        => $cfg['grid']['font_isi']      ?? [],
+            'FontNamaPoli'   => $cfg['grid']['font_nama_poli'] ?? [],
+        ];
+ 
+        foreach ($slots as $alias => $fontObj) {
+            if (($fontObj['sumber'] ?? '') === 'upload' && ! empty($fontObj['path'])) {
+                $abs = Storage::disk('public')->path($fontObj['path']);
+                $uri = $this->toDataUri($abs);
+                if ($uri) {
+                    $result[$alias] = $uri;
+                }
+            }
+        }
+ 
+        return $result;
+    }
+
+    /** Validasi & parse template + tanggal. Return [null, null] jika gagal. */
+    private function resolveTemplateAndTanggal(): array
+    {
+        $templateId = $this->getTemplateId();
+        $tanggalStr = $this->getTanggal();
+
+        if (! $templateId || ! $tanggalStr) {
+            Notification::make()->title('Pilih template dan tanggal terlebih dahulu.')->warning()->send();
+            return [null, null];
+        }
+
+        $template = PosterTemplate::with('rumahSakit')->find($templateId);
+        if (! $template) {
+            Notification::make()->title('Template tidak ditemukan.')->danger()->send();
+            return [null, null];
+        }
+
+        return [$template, Carbon::parse($tanggalStr)];
+    }
+
+    /** Bangun data jadwal per poli dari jadwal harian + praktek, lalu render HTML template. */
+    private function buildHtml(PosterTemplate $template, Carbon $tanggal): string
+    {
+        $rsId    = $template->rumah_sakit_id;
+        $hariIni = strtoupper($tanggal->locale('id')->dayName);
+
+        $jadwalHarian = JadwalHarian::whereDate('tanggal', $tanggal)
+            ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rsId))
+            ->with(['poliklinik', 'dokter'])
+            ->get()
+            ->groupBy('poliklinik_id');
+
+        $jadwalPraktek = JadwalPraktek::where('hari', $hariIni)
+            ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rsId))
+            ->with(['poliklinik', 'dokter'])
+            ->get()
+            ->groupBy('poliklinik_id');
+
+        $merged = $jadwalHarian->union($jadwalPraktek);
+
+        $poliList = collect($this->poli_list)
+            ->where('visible', true)
+            ->sortBy('order')
+            ->values()
+            ->map(function ($item) use ($merged, $rsId) {
+                $rows = $merged->get($item['id'], collect());
+                $poli = $rows->first()?->poliklinik
+                    ?? PoliKlinik::where('id', $item['id'])->where('rumah_sakit_id', $rsId)->first();
+                if (! $poli) return null;
+
+                return [
+                    'poli'   => $poli,
+                    'jadwal' => $rows->map(fn ($r) => [
+                        'nama_dokter'  => $r->dokter?->nama ?? $r->nama_dokter ?? '-',
+                        'jam_mulai'    => ($r->waktu_mulai ?? $r->jam_mulai)?->format('H:i'),
+                        'jam_selesai'  => ($r->waktu_selesai ?? $r->jam_selesai)?->format('H:i'),
+                        'libur'        => ($r->status_layanan?->value ?? '') === 'LIBUR',
+                        'is_executive' => (bool) ($r->is_executive ?? false),
+                    ])->toArray(),
+                ];
+            })
+            ->filter()
+            ->values();
+
+        return view('filament.resources.poster-jadwal-resource.pages.jadwal-template', [
+            'template'        => $template,
+            'tanggal'         => $tanggal,
+            'fotoHeroDataUri' => $this->getFotoHeroDataUri(),
+            'templateDataUri' => $this->toDataUri(Storage::disk('public')->path($template->template_png)),
+            'logoDataUri'     => $template->logo_header
+                                    ? $this->toDataUri(Storage::disk('public')->path($template->logo_header))
+                                    : null,
+            'shapeDataUri'    => $template->shape_poli
+                                    ? $this->toDataUri(Storage::disk('public')->path($template->shape_poli))
+                                    : null,
+            'uploadFonts'     => $this->resolveUploadFonts($template),
+            'keterangan'      => $this->getKeterangan(),
+            'poliList'        => $poliList,
+        ])->render();
+    }
+}

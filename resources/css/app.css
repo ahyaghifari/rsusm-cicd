@@ -1,0 +1,136 @@
+@import "tailwindcss";
+@import "swiper/css";
+@import "swiper/css/autoplay";
+
+/* Preline UI Configuration */
+@source "../../node_modules/preline/dist/*.js";
+@import "../../node_modules/preline/variants.css";
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source "../**/*.blade.php";
+@source "../**/*.js";
+@source "../**/*.vue";
+
+[x-cloak] { display: none !important; }
+
+/* ── Tom Select — portal theme ───────────────────────────── */
+.ts-portal-wrapper .ts-wrapper.single .ts-control {
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    border-color: var(--color-outline-variant);
+    background: #fff;
+    font-size: 0.875rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,.06);
+    cursor: pointer;
+}
+.ts-portal-wrapper .ts-wrapper.single.focus .ts-control,
+.ts-portal-wrapper .ts-wrapper.single .ts-control:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
+}
+.ts-portal-wrapper .ts-dropdown {
+    border-radius: 0.75rem;
+    border-color: var(--color-outline-variant);
+    box-shadow: 0 10px 25px rgba(0,0,0,.12);
+    font-size: 0.875rem;
+    margin-top: 4px;
+}
+.ts-portal-wrapper .ts-dropdown .option {
+    padding: 0.6rem 1rem;
+}
+.ts-portal-wrapper .ts-dropdown .option:hover,
+.ts-portal-wrapper .ts-dropdown .option.active {
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+    color: var(--color-primary);
+}
+.ts-portal-wrapper .ts-dropdown .option.selected {
+    background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+    color: var(--color-primary);
+    font-weight: 600;
+}
+.ts-portal-wrapper .plugin-clear_button .clear-button {
+    color: var(--color-on-surface-variant);
+}
+/* ── End Tom Select ──────────────────────────────────────── */
+
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+    animation: fade-in 0.35s ease both;
+}
+
+@theme {
+    /* Custom Colors */
+    --color-surface-container-highest: #d3e4fe;
+    --color-primary-fixed-dim: #ffabee;
+    --color-secondary-fixed-dim: #7ad9ad;
+    --color-on-error: #ffffff;
+    --color-tertiary: #4d51b2;
+    --color-surface-variant: #d3e4fe;
+    --color-inverse-on-surface: #eaf1ff;
+    --color-on-error-container: #93000a;
+    --color-secondary: #006c4b;
+    --color-surface: #f8f9ff;
+    --color-inverse-surface: #213145;
+    --color-error: #ba1a1a;
+    --color-surface-bright: #f8f9ff;
+    --color-on-tertiary-fixed: #04006d;
+    --color-on-tertiary: #ffffff;
+    --color-surface-dim: #cbdbf5;
+    --color-tertiary-fixed-dim: #c0c1ff;
+    --color-secondary-container: #96f6c8;
+    --color-tertiary-container: #666acc;
+    --color-outline-variant: #d6c0ce;
+    --color-on-tertiary-container: #fffbff;
+    --color-error-container: #ffdad6;
+    --color-inverse-primary: #ffabee;
+    --color-on-primary-fixed-variant: #7e1277;
+    --color-on-secondary-fixed-variant: #005137;
+    --color-on-secondary-container: #00734f;
+    --color-tertiary-fixed: #e1e0ff;
+    --color-secondary-fixed: #96f6c8;
+    --color-surface-container-low: #eff4ff;
+    /* --color-primary: #006c4b; */
+    --color-primary: #d606b0;
+    --color-on-secondary: #ffffff;
+    --color-surface-container-high: #dce9ff;
+    --color-primary-container: #b649a9;
+    --color-on-surface-variant: #52424d;
+    --color-on-primary-fixed: #390036;
+    --color-on-primary-container: #fffbff;
+    --color-background: #f8f9ff;
+    --color-on-primary: #ffffff;
+    --color-surface-container-lowest: #ffffff;
+    --color-on-background: #0b1c30;
+    --color-surface-tint: #9b3191;
+    --color-on-tertiary-fixed-variant: #373a9b;
+    --color-outline: #84727e;
+    --color-primary-fixed: #ffd7f3;
+    --color-surface-container: #e5eeff;
+    --color-on-surface: #0b1c30;
+    --color-on-secondary-fixed: #002114;
+
+    /* Custom Fonts */
+    --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-headline-lg: "Plus Jakarta Sans", sans-serif;
+    --font-body-lg: "Plus Jakarta Sans", sans-serif;
+    --font-body-sm: "Plus Jakarta Sans", sans-serif;
+    --font-headline-sm: "Plus Jakarta Sans", sans-serif;
+    --font-headline-md: "Plus Jakarta Sans", sans-serif;
+    --font-label-md: "Plus Jakarta Sans", sans-serif;
+    --font-headline-xl-mobile: "Plus Jakarta Sans", sans-serif;
+    --font-body-md: "Plus Jakarta Sans", sans-serif;
+    --font-headline-lg-mobile: "Plus Jakarta Sans", sans-serif;
+    --font-headline-xl: "Plus Jakarta Sans", sans-serif;
+
+    /* Spacings */
+    --spacing-unit: 8px;
+    --spacing-margin-desktop: 40px;
+    --spacing-margin-mobile: 16px;
+    --spacing-section-gap: 80px;
+    --spacing-container-max: 1280px;
+    --spacing-gutter: 24px;
+}
