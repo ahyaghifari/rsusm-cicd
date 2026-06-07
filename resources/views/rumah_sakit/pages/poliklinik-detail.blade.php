@@ -25,7 +25,7 @@
                     <div class="w-14 h-14 rounded-2xl bg-white/90 flex items-center justify-center shrink-0 overflow-hidden shadow-lg">
                         <img src="{{ Storage::url($poliklinik->gambar) }}"
                              alt="{{ $poliklinik->nama }}"
-                             class="w-10 h-10 object-contain">
+                             class="w-10 h-10 object-contain" loading="lazy">
                     </div>
                 @endif
                 <h1 class="text-3xl md:text-4xl font-bold text-white leading-tight">
@@ -121,7 +121,8 @@
                                                     @if($first->dokter?->foto)
                                                         <img src="{{ Storage::url($first->dokter->foto) }}"
                                                              alt="{{ $namaTampil }}"
-                                                             class="w-8 h-8 rounded-full object-cover shrink-0 mt-0.5">
+                                                             class="w-8 h-8 rounded-full object-cover shrink-0 mt-0.5"
+                                                             loading="lazy">
                                                     @else
                                                         <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5"
                                                              style="background-color: {{ $warna }}18;">

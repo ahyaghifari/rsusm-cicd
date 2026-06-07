@@ -189,6 +189,34 @@
                             <div class="px-3 py-2 rounded-[15px] rounded-bl-[4px] bg-white border border-[#d6c0ce] text-[13px] leading-snug text-[#0b1c30] break-words">
                                 {!! nl2br(str($msg['text'])->sanitizeHtml()) !!}
                             </div>
+
+                            @if(!empty($msg['failed']))
+                            <div class="mt-2 flex flex-col gap-2 bg-[#fff8fe] border border-[#d6c0ce] rounded-[12px] p-2.5">
+                                <div class="flex flex-wrap gap-1.5">
+                                    <button
+                                        wire:click="resetConversation"
+                                        class="text-[11px] font-medium px-2.5 py-1.5 rounded-full bg-white border border-[#d6c0ce] hover:border-[#d606b0] hover:text-[#d606b0] text-[#0b1c30] transition-colors cursor-pointer"
+                                    >🔄 Mulai ulang percakapan</button>
+                                    @if(!empty($msg['retry']))
+                                    <button
+                                        wire:click="retryLastMessage(@js($msg['retry']))"
+                                        class="text-[11px] font-medium px-2.5 py-1.5 rounded-full bg-white border border-[#d6c0ce] hover:border-[#d606b0] hover:text-[#d606b0] text-[#0b1c30] transition-colors cursor-pointer"
+                                    >↻ Kirim ulang pesan</button>
+                                    @endif
+                                </div>
+                                @if($contacts->isNotEmpty())
+                                <div class="text-[11px] text-[#84727e] border-t border-[#d6c0ce]/60 pt-2">
+                                    <div class="font-medium text-[#0b1c30] mb-1">📞 Atau hubungi kami langsung:</div>
+                                    <div class="flex flex-col gap-0.5">
+                                        @foreach($contacts as $c)
+                                        <div><span class="font-medium">{{ $c->label }}:</span> {{ $c->value }}</div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @endif
+                            </div>
+                            @endif
+
                             <div class="text-[10px] text-[#84727e] mt-0.5">{{ $msg['time'] }}</div>
                         </div>
                     </div>

@@ -20,7 +20,8 @@
 
                 <img src="{{ Storage::url($layanan->gambar) }}"
                      alt="{{ $layanan->nama }}"
-                     class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                     class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                     loading="lazy">
 
                 {{-- Overlay zoom --}}
                 <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition flex items-center justify-center">

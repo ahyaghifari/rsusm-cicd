@@ -118,7 +118,7 @@
                                     @if($poli->gambar)
                                         <img src="{{ Storage::url($poli->gambar) }}"
                                              alt="{{ $poli->nama }}"
-                                             class="w-7 h-7 object-contain">
+                                             class="w-7 h-7 object-contain" loading="lazy">
                                     @else
                                         <span class="material-symbols-outlined text-[18px]"
                                               style="color: {{ $warna }};">local_hospital</span>
@@ -180,7 +180,8 @@
                         <img src="{{ Storage::url($selectedPoli->gambar) }}"
                              alt="{{ $selectedPoli->nama }}"
                              class="w-10 h-10 rounded-full object-cover shrink-0"
-                             style="outline: 2px solid {{ $warna }}55; outline-offset: 2px;">
+                             style="outline: 2px solid {{ $warna }}55; outline-offset: 2px;"
+                             loading="lazy">
                     @else
                         <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
                              style="background-color: {{ $warna }}18; outline: 2px solid {{ $warna }}40; outline-offset: 2px;">

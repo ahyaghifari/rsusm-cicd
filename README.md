@@ -132,6 +132,8 @@ Dua mode tampilan:
 - Smart scroll: scroll ke awal bubble bot saat respons panjang
 - Input langsung kosong saat kirim, disabled saat loading
 - AI backend via N8N webhook (`N8N_URL` env)
+- **Rate limiting 2 lapis**: burst (maks. pesan dalam jendela singkat) + kuota harian — keduanya reset otomatis via `RateLimiter`, angka diatur sebagai konstanta agar mudah disesuaikan dengan kuota Gemini
+- **Opsi pemulihan saat respons gagal**: tombol restart percakapan, kirim ulang pesan terakhir, dan daftar kontak langsung (kategori OPERASIONAL/PENDAFTARAN — di luar emergency, hotline, sosial media)
 
 #### Homepage RS
 
@@ -244,13 +246,24 @@ Slug bersifat unik **per RS** (composite unique), bukan global:
 | Fitur | Detail |
 |---|---|
 | Rate Limiting | `public-api`: 20 req/menit, `portal`: 100 req/menit (per IP) |
+| Rate Limiting Chatbot AI | 2 lapis via `RateLimiter`: burst (maks. N pesan / X menit) + kuota harian (maks. N pesan / 24 jam), key gabungan IP + session, reset otomatis. Angka diatur sebagai konstanta di `Chatbot\Panel` |
 | Security Headers | `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `X-XSS-Protection`, `Permissions-Policy` |
+| Content-Security-Policy | Mode Report-Only (default) atau enforced via env `CSP_ENFORCE=true`, daftar sumber eksternal di `SecurityHeaders` middleware |
 | Session Encryption | `SESSION_ENCRYPT=true` — payload session dienkripsi di DB |
 | Proxy Trust | `TRUSTED_PROXIES` via env (bukan hardcode `'*'`) |
 | Admin Path | Dikonfigurasi via `ADMIN_PATH` env, default `manage` |
 | Livewire `#[Locked]` | Semua property server-side yang dipakai sebagai filter query dilindungi |
 | Input Validation | `/cari-spesialis`: `alpha_dash`, max 100 chars |
 | Custom 429 Page | Halaman Too Many Requests dengan countdown |
+
+---
+
+## Performa & SEO
+
+| Fitur | Detail |
+|---|---|
+| Sitemap XML | Otomatis dari database per cabang RS aktif (`/sitemap.xml` index + `/{rumahsakit}/sitemap.xml`), di-cache 6 jam via `Cache::remember` |
+| Lazy Loading Gambar | `loading="lazy"` pada gambar below-the-fold (kartu, list, popup) di seluruh halaman publik — hero/logo above-the-fold tetap eager agar tidak menunda render awal |
 
 ---
 
@@ -348,9 +361,11 @@ ADMIN_PATH=manage                  # Path admin panel (ganti di production)
 SESSION_ENCRYPT=true               # Enkripsi payload session
 SESSION_SECURE_COOKIE=false        # Set true di production (HTTPS)
 TRUSTED_PROXIES=                   # IP load balancer/proxy di production
+CSP_ENFORCE=false                  # true = Content-Security-Policy ditegakkan (blocking), false = Report-Only
 
 # Chatbot
 N8N_URL=https://...                # Webhook N8N untuk AI chatbot
+# Batas pemakaian AI (burst & harian) diatur sebagai konstanta di app/Livewire/Chatbot/Panel.php
 
 # Cache (untuk rate limiter)
 CACHE_STORE=database               # Gunakan redis di production untuk performa
@@ -394,6 +409,11 @@ CACHE_STORE=database               # Gunakan redis di production untuk performa
 - [x] Test suite (Unit + Feature, 233+ passing)
 - [x] PosterTemplate — CRUD upload asset (background, logo, shape), zone editor drag-drop
 - [x] GeneratePosterPage — form + download PNG 1080×1920 via Browsershot
+- [x] Sitemap XML otomatis per rumah sakit (`/sitemap.xml` index + `/{rumahsakit}/sitemap.xml`, di-cache 6 jam)
+- [x] Content-Security-Policy (CSP) header — mode Report-Only dengan toggle `CSP_ENFORCE`
+- [x] Chatbot — rate limiting AI 2 lapis (burst per menit + kuota harian, via `RateLimiter`, angka dikonfigurasi sebagai konstanta)
+- [x] Chatbot — opsi pemulihan saat respons gagal (restart percakapan, kirim ulang pesan, daftar kontak non-emergency)
+- [x] Lazy loading (`loading="lazy"`) pada gambar below-the-fold di seluruh halaman publik
 
 ### Dalam Pengerjaan
 
@@ -402,8 +422,6 @@ CACHE_STORE=database               # Gunakan redis di production untuk performa
 
 ### Dalam Pertimbangan
 
-- [ ] Sitemap otomatis per rumah sakit
 - [ ] Notifikasi jadwal (email/WhatsApp)
 - [ ] Export jadwal ke PDF/Excel
-- [ ] Dark mode portal publik
-- [ ] Content-Security-Policy (CSP) header
+- [ ] Optimasi gambar (resize/kompresi otomatis saat upload — `intervention/image` atau WebP)

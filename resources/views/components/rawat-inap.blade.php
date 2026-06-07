@@ -13,7 +13,7 @@
 
         <img src="{{ Storage::url($kamarInap->thumbnail) }}"
              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-             alt="{{ $kamarInap->nama }}">
+             alt="{{ $kamarInap->nama }}" loading="lazy">
 
         {{-- Badge kelas (bottom left) --}}
         <div class="absolute bottom-3 left-3">
@@ -76,7 +76,8 @@
                                    data-gallery="rawat-inap-{{ $kamarInap->id }}">
                                     <img src="{{ Storage::url($g->gambar) }}"
                                          alt="{{ $kamarInap->nama }}"
-                                         class="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-300">
+                                         class="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-300"
+                                         loading="lazy">
                                     <div class="absolute inset-0 bg-black/0 group-hover/thumb:bg-black/30 transition flex items-center justify-center">
                                         <span class="material-symbols-outlined text-white text-base opacity-0 group-hover/thumb:opacity-100 transition">zoom_in</span>
                                     </div>

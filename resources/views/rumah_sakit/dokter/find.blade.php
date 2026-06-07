@@ -71,7 +71,8 @@
                     <div class="relative overflow-hidden h-72 bg-gray-100 shrink-0">
                         <img src="{{ Storage::url($d->foto) }}" alt="{{ $d->nama }}"
                              class="w-full h-full object-contain object-bottom
-                                    group-hover:scale-105 transition-transform duration-700">
+                                    group-hover:scale-105 transition-transform duration-700"
+                             loading="lazy">
 
                         {{-- Badge spesialis (pojok kiri bawah foto) --}}
                         <div class="absolute bottom-0 left-0 right-0 px-4 pb-3">

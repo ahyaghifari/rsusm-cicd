@@ -35,7 +35,8 @@
                     <img
                         src="{{ Storage::url($featured->gambar) }}"
                         alt="{{ $featured->nama }}"
-                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy">
                     <div class="absolute inset-0 bg-linear-to-r from-black/30 to-transparent"></div>
                     <span class="absolute top-4 left-4 inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm
                                  text-primary text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow">
@@ -77,7 +78,8 @@
                                 <img
                                     src="{{ Storage::url($f->gambar) }}"
                                     alt="{{ $f->nama }}"
-                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    loading="lazy">
                                 <div class="absolute inset-0 bg-linear-to-t from-black/40 to-transparent"></div>
                                 <span class="absolute bottom-3 right-3 material-symbols-outlined text-white text-2xl opacity-0 group-hover:opacity-100 transition drop-shadow">zoom_in</span>
                             </a>

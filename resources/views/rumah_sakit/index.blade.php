@@ -258,7 +258,7 @@
                                 bg-white/20 group-hover:bg-primary/10 transition-colors duration-300">
                         @if($layanan->gambar)
                             <img src="{{ Storage::url($layanan->gambar) }}"
-                                 class="w-10 h-10 object-cover rounded-xl" alt="{{ $layanan->label }}">
+                                 class="w-10 h-10 object-cover rounded-xl" alt="{{ $layanan->label }}" loading="lazy">
                         @else
                             <span class="material-symbols-outlined text-white group-hover:text-primary text-4xl transition-colors duration-300">
                                 {{ $icon }}
@@ -300,15 +300,15 @@
             <img
                 src="{{ $rs->gambar_tentang ? Storage::url($rs->gambar_tentang) : asset('img/syifa-medika.webp') }}"
                 class="w-full h-full object-cover"
-                alt="{{ $rs->nama }}">
+                alt="{{ $rs->nama }}" loading="lazy">
         </div>
         <div class="p-6 relative">
             <img src="{{ asset('img/bg-header.png') }}"
                 class="absolute top-0 left-0 right-0 w-full h-full -z-10 opacity-50 bg-blend-overlay object-cover blur-xs"
-                alt="">
+                alt="" loading="lazy">
             <h2 class="text-on-surface text-lg lg:text-xl">Kenapa harus memilih</h2>
             @if($rs->logo)
-                <img src="{{ Storage::url($rs->logo) }}" class="h-24 lg:h-28 mt-2 object-contain" alt="{{ $rs->nama }}">
+                <img src="{{ Storage::url($rs->logo) }}" class="h-24 lg:h-28 mt-2 object-contain" alt="{{ $rs->nama }}" loading="lazy">
             @endif
             <div class="text-sm lg:text-base text-on-surface mt-6 leading-7">
                 {!! str($rs->tentang_kami)->sanitizeHtml() !!}
@@ -350,7 +350,8 @@
                                 shadow-md mb-4 shrink-0">
                         <img src="{{ Storage::url($lu->gambar) }}"
                              alt="{{ $lu->nama }}"
-                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                             loading="lazy">
                     </div>
 
                     {{-- Nama --}}
@@ -398,7 +399,7 @@
                     <div class="aspect-square overflow-hidden bg-gray-100">
                         <img alt="{{ $dk->nama }}"
                              class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                             src="{{ Storage::url($dk->foto) }}">
+                             src="{{ Storage::url($dk->foto) }}" loading="lazy">
                     </div>
 
                     {{-- Info --}}
@@ -521,7 +522,7 @@
                     <div class="swiper-slide">
                         <div class="mx-3 bg-white border border-outline-variant/30 rounded-2xl px-6 py-5 flex flex-col items-center justify-center gap-3 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 min-h-30">
                             @if($partner->logo)
-                                <img src="{{ Storage::url($partner->logo) }}" alt="{{ $partner->nama }}" class="h-14 object-contain">
+                                <img src="{{ Storage::url($partner->logo) }}" alt="{{ $partner->nama }}" class="h-14 object-contain" loading="lazy">
                             @else
                                 <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
                                     <span class="material-symbols-outlined text-primary text-2xl">shield</span>
@@ -549,7 +550,7 @@
                     <div class="swiper-slide">
                         <div class="mx-3 bg-white border border-outline-variant/30 rounded-2xl px-6 py-5 flex flex-col items-center justify-center gap-3 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 min-h-30">
                             @if($partner->logo)
-                                <img src="{{ Storage::url($partner->logo) }}" alt="{{ $partner->nama }}" class="h-14 object-contain">
+                                <img src="{{ Storage::url($partner->logo) }}" alt="{{ $partner->nama }}" class="h-14 object-contain" loading="lazy">
                             @else
                                 <div class="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center">
                                     <span class="material-symbols-outlined text-secondary text-2xl">business</span>
@@ -595,7 +596,8 @@
                     @if($p->gambar)
                     <div class="h-48 overflow-hidden relative bg-surface-container/30">
                         <img src="{{ Storage::url($p->gambar) }}" alt="{{ $p->judul }}"
-                             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
+                             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                             loading="lazy">
                         @if($p->popup)
                         <div class="absolute top-3 right-3">
                             <span class="inline-flex items-center gap-1 text-[10px] font-bold bg-yellow-400 text-primary px-2 py-0.5 rounded-full">

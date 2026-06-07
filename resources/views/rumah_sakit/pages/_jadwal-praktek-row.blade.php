@@ -21,7 +21,8 @@
                 src="{{ Storage::url($sesi->dokter->foto) }}"
                 alt="{{ $sesi->nama_dokter ?? $sesi->dokter->nama }}"
                 class="w-10 h-10 rounded-full object-cover"
-                style="outline: 2px solid {{ $warna }}55; outline-offset: 2px;">
+                style="outline: 2px solid {{ $warna }}55; outline-offset: 2px;"
+                loading="lazy">
         @else
             <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
                  style="background-color: {{ $warna }}18; outline: 2px solid {{ $warna }}30; outline-offset: 2px;">

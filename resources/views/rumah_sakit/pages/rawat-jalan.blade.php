@@ -41,7 +41,8 @@
                                         <img src="{{ Storage::url($poli->gambar) }}"
                                              alt="{{ $poli->nama }}"
                                              class="w-11 h-11 object-contain
-                                                    group-hover:scale-105 transition-transform duration-300">
+                                                    group-hover:scale-105 transition-transform duration-300"
+                                             loading="lazy">
                                     @else
                                         <span class="material-symbols-outlined text-[30px] text-primary
                                                      group-hover:scale-105 transition-transform duration-300">
