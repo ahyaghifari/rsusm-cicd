@@ -76,7 +76,7 @@ class StatsOverviewWidget extends BaseWidget
                 ->color('success'),
             Stat::make('Jadwal Mingguan', JadwalPraktek::whereHas('poliklinik', $scope)->count())
                 ->description('Total sesi jadwal')
-                ->descriptionIcon('heroicon-m-calendar-week')
+                ->descriptionIcon('heroicon-m-calendar-days')
                 ->color('info'),
             Stat::make('Jadwal Hari Ini', JadwalHarian::whereHas('poliklinik', $scope)->whereDate('tanggal', today())->count())
                 ->description('Entri jadwal harian')
@@ -120,7 +120,7 @@ class StatsOverviewWidget extends BaseWidget
                 ->color('success'),
             Stat::make('Jadwal Mingguan', JadwalPraktek::whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rsId))->count())
                 ->description('Total sesi jadwal')
-                ->descriptionIcon('heroicon-m-calendar-week')
+                ->descriptionIcon('heroicon-m-calendar-days')
                 ->color('info'),
             Stat::make('Rawat Inap', RawatInap::where('rumah_sakit_id', $rsId)->count())
                 ->description('Kamar rawat inap')
