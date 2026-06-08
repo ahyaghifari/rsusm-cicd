@@ -11,6 +11,7 @@ Sistem informasi multi-tenant untuk manajemen dan portal publik rumah sakit. Sat
 | Framework | Laravel 12 |
 | Admin Panel | Filament 3.x |
 | Reactive UI | Livewire 3 |
+| Real-Time | Laravel Reverb (WebSocket self-hosted) + Laravel Echo (Pusher protocol) |
 | Styling | Tailwind CSS v4 |
 | Asset Bundler | Vite |
 | Database | MySQL (dev & prod) |
@@ -134,6 +135,15 @@ Dua mode tampilan:
 - AI backend via N8N webhook (`N8N_URL` env)
 - **Rate limiting 2 lapis**: burst (maks. pesan dalam jendela singkat) + kuota harian — keduanya reset otomatis via `RateLimiter`, angka diatur sebagai konstanta agar mudah disesuaikan dengan kuota Gemini
 - **Opsi pemulihan saat respons gagal**: tombol restart percakapan, kirim ulang pesan terakhir, dan daftar kontak langsung (kategori OPERASIONAL/PENDAFTARAN — di luar emergency, hotline, sosial media)
+
+#### Tanya Dokter — Konsultasi Chat Real-Time
+
+- **Tanpa login**: pasien mengisi nama + kontak, pilih dokter yang `tersedia_konsultasi`, lalu sesi (`SesiKonsultasi`) dibuat dengan token UUID — diakses lewat URL `/{rumahsakit}/konsultasi/{token}` (`getRouteKeyName() => 'token'`)
+- **Real-time via Laravel Reverb**: status sesi (`MENUNGGU` → `BERLANGSUNG` → `SELESAI`/`KEDALUWARSA`) dan pesan chat (`KonsultasiPesan`) tersinkron langsung di kedua sisi tanpa reload — event `SesiStatusBerubah` & `PesanDikirim` di-broadcast lewat channel publik `konsultasi.{token}` dan private channel `konsultasi.dokter.{dokterId}`
+- **1 sesi aktif per pasien**: cookie `konsultasi_sesi_{rumah_sakit_id}` (umur = `durasi_sesi_menit` milik dokter) menyimpan token sesi aktif pasien — membuka kembali halaman "Tanya Dokter" saat masih ada sesi `MENUNGGU`/`BERLANGSUNG` akan otomatis redirect ke sesi tsb, alih-alih membuat sesi baru
+- **Sisi dokter**: panel Filament terpisah (`/dokter`), halaman `KonsultasiDashboard` — toggle ketersediaan, antrean sesi masuk (live), terima sesi, jendela chat balasan (`wire:poll.visible.5s` sebagai jaring pengaman di samping update WebSocket — lihat [reverb/06](../reverb/06-race-condition-subscribe-channel-dinamis.md))
+- **Rate limiting**: burst + harian per kombinasi IP + session, via `RateLimiter` (sama pola dengan chatbot AI)
+- Dokumentasi belajar lengkap (konsep dasar Reverb/Pusher/Echo sampai setiap bug nyata yang ditemukan & cara memperbaikinya) ada di [reverb/](../reverb/)
 
 #### Homepage RS
 
@@ -352,6 +362,8 @@ php artisan test
 - `sesuai_perjanjian` dan `is_executive` disimpan dengan `(bool)` cast — **bukan** perbandingan `=== '1'`
 - Rows di JadwalPraktekPage dan JadwalHarianPage menggunakan UUID string sebagai array key
 - Poster: asset lokal dikonversi ke data URI base64 sebelum dirender di Browsershot (file:// tidak diizinkan)
+- Reverb/Echo: `namespace: ''` **wajib** di konfigurasi `new Echo({...})` (`resources/js/echo.js`) — Echo defaultnya menambahkan prefiks `App.Events` yang tidak cocok dengan `broadcastAs()` nama pendek; nama event di `broadcastAs()` & `#[On('echo:...')]` harus sama persis (lihat [reverb/05](../reverb/05-mismatch-namespace-echo-broadcastas.md))
+- Reverb/Echo: listener Livewire dengan placeholder channel **dinamis** (`#[On('echo:topik.{propertiYangBerubah},Event')]`) punya jendela rawan *race condition* saat propertinya berubah — pertimbangkan `wire:poll.visible.Ns` sebagai jaring pengaman (lihat [reverb/06](../reverb/06-race-condition-subscribe-channel-dinamis.md))
 
 ---
 
@@ -421,6 +433,8 @@ CACHE_STORE=database               # Gunakan redis di production untuk performa
 - [x] JadwalHarianPerubahan — snapshot nilai asli (`*_asli`) untuk deteksi "kembali ke semula" tanpa bergantung pada `JadwalPraktek`
 - [x] JadwalHarian — penanda visual baris Executive (highlight background amber + ikon bintang) di tabel admin
 - [x] JadwalPraktek — validasi `waktu_mulai` wajib diisi kecuali `sesuai_perjanjian` dicentang (form & kedua mode tabel)
+- [x] Tanya Dokter — konsultasi chat real-time via Laravel Reverb (token UUID, tanpa login, broadcasting dua arah pasien ↔ dokter, panel Filament terpisah untuk dokter)
+- [x] Tanya Dokter — 1 sesi aktif per pasien via cookie (redirect otomatis ke sesi aktif, umur cookie = durasi sesi dokter)
 
 ### Dalam Pengerjaan
 

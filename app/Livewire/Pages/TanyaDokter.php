@@ -7,6 +7,7 @@ use App\Events\SesiStatusBerubah;
 use App\Livewire\RsPortalComponent;
 use App\Models\Dokter;
 use App\Models\SesiKonsultasi;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Validate;
@@ -15,7 +16,7 @@ class TanyaDokter extends RsPortalComponent
 {
     private const BURST_LIMIT   = 2;   // maks. sesi baru dalam jendela singkat
     private const BURST_MINUTES = 30;
-    private const DAILY_LIMIT   = 5;
+    private const DAILY_LIMIT   =10;
     private const DAILY_HOURS   = 24;
 
     public ?int $dokterDipilih = null;
@@ -30,7 +31,37 @@ class TanyaDokter extends RsPortalComponent
     {
         abort_unless($this->rs->tanya_dokter_aktif, 404);
 
+        $token = request()->cookie($this->cookieSesiKey());
+
+        if ($token) {
+            $sesiAktif = SesiKonsultasi::query()
+                ->where('rumah_sakit_id', $this->rs->id)
+                ->where('token', $token)
+                ->whereIn('status', [StatusSesiKonsultasi::MENUNGGU, StatusSesiKonsultasi::BERLANGSUNG])
+                ->first();
+
+            if ($sesiAktif) {
+                $this->redirect(route('rumahsakit.konsultasi', [
+                    'rumahsakit' => $this->rs->slug,
+                    'sesi'       => $sesiAktif->token,
+                ]));
+                return;
+            }
+
+            // Token tersimpan tapi sesinya sudah selesai/kedaluwarsa — bersihkan agar tidak terus dicek tiap kunjungan.
+            Cookie::queue(Cookie::forget($this->cookieSesiKey()));
+        }
+
         $this->seo('Tanya Dokter', 'Konsultasi chat langsung dengan dokter kami di ' . $this->rs->nama . '.');
+    }
+
+    /**
+     * Nama cookie yang menyimpan token sesi aktif milik pasien ini, di-scope per rumah sakit
+     * supaya pasien tetap bisa membuka sesi terpisah di rumah sakit lain.
+     */
+    private function cookieSesiKey(): string
+    {
+        return 'konsultasi_sesi_' . $this->rs->id;
     }
 
     public function pilihDokter(int $dokterId): void
@@ -59,11 +90,11 @@ class TanyaDokter extends RsPortalComponent
         $burstKey = "konsultasi-burst:{$id}";
         $dailyKey = "konsultasi-daily:{$id}";
 
-        if (RateLimiter::tooManyAttempts($burstKey, self::BURST_LIMIT) ||
-            RateLimiter::tooManyAttempts($dailyKey, self::DAILY_LIMIT)) {
-            $this->addError('nama', 'Anda telah mencapai batas pembuatan sesi konsultasi. Silakan coba lagi nanti.');
-            return;
-        }
+        // if (RateLimiter::tooManyAttempts($burstKey, self::BURST_LIMIT) ||
+        //     RateLimiter::tooManyAttempts($dailyKey, self::DAILY_LIMIT)) {
+        //     $this->addError('nama', 'Anda telah mencapai batas pembuatan sesi konsultasi. Silakan coba lagi nanti.');
+        //     return;
+        // }
 
         // Validasi ulang ketersediaan dokter saat ini juga (bukan hanya saat render)
         // — mencegah race condition jika dokter baru saja menonaktifkan diri.
@@ -92,6 +123,8 @@ class TanyaDokter extends RsPortalComponent
         ]);
 
         broadcast(new SesiStatusBerubah($sesi));
+
+        Cookie::queue($this->cookieSesiKey(), $sesi->token, $dokter->durasi_sesi_menit);
 
         $this->redirect(route('rumahsakit.konsultasi', [
             'rumahsakit' => $this->rs->slug,

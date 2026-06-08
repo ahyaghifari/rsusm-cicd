@@ -4,8 +4,6 @@
 <div>
     <x-page-hero
         title="Konsultasi dengan {{ $sesi->dokter->nama }}"
-        subtitle="{{ $sesi->dokter->namaSpesialis() }} &bull; {{ $rs->nama }}"
-        icon="stethoscope"
     />
 
     <div class="w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 mx-auto py-12">

@@ -18,11 +18,11 @@ class SecurityHeaders
         $response->headers->set('X-XSS-Protection', '0');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
-        $headerName = env('CSP_ENFORCE', false)
-            ? 'Content-Security-Policy'
-            : 'Content-Security-Policy-Report-Only';
+        // $headerName = env('CSP_ENFORCE', false)
+        //     ? 'Content-Security-Policy'
+        //     : 'Content-Security-Policy-Report-Only';
 
-        $response->headers->set($headerName, $this->contentSecurityPolicy());
+        // $response->headers->set($headerName, $this->contentSecurityPolicy());
 
         return $response;
     }

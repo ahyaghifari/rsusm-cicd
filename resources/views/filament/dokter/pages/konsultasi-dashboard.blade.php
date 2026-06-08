@@ -1,8 +1,8 @@
-<?php
+@php
 
 use App\Enums\StatusSesiKonsultasi;
 
-?>
+@endphp
 <x-filament-panels::page>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -15,13 +15,13 @@ use App\Enums\StatusSesiKonsultasi;
                     <div class="flex items-center gap-2.5">
                         <span @class([
                             'flex h-2.5 w-2.5 rounded-full',
-                            'bg-success-500' => $dokter->tersedia_konsultasi,
-                            'bg-gray-400 dark:bg-gray-500' => ! $dokter->tersedia_konsultasi,
+                            'bg-success-500' => $tersediaKonsultasi,
+                            'bg-gray-400 dark:bg-gray-500' => ! $tersediaKonsultasi,
                         ])></span>
                         <div>
                             <p class="text-sm font-semibold text-gray-950 dark:text-white">Status Ketersediaan</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                @if($dokter->tersedia_konsultasi)
+                                @if($tersediaKonsultasi)
                                     Anda <span class="font-medium text-success-600 dark:text-success-400">tersedia</span> menerima konsultasi baru.
                                 @else
                                     Anda <span class="font-medium text-gray-600 dark:text-gray-300">tidak tersedia</span> untuk konsultasi baru.
@@ -30,32 +30,38 @@ use App\Enums\StatusSesiKonsultasi;
                         </div>
                     </div>
 
-                    <button
-                        type="button"
-                        wire:click="toggleTersedia"
-                        wire:loading.attr="disabled"
-                        wire:target="toggleTersedia"
-                        role="switch"
-                        aria-checked="{{ $dokter->tersedia_konsultasi ? 'true' : 'false' }}"
-                        @class([
-                            'group flex shrink-0 items-center gap-2 rounded-full border py-1 pl-1 pr-3 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-60',
-                            'border-success-600 bg-success-600 dark:border-success-500 dark:bg-success-500' => $dokter->tersedia_konsultasi,
-                            'border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700' => ! $dokter->tersedia_konsultasi,
-                        ])
-                    >
-                        <span @class([
-                            'inline-flex h-4 w-4 shrink-0 transform rounded-full bg-white shadow transition-transform duration-200',
-                            'translate-x-4' => $dokter->tersedia_konsultasi,
-                            'translate-x-0' => ! $dokter->tersedia_konsultasi,
-                        ])></span>
+                    {{--
+                        Toggle bawaan Filament (kelas `fi-fo-toggle` & markup yang sama persis
+                        dipakai di form admin) di-entangle ke variabel khusus $tersediaKonsultasi
+                        — bukan langsung ke atribut model — supaya state UI & persistensi DB
+                        terpisah jelas. Lihat KonsultasiDashboard::updatedTersediaKonsultasi().
+                    --}}
+                    <div class="flex shrink-0 items-center gap-2">
+                        <button
+                            type="button"
+                            role="switch"
+                            x-data="{ state: $wire.entangle('tersediaKonsultasi').live }"
+                            x-on:click="state = ! state"
+                            x-bind:aria-checked="state?.toString()"
+                            x-bind:class="state ? 'bg-success-600 dark:bg-success-500' : 'bg-gray-200 dark:bg-gray-700'"
+                            wire:loading.attr="disabled"
+                            wire:target="tersediaKonsultasi"
+                            class="fi-fo-toggle relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent outline-none transition-colors duration-200 ease-in-out disabled:pointer-events-none disabled:opacity-70"
+                        >
+                            <span
+                                class="pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                                x-bind:class="{ 'translate-x-5 rtl:-translate-x-5': state, 'translate-x-0': ! state }"
+                            ></span>
+                        </button>
+
                         <span @class([
                             'text-xs font-semibold',
-                            'text-white' => $dokter->tersedia_konsultasi,
-                            'text-gray-600 dark:text-gray-300' => ! $dokter->tersedia_konsultasi,
+                            'text-success-600 dark:text-success-400' => $tersediaKonsultasi,
+                            'text-gray-500 dark:text-gray-400' => ! $tersediaKonsultasi,
                         ])>
-                            {{ $dokter->tersedia_konsultasi ? 'Aktif' : 'Nonaktif' }}
+                            {{ $tersediaKonsultasi ? 'Aktif' : 'Nonaktif' }}
                         </span>
-                    </button>
+                    </div>
                 </div>
             </x-filament::section>
 
@@ -71,11 +77,14 @@ use App\Enums\StatusSesiKonsultasi;
                 @else
                     <div class="flex flex-col gap-2">
                         @foreach($antrean as $sesi)
-                            <button
-                                type="button"
+                            <div
+                                role="button"
+                                tabindex="0"
                                 wire:click="pilihSesi({{ $sesi->id }})"
+                                wire:key="antrean-{{ $sesi->id }}"
+                                x-on:keydown.enter="$wire.pilihSesi({{ $sesi->id }})"
                                 @class([
-                                    'w-full text-left rounded-xl border p-3 transition-colors duration-150',
+                                    'w-full text-left rounded-xl border p-3 transition-colors duration-150 cursor-pointer',
                                     'border-primary-500 bg-primary-50 dark:bg-primary-500/10' => $sesiAktif?->id === $sesi->id,
                                     'border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5' => $sesiAktif?->id !== $sesi->id,
                                 ])
@@ -102,7 +111,7 @@ use App\Enums\StatusSesiKonsultasi;
                                         </x-filament::button>
                                     </div>
                                 @endif
-                            </button>
+                            </div>
                         @endforeach
                     </div>
                 @endif
@@ -123,6 +132,7 @@ use App\Enums\StatusSesiKonsultasi;
                     <div
                         id="dokter-chat-msgs"
                         class="flex flex-col gap-3 h-[55vh] min-h-[360px] overflow-y-auto pr-1"
+                        wire:poll.visible.5s
                         x-init="
                             const el = $el;
                             el.scrollTop = el.scrollHeight;

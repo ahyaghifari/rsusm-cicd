@@ -30,6 +30,8 @@ class KonsultasiDashboard extends Page
 
     public ?int $sesiAktifId = null;
 
+    public bool $tersediaKonsultasi = false;
+
     /**
      * Selalu string (bukan nullable) — placeholder dinamis #[On('echo:konsultasi.{sesiAktifToken},...')]
      * tidak bisa di-resolve Livewire jika nilainya null. String kosong berarti
@@ -48,6 +50,8 @@ class KonsultasiDashboard extends Page
 
         $sesi = $this->antrean()->firstWhere('status', StatusSesiKonsultasi::BERLANGSUNG);
         $this->pilihSesiInternal($sesi?->id);
+
+        $this->tersediaKonsultasi = $this->dokter->tersedia_konsultasi;
     }
 
     /**
@@ -171,9 +175,22 @@ class KonsultasiDashboard extends Page
         Notification::make()->title('Sesi konsultasi diakhiri')->success()->send();
     }
 
-    public function toggleTersedia(): void
+    /**
+     * Hook lifecycle Livewire — terpanggil otomatis tiap kali $tersediaKonsultasi
+     * berubah (lewat toggle Filament yang di-entangle ke variabel ini di Blade).
+     * Menjaga $tersediaKonsultasi sebagai satu-satunya sumber state UI, terpisah
+     * dari atribut model — perubahan baru ditulis ke DB di sini, bukan langsung dari view.
+     */
+    public function updatedTersediaKonsultasi(bool $value): void
     {
-        $this->dokter->update(['tersedia_konsultasi' => ! $this->dokter->tersedia_konsultasi]);
+        $this->dokter->update(['tersedia_konsultasi' => $value]);
+
+        Notification::make()
+            ->title($value
+                ? 'Anda kini tersedia menerima konsultasi baru'
+                : 'Anda kini tidak tersedia untuk konsultasi baru')
+            ->success()
+            ->send();
     }
 
     protected function getViewData(): array
