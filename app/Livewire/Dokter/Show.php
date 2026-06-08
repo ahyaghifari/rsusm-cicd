@@ -5,7 +5,6 @@ namespace App\Livewire\Dokter;
 use App\Livewire\RsPortalComponent;
 use App\Models\Dokter;
 use App\Models\JadwalPraktek;
-use App\Models\UnitLayanan;
 use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\SEOMeta;
 use Livewire\Attributes\Locked;
@@ -47,27 +46,15 @@ class Show extends RsPortalComponent
         $hariOrder = ['SENIN' => 1, 'SELASA' => 2, 'RABU' => 3, 'KAMIS' => 4, 'JUMAT' => 5, 'SABTU' => 6, 'MINGGU' => 7];
 
         $jadwal = JadwalPraktek::where('dokter_id', $this->dokter->id)
-            ->with('poliklinik.unitLayanan')
+            ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rs->id))
+            ->with('poliklinik')
             ->get()
             ->sortBy(fn ($j) => $hariOrder[$j->hari->value] ?? 8);
 
-        $jumlahUnit = UnitLayanan::where('rumah_sakit_id', $rs->id)
-            ->where('aktif', true)
-            ->count();
-
-        // Jika RS punya >1 unit layanan: group per unit layanan lalu per hari
-        // Jika hanya 1 unit: tampilkan flat per hari
-        if ($jumlahUnit > 1) {
-            $jadwalGrouped = $jadwal->groupBy(fn ($j) => $j->poliklinik?->unitLayanan?->id);
-        } else {
-            $jadwalGrouped = null;
-        }
-
         return view('rumah_sakit.dokter.show', [
-            'dokter'        => $this->dokter,
-            'jadwal'        => $jadwal,
-            'jadwalGrouped' => $jadwalGrouped,
-            'multiUnit'     => $jumlahUnit > 1,
+            'dokter' => $this->dokter,
+            'jadwal' => $jadwal,
+            'rs'     => $rs,
         ]);
     }
 }

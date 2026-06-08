@@ -21,6 +21,7 @@ class JadwalPraktekFactory extends Factory
             'waktu_mulai'       => '08:00',
             'waktu_selesai'     => '12:00',
             'sesuai_perjanjian' => false,
+            'is_executive'      => false,
             'catatan'           => null,
         ];
     }

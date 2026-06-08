@@ -1,13 +1,23 @@
 {{-- Partial: 1 baris jadwal praktek dokter di halaman profil --}}
-{{-- Variables: $sesi (JadwalPraktek), $warna (hex string) --}}
-<div class="flex items-center gap-3 px-4 py-3">
+{{-- Variables: $sesi (JadwalPraktek), $warna (hex string), $rs (RumahSakit) --}}
+@php $isExec = isset($rs) && $rs->executive_clinic && $sesi->is_executive; @endphp
+<div class="flex items-start gap-3 px-4 py-3"
+     @if($isExec) style="background-color: #e8cd84;" @endif>
 
-    {{-- Nama poliklinik --}}
+    {{-- Nama poliklinik + jam --}}
     <div class="flex-1 min-w-0">
-        <p class="text-xs font-bold uppercase tracking-wide truncate"
-           style="color: {{ $warna }};">
-            {{ $sesi->poliklinik?->nama ?? '—' }}
-        </p>
+        <div class="flex items-center gap-2 flex-wrap">
+            <p class="text-xs font-bold uppercase tracking-wide truncate"
+               style="color: {{ $warna }};">
+                {{ $sesi->poliklinik?->nama ?? '—' }}
+            </p>
+            @if($isExec)
+                <span class="inline-flex items-center text-[10px] uppercase tracking-wide shrink-0"
+                      style="color: #363c38; font-weight: 700; font-style: italic;">
+                    Executive Clinic
+                </span>
+            @endif
+        </div>
         <div class="flex items-center gap-2 mt-0.5 flex-wrap">
             {{-- Jam --}}
             @if($sesi->waktu_mulai)
@@ -30,7 +40,7 @@
             {{-- Badge perjanjian --}}
             @if($sesi->sesuai_perjanjian)
                 <span class="inline-flex items-center gap-1 text-[10px] font-bold
-                             text-amber-700 bg-amber-50 border border-amber-200
+                             text-green-700 bg-green-50 border border-green-200
                              px-2 py-0.5 rounded-full shrink-0">
                     <span class="material-symbols-outlined text-[10px]">calendar_clock</span>
                     Perjanjian

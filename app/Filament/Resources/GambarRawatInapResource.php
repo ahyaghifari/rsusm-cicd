@@ -19,7 +19,7 @@ class GambarRawatInapResource extends BaseResource
     protected static ?string $navigationLabel = 'Gambar';
     protected static ?int $navigationSort = 3;
     protected static string | null $navigationGroup = 'Rawat Inap';
-    protected static ?string $navigationIcon = 'fas-image';
+    protected static ?string $navigationIcon = 'heroicon-o-photo';
 
     public static function getEloquentQuery(): Builder
     {

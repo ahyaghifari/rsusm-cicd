@@ -4,12 +4,12 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PoliKlinikResource\Pages;
 use App\Models\PoliKlinik;
-use App\Models\UnitLayanan;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 class PoliKlinikResource extends BaseResource
@@ -18,11 +18,22 @@ class PoliKlinikResource extends BaseResource
 
     protected static ?int $navigationSort = 1;
     protected static string | null $navigationGroup = 'Poliklinik / Rawat Jalan';
-    protected static ?string $navigationIcon = 'fas-house-chimney-medical';
-    
+    protected static ?string $navigationIcon = 'heroicon-o-heart';
+
     protected static ?string $slug = 'poliklinik';
-    
+
     protected static ?string $label = 'Poliklinik';
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery()->withTrashed();
+
+        if (static::isSuperAdmin()) {
+            return $query;
+        }
+
+        return $query->where('rumah_sakit_id', static::rumahSakitId());
+    }
 
     public static function form(Form $form): Form
     {
@@ -44,37 +55,18 @@ class PoliKlinikResource extends BaseResource
                         column: 'slug',
                         ignoreRecord: true,
                         modifyRuleUsing: function (\Illuminate\Validation\Rules\Unique $rule, Forms\Get $get) {
-                            $ulId = $get('unit_layanan_id');
-                            return $ulId ? $rule->where('unit_layanan_id', $ulId) : $rule;
+                            $rsId = $get('rumah_sakit_id') ?? static::rumahSakitId();
+                            return $rsId ? $rule->where('rumah_sakit_id', $rsId) : $rule;
                         }
                     ),
 
-                // Step 1: Pilih Rumah Sakit terlebih dahulu (Tidak disimpan ke database)
                 Forms\Components\Select::make('rumah_sakit_id')
                     ->label('Rumah Sakit')
-                    ->relationship('unitLayanan.rumahSakit', 'nama') // Membantu memuat data awal saat Edit
                     ->options(\App\Models\RumahSakit::pluck('nama', 'id'))
                     ->required()
                     ->live()
-                    ->dehydrated(false) // Memastikan field ini tidak ikut disimpan ke tabel poliklinik
-                    ->afterStateUpdated(fn (Set $set) => $set('unit_layanan_id', null)), // Reset unit jika RS berubah
-
-                // Step 2: Pilih Unit Layanan yang difilter berdasarkan Rumah Sakit yang dipilih
-                Forms\Components\Select::make('unit_layanan_id')
-                    ->label('Unit Layanan')
-                    ->required()
-                    ->options(function (Forms\Get $get) {
-                        $rumahSakitId = $get('rumah_sakit_id');
-                        
-                        // Jika Rumah Sakit belum dipilih, tampilkan kosong atau semua data jika saat halaman edit dimuat
-                        if (! $rumahSakitId) {
-                            return [];
-                        }
-
-                        // Mengambil Unit Layanan yang berafiliasi dengan rumah_sakit_id tersebut
-                        return UnitLayanan::where('rumah_sakit_id', $rumahSakitId)->pluck('nama', 'id');
-                    })
-                    ->disabled(fn (Forms\Get $get) => !$get('rumah_sakit_id')),
+                    ->visible(fn () => static::isSuperAdmin())
+                    ->default(fn () => static::isSuperAdmin() ? null : static::rumahSakitId()),
 
                 Forms\Components\FileUpload::make('gambar')
                     ->image()
@@ -101,11 +93,8 @@ class PoliKlinikResource extends BaseResource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('slug')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('unitLayanan.nama')
-                ->label('Unit Layanan')
-                ->sortable(),
-                Tables\Columns\TextColumn::make('unitLayanan.rumahSakit.nama')
-                    ->label('RS')
+                Tables\Columns\TextColumn::make('rumahSakit.nama')
+                    ->label('Rumah Sakit')
                     ->sortable()
                     ->visible(fn () => static::isSuperAdmin()),
                 Tables\Columns\IconColumn::make('aktif')
@@ -117,31 +106,17 @@ class PoliKlinikResource extends BaseResource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('rumah_sakit_id')
-                    ->relationship('unitLayanan.rumahSakit', 'nama')
+                    ->relationship('rumahSakit', 'nama')
                     ->label('Rumah Sakit')
                     ->visible(fn () => static::isSuperAdmin()),
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ->mutateRecordDataUsing(function (array $data): array {
-                        $unitLayanan = UnitLayanan::find($data['unit_layanan_id']);
-                        if ($unitLayanan) {
-                            $data['rumah_sakit_id'] = $unitLayanan->rumah_sakit_id;
-                        }
-                        return $data;
-                    }),
+                Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\RestoreAction::make(),
                 Tables\Actions\ForceDeleteAction::make(),
             ]);
-            // ->bulkActions([
-            //     Tables\Actions\BulkActionGroup::make([
-            //         Tables\Actions\DeleteBulkAction::make(),
-            //         Tables\Actions\RestoreBulkAction::make(),
-            //         Tables\Actions\ForceDeleteBulkAction::make(),
-            //     ]),
-            // ]);
     }
 
     public static function getPages(): array

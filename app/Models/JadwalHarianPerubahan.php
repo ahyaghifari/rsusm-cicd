@@ -15,14 +15,19 @@ class JadwalHarianPerubahan extends Model
         'jam_mulai',
         'jam_selesai',
         'status_layanan',
+        'jam_mulai_asli',
+        'jam_selesai_asli',
+        'status_layanan_asli',
         'catatan',
     ];
 
     protected function casts(): array
     {
         return [
-            'jam_mulai'    => 'datetime:H:i',
-            'jam_selesai'  => 'datetime:H:i',
+            'jam_mulai'         => 'datetime:H:i',
+            'jam_selesai'       => 'datetime:H:i',
+            'jam_mulai_asli'    => 'datetime:H:i',
+            'jam_selesai_asli'  => 'datetime:H:i',
         ];
     }
 

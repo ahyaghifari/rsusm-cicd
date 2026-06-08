@@ -8,7 +8,6 @@ use App\Models\Dokter;
 use App\Models\JadwalPraktek;
 use App\Models\PoliKlinik;
 use App\Models\RumahSakit;
-use App\Models\UnitLayanan;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -29,7 +28,7 @@ class JadwalPraktekPage extends Page
     // =========================================================================
 
     public ?int    $selectedRumahSakitId  = null;
-    public ?int    $selectedUnitLayananId = null;
+    public ?int    $selectedUnitLayananId = null; // kept for Livewire hydration safety
     public string  $viewMode             = 'per_dokter'; // 'per_hari' | 'per_dokter'
     public ?int    $selectedDokterId      = null;
 
@@ -72,7 +71,6 @@ class JadwalPraktekPage extends Page
 
         return $form
             ->schema([
-                // ── Rumah Sakit (superadmin only) ──────────────────────────
                 Forms\Components\Select::make('selectedRumahSakitId')
                     ->label('Rumah Sakit')
                     ->placeholder('— Pilih Rumah Sakit —')
@@ -82,7 +80,6 @@ class JadwalPraktekPage extends Page
                     ->live()
                     ->columnSpanFull(),
 
-                // ── Mode View ──────────────────────────────────────────────
                 Forms\Components\ToggleButtons::make('viewMode')
                     ->label('Mode Tampilan')
                     ->options([
@@ -97,22 +94,11 @@ class JadwalPraktekPage extends Page
                     ->live()
                     ->visible(fn () => $rsSet)
                     ->columnSpanFull(),
-
-                // ── Unit Layanan (jika > 1, muncul setelah mode dipilih) ───
-                Forms\Components\Select::make('selectedUnitLayananId')
-                    ->label('Unit Layanan')
-                    ->placeholder('— Pilih Unit Layanan —')
-                    ->options(fn () => $this->getUnitLayananOptions())
-                    ->required(fn () => count($this->getUnitLayananOptions()) > 1)
-                    ->visible(fn () => $rsSet && count($this->getUnitLayananOptions()) > 1)
-                    ->live()
-                    ->columnSpanFull(),
             ])
             ->statePath('')
             ->columns(2);
     }
 
-    // Dokter selector ditaruh terpisah agar bisa dirender di area konten
     public function dokterForm(Form $form): Form
     {
         return $form
@@ -138,12 +124,16 @@ class JadwalPraktekPage extends Page
         return $this->selectedRumahSakitId;
     }
 
-    // RS punya >1 unit layanan tapi belum memilih → jadwal belum boleh tampil
     public function mustPickUnit(): bool
     {
-        return (bool) $this->getActiveRumahSakitId()
-            && count($this->getUnitLayananOptions()) > 1
-            && ! $this->selectedUnitLayananId;
+        return false;
+    }
+
+    public function hasExecutiveClinic(): bool
+    {
+        $rsId = $this->getActiveRumahSakitId();
+        if (! $rsId) return false;
+        return (bool) RumahSakit::where('id', $rsId)->value('executive_clinic');
     }
 
     public function getPoliklinikOptions(): array
@@ -151,12 +141,7 @@ class JadwalPraktekPage extends Page
         $rsId = $this->getActiveRumahSakitId();
         if (! $rsId) return [];
 
-        return PoliKlinik::whereHas('unitLayanan', function ($q) use ($rsId) {
-                $q->where('rumah_sakit_id', $rsId);
-                if ($this->selectedUnitLayananId) {
-                    $q->where('id', $this->selectedUnitLayananId);
-                }
-            })
+        return PoliKlinik::where('rumah_sakit_id', $rsId)
             ->where('aktif', true)
             ->orderBy('nama')
             ->pluck('nama', 'id')
@@ -175,29 +160,12 @@ class JadwalPraktekPage extends Page
             ->toArray();
     }
 
-    public function getUnitLayananOptions(): array
-    {
-        $rsId = $this->getActiveRumahSakitId();
-        if (! $rsId) return [];
-
-        return UnitLayanan::where('rumah_sakit_id', $rsId)
-            ->where('aktif', true)
-            ->orderBy('id')
-            ->pluck('nama', 'id')
-            ->toArray();
-    }
-
     protected function getPoliIds(): array
     {
         $rsId = $this->getActiveRumahSakitId();
         if (! $rsId) return [];
 
-        return PoliKlinik::whereHas('unitLayanan', function ($q) use ($rsId) {
-                $q->where('rumah_sakit_id', $rsId);
-                if ($this->selectedUnitLayananId) {
-                    $q->where('id', $this->selectedUnitLayananId);
-                }
-            })
+        return PoliKlinik::where('rumah_sakit_id', $rsId)
             ->pluck('id')
             ->toArray();
     }
@@ -212,11 +180,8 @@ class JadwalPraktekPage extends Page
         if (! $rsId) { $this->rows = []; return; }
 
         $jadwals = JadwalPraktek::where('hari', $this->activeHari)
-            ->whereHas('poliklinik.unitLayanan', function ($q) use ($rsId) {
+            ->whereHas('poliklinik', function ($q) use ($rsId) {
                 $q->where('rumah_sakit_id', $rsId);
-                if ($this->selectedUnitLayananId) {
-                    $q->where('id', $this->selectedUnitLayananId);
-                }
             })
             ->orderBy('waktu_mulai')
             ->get();
@@ -230,6 +195,7 @@ class JadwalPraktekPage extends Page
                 'waktu_mulai'       => $j->waktu_mulai?->format('H:i'),
                 'waktu_selesai'     => $j->waktu_selesai?->format('H:i'),
                 'sesuai_perjanjian' => $j->sesuai_perjanjian ? '1' : '0',
+                'is_executive'      => $j->is_executive ? '1' : '0',
                 'catatan'           => $j->catatan,
             ];
         }
@@ -265,6 +231,7 @@ class JadwalPraktekPage extends Page
                 'waktu_mulai'       => $j->waktu_mulai?->format('H:i'),
                 'waktu_selesai'     => $j->waktu_selesai?->format('H:i'),
                 'sesuai_perjanjian' => $j->sesuai_perjanjian ? '1' : '0',
+                'is_executive'      => $j->is_executive ? '1' : '0',
                 'catatan'           => $j->catatan,
             ];
         }
@@ -295,10 +262,9 @@ class JadwalPraktekPage extends Page
     public function updatedSelectedRumahSakitId(): void
     {
         foreach (Hari::cases() as $h) { $this->rowsCache[$h->value] = null; }
-        $this->selectedUnitLayananId = null;
-        $this->selectedDokterId      = null;
-        $this->rows                  = [];
-        $this->dokterRows            = [];
+        $this->selectedDokterId = null;
+        $this->rows             = [];
+        $this->dokterRows       = [];
 
         if ($this->selectedRumahSakitId) {
             $this->loadRows();
@@ -307,10 +273,8 @@ class JadwalPraktekPage extends Page
 
     public function updatedSelectedUnitLayananId(): void
     {
-        foreach (Hari::cases() as $h) { $this->rowsCache[$h->value] = null; }
-        $this->selectedDokterId = null;
-        $this->dokterRows       = [];
-        $this->loadRows();
+        // Unit layanan sudah dihapus dari model — hook ini dipertahankan agar
+        // state lama dari browser tidak menyebabkan error.
     }
 
     public function updatedViewMode(): void
@@ -342,6 +306,7 @@ class JadwalPraktekPage extends Page
             'waktu_mulai'       => null,
             'waktu_selesai'     => null,
             'sesuai_perjanjian' => '0',
+            'is_executive'      => '0',
             'catatan'           => null,
         ];
     }
@@ -359,6 +324,7 @@ class JadwalPraktekPage extends Page
             'waktu_mulai'       => null,
             'waktu_selesai'     => null,
             'sesuai_perjanjian' => '0',
+            'is_executive'      => '0',
             'catatan'           => null,
         ];
     }
@@ -395,6 +361,14 @@ class JadwalPraktekPage extends Page
                     ->warning()->send();
                 return;
             }
+
+            if (empty($row['waktu_mulai']) && ! (bool) ($row['sesuai_perjanjian'] ?? false)) {
+                Notification::make()
+                    ->title("Baris ke-" . ($i + 1) . ": Jam Mulai wajib diisi")
+                    ->body('Kosongkan hanya jika "Sesuai Perjanjian" dicentang.')
+                    ->danger()->send();
+                return;
+            }
         }
 
         $poliIds = $this->getPoliIds();
@@ -413,6 +387,7 @@ class JadwalPraktekPage extends Page
                     'waktu_mulai'       => $row['waktu_mulai'] ?: null,
                     'waktu_selesai'     => $row['waktu_selesai'] ?: null,
                     'sesuai_perjanjian' => (bool) ($row['sesuai_perjanjian'] ?? false),
+                    'is_executive'      => (bool) ($row['is_executive'] ?? false),
                     'catatan'           => $row['catatan'] ?: null,
                 ]);
             }
@@ -450,6 +425,14 @@ class JadwalPraktekPage extends Page
                     ->warning()->send();
                 return;
             }
+
+            if (empty($row['waktu_mulai']) && ! (bool) ($row['sesuai_perjanjian'] ?? false)) {
+                Notification::make()
+                    ->title("Baris ke-" . ($i + 1) . ": Jam Mulai wajib diisi")
+                    ->body('Kosongkan hanya jika "Sesuai Perjanjian" dicentang.')
+                    ->danger()->send();
+                return;
+            }
         }
 
         $poliIds = $this->getPoliIds();
@@ -468,6 +451,7 @@ class JadwalPraktekPage extends Page
                     'waktu_mulai'       => $row['waktu_mulai'] ?: null,
                     'waktu_selesai'     => $row['waktu_selesai'] ?: null,
                     'sesuai_perjanjian' => (bool) ($row['sesuai_perjanjian'] ?? false),
+                    'is_executive'      => (bool) ($row['is_executive'] ?? false),
                     'catatan'           => $row['catatan'] ?: null,
                 ]);
             }
@@ -493,18 +477,12 @@ class JadwalPraktekPage extends Page
             return response()->streamDownload(fn () => '', 'error.pdf');
         }
 
-        $rs   = RumahSakit::find($rsId);
-        $unit = $this->selectedUnitLayananId
-            ? UnitLayanan::find($this->selectedUnitLayananId)?->nama
-            : null;
+        $rs = RumahSakit::find($rsId);
 
         if ($this->viewMode === 'per_hari') {
             $jadwals = JadwalPraktek::where('hari', $this->activeHari)
-                ->whereHas('poliklinik.unitLayanan', function ($q) use ($rsId) {
+                ->whereHas('poliklinik', function ($q) use ($rsId) {
                     $q->where('rumah_sakit_id', $rsId);
-                    if ($this->selectedUnitLayananId) {
-                        $q->where('id', $this->selectedUnitLayananId);
-                    }
                 })
                 ->orderBy('waktu_mulai')
                 ->with('poliklinik', 'dokter')
@@ -521,8 +499,8 @@ class JadwalPraktekPage extends Page
                 return response()->streamDownload(fn () => '', 'error.pdf');
             }
 
-            $dokter     = Dokter::find($this->selectedDokterId);
-            $hariOrder  = array_flip(['SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU', 'MINGGU']);
+            $dokter    = Dokter::find($this->selectedDokterId);
+            $hariOrder = array_flip(['SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU', 'MINGGU']);
 
             $jadwals = JadwalPraktek::where('dokter_id', $this->selectedDokterId)
                 ->whereIn('poliklinik_id', $this->getPoliIds())
@@ -541,7 +519,7 @@ class JadwalPraktekPage extends Page
             'jadwals'    => $jadwals,
             'title'      => $title,
             'rsName'     => $rs?->nama ?? '-',
-            'unit'       => $unit,
+            'unit'       => null,
             'viewMode'   => $this->viewMode,
             'hariLabel'  => $hariLabel ?? '',
             'dokterNama' => $dokterNama ?? '',

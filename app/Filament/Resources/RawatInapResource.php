@@ -21,7 +21,7 @@ class RawatInapResource extends BaseRumahSakitResource
 
     protected static string | null $navigationGroup = 'Rawat Inap';
 
-    protected static ?string $navigationIcon = 'fas-bed';
+    protected static ?string $navigationIcon = 'heroicon-o-identification';
 
     public static function form(Form $form): Form
     {

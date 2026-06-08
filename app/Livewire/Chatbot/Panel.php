@@ -3,14 +3,22 @@
 namespace App\Livewire\Chatbot;
 
 use Livewire\Component;
+use App\Models\Kontak;
 use App\Models\RumahSakit;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 
 class Panel extends Component
 {
     private const SESSION_KEY  = 'chatbot_state';
-    private const MAX_MESSAGES = 100;
+    private const MAX_MESSAGES = 50;
+
+    // ── Rate limit AI (ubah angka di sini sesuai kebutuhan/kuota) ─────────────
+    private const AI_BURST_LIMIT   = 10;   // maks. pesan AI dalam jendela singkat
+    private const AI_BURST_MINUTES = 10;  // panjang jendela singkat (menit), reset otomatis
+    private const AI_DAILY_LIMIT   = 100;  // maks. pesan AI per hari
+    private const AI_DAILY_HOURS   = 24;  // panjang jendela harian (jam), reset otomatis
 
     public bool $branchSelected = false;
     public ?string $activeBranchSlug = null;
@@ -101,8 +109,41 @@ class Panel extends Component
         $this->saveState();
     }
 
-    private function sendToAi(string $text): string
+    /**
+     * Cek batas pemakaian AI (burst & harian). Mengembalikan pesan ramah kalau
+     * batas tercapai (null kalau masih boleh lanjut). Key digabung IP + session
+     * supaya tidak mudah di-reset hanya dengan menghapus cookie.
+     */
+    private function aiRateLimited(): ?string
     {
+        $id       = request()?->ip() . '|' . session()->getId();
+        $burstKey = "chatbot-ai-burst:{$id}";
+        $dailyKey = "chatbot-ai-daily:{$id}";
+
+        if (RateLimiter::tooManyAttempts($burstKey, self::AI_BURST_LIMIT)) {
+            return 'Anda mengirim pesan terlalu cepat. Silakan tunggu beberapa menit, lalu coba lagi.';
+        }
+
+        if (RateLimiter::tooManyAttempts($dailyKey, self::AI_DAILY_LIMIT)) {
+            return 'Anda sudah mencapai batas tanya-jawab untuk hari ini. Silakan coba lagi besok, atau gunakan opsi kontak di bawah.';
+        }
+
+        RateLimiter::hit($burstKey, self::AI_BURST_MINUTES * 60);
+        RateLimiter::hit($dailyKey, self::AI_DAILY_HOURS * 3600);
+
+        return null;
+    }
+
+    /**
+     * @return array{text: string, failed: bool} 'failed' menandakan respons gagal/kosong
+     *         (bukan batas rate limit) — dipakai UI untuk menampilkan opsi pemulihan.
+     */
+    private function sendToAi(string $text): array
+    {
+        if ($limitMessage = $this->aiRateLimited()) {
+            return ['text' => $limitMessage, 'failed' => false];
+        }
+
         if (empty($this->sessionKey)) {
             $this->sessionKey = Str::uuid()->toString();
         }
@@ -113,11 +154,15 @@ class Panel extends Component
             'sessionKey' => $this->sessionKey,
         ]);
 
-        if ($response->successful()) {
-            return $response->json('output') ?? 'Maaf, tidak ada respons dari asisten.';
+        if ($response->successful() && $response->json('output')) {
+            return ['text' => $response->json('output'), 'failed' => false];
         }
 
-        return 'Maaf, terjadi gangguan. Silakan coba lagi.';
+        if ($response->successful()) {
+            return ['text' => 'Maaf, tidak ada respons dari asisten.', 'failed' => true];
+        }
+
+        return ['text' => 'Maaf, terjadi gangguan. Silakan coba lagi.', 'failed' => true];
     }
 
     public function sendMessage(string $text = ''): void
@@ -133,8 +178,8 @@ class Panel extends Component
 
         $this->addUserMessage($text);
 
-        $respon = $this->sendToAi($text);
-        $this->addBotMessage($respon);
+        $result = $this->sendToAi($text);
+        $this->addBotMessage($result['text'], $result['failed'] ? $text : null);
         $this->saveState();
     }
 
@@ -142,7 +187,21 @@ class Panel extends Component
     {
         if (! $this->branchSelected) return;
         $this->addUserMessage($text);
-        $this->generateReply($text);
+        $result = $this->sendToAi($text);
+        $this->addBotMessage($result['text'], $result['failed'] ? $text : null);
+        $this->saveState();
+    }
+
+    /**
+     * Kirim ulang pesan user sebelumnya — dipicu dari tombol "Kirim ulang pesan"
+     * yang muncul di bawah balasan bot yang gagal.
+     */
+    public function retryLastMessage(string $text): void
+    {
+        if (! $this->branchSelected || ! trim($text)) return;
+
+        $result = $this->sendToAi($text);
+        $this->addBotMessage($result['text'], $result['failed'] ? $text : null);
         $this->saveState();
     }
 
@@ -155,18 +214,33 @@ class Panel extends Component
         ];
     }
 
-    protected function addBotMessage(string $text): void
+    /**
+     * @param string|null $retryText  Teks pesan user yang bisa dikirim ulang —
+     *        diisi hanya saat balasan ini adalah hasil kegagalan (bukan rate limit).
+     */
+    protected function addBotMessage(string $text, ?string $retryText = null): void
     {
         $this->messages[] = [
-            'type' => 'bot',
-            'text' => $text,
-            'time' => now()->format('H:i'),
+            'type'   => 'bot',
+            'text'   => $text,
+            'time'   => now()->format('H:i'),
+            'failed' => $retryText !== null,
+            'retry'  => $retryText,
         ];
     }
 
     public function render()
     {
         $branches = RumahSakit::where('aktif', true)->get();
-        return view('rumah_sakit.chatbot.panel', compact('branches'));
+
+        $contacts = $this->activeBranch
+            ? Kontak::where('rumah_sakit_id', $this->activeBranch->id)
+                ->where('aktif', true)
+                ->where('kategori', '!=', 'SOSIAL MEDIA')
+                ->orderBy('sort_order')
+                ->get(['label', 'value', 'kategori'])
+            : collect();
+
+        return view('rumah_sakit.chatbot.panel', compact('branches', 'contacts'));
     }
 }

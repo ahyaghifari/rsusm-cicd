@@ -8,7 +8,6 @@ use App\Models\JadwalHarianPerubahan;
 use App\Models\JadwalPraktek;
 use App\Models\PoliKlinik;
 use App\Models\RumahSakit;
-use App\Models\UnitLayanan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Livewire;
@@ -19,7 +18,6 @@ class JadwalHarianTest extends TestCase
     use RefreshDatabase;
 
     private RumahSakit $rs;
-    private UnitLayanan $unit;
     private PoliKlinik $poli;
 
     protected function setUp(): void
@@ -28,8 +26,7 @@ class JadwalHarianTest extends TestCase
         $this->createRoles();
 
         $this->rs   = RumahSakit::factory()->create(['aktif' => true]);
-        $this->unit = UnitLayanan::factory()->create(['rumah_sakit_id' => $this->rs->id, 'aktif' => true]);
-        $this->poli = PoliKlinik::factory()->create(['unit_layanan_id' => $this->unit->id, 'aktif' => true]);
+        $this->poli = PoliKlinik::factory()->create(['rumah_sakit_id' => $this->rs->id, 'aktif' => true]);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -64,6 +61,22 @@ class JadwalHarianTest extends TestCase
         ], $attrs));
     }
 
+    private function makeRow(array $attrs = []): array
+    {
+        return array_merge([
+            'id'             => null,
+            'poliklinik_id'  => $this->poli->id,
+            'dokter_id'      => null,
+            'nama_dokter'    => null,
+            'jam_mulai'      => '08:00',
+            'jam_selesai'    => null,
+            'status_layanan' => 'BUKA',
+            'catatan'        => null,
+            'sumber'         => 'MANUAL',
+            'is_executive'   => false,
+        ], $attrs);
+    }
+
     // ── Access ───────────────────────────────────────────────────────────────
 
     public function test_unauthenticated_redirects_to_login(): void
@@ -78,26 +91,11 @@ class JadwalHarianTest extends TestCase
             ->assertOk();
     }
 
-    // ── mustPickUnit (unit test PHP langsung) ─────────────────────────────────
+    // ── mustPickUnit ──────────────────────────────────────────────────────────
 
-    public function test_must_pick_unit_false_jika_hanya_1_unit(): void
+    public function test_must_pick_unit_selalu_false(): void
     {
         $page = $this->makePage();
-        $this->assertFalse($page->mustPickUnit());
-    }
-
-    public function test_must_pick_unit_true_jika_lebih_dari_1_unit_belum_pilih(): void
-    {
-        UnitLayanan::factory()->create(['rumah_sakit_id' => $this->rs->id, 'aktif' => true]);
-        $page = $this->makePage();
-        $this->assertTrue($page->mustPickUnit());
-    }
-
-    public function test_must_pick_unit_false_setelah_pilih_unit(): void
-    {
-        $unit2 = UnitLayanan::factory()->create(['rumah_sakit_id' => $this->rs->id, 'aktif' => true]);
-        $page  = $this->makePage();
-        $page->selectedUnitLayananId = $unit2->id;
         $this->assertFalse($page->mustPickUnit());
     }
 
@@ -133,8 +131,7 @@ class JadwalHarianTest extends TestCase
     public function test_load_rows_tidak_tampilkan_jadwal_rs_lain(): void
     {
         $rs2   = RumahSakit::factory()->create();
-        $ul2   = UnitLayanan::factory()->create(['rumah_sakit_id' => $rs2->id]);
-        $poli2 = PoliKlinik::factory()->create(['unit_layanan_id' => $ul2->id]);
+        $poli2 = PoliKlinik::factory()->create(['rumah_sakit_id' => $rs2->id]);
 
         JadwalHarian::create([
             'poliklinik_id'  => $poli2->id,
@@ -186,12 +183,7 @@ class JadwalHarianTest extends TestCase
     public function test_save_gagal_jika_poliklinik_kosong(): void
     {
         $page = $this->makePage();
-        $page->rows = [[
-            'id' => null, 'poliklinik_id' => null,
-            'dokter_id' => null, 'nama_dokter' => null,
-            'jam_mulai' => '08:00', 'jam_selesai' => null,
-            'status_layanan' => 'BUKA', 'catatan' => null, 'sumber' => 'MANUAL',
-        ]];
+        $page->rows = [$this->makeRow(['poliklinik_id' => null])];
         $page->saveJadwal();
         $this->assertDatabaseMissing('jadwal_harian', ['tanggal' => today()->format('Y-m-d')]);
     }
@@ -199,12 +191,7 @@ class JadwalHarianTest extends TestCase
     public function test_save_gagal_jika_jam_mulai_kosong(): void
     {
         $page = $this->makePage();
-        $page->rows = [[
-            'id' => null, 'poliklinik_id' => $this->poli->id,
-            'dokter_id' => null, 'nama_dokter' => null,
-            'jam_mulai' => null, 'jam_selesai' => null,
-            'status_layanan' => 'BUKA', 'catatan' => null, 'sumber' => 'MANUAL',
-        ]];
+        $page->rows = [$this->makeRow(['jam_mulai' => null])];
         $page->saveJadwal();
         $this->assertDatabaseMissing('jadwal_harian', ['tanggal' => today()->format('Y-m-d')]);
     }
@@ -212,12 +199,7 @@ class JadwalHarianTest extends TestCase
     public function test_save_berhasil_simpan_baris_manual(): void
     {
         $page = $this->makePage();
-        $page->rows = [[
-            'id' => null, 'poliklinik_id' => $this->poli->id,
-            'dokter_id' => null, 'nama_dokter' => 'dr. Baru',
-            'jam_mulai' => '08:00', 'jam_selesai' => '12:00',
-            'status_layanan' => 'BUKA', 'catatan' => null, 'sumber' => 'MANUAL',
-        ]];
+        $page->rows = [$this->makeRow(['nama_dokter' => 'dr. Baru', 'jam_selesai' => '12:00'])];
         $page->saveJadwal();
 
         $this->assertDatabaseHas('jadwal_harian', [
@@ -232,12 +214,11 @@ class JadwalHarianTest extends TestCase
         $this->makeJadwalHarian(['nama_dokter' => 'dr. Lama']);
 
         $page = $this->makePage();
-        $page->rows = [[
-            'id' => null, 'poliklinik_id' => $this->poli->id,
-            'dokter_id' => null, 'nama_dokter' => 'dr. Baru',
-            'jam_mulai' => '09:00', 'jam_selesai' => null,
-            'status_layanan' => 'BUKA', 'catatan' => null, 'sumber' => 'GENERATE',
-        ]];
+        $page->rows = [$this->makeRow([
+            'nama_dokter'    => 'dr. Baru',
+            'jam_mulai'      => '09:00',
+            'sumber'         => 'GENERATE',
+        ])];
         $page->saveJadwal();
 
         $this->assertDatabaseMissing('jadwal_harian', ['nama_dokter' => 'dr. Lama']);
@@ -250,12 +231,12 @@ class JadwalHarianTest extends TestCase
     {
         $tanggal = today()->format('Y-m-d');
         $page    = $this->makePage();
-        $page->rows = [[
-            'id' => null, 'poliklinik_id' => $this->poli->id,
-            'dokter_id' => null, 'nama_dokter' => 'dr. Test',
-            'jam_mulai' => '08:00', 'jam_selesai' => null,
-            'status_layanan' => 'LIBUR', 'catatan' => 'dokter sakit', 'sumber' => 'GENERATE',
-        ]];
+        $page->rows = [$this->makeRow([
+            'nama_dokter'    => 'dr. Test',
+            'status_layanan' => 'LIBUR',
+            'catatan'        => 'dokter sakit',
+            'sumber'         => 'GENERATE',
+        ])];
         $page->saveJadwal();
 
         $jh = JadwalHarian::whereDate('tanggal', $tanggal)->first();
@@ -270,12 +251,10 @@ class JadwalHarianTest extends TestCase
     {
         $tanggal = today()->format('Y-m-d');
         $page    = $this->makePage();
-        $page->rows = [[
-            'id' => null, 'poliklinik_id' => $this->poli->id,
-            'dokter_id' => null, 'nama_dokter' => 'dr. Normal',
-            'jam_mulai' => '08:00', 'jam_selesai' => null,
-            'status_layanan' => 'BUKA', 'catatan' => null, 'sumber' => 'GENERATE',
-        ]];
+        $page->rows = [$this->makeRow([
+            'nama_dokter' => 'dr. Normal',
+            'sumber'      => 'GENERATE',
+        ])];
         $page->saveJadwal();
 
         $jh = JadwalHarian::whereDate('tanggal', $tanggal)->first();
@@ -287,17 +266,147 @@ class JadwalHarianTest extends TestCase
     {
         $tanggal = today()->format('Y-m-d');
         $page    = $this->makePage();
-        $page->rows = [[
-            'id' => null, 'poliklinik_id' => $this->poli->id,
-            'dokter_id' => null, 'nama_dokter' => 'dr. Manual',
-            'jam_mulai' => '14:00', 'jam_selesai' => null,
-            'status_layanan' => 'BUKA', 'catatan' => null, 'sumber' => 'MANUAL',
-        ]];
+        $page->rows = [$this->makeRow([
+            'nama_dokter' => 'dr. Manual',
+            'jam_mulai'   => '14:00',
+            'sumber'      => 'MANUAL',
+        ])];
         $page->saveJadwal();
 
         $jh = JadwalHarian::whereDate('tanggal', $tanggal)->where('sumber', 'MANUAL')->first();
         $this->assertNotNull($jh);
         $this->assertDatabaseCount('jadwal_harian_perubahan', 0);
+    }
+
+    // ── Nilai Asli (deteksi "balik ke semula" tanpa JadwalPraktek) ────────────
+
+    public function test_perubahan_pertama_kali_capture_nilai_asli(): void
+    {
+        $jh = $this->makeJadwalHarian([
+            'jam_mulai'      => '08:00',
+            'jam_selesai'    => '12:00',
+            'status_layanan' => 'BUKA',
+            'sumber'         => 'GENERATE',
+        ]);
+
+        $page = $this->makePage();
+        $page->rows = [$this->makeRow([
+            'id'             => $jh->id,
+            'jam_mulai'      => '08:00',
+            'jam_selesai'    => '12:00',
+            'status_layanan' => 'LIBUR',
+            'catatan'        => 'dokter cuti',
+            'sumber'         => 'GENERATE',
+        ])];
+        $page->saveJadwal();
+
+        $perubahan = JadwalHarianPerubahan::first();
+        $this->assertNotNull($perubahan);
+        $this->assertEquals('LIBUR', $perubahan->status_layanan);
+        $this->assertEquals('08:00', $perubahan->jam_mulai_asli->format('H:i'));
+        $this->assertEquals('12:00', $perubahan->jam_selesai_asli->format('H:i'));
+        $this->assertEquals('BUKA', $perubahan->status_layanan_asli);
+    }
+
+    public function test_nilai_asli_tidak_tertimpa_pada_perubahan_berikutnya(): void
+    {
+        $jh = $this->makeJadwalHarian([
+            'jam_mulai'      => '08:00',
+            'jam_selesai'    => '12:00',
+            'status_layanan' => 'BUKA',
+            'sumber'         => 'GENERATE',
+        ]);
+
+        // Perubahan pertama: BUKA → LIBUR (asli ter-capture: 08:00–12:00, BUKA)
+        $page = $this->makePage();
+        $page->rows = [$this->makeRow([
+            'id'             => $jh->id,
+            'jam_mulai'      => '08:00',
+            'jam_selesai'    => '12:00',
+            'status_layanan' => 'LIBUR',
+            'sumber'         => 'GENERATE',
+        ])];
+        $page->saveJadwal();
+
+        $jhSetelahPertama = JadwalHarian::whereDate('tanggal', today()->format('Y-m-d'))->first();
+
+        // Perubahan kedua: ubah jam (masih LIBUR) pada baris yang sama
+        $page2 = $this->makePage();
+        $page2->rows = [$this->makeRow([
+            'id'             => $jhSetelahPertama->id,
+            'jam_mulai'      => '10:00',
+            'jam_selesai'    => '12:00',
+            'status_layanan' => 'LIBUR',
+            'catatan'        => 'diundur',
+            'sumber'         => 'GENERATE',
+        ])];
+        $page2->saveJadwal();
+
+        $perubahanAkhir = JadwalHarianPerubahan::first();
+        $this->assertEquals('10:00', $perubahanAkhir->jam_mulai->format('H:i'));
+        $this->assertEquals('08:00', $perubahanAkhir->jam_mulai_asli->format('H:i'));
+        $this->assertEquals('12:00', $perubahanAkhir->jam_selesai_asli->format('H:i'));
+        $this->assertEquals('BUKA', $perubahanAkhir->status_layanan_asli);
+    }
+
+    public function test_balik_ke_semula_menghapus_record_perubahan(): void
+    {
+        $jh = $this->makeJadwalHarian([
+            'jam_mulai'      => '08:00',
+            'jam_selesai'    => '12:00',
+            'status_layanan' => 'BUKA',
+            'sumber'         => 'GENERATE',
+        ]);
+
+        // Ubah jadi LIBUR — record perubahan tercipta
+        $page = $this->makePage();
+        $page->rows = [$this->makeRow([
+            'id'             => $jh->id,
+            'jam_mulai'      => '08:00',
+            'jam_selesai'    => '12:00',
+            'status_layanan' => 'LIBUR',
+            'sumber'         => 'GENERATE',
+        ])];
+        $page->saveJadwal();
+
+        $this->assertDatabaseCount('jadwal_harian_perubahan', 1);
+        $jhLibur = JadwalHarian::whereDate('tanggal', today()->format('Y-m-d'))->first();
+
+        // Kembalikan persis ke kondisi asli (BUKA, jam sama)
+        $page2 = $this->makePage();
+        $page2->rows = [$this->makeRow([
+            'id'             => $jhLibur->id,
+            'jam_mulai'      => '08:00',
+            'jam_selesai'    => '12:00',
+            'status_layanan' => 'BUKA',
+            'sumber'         => 'GENERATE',
+        ])];
+        $page2->saveJadwal();
+
+        $this->assertDatabaseCount('jadwal_harian_perubahan', 0);
+        $this->assertDatabaseHas('jadwal_harian', [
+            'poliklinik_id'  => $this->poli->id,
+            'status_layanan' => 'BUKA',
+            'sumber'         => 'GENERATE',
+        ]);
+    }
+
+    public function test_baris_baru_dari_template_yang_jadi_libur_capture_asli_dari_jam_saat_ini(): void
+    {
+        $page = $this->makePage();
+        $page->rows = [$this->makeRow([
+            'jam_mulai'      => '08:00',
+            'jam_selesai'    => '11:00',
+            'status_layanan' => 'LIBUR',
+            'sumber'         => 'GENERATE', // simulasi baris hasil "muat dari jadwal mingguan"
+        ])];
+        $page->saveJadwal();
+
+        $perubahan = JadwalHarianPerubahan::first();
+        $this->assertNotNull($perubahan);
+        $this->assertEquals('08:00', $perubahan->jam_mulai_asli->format('H:i'));
+        $this->assertEquals('11:00', $perubahan->jam_selesai_asli->format('H:i'));
+        $this->assertEquals('BUKA', $perubahan->status_layanan_asli);
     }
 
     // ── muatDariJadwalMingguan ────────────────────────────────────────────────
@@ -307,12 +416,13 @@ class JadwalHarianTest extends TestCase
         $hari = ['MINGGU','SENIN','SELASA','RABU','KAMIS','JUMAT','SABTU'][today()->dayOfWeek];
 
         JadwalPraktek::create([
-            'poliklinik_id'      => $this->poli->id,
-            'hari'               => $hari,
-            'nama_dokter'        => 'dr. Mingguan',
-            'waktu_mulai'        => '08:00',
-            'waktu_selesai'      => '12:00',
-            'sesuai_perjanjian'  => false,
+            'poliklinik_id'     => $this->poli->id,
+            'hari'              => $hari,
+            'nama_dokter'       => 'dr. Mingguan',
+            'waktu_mulai'       => '08:00',
+            'waktu_selesai'     => '12:00',
+            'sesuai_perjanjian' => false,
+            'is_executive'      => false,
         ]);
 
         $page = $this->makePage();
@@ -357,7 +467,6 @@ class JadwalHarianTest extends TestCase
         $page->prevDay();
         $this->assertEmpty($page->rows);
 
-        // Cache dari tanggal asal masih ada
         $this->assertEquals([['nama_dokter' => 'cached']], $page->rowsCache[$tanggal]);
     }
 
@@ -365,14 +474,8 @@ class JadwalHarianTest extends TestCase
 
     public function test_jadwal_harian_tersimpan_dengan_sumber_yang_benar(): void
     {
-        $tanggal = today()->format('Y-m-d');
-        $page    = $this->makePage();
-        $page->rows = [[
-            'id' => null, 'poliklinik_id' => $this->poli->id,
-            'dokter_id' => null, 'nama_dokter' => null,
-            'jam_mulai' => '08:00', 'jam_selesai' => null,
-            'status_layanan' => 'BUKA', 'catatan' => null, 'sumber' => 'MANUAL',
-        ]];
+        $page = $this->makePage();
+        $page->rows = [$this->makeRow(['sumber' => 'MANUAL'])];
         $page->saveJadwal();
 
         $this->assertDatabaseHas('jadwal_harian', ['poliklinik_id' => $this->poli->id, 'sumber' => 'MANUAL']);
@@ -381,7 +484,6 @@ class JadwalHarianTest extends TestCase
     public function test_get_hari_dari_tanggal_senin(): void
     {
         $page = $this->makePage();
-        // Cari tanggal Senin terdekat
         $senin = today()->startOfWeek()->format('Y-m-d');
         $page->activeTanggal = $senin;
 

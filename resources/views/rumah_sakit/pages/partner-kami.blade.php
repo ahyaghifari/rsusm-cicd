@@ -30,7 +30,7 @@
                 @foreach($partner_asuransi as $partner)
                 <div data-aos="zoom-in-up" class="bg-white border border-outline-variant/30 rounded-2xl px-5 py-5 flex flex-col items-center justify-center gap-3 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 min-h-[130px]">
                     @if($partner->logo)
-                        <img src="{{ Storage::url($partner->logo) }}" alt="{{ $partner->nama }}" class="h-12 object-contain">
+                        <img src="{{ Storage::url($partner->logo) }}" alt="{{ $partner->nama }}" class="h-12 object-contain" loading="lazy">
                     @else
                         <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
                             <span class="material-symbols-outlined text-primary text-2xl">shield</span>
@@ -57,7 +57,7 @@
                 @foreach($partner_perusahaan as $partner)
                 <div data-aos="zoom-in-up" class="bg-white border border-outline-variant/30 rounded-2xl px-5 py-5 flex flex-col items-center justify-center gap-3 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 min-h-[130px]">
                     @if($partner->logo)
-                        <img src="{{ Storage::url($partner->logo) }}" alt="{{ $partner->nama }}" class="h-12 object-contain">
+                        <img src="{{ Storage::url($partner->logo) }}" alt="{{ $partner->nama }}" class="h-12 object-contain" loading="lazy">
                     @else
                         <div class="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center flex-shrink-0">
                             <span class="material-symbols-outlined text-secondary text-2xl">business</span>

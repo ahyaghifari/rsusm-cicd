@@ -1,6 +1,6 @@
 <footer class="bg-primary/15 px-10 py-20 md:py-22 lg:py-24 flex flex-col lg:grid lg:grid-cols-5 gap-5">
     <div class="lg:col-span-2">
-        <img src="{{ Storage::url($currentRumahSakit->logo) }}" class="w-full md:w-52 lg:w-64" alt="">
+        <img src="{{ Storage::url($currentRumahSakit->logo) }}" class="w-full md:w-52 lg:w-64" alt="" loading="lazy">
         <p class="mt-2 text-on-surface text-sm">{{ $currentRumahSakit->alamat }}</p>
 
         {{-- Sosial Media --}}
@@ -19,7 +19,8 @@
                         @elseif($kontak->gambar)
                             <img src="{{ Storage::url($kontak->gambar) }}"
                                              alt="{{ $kontak->label }}"
-                                             class="w-10 h-10 object-contain">
+                                             class="w-10 h-10 object-contain"
+                                             loading="lazy">
                         @else
                             <span class="material-symbols-outlined text-[18px]">share</span>
                         @endif
@@ -70,7 +71,8 @@
                     @elseif($kontak->gambar)
                         <img src="{{ Storage::url($kontak->gambar) }}"
                             alt="{{ $kontak->label }}"
-                            class="w-10 h-10 object-contain">
+                            class="w-10 h-10 object-contain"
+                            loading="lazy">
                     @else
                         <span class="material-symbols-outlined text-primary text-[20px]">contact_phone</span>
                     @endif

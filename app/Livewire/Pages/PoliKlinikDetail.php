@@ -15,12 +15,7 @@ class PoliKlinikDetail extends RsPortalComponent
 
     public function mount(PoliKlinik $poliklinik): void
     {
-        $poliklinik->load('unitLayanan');
-
-        abort_unless(
-            $poliklinik->unitLayanan->rumah_sakit_id === $this->rs->id,
-            404
-        );
+        abort_unless($poliklinik->rumah_sakit_id === $this->rs->id, 404);
 
         $this->poliklinik = $poliklinik;
 
@@ -36,7 +31,6 @@ class PoliKlinikDetail extends RsPortalComponent
 
     public function render()
     {
-        // Gunakan CASE WHEN agar kompatibel MySQL dan SQLite
         $jadwalMingguan = JadwalPraktek::where('poliklinik_id', $this->poliklinik->id)
             ->orderByRaw("CASE hari
                 WHEN 'SENIN'   THEN 1
@@ -54,6 +48,7 @@ class PoliKlinikDetail extends RsPortalComponent
 
         return view('rumah_sakit.pages.poliklinik-detail', [
             'jadwalMingguan' => $jadwalMingguan,
+            'rs'             => $this->rs,
         ]);
     }
 }

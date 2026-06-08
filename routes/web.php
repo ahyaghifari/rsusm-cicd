@@ -2,10 +2,27 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PortalController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Middleware\RumahSakitMiddleware;
+
+// ── Poster Preview (one-time HTML, admin only) ───────────────────────────────
+Route::get('/poster-preview/{key}', function (string $key) {
+    abort_if(! preg_match('/^[0-9a-f\-]{36}$/', $key), 404);
+    $path = storage_path("app/poster-preview/{$key}.html");
+    abort_if(! file_exists($path), 404);
+    $html = file_get_contents($path);
+    @unlink($path);
+    return response($html)->header('Content-Type', 'text/html; charset=utf-8');
+})->name('poster.preview')->middleware('auth');
 
 Route::get('/', [PortalController::class, 'index'])->middleware('throttle:portal')->name('home');
 Route::get('/cari-spesialis', [PortalController::class, 'spesialis'])->middleware('throttle:public-api')->name('cari_spesialis');
+
+// ── Sitemap (otomatis dari database, di-cache 6 jam) ─────────────────────────
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+Route::get('/{rumahsakit}/sitemap.xml', [SitemapController::class, 'show'])
+    ->middleware('throttle:portal')
+    ->name('rumahsakit.sitemap');
 
 Route::prefix('{rumahsakit}')
     ->middleware([RumahSakitMiddleware::class, 'throttle:portal'])

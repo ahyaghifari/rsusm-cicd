@@ -1,7 +1,7 @@
 <div>
     @if($isOpen)
     {{-- Overlay --}}
-    <div class="fixed inset-0 z-[200] flex items-start justify-center pt-16 px-4"
+    <div class="fixed inset-0 z-200 flex items-start justify-center pt-16 px-4"
          x-data
          x-on:keydown.escape.window="$wire.close()"
          x-on:keydown.ctrl.k.window.prevent="$wire.close()">
@@ -68,7 +68,8 @@
                                         @if($dokter->foto)
                                             <img src="{{ asset('storage/' . $dokter->foto) }}"
                                                  alt="{{ $dokter->nama }}"
-                                                 class="w-full h-full object-cover">
+                                                 class="w-full h-full object-cover"
+                                                 loading="lazy">
                                         @else
                                             <span class="material-symbols-outlined text-primary text-[18px]">person</span>
                                         @endif
@@ -96,16 +97,14 @@
                                         @if($poli->gambar)
                                             <img src="{{ asset('storage/' . $poli->gambar) }}"
                                                  alt="{{ $poli->nama }}"
-                                                 class="w-full h-full object-cover">
+                                                 class="w-full h-full object-cover"
+                                                 loading="lazy">
                                         @else
                                             <span class="material-symbols-outlined text-secondary text-[18px]">local_hospital</span>
                                         @endif
                                     </div>
                                     <div class="min-w-0">
                                         <p class="text-sm font-semibold text-on-surface truncate">{{ $poli->nama }}</p>
-                                        @if($poli->unitLayanan)
-                                            <p class="text-xs text-on-surface-variant truncate">{{ $poli->unitLayanan->nama }}</p>
-                                        @endif
                                     </div>
                                     <span class="material-symbols-outlined text-on-surface-variant text-[16px] ml-auto shrink-0">chevron_right</span>
                                 </a>

@@ -58,7 +58,7 @@ class JadwalHarianTest extends TestCase
         $poli1 = PoliKlinik::factory()->create();
         $poli2 = PoliKlinik::factory()->create();
 
-        $rsId = $poli1->unitLayanan->rumah_sakit_id;
+        $rsId = $poli1->rumah_sakit_id;
 
         JadwalHarian::factory()->count(3)->create([
             'poliklinik_id' => $poli1->id,
@@ -70,7 +70,7 @@ class JadwalHarianTest extends TestCase
         ]);
 
         $count = JadwalHarian::whereHas(
-            'poliklinik.unitLayanan',
+            'poliklinik',
             fn ($q) => $q->where('rumah_sakit_id', $rsId)
         )->whereDate('tanggal', today())->count();
 

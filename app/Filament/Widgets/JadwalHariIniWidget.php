@@ -30,7 +30,7 @@ class JadwalHariIniWidget extends BaseWidget
         return $table
             ->query(
                 JadwalHarian::with(['poliklinik', 'dokter'])
-                    ->whereHas('poliklinik.unitLayanan', $scope)
+                    ->whereHas('poliklinik', $scope)
                     ->whereDate('tanggal', today())
                     ->orderBy('jam_mulai')
             )

@@ -19,7 +19,7 @@ class JadwalPraktekResource extends BaseResource
 
     protected static ?int $navigationSort = 2;
     protected static string|null $navigationGroup = 'Poliklinik / Rawat Jalan';
-    protected static ?string $navigationIcon = 'fas-calendar-week';
+    protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
     protected static ?string $navigationLabel = 'Jadwal Praktek';
     protected static ?string $modelLabel = 'Jadwal Praktek';
     protected static ?string $pluralModelLabel = 'Jadwal Praktek';
@@ -32,7 +32,7 @@ class JadwalPraktekResource extends BaseResource
             return $query;
         }
 
-        return $query->whereHas('poliklinik.unitLayanan', function (Builder $q) {
+        return $query->whereHas('poliklinik', function (Builder $q) {
             $q->where('rumah_sakit_id', static::rumahSakitId());
         });
     }
@@ -61,7 +61,7 @@ class JadwalPraktekResource extends BaseResource
 
                                 if (! $rsId) return [];
 
-                                return PoliKlinik::whereHas('unitLayanan', fn ($q) => $q->where('rumah_sakit_id', $rsId))
+                                return PoliKlinik::where('rumah_sakit_id', $rsId)
                                     ->where('aktif', true)
                                     ->pluck('nama', 'id');
                             })
@@ -80,6 +80,7 @@ class JadwalPraktekResource extends BaseResource
                         Forms\Components\TimePicker::make('waktu_mulai')
                             ->label('Jam Mulai')
                             ->seconds(false)
+                            ->required(fn (Forms\Get $get) => ! $get('sesuai_perjanjian'))
                             ->nullable(),
 
                         Forms\Components\TimePicker::make('waktu_selesai')
@@ -89,7 +90,19 @@ class JadwalPraktekResource extends BaseResource
 
                         Forms\Components\Toggle::make('sesuai_perjanjian')
                             ->label('Sesuai Perjanjian')
+                            ->live()
                             ->default(false),
+
+                        Forms\Components\Toggle::make('is_executive')
+                            ->label('Executive Clinic')
+                            ->default(false)
+                            ->visible(function (Forms\Get $get) {
+                                $rsId = static::isSuperAdmin()
+                                    ? $get('rumah_sakit_id')
+                                    : static::rumahSakitId();
+                                if (! $rsId) return false;
+                                return (bool) \App\Models\RumahSakit::where('id', $rsId)->value('executive_clinic');
+                            }),
                     ])->columns(2),
 
                 Forms\Components\Section::make('Dokter')
@@ -138,11 +151,19 @@ class JadwalPraktekResource extends BaseResource
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('poliklinik.unitLayanan.rumahSakit.nama')
+                Tables\Columns\TextColumn::make('poliklinik.rumahSakit.nama')
                     ->label('Rumah Sakit')
                     ->searchable()
                     ->sortable()
                     ->visible(fn () => static::isSuperAdmin()),
+
+                Tables\Columns\IconColumn::make('is_executive')
+                    ->label('Executive')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-star')
+                    ->falseIcon('heroicon-o-minus')
+                    ->trueColor('warning')
+                    ->falseColor('gray'),
 
                 Tables\Columns\TextColumn::make('hari')
                     ->badge()
@@ -184,9 +205,9 @@ class JadwalPraktekResource extends BaseResource
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->mutateRecordDataUsing(function (array $data): array {
-                        $poli = PoliKlinik::with('unitLayanan')->find($data['poliklinik_id']);
+                        $poli = PoliKlinik::find($data['poliklinik_id']);
                         if ($poli) {
-                            $data['rumah_sakit_id'] = $poli->unitLayanan->rumah_sakit_id;
+                            $data['rumah_sakit_id'] = $poli->rumah_sakit_id;
                         }
                         return $data;
                     }),

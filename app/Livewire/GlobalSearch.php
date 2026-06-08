@@ -93,10 +93,9 @@ class GlobalSearch extends Component
                     fn ($q2) => $q2->where('nama', 'like', $like)
                 )
                 ->where('aktif', true)
-                ->whereHas('unitLayanan', fn ($u) => $u->where('rumah_sakit_id', $rsId)->where('aktif', true))
-                ->with('unitLayanan')
+                ->where('rumah_sakit_id', $rsId)
                 ->limit(5)
-                ->get(['id', 'nama', 'slug', 'gambar', 'unit_layanan_id']);
+                ->get(['id', 'nama', 'slug', 'gambar']);
 
             // Promo
             $results['promo'] = Promo::when($isMySQL,

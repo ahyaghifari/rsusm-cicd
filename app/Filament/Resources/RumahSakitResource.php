@@ -61,6 +61,8 @@ class RumahSakitResource extends BaseResource
                 Forms\Components\Toggle::make('aktif')
                     ->required()
                     ->default(true),
+                Forms\Components\Toggle::make('executive_clinic')
+                    ->default(false),
                 Forms\Components\Section::make('Tentang RS')
                     ->description('Konten untuk section "Kenapa Memilih Kami" di halaman beranda.')
                     ->collapsible()

@@ -88,12 +88,12 @@ class JadwalPraktekTest extends TestCase
     {
         $poli1 = PoliKlinik::factory()->create();
         $poli2 = PoliKlinik::factory()->create();
-        $rsId  = $poli1->unitLayanan->rumah_sakit_id;
+        $rsId  = $poli1->rumah_sakit_id;
 
         JadwalPraktek::factory()->count(3)->create(['poliklinik_id' => $poli1->id]);
         JadwalPraktek::factory()->count(2)->create(['poliklinik_id' => $poli2->id]);
 
-        $count = JadwalPraktek::whereHas('poliklinik.unitLayanan',
+        $count = JadwalPraktek::whereHas('poliklinik',
             fn ($q) => $q->where('rumah_sakit_id', $rsId)
         )->count();
 

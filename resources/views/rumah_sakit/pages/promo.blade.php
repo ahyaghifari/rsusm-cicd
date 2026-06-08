@@ -27,7 +27,8 @@
                     @if($p->gambar)
                         <img src="{{ Storage::url($p->gambar) }}" alt="{{ $p->judul }}"
                              class="h-full w-auto max-w-full object-contain
-                                    transition-transform duration-500 group-hover:scale-105">
+                                    transition-transform duration-500 group-hover:scale-105"
+                             loading="lazy">
                     @else
                         {{-- Placeholder dengan pola dot --}}
                         <div class="absolute inset-0 opacity-5"

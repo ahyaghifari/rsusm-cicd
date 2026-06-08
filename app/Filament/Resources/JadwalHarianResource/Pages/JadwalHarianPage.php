@@ -11,7 +11,6 @@ use App\Models\JadwalHarianPerubahan;
 use App\Models\JadwalPraktek;
 use App\Models\PoliKlinik;
 use App\Models\RumahSakit;
-use App\Models\UnitLayanan;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -83,12 +82,6 @@ class JadwalHarianPage extends Page
                     ->visible(fn () => JadwalHarianResource::isSuperAdmin())
                     ->live(),
 
-                Forms\Components\Select::make('selectedUnitLayananId')
-                    ->label('Unit Layanan')
-                    ->placeholder('— Semua Unit Layanan —')
-                    ->options(fn () => $this->getUnitLayananOptions())
-                    ->visible(fn () => count($this->getUnitLayananOptions()) > 1)
-                    ->live(),
             ])
             ->statePath('')
             ->columns(2);
@@ -105,9 +98,14 @@ class JadwalHarianPage extends Page
 
     public function mustPickUnit(): bool
     {
-        return (bool) $this->getActiveRumahSakitId()
-            && count($this->getUnitLayananOptions()) > 1
-            && ! $this->selectedUnitLayananId;
+        return false;
+    }
+
+    public function hasExecutiveClinic(): bool
+    {
+        $rsId = $this->getActiveRumahSakitId();
+        if (! $rsId) return false;
+        return (bool) RumahSakit::where('id', $rsId)->value('executive_clinic');
     }
 
     public function getNamaHariAktif(): string
@@ -128,12 +126,7 @@ class JadwalHarianPage extends Page
         $rsId = $this->getActiveRumahSakitId();
         if (! $rsId) return [];
 
-        return PoliKlinik::whereHas('unitLayanan', function ($q) use ($rsId) {
-                $q->where('rumah_sakit_id', $rsId);
-                if ($this->selectedUnitLayananId) {
-                    $q->where('id', $this->selectedUnitLayananId);
-                }
-            })
+        return PoliKlinik::where('rumah_sakit_id', $rsId)
             ->where('aktif', true)
             ->orderBy('nama')
             ->pluck('nama', 'id')
@@ -152,17 +145,6 @@ class JadwalHarianPage extends Page
             ->toArray();
     }
 
-    public function getUnitLayananOptions(): array
-    {
-        $rsId = $this->getActiveRumahSakitId();
-        if (! $rsId) return [];
-
-        return UnitLayanan::where('rumah_sakit_id', $rsId)
-            ->where('aktif', true)
-            ->orderBy('nama')
-            ->pluck('nama', 'id')
-            ->toArray();
-    }
 
     // =========================================================================
     // DATA LOADING
@@ -178,11 +160,8 @@ class JadwalHarianPage extends Page
         }
 
         $jadwals = JadwalHarian::whereDate('tanggal', $this->activeTanggal)
-            ->whereHas('poliklinik.unitLayanan', function ($q) use ($rsId) {
+            ->whereHas('poliklinik', function ($q) use ($rsId) {
                 $q->where('rumah_sakit_id', $rsId);
-                if ($this->selectedUnitLayananId) {
-                    $q->where('id', $this->selectedUnitLayananId);
-                }
             })
             ->get();
 
@@ -197,6 +176,7 @@ class JadwalHarianPage extends Page
                 'jam_selesai'    => $j->jam_selesai?->format('H:i'),
                 'status_layanan' => $j->status_layanan->value,
                 'catatan'        => $j->catatan,
+                'is_executive'   => $j->is_executive ? '1' : '0',
                 'sumber'         => $j->sumber,
             ];
         }
@@ -247,11 +227,8 @@ class JadwalHarianPage extends Page
         $namaHari = Hari::from($hari)->getLabel();
 
         $jadwals = JadwalPraktek::where('hari', $hari)
-            ->whereHas('poliklinik.unitLayanan', function ($q) use ($rsId) {
+            ->whereHas('poliklinik', function ($q) use ($rsId) {
                 $q->where('rumah_sakit_id', $rsId);
-                if ($this->selectedUnitLayananId) {
-                    $q->where('id', $this->selectedUnitLayananId);
-                }
             })
             ->get();
 
@@ -273,6 +250,7 @@ class JadwalHarianPage extends Page
                 'jam_selesai'    => $j->waktu_selesai?->format('H:i'),
                 'status_layanan' => 'BUKA',
                 'catatan'        => $j->catatan,
+                'is_executive'   => $j->is_executive ? '1' : '0',
                 'sumber'         => 'GENERATE',
             ];
         }
@@ -302,8 +280,7 @@ class JadwalHarianPage extends Page
 
     public function updatedSelectedUnitLayananId(): void
     {
-        $this->rowsCache = [];
-        $this->loadRows();
+        // Unit layanan sudah dihapus — hook dipertahankan agar state lama tidak crash.
     }
 
     // =========================================================================
@@ -321,6 +298,7 @@ class JadwalHarianPage extends Page
             'jam_selesai'    => null,
             'status_layanan' => 'BUKA',
             'catatan'        => null,
+            'is_executive'   => '0',
             'sumber'         => 'MANUAL',
         ];
     }
@@ -385,53 +363,73 @@ class JadwalHarianPage extends Page
             }
         }
 
-        $poliIds = PoliKlinik::whereHas('unitLayanan', function ($q) use ($rsId) {
-                $q->where('rumah_sakit_id', $rsId);
-                if ($this->selectedUnitLayananId) {
-                    $q->where('id', $this->selectedUnitLayananId);
-                }
-            })
+        $poliIds = PoliKlinik::where('rumah_sakit_id', $rsId)
             ->pluck('id')
             ->toArray();
 
-        DB::transaction(function () use ($poliIds) {
+        // Snapshot kondisi & perubahan EXISTING sebelum dihapus — dipakai sebagai
+        // acuan "nilai asli" tanpa perlu menengok lagi ke JadwalPraktek.
+        $existingIds = collect($this->rows)->pluck('id')->filter()->all();
+        $existingJadwal = JadwalHarian::with('perubahan')
+            ->whereIn('id', $existingIds)
+            ->get()
+            ->keyBy('id');
+
+        DB::transaction(function () use ($poliIds, $existingJadwal) {
             JadwalHarian::whereDate('tanggal', $this->activeTanggal)
                 ->whereIn('poliklinik_id', $poliIds)
                 ->delete();
 
             $userId = Auth::id();
-            $hariValue = $this->getHariDariTanggal();
 
             foreach ($this->rows as $row) {
                 $sumber = $row['sumber'] ?? 'MANUAL';
 
-                // Format jam untuk pencarian (tambahkan detik jika belum ada)
-                $jamMulaiRaw = $row['jam_mulai'];
-                $jamMulaiFormat = (strlen($jamMulaiRaw) === 5) ? $jamMulaiRaw . ':00' : $jamMulaiRaw;
-                
-                $jamSelesaiFormat = null;
-                if (!empty($row['jam_selesai'])) {
-                    $jamSelesaiRaw = $row['jam_selesai'];
-                    $jamSelesaiFormat = (strlen($jamSelesaiRaw) === 5) ? $jamSelesaiRaw . ':00' : $jamSelesaiRaw;
+                $old = $row['id'] ? $existingJadwal->get($row['id']) : null;
+                $existingPerubahan = $old?->perubahan;
+
+                // "Balik ke semula" hanya relevan untuk baris yang berasal dari
+                // GENERATE — baris MANUAL tidak punya acuan "asli" untuk dibandingkan.
+                $kembaliKeSemula = false;
+                $nilaiAsli = null;
+
+                if ($old && $old->sumber === 'GENERATE') {
+                    // Baris sudah pernah tersimpan sebagai GENERATE. Acuan asli:
+                    // kalau sudah pernah berubah, pakai nilai yang sudah terkunci di
+                    // record perubahan (tidak boleh ditimpa lagi); kalau belum pernah
+                    // berubah, acuan asli = kondisi $old saat ini (sebelum edit ini).
+                    $nilaiAsli = $existingPerubahan
+                        ? [
+                            'jam_mulai'      => $existingPerubahan->jam_mulai_asli?->format('H:i'),
+                            'jam_selesai'    => $existingPerubahan->jam_selesai_asli?->format('H:i'),
+                            'status_layanan' => $existingPerubahan->status_layanan_asli,
+                          ]
+                        : [
+                            'jam_mulai'      => $old->jam_mulai?->format('H:i'),
+                            'jam_selesai'    => $old->jam_selesai?->format('H:i'),
+                            'status_layanan' => $old->status_layanan->value,
+                          ];
+                } elseif (! $old && $sumber === 'GENERATE') {
+                    // Baris baru hasil "muat dari jadwal mingguan" — belum pernah
+                    // tersimpan, sehingga belum punya snapshot DB. Acuan aslinya:
+                    // jam saat ini (asumsi belum diubah) dengan status BUKA, karena
+                    // baris GENERATE selalu dimuat dalam kondisi BUKA.
+                    $nilaiAsli = [
+                        'jam_mulai'      => $row['jam_mulai'],
+                        'jam_selesai'    => $row['jam_selesai'] ?: null,
+                        'status_layanan' => 'BUKA',
+                    ];
                 }
 
-                // Cek apakah data ini identik dengan JadwalPraktek (jadwal asli mingguan)
-                $isSamaDenganAsli = JadwalPraktek::where('hari', $hariValue)
-                    ->where('poliklinik_id', $row['poliklinik_id'])
-                    ->where('dokter_id', $row['dokter_id'])
-                    ->whereTime('waktu_mulai', $jamMulaiFormat)
-                    ->when($jamSelesaiFormat, function ($q, $v) {
-                        $q->whereTime('waktu_selesai', $v);
-                    }, function ($q) {
-                        $q->whereNull('waktu_selesai');
-                    })
-                    ->exists();
+                if ($nilaiAsli) {
+                    $kembaliKeSemula =
+                        $nilaiAsli['jam_mulai'] === $row['jam_mulai']
+                        && $nilaiAsli['jam_selesai'] === ($row['jam_selesai'] ?: null)
+                        && $nilaiAsli['status_layanan'] === $row['status_layanan'];
 
-                // Jika identik dengan nilai awal mingguan dan status BUKA,
-                // maka ini BUKAN perubahan. Set sumber kembali ke GENERATE agar tidak
-                // terhitung sebagai data MANUAL/DITAMBAH.
-                if ($isSamaDenganAsli && $row['status_layanan'] === 'BUKA') {
-                    $sumber = 'GENERATE';
+                    if ($kembaliKeSemula) {
+                        $sumber = 'GENERATE';
+                    }
                 }
 
                 $jh = JadwalHarian::create([
@@ -443,20 +441,23 @@ class JadwalHarianPage extends Page
                     'jam_selesai'    => $row['jam_selesai'] ?: null,
                     'status_layanan' => $row['status_layanan'],
                     'catatan'        => $row['catatan'] ?: null,
+                    'is_executive'   => (bool) ($row['is_executive'] ?? false),
                     'sumber'         => $sumber,
                 ]);
 
-                $jhId = $jh->getKey();
-
-                // Catat ke JadwalHarianPerubahan hanya jika sumber GENERATE dan status bukan BUKA
-                if ($sumber === 'GENERATE' && $row['status_layanan'] !== 'BUKA') {
+                // Catat ke JadwalHarianPerubahan hanya jika ada acuan asli, baris ini
+                // menyimpang darinya (belum "balik ke semula"), dan statusnya berubah.
+                if ($nilaiAsli && ! $kembaliKeSemula && $row['status_layanan'] !== 'BUKA') {
                     JadwalHarianPerubahan::create([
-                        'jadwal_harian_id' => $jhId,
-                        'user_id'          => $userId,
-                        'jam_mulai'        => $row['jam_mulai'] ?: null,
-                        'jam_selesai'      => $row['jam_selesai'] ?: null,
-                        'status_layanan'   => $row['status_layanan'],
-                        'catatan'          => $row['catatan'] ?: null,
+                        'jadwal_harian_id'    => $jh->getKey(),
+                        'user_id'             => $userId,
+                        'jam_mulai'           => $row['jam_mulai'] ?: null,
+                        'jam_selesai'         => $row['jam_selesai'] ?: null,
+                        'status_layanan'      => $row['status_layanan'],
+                        'jam_mulai_asli'      => $nilaiAsli['jam_mulai'],
+                        'jam_selesai_asli'    => $nilaiAsli['jam_selesai'],
+                        'status_layanan_asli' => $nilaiAsli['status_layanan'],
+                        'catatan'             => $row['catatan'] ?: null,
                     ]);
                 }
             }
@@ -482,11 +483,8 @@ class JadwalHarianPage extends Page
 
         $scope = function ($q) use ($rsId) {
             $q->whereDate('tanggal', $this->activeTanggal)
-              ->whereHas('poliklinik.unitLayanan', function ($q2) use ($rsId) {
+              ->whereHas('poliklinik', function ($q2) use ($rsId) {
                   $q2->where('rumah_sakit_id', $rsId);
-                  if ($this->selectedUnitLayananId) {
-                      $q2->where('id', $this->selectedUnitLayananId);
-                  }
               });
         };
 

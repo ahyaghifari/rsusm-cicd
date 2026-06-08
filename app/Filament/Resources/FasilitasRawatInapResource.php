@@ -19,7 +19,7 @@ class FasilitasRawatInapResource extends BaseResource
     protected static ?string $navigationLabel = 'Fasilitas';
     protected static ?int $navigationSort = 2;
     protected static string | null $navigationGroup = 'Rawat Inap';
-    protected static ?string $navigationIcon = 'fas-house-medical';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getEloquentQuery(): Builder
     {

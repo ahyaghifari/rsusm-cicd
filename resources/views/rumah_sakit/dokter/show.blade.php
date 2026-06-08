@@ -9,7 +9,7 @@
             <div class="flex justify-center md:block">
                 @if($dokter->foto)
                     <img src="{{ Storage::url($dokter->foto) }}" alt="{{ $dokter->nama }}"
-                         class="w-48 md:w-full max-h-80 object-contain rounded-2xl">
+                         class="w-48 md:w-full max-h-80 object-contain rounded-2xl" loading="lazy">
                 @else
                     <div class="w-48 md:w-full max-h-80 md:max-h-96 bg-primary/10 rounded-2xl
                                 flex items-center justify-center aspect-square">
@@ -41,96 +41,37 @@
                 <p class="text-on-surface-variant">Belum ada jadwal praktek terdaftar.</p>
             </div>
         @else
-
-            @if($multiUnit)
-                {{-- ====================================================== --}}
-                {{-- RS punya > 1 unit layanan → tampilkan per unit layanan --}}
-                {{-- ====================================================== --}}
-                <div class="flex flex-col gap-6">
-                    @foreach($jadwalGrouped as $unitId => $sesiUnit)
-                        @php $unit = $sesiUnit->first()->poliklinik?->unitLayanan; @endphp
-                        <div>
-                            {{-- Header unit --}}
-                            @if($unit)
-                            <div class="flex items-center gap-2 mb-3">
-                                <span class="w-1.5 h-6 rounded-full shrink-0"
-                                      style="background-color: {{ $unit->warnaHex() }};"></span>
-                                <h3 class="font-bold text-base text-on-surface">{{ $unit->nama }}</h3>
-                            </div>
+            @php
+                $warna  = '#4d51b2';
+                $perHari = $jadwal->groupBy(fn ($j) => $j->hari->value);
+            @endphp
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                @foreach($perHari as $hariValue => $sesiHari)
+                    @php
+                        $hariLabel  = \App\Enums\Hari::from($hariValue)->getLabel();
+                        $hariIniVal = ['MINGGU','SENIN','SELASA','RABU','KAMIS','JUMAT','SABTU'][now()->dayOfWeek];
+                        $isToday    = $hariValue === $hariIniVal;
+                    @endphp
+                    <div class="rounded-xl overflow-hidden border flex flex-col"
+                         style="{{ $isToday ? "border-color: {$warna}66;" : 'border-color: #e5e7eb;' }}">
+                        <div class="px-4 py-2 flex items-center justify-between shrink-0"
+                             style="{{ $isToday
+                                 ? "background-color: {$warna}; color: white;"
+                                 : "background-color: {$warna}0f; color: {$warna};" }}">
+                            <span class="text-sm font-bold">{{ $hariLabel }}</span>
+                            @if($isToday)
+                                <span class="text-[10px] font-bold uppercase tracking-widest
+                                             bg-white/20 px-2 py-0.5 rounded-full">Hari Ini</span>
                             @endif
-
-                            {{-- Daftar jadwal per hari — horizontal di desktop --}}
-                            @php
-                                $perHari = $sesiUnit->groupBy(fn ($j) => $j->hari->value);
-                            @endphp
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                                @foreach($perHari as $hariValue => $sesiHari)
-                                    @php
-                                        $warna      = $unit?->warnaHex() ?? '#4d51b2';
-                                        $hariLabel  = \App\Enums\Hari::from($hariValue)->getLabel();
-                                        $hariIniVal = ['MINGGU','SENIN','SELASA','RABU','KAMIS','JUMAT','SABTU'][now()->dayOfWeek];
-                                        $isToday    = $hariValue === $hariIniVal;
-                                    @endphp
-                                    <div class="rounded-xl overflow-hidden border flex flex-col"
-                                         style="{{ $isToday ? "border-color: {$warna}66;" : 'border-color: #e5e7eb;' }}">
-                                        <div class="px-4 py-2 flex items-center justify-between shrink-0"
-                                             style="{{ $isToday
-                                                 ? "background-color: {$warna}; color: white;"
-                                                 : "background-color: {$warna}0f; color: {$warna};" }}">
-                                            <span class="text-sm font-bold">{{ $hariLabel }}</span>
-                                            @if($isToday)
-                                                <span class="text-[10px] font-bold uppercase tracking-widest
-                                                             bg-white/20 px-2 py-0.5 rounded-full">Hari Ini</span>
-                                            @endif
-                                        </div>
-                                        <div class="divide-y divide-outline-variant/15 flex-1">
-                                            @foreach($sesiHari as $sesi)
-                                                @include('rumah_sakit.dokter._jadwal-row', ['sesi' => $sesi, 'warna' => $warna])
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
                         </div>
-                    @endforeach
-                </div>
-
-            @else
-                {{-- ====================================================== --}}
-                {{-- RS punya 1 unit layanan → tampilkan flat per hari --}}
-                {{-- ====================================================== --}}
-                @php $perHari = $jadwal->groupBy(fn ($j) => $j->hari->value); @endphp
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    @foreach($perHari as $hariValue => $sesiHari)
-                        @php
-                            $unit       = $sesiHari->first()->poliklinik?->unitLayanan;
-                            $warna      = $unit?->warnaHex() ?? '#4d51b2';
-                            $hariLabel  = \App\Enums\Hari::from($hariValue)->getLabel();
-                            $hariIniVal = ['MINGGU','SENIN','SELASA','RABU','KAMIS','JUMAT','SABTU'][now()->dayOfWeek];
-                            $isToday    = $hariValue === $hariIniVal;
-                        @endphp
-                        <div class="rounded-xl overflow-hidden border flex flex-col"
-                             style="{{ $isToday ? "border-color: {$warna}66;" : 'border-color: #e5e7eb;' }}">
-                            <div class="px-4 py-2 flex items-center justify-between shrink-0"
-                                 style="{{ $isToday
-                                     ? "background-color: {$warna}; color: white;"
-                                     : "background-color: {$warna}0f; color: {$warna};" }}">
-                                <span class="text-sm font-bold">{{ $hariLabel }}</span>
-                                @if($isToday)
-                                    <span class="text-[10px] font-bold uppercase tracking-widest
-                                                 bg-white/20 px-2 py-0.5 rounded-full">Hari Ini</span>
-                                @endif
-                            </div>
-                            <div class="divide-y divide-outline-variant/15 flex-1">
-                                @foreach($sesiHari as $sesi)
-                                    @include('rumah_sakit.dokter._jadwal-row', ['sesi' => $sesi, 'warna' => $warna])
-                                @endforeach
-                            </div>
+                        <div class="divide-y divide-outline-variant/15 flex-1">
+                            @foreach($sesiHari as $sesi)
+                                @include('rumah_sakit.dokter._jadwal-row', ['sesi' => $sesi, 'warna' => $warna, 'rs' => $rs])
+                            @endforeach
                         </div>
-                    @endforeach
-                </div>
-            @endif
-
+                    </div>
+                @endforeach
+            </div>
         @endif
 
         @include('rumah_sakit.partials._jadwal-disclaimer')

@@ -19,7 +19,7 @@ class JadwalHarianResource extends BaseResource
 
     protected static ?int $navigationSort = 3;
     protected static string|null $navigationGroup = 'Poliklinik / Rawat Jalan';
-    protected static ?string $navigationIcon = 'fas-calendar-day';
+    protected static ?string $navigationIcon = 'heroicon-o-clock';
     protected static ?string $navigationLabel = 'Jadwal Harian';
     protected static ?string $modelLabel = 'Jadwal Harian';
     protected static ?string $pluralModelLabel = 'Jadwal Harian';
@@ -32,7 +32,7 @@ class JadwalHarianResource extends BaseResource
             return $query;
         }
 
-        return $query->whereHas('poliklinik.unitLayanan', function (Builder $q) {
+        return $query->whereHas('poliklinik', function (Builder $q) {
             $q->where('rumah_sakit_id', static::rumahSakitId());
         });
     }
@@ -61,7 +61,7 @@ class JadwalHarianResource extends BaseResource
 
                                 if (! $rsId) return [];
 
-                                return PoliKlinik::whereHas('unitLayanan', fn ($q) => $q->where('rumah_sakit_id', $rsId))
+                                return PoliKlinik::where('rumah_sakit_id', $rsId)
                                     ->where('aktif', true)
                                     ->pluck('nama', 'id');
                             })
@@ -145,7 +145,7 @@ class JadwalHarianResource extends BaseResource
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('poliklinik.unitLayanan.rumahSakit.nama')
+                Tables\Columns\TextColumn::make('poliklinik.rumahSakit.nama')
                     ->label('Rumah Sakit')
                     ->searchable()
                     ->sortable()
@@ -199,9 +199,9 @@ class JadwalHarianResource extends BaseResource
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->mutateRecordDataUsing(function (array $data): array {
-                        $poli = PoliKlinik::with('unitLayanan')->find($data['poliklinik_id']);
+                        $poli = PoliKlinik::find($data['poliklinik_id']);
                         if ($poli) {
-                            $data['rumah_sakit_id'] = $poli->unitLayanan->rumah_sakit_id;
+                            $data['rumah_sakit_id'] = $poli->rumah_sakit_id;
                         }
                         return $data;
                     }),

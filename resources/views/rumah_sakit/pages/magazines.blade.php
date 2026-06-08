@@ -27,7 +27,8 @@
                     @if($magazine->cover)
                         <img src="{{ Storage::url($magazine->cover) }}"
                              alt="{{ $magazine->judul }}"
-                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                             loading="lazy">
                     @else
                         <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary/10 to-primary/30">
                             <span class="material-symbols-outlined text-5xl text-primary/50">menu_book</span>

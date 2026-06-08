@@ -218,6 +218,9 @@
                                     <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 w-28">Jam Mulai</th>
                                     <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 w-28">Jam Selesai</th>
                                     <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 w-20 text-center">Perjanjian</th>
+                                    @if($this->hasExecutiveClinic())
+                                    <th class="px-3 py-3 text-xs font-semibold text-amber-600 dark:text-amber-400 w-20 text-center">Executive</th>
+                                    @endif
                                     <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-32">Catatan</th>
                                     <th class="px-3 py-3 w-10"></th>
                                 </tr>
@@ -295,6 +298,16 @@
                                                 @change="$wire.set('rows.{{ $uuid }}.sesuai_perjanjian', $event.target.checked ? '1' : '0')"
                                                 class="rounded border-gray-300 text-primary-600 shadow-sm focus:ring-primary-500 cursor-pointer"/>
                                         </td>
+
+                                        @if($this->hasExecutiveClinic())
+                                        <td class="px-2 py-1.5 text-center">
+                                            <input type="checkbox"
+                                                @php $exVal = $row['is_executive'] ?? '0'; @endphp
+                                                {{ ($exVal === '1' || $exVal === true || $exVal === 1) ? 'checked' : '' }}
+                                                @change="$wire.set('rows.{{ $uuid }}.is_executive', $event.target.checked ? '1' : '0')"
+                                                class="rounded border-gray-300 text-amber-500 shadow-sm focus:ring-amber-400 cursor-pointer"/>
+                                        </td>
+                                        @endif
 
                                         <td class="px-2 py-1.5">
                                             <input type="text" wire:model="rows.{{ $uuid }}.catatan" placeholder="Catatan..."
@@ -385,6 +398,9 @@
                                         <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 w-28">Jam Mulai</th>
                                         <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 w-28">Jam Selesai</th>
                                         <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 w-20 text-center">Perjanjian</th>
+                                        @if($this->hasExecutiveClinic())
+                                        <th class="px-3 py-3 text-xs font-semibold text-amber-600 dark:text-amber-400 w-20 text-center">Executive</th>
+                                        @endif
                                         <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-32">Catatan</th>
                                         <th class="px-3 py-3 w-10"></th>
                                     </tr>
@@ -441,6 +457,16 @@
                                                     @change="$wire.set('dokterRows.{{ $uuid }}.sesuai_perjanjian', $event.target.checked ? '1' : '0')"
                                                     class="rounded border-gray-300 text-primary-600 shadow-sm focus:ring-primary-500 cursor-pointer"/>
                                             </td>
+
+                                            @if($this->hasExecutiveClinic())
+                                            <td class="px-2 py-1.5 text-center">
+                                                @php $exValD = $row['is_executive'] ?? '0'; @endphp
+                                                <input type="checkbox"
+                                                    {{ ($exValD === '1' || $exValD === true || $exValD === 1) ? 'checked' : '' }}
+                                                    @change="$wire.set('dokterRows.{{ $uuid }}.is_executive', $event.target.checked ? '1' : '0')"
+                                                    class="rounded border-gray-300 text-amber-500 shadow-sm focus:ring-amber-400 cursor-pointer"/>
+                                            </td>
+                                            @endif
 
                                             <td class="px-2 py-1.5">
                                                 <input type="text" wire:model="dokterRows.{{ $uuid }}.catatan" placeholder="Catatan..."

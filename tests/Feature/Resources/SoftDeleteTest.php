@@ -6,7 +6,6 @@ use App\Models\Dokter;
 use App\Models\PoliKlinik;
 use App\Models\RumahSakit;
 use App\Models\Spesialis;
-use App\Models\UnitLayanan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -45,10 +44,9 @@ class SoftDeleteTest extends TestCase
 
     private function makePoliKlinik(array $attrs = []): PoliKlinik
     {
-        $unit = UnitLayanan::factory()->create(['rumah_sakit_id' => $this->rs->id]);
         return PoliKlinik::factory()->create(array_merge([
-            'unit_layanan_id' => $unit->id,
-            'aktif'           => true,
+            'rumah_sakit_id' => $this->rs->id,
+            'aktif'          => true,
         ], $attrs));
     }
 

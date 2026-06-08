@@ -18,7 +18,7 @@ class GedungResource extends BaseResource
     protected static ?string $model = Gedung::class;
 
     protected static ?int $navigationSort = 3;
-    protected static ?string $navigationIcon = 'fas-building';
+    protected static ?string $navigationIcon = 'heroicon-o-building-office';
 
     public static function form(Form $form): Form
     {

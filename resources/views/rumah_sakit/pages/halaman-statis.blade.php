@@ -28,7 +28,7 @@
                 <div class="rounded-2xl overflow-hidden shadow-md border border-outline-variant/20">
                     <img src="{{ Storage::url($gambarRS) }}"
                          alt="{{ $currentRumahSakit->nama }}"
-                         class="w-full h-56 lg:h-64 object-cover">
+                         class="w-full h-56 lg:h-64 object-cover" loading="lazy">
                     <div class="bg-primary px-4 py-3">
                         <p class="text-white font-semibold text-sm leading-snug">{{ $currentRumahSakit->nama }}</p>
                         <p class="text-white/70 text-xs mt-0.5 flex items-center gap-1">

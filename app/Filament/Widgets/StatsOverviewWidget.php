@@ -11,7 +11,7 @@ use App\Models\PoliKlinik;
 use App\Models\Promo;
 use App\Models\RawatInap;
 use App\Models\RumahSakit;
-use App\Models\UnitLayanan;
+use App\Models\JadwalPraktek;
 use App\Models\User;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -54,9 +54,9 @@ class StatsOverviewWidget extends BaseWidget
                 ->description('Seluruh rumah sakit')
                 ->descriptionIcon('heroicon-m-user-circle')
                 ->color('success'),
-            Stat::make('Total Unit Layanan', UnitLayanan::count())
+            Stat::make('Total Poliklinik', PoliKlinik::count())
                 ->description('Seluruh rumah sakit')
-                ->descriptionIcon('heroicon-m-squares-2x2')
+                ->descriptionIcon('heroicon-m-building-office-2')
                 ->color('warning'),
         ];
     }
@@ -70,15 +70,15 @@ class StatsOverviewWidget extends BaseWidget
                 ->description('Dokter RS ini')
                 ->descriptionIcon('heroicon-m-user-circle')
                 ->color('primary'),
-            Stat::make('Poliklinik', PoliKlinik::whereHas('unitLayanan', $scope)->count())
+            Stat::make('Poliklinik', PoliKlinik::where('rumah_sakit_id', $rsId)->count())
                 ->description('Poliklinik RS ini')
                 ->descriptionIcon('heroicon-m-building-office-2')
                 ->color('success'),
-            Stat::make('Unit Layanan', UnitLayanan::where('rumah_sakit_id', $rsId)->count())
-                ->description('Unit layanan RS ini')
-                ->descriptionIcon('heroicon-m-squares-2x2')
+            Stat::make('Jadwal Mingguan', JadwalPraktek::whereHas('poliklinik', $scope)->count())
+                ->description('Total sesi jadwal')
+                ->descriptionIcon('heroicon-m-calendar-days')
                 ->color('info'),
-            Stat::make('Jadwal Hari Ini', JadwalHarian::whereHas('poliklinik.unitLayanan', $scope)->whereDate('tanggal', today())->count())
+            Stat::make('Jadwal Hari Ini', JadwalHarian::whereHas('poliklinik', $scope)->whereDate('tanggal', today())->count())
                 ->description('Entri jadwal harian')
                 ->descriptionIcon('heroicon-m-calendar-days')
                 ->color('warning'),
@@ -109,20 +109,18 @@ class StatsOverviewWidget extends BaseWidget
 
     private function informasiStats(?int $rsId): array
     {
-        $scope = fn ($q) => $q->where('rumah_sakit_id', $rsId);
-
         return [
             Stat::make('Dokter', Dokter::where('rumah_sakit_id', $rsId)->count())
                 ->description('Dokter RS ini')
                 ->descriptionIcon('heroicon-m-user-circle')
                 ->color('primary'),
-            Stat::make('Poliklinik', PoliKlinik::whereHas('unitLayanan', $scope)->count())
+            Stat::make('Poliklinik', PoliKlinik::where('rumah_sakit_id', $rsId)->count())
                 ->description('Poliklinik RS ini')
                 ->descriptionIcon('heroicon-m-building-office-2')
                 ->color('success'),
-            Stat::make('Unit Layanan', UnitLayanan::where('rumah_sakit_id', $rsId)->count())
-                ->description('Unit layanan RS ini')
-                ->descriptionIcon('heroicon-m-squares-2x2')
+            Stat::make('Jadwal Mingguan', JadwalPraktek::whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rsId))->count())
+                ->description('Total sesi jadwal')
+                ->descriptionIcon('heroicon-m-calendar-days')
                 ->color('info'),
             Stat::make('Rawat Inap', RawatInap::where('rumah_sakit_id', $rsId)->count())
                 ->description('Kamar rawat inap')

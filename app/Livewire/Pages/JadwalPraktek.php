@@ -40,9 +40,7 @@ class JadwalPraktek extends RsPortalComponent
     {
         $rs = $this->rs;
 
-        $poliklinikList = PoliKlinik::whereHas('unitLayanan', fn ($q) =>
-                $q->where('rumah_sakit_id', $rs->id)
-            )
+        $poliklinikList = PoliKlinik::where('rumah_sakit_id', $rs->id)
             ->where('aktif', true)
             ->orderBy('nama')
             ->get();
@@ -51,13 +49,10 @@ class JadwalPraktek extends RsPortalComponent
         $jadwalPerPoli = collect();
 
         if ($this->viewMode === 'hari') {
-            $jadwalPerPoli = JadwalPraktekModel::with(['poliklinik.unitLayanan', 'dokter'])
+            $jadwalPerPoli = JadwalPraktekModel::with(['poliklinik', 'dokter'])
                 ->where('hari', $this->activeHari)
                 ->whereHas('poliklinik', fn ($q) =>
-                    $q->where('aktif', true)
-                      ->whereHas('unitLayanan', fn ($q2) =>
-                          $q2->where('rumah_sakit_id', $rs->id)
-                      )
+                    $q->where('aktif', true)->where('rumah_sakit_id', $rs->id)
                 )
                 ->when($this->poliklinikId, fn ($q) => $q->where('poliklinik_id', $this->poliklinikId))
                 ->orderBy('waktu_mulai')
@@ -71,6 +66,7 @@ class JadwalPraktek extends RsPortalComponent
         if ($this->viewMode === 'poli' && $this->poliklinikId) {
             $rawJadwal = JadwalPraktekModel::with('dokter')
                 ->where('poliklinik_id', $this->poliklinikId)
+                ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rs->id))
                 ->orderBy('waktu_mulai')
                 ->get()
                 ->groupBy(fn ($j) => $j->hari->value);

@@ -20,7 +20,7 @@ class DokterResource extends BaseRumahSakitResource
 
     protected static ?int $navigationSort = 1;
     protected static string | null $navigationGroup = 'Dokter';
-    protected static ?string $navigationIcon = 'fas-user-doctor';
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
     public static function form(Form $form): Form
     {

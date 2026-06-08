@@ -106,12 +106,12 @@ class PoliKlinikSeeder extends Seeder
 
         foreach ($data as $item) {
             PoliKlinik::create([
-                'unit_layanan_id' => 1, // Sesuai permintaan diisi id 1
-                'nama' => $item['nama'],
-                'slug' => Str::slug($item['nama']),
-                'gambar' => null,
-                'deskripsi' => $item['deskripsi'],
-                'aktif' => true,
+                'rumah_sakit_id' => 1,
+                'nama'           => $item['nama'],
+                'slug'           => Str::slug($item['nama']),
+                'gambar'         => null,
+                'deskripsi'      => $item['deskripsi'],
+                'aktif'          => true,
             ]);
         }
     }

@@ -21,7 +21,7 @@ class PoliKlinik extends Model
 
     // Allowed fields (Semua kolom kecuali ID)
     protected $fillable = [
-        'unit_layanan_id',
+        'rumah_sakit_id',
         'nama',
         'slug',
         'gambar',
@@ -37,12 +37,9 @@ class PoliKlinik extends Model
         return 'slug';
     }
 
-    /**
-     * Relasi ke model UnitLayanan
-     */
-    public function unitLayanan(): BelongsTo
+    public function rumahSakit(): BelongsTo
     {
-        return $this->belongsTo(UnitLayanan::class, 'unit_layanan_id');
+        return $this->belongsTo(RumahSakit::class, 'rumah_sakit_id');
     }
 
     public function jadwalPraktek(): HasMany

@@ -53,6 +53,7 @@
                                 src="{{ Storage::url($item->gambar) }}"
                                 alt="{{ $item->label }}"
                                 class="w-16 h-16 object-cover rounded-xl flex-shrink-0"
+                                loading="lazy"
                             >
                         @else
                             <div class="w-16 h-16 {{ $iconBg }} rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">

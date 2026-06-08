@@ -56,10 +56,7 @@ class GenerateJadwalHarian extends Command
 
                     // Ambil semua JadwalPraktek untuk RS ini pada hari yang sesuai
                     $jadwalPrakteks = JadwalPraktek::where('hari', $hariValue)
-                        ->whereHas('poliklinik', function ($q) {
-                            $q->where('aktif', true);
-                        })
-                        ->whereHas('poliklinik.unitLayanan', function ($q) use ($rs) {
+                        ->whereHas('poliklinik', function ($q) use ($rs) {
                             $q->where('rumah_sakit_id', $rs->id)
                               ->where('aktif', true);
                         })
@@ -86,6 +83,7 @@ class GenerateJadwalHarian extends Command
                             'jam_selesai'    => $jp->waktu_selesai?->format('H:i'),
                             'status_layanan' => 'BUKA',
                             'catatan'        => $jp->catatan,
+                            'is_executive'   => $jp->is_executive,
                             'sumber'         => 'GENERATE',
                         ]);
 

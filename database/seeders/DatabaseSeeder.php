@@ -34,7 +34,6 @@ class DatabaseSeeder extends Seeder
             PartnerSeeder::class,
             KontakSeeder::class,
             LinkLayananSeeder::class,
-            UnitLayananSeeder::class,
             PoliKlinikSeeder::class,
             JadwalPraktekSeeder::class,
             HalamanSeeder::class,

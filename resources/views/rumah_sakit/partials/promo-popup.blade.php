@@ -64,7 +64,8 @@ function promoPopup(rsSlug) {
                                 min-h-56 sm:min-h-full">
                         @if($p->gambar)
                             <img src="{{ Storage::url($p->gambar) }}" alt="{{ $p->judul }}"
-                                 class="w-full h-full object-contain max-h-96 sm:max-h-none sm:h-full">
+                                 class="w-full h-full object-contain max-h-96 sm:max-h-none sm:h-full"
+                                 loading="lazy">
                         @else
                             <span class="material-symbols-outlined text-6xl text-outline-variant">local_offer</span>
                         @endif

@@ -32,7 +32,8 @@
                                 <img
                                     src="{{ Storage::url($medis->gambar) }}"
                                     alt="{{ $medis->nama }}"
-                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    loading="lazy">
                                 <div class="absolute inset-0 bg-linear-to-r from-black/20 to-transparent"></div>
                                 <div class="absolute bottom-4 left-4">
                                     <span class="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-primary
@@ -86,7 +87,8 @@
                                 <img
                                     src="{{ Storage::url($medis->gambar) }}"
                                     alt="{{ $medis->nama }}"
-                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    loading="lazy">
                                 <div class="absolute inset-0 bg-linear-to-l from-black/20 to-transparent"></div>
                                 <div class="absolute bottom-4 right-4">
                                     <span class="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-primary

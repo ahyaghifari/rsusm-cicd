@@ -281,13 +281,36 @@
                             <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-28">Jam Selesai</th>
                             <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-32">Status <span class="text-red-500">*</span></th>
                             <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-32">Catatan</th>
+                            @if($this->hasExecutiveClinic())
+                            <th class="px-3 py-3 text-xs font-semibold text-amber-600 dark:text-amber-400 text-center whitespace-nowrap">
+                                <span class="inline-flex items-center gap-0.5">
+                                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                    Exec
+                                </span>
+                            </th>
+                            @endif
                             <th class="px-3 py-3 w-10 text-center"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                         @forelse($rows as $uuid => $row)
-                            <tr wire:key="row-{{ $uuid }}" class="bg-white dark:bg-gray-900 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors">
-                                <td class="px-3 py-2 text-xs text-gray-400 text-center select-none">{{ $loop->iteration }}</td>
+                            <tr wire:key="row-{{ $uuid }}"
+                                @class([
+                                    'transition-colors',
+                                    'border-l-4 border-amber-400 bg-amber-50/70 dark:bg-amber-900/10 hover:bg-amber-100/70 dark:hover:bg-amber-900/20' => (bool) ($row['is_executive'] ?? false),
+                                    'bg-white dark:bg-gray-900 hover:bg-blue-50/30 dark:hover:bg-blue-900/10' => ! (bool) ($row['is_executive'] ?? false),
+                                ])>
+                                <td class="px-3 py-2 text-xs text-gray-400 text-center select-none">
+                                    <span class="inline-flex items-center justify-center gap-1">
+                                        {{ $loop->iteration }}
+                                        @if((bool) ($row['is_executive'] ?? false))
+                                            <svg class="w-3 h-3 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
+                                                <title>Executive Clinic</title>
+                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                            </svg>
+                                        @endif
+                                    </span>
+                                </td>
                                 
                                 {{-- Poliklinik --}}
                                 <td class="px-2 py-1.5">
@@ -367,6 +390,14 @@
                                         class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500"/>
                                 </td>
 
+                                {{-- Executive --}}
+                                @if($this->hasExecutiveClinic())
+                                <td class="px-2 py-1.5 text-center">
+                                    <input type="checkbox" wire:model="rows.{{ $uuid }}.is_executive"
+                                        class="rounded border-amber-300 text-amber-500 shadow-sm focus:ring-amber-400"/>
+                                </td>
+                                @endif
+
                                 {{-- Remove --}}
                                 <td class="px-2 py-1.5 text-center">
                                     <button wire:click="removeRow('{{ $uuid }}')" wire:confirm="Hapus baris ini?"
@@ -379,7 +410,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="px-4 py-8 text-center text-gray-400 dark:text-gray-500">
+                                <td colspan="{{ $this->hasExecutiveClinic() ? 10 : 9 }}" class="px-4 py-8 text-center text-gray-400 dark:text-gray-500">
                                     <div class="flex flex-col items-center justify-center gap-2">
                                         <svg class="w-8 h-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>

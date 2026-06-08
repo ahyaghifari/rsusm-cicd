@@ -27,14 +27,15 @@ Sistem informasi multi-tenant untuk manajemen dan portal publik rumah sakit. Sat
 Project ini menggunakan arsitektur **multi-tenant berbasis kolom** (`rumah_sakit_id`). Semua entitas konten dimiliki oleh satu `RumahSakit`. Akses data dibatasi di level resource Filament dan middleware route.
 
 ```
-RumahSakit
+RumahSakit (slug, executive_clinic)
 ├── User (admin rumah sakit, terikat ke 1 RS)
 ├── Dokter → Spesialis                          (SoftDeletes)
 ├── Spesialis                                   (SoftDeletes)
-├── UnitLayanan → PoliKlinik                    (SoftDeletes)
-│   └── JadwalPraktek (per poliklinik, per hari, opsional per dokter)
-├── JadwalHarian (override harian per tanggal)
+├── PoliKlinik                                  (SoftDeletes, slug unik per RS)
+│   └── JadwalPraktek (per poliklinik, per hari, opsional per dokter, is_executive)
+├── JadwalHarian (override harian per tanggal, is_executive)
 │   └── JadwalHarianPerubahan (1-to-1, tracking perubahan status)
+├── PosterTemplate (background PNG, logo, shape_poli, config zona JSON)
 ├── RawatInap → Gedung
 │   ├── GambarRawatInap
 │   └── FasilitasRawatInap
@@ -53,6 +54,8 @@ RumahSakit
 
 > **Arsitektur jadwal:** `JadwalPraktek` adalah jadwal rawat jalan per **poliklinik** (bukan per dokter).
 > `JadwalHarian` adalah override untuk tanggal spesifik, dapat dimuat otomatis dari `JadwalPraktek` via cron.
+>
+> **Executive Clinic:** Flag `executive_clinic` di `RumahSakit` mengaktifkan fitur jadwal executive. Field `is_executive` di setiap baris jadwal menandai sesi executive dengan tampilan warna brand `#e8cd84`.
 
 ### Role
 
@@ -82,7 +85,7 @@ RumahSakit
 | `/dokter-kami` | Daftar & cari dokter (urut A–Z, filter nama + spesialis) |
 | `/dokter-kami/{dokter}` | Profil dokter + jadwal praktek |
 | `/jadwal-praktek` | Jadwal praktek (Per Hari / Per Poli) |
-| `/rawat-jalan` | Daftar poliklinik per unit layanan |
+| `/rawat-jalan` | Daftar poliklinik |
 | `/rawat-jalan/{poliklinik}` | Detail poliklinik + jadwal |
 | `/rawat-inap` | Informasi kelas rawat inap |
 | `/unggulan` | Layanan unggulan |
@@ -105,7 +108,9 @@ Dua mode tampilan:
 | **Per Hari** | Tab SENIN–MINGGU, kartu per poliklinik. Filter poliklinik via Tom Select. |
 | **Per Poli** | Pilih poliklinik → tampilkan semua 7 hari (grid horizontal di desktop). |
 
-- Badge **Sesuai Perjanjian** ditampilkan jika `sesuai_perjanjian = true`
+- Badge **Sesuai Perjanjian** (hijau) ditampilkan jika `sesuai_perjanjian = true`
+- Badge **Executive Clinic** (warna brand `#e8cd84`) ditampilkan jika RS mengaktifkan `executive_clinic` dan sesi memiliki `is_executive = true`
+- Sesi executive dikelompokkan per dokter — semua slot jam tampil sekaligus dalam satu baris
 - Di bawah jadwal terdapat **disclaimer** dengan nomor kontak PENDAFTARAN (klik langsung `tel:` / WhatsApp)
 - Nama dokter yang terhubung ke profil dapat diklik → navigasi ke profil dokter
 
@@ -127,6 +132,8 @@ Dua mode tampilan:
 - Smart scroll: scroll ke awal bubble bot saat respons panjang
 - Input langsung kosong saat kirim, disabled saat loading
 - AI backend via N8N webhook (`N8N_URL` env)
+- **Rate limiting 2 lapis**: burst (maks. pesan dalam jendela singkat) + kuota harian — keduanya reset otomatis via `RateLimiter`, angka diatur sebagai konstanta agar mudah disesuaikan dengan kuota Gemini
+- **Opsi pemulihan saat respons gagal**: tombol restart percakapan, kirim ulang pesan terakhir, dan daftar kontak langsung (kategori OPERASIONAL/PENDAFTARAN — di luar emergency, hotline, sosial media)
 
 #### Homepage RS
 
@@ -162,13 +169,14 @@ Path admin dikonfigurasi via env: `ADMIN_PATH=manage` (default). Akses di `/{ADM
 
 | Modul | Keterangan |
 |---|---|
-| Rumah Sakit | CRUD data RS, logo, gambar, about (super admin only) |
+| Rumah Sakit | CRUD data RS, logo, gambar, about, `executive_clinic` (super admin only) |
 | Dokter | Manajemen dokter + foto + deskripsi (SoftDelete + Restore) |
 | Spesialis | Spesialisasi per RS (SoftDelete + Restore) |
-| Unit Layanan | Kelompok layanan (poli, IGD, dll.) |
-| Poliklinik | Klinik per unit layanan (SoftDelete + Restore) |
-| **Jadwal Praktek** | Jadwal rawat jalan per poliklinik — 2 mode editable |
-| **Jadwal Harian** | Override jadwal harian + tracking perubahan status |
+| Poliklinik | Klinik per RS (SoftDelete + Restore) |
+| **Jadwal Praktek** | Jadwal rawat jalan per poliklinik — 2 mode editable, kolom `is_executive` |
+| **Jadwal Harian** | Override jadwal harian + tracking perubahan status, kolom `is_executive` |
+| **Poster Template** | Upload background PNG, logo, shape; zone editor drag-drop interaktif |
+| **Generate Poster** | Form pilih template + tanggal → generate PNG 1080×1920 via Browsershot |
 | Rawat Inap | Kelas kamar, fasilitas, galeri foto |
 | Gedung | Manajemen gedung |
 | Banner | Spanduk promosi beranda |
@@ -186,16 +194,16 @@ Path admin dikonfigurasi via env: `ADMIN_PATH=manage` (default). Akses di `/{ADM
 
 #### Jadwal Praktek — Fitur Khusus
 
-- **Urutan filter**: RS → Mode (Per Hari / Per Dokter) → Unit Layanan
+- **Urutan filter**: RS → Mode (Per Hari / Per Dokter)
 - **Mode Per Hari**: tab SENIN–MINGGU, tabel baris editable (HTML table + Tom Select)
   - Poliklinik dan Dokter menggunakan Tom Select untuk kemudahan pencarian
-  - Checkbox `sesuai_perjanjian` sync langsung via `$wire.set()` (bukan deferred wire:model)
-  - Simpan: replace-all per hari × scope poliklinik RS/unit
+  - Checkbox `sesuai_perjanjian` dan `is_executive` sync langsung via `$wire.set()`
+  - Simpan: replace-all per hari × scope poliklinik RS
 - **Mode Per Dokter**: dropdown dokter di area konten, tabel jadwal lintas semua hari
   - Poliklinik menggunakan Tom Select
   - Simpan: replace-all WHERE `dokter_id` dalam scope RS
+- **Validasi `waktu_mulai`**: wajib diisi kecuali `sesuai_perjanjian` dicentang (berlaku di form Resource maupun kedua mode tabel — `saveJadwal()` & `saveDokterJadwal()`)
 - **Layar Penuh**: sembunyikan sidebar Filament
-- **Gate Unit Layanan**: wajib pilih unit jika RS punya >1 unit
 - Rows menggunakan UUID key untuk identifikasi unik
 
 #### Jadwal Harian — Fitur Khusus
@@ -206,6 +214,9 @@ Path admin dikonfigurasi via env: `ADMIN_PATH=manage` (default). Akses di `/{ADM
 - **Tracking Perubahan** via `JadwalHarianPerubahan` (1-to-1 per baris):
   - Record perubahan dibuat HANYA jika sumber GENERATE dan status bukan BUKA
   - Manual tidak membuat record perubahan
+  - **Snapshot nilai asli** (`jam_mulai_asli`, `jam_selesai_asli`, `status_layanan_asli`): di-capture sekali saat perubahan pertama kali terjadi, dan tidak ditimpa pada edit berikutnya
+  - **Deteksi "kembali ke semula"**: dibandingkan terhadap kolom `*_asli` di `jadwal_harian_perubahan` sendiri — **bukan** dengan query ke `JadwalPraktek` (agar histori tidak bergantung pada perubahan jadwal mingguan di kemudian hari). Jika sama persis, record perubahan dihapus otomatis dan `sumber` kembali ke `GENERATE`
+- **Penanda visual Executive**: baris `is_executive = true` di tabel admin diberi highlight background amber + ikon bintang pada kolom No, agar mudah dibedakan dari baris reguler
 - **Cron**: `php artisan jadwal:generate-harian` berjalan otomatis `daily at 00:05`
   - Memuat dari JadwalPraktek sesuai hari
   - Skip jika jadwal harian untuk tanggal + poliklinik sudah ada
@@ -230,7 +241,7 @@ Slug bersifat unik **per RS** (composite unique), bukan global:
 - `promo`: unique `(slug, rumah_sakit_id)`
 - `spesialis`: unique `(slug, rumah_sakit_id)`
 - `halaman`: unique `(slug, rumah_sakit_id)`
-- `poliklinik`: unique `(slug, unit_layanan_id)`
+- `poliklinik`: unique `(slug, rumah_sakit_id)`
 
 ---
 
@@ -239,13 +250,24 @@ Slug bersifat unik **per RS** (composite unique), bukan global:
 | Fitur | Detail |
 |---|---|
 | Rate Limiting | `public-api`: 20 req/menit, `portal`: 100 req/menit (per IP) |
+| Rate Limiting Chatbot AI | 2 lapis via `RateLimiter`: burst (maks. N pesan / X menit) + kuota harian (maks. N pesan / 24 jam), key gabungan IP + session, reset otomatis. Angka diatur sebagai konstanta di `Chatbot\Panel` |
 | Security Headers | `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `X-XSS-Protection`, `Permissions-Policy` |
+| Content-Security-Policy | Mode Report-Only (default) atau enforced via env `CSP_ENFORCE=true`, daftar sumber eksternal di `SecurityHeaders` middleware |
 | Session Encryption | `SESSION_ENCRYPT=true` — payload session dienkripsi di DB |
 | Proxy Trust | `TRUSTED_PROXIES` via env (bukan hardcode `'*'`) |
 | Admin Path | Dikonfigurasi via `ADMIN_PATH` env, default `manage` |
 | Livewire `#[Locked]` | Semua property server-side yang dipakai sebagai filter query dilindungi |
 | Input Validation | `/cari-spesialis`: `alpha_dash`, max 100 chars |
 | Custom 429 Page | Halaman Too Many Requests dengan countdown |
+
+---
+
+## Performa & SEO
+
+| Fitur | Detail |
+|---|---|
+| Sitemap XML | Otomatis dari database per cabang RS aktif (`/sitemap.xml` index + `/{rumahsakit}/sitemap.xml`), di-cache 6 jam via `Cache::remember` |
+| Lazy Loading Gambar | `loading="lazy"` pada gambar below-the-fold (kartu, list, popup) di seluruh halaman publik — hero/logo above-the-fold tetap eager agar tidak menunda render awal |
 
 ---
 
@@ -310,7 +332,7 @@ Akun yang dibuat otomatis oleh `DatabaseSeeder`:
 
 ```bash
 php artisan test
-# 235+ tests passing (Unit + Feature)
+# 242+ tests passing (Unit + Feature)
 ```
 
 ---
@@ -327,8 +349,9 @@ php artisan test
 - Tom Select via CDN — diintegrasikan dengan Livewire via `wire:ignore` + `$wire.set()` eksplisit
 - Checkbox di tabel editable: gunakan `@change="$wire.set(...)"` bukan `wire:model` (menghindari timing conflict dengan Tom Select)
 - Query kolom tanggal: selalu gunakan `whereDate()` bukan `where()` (kompatibel MySQL & SQLite)
-- `sesuai_perjanjian` disimpan dengan `(bool)` cast — **bukan** perbandingan `=== '1'`
+- `sesuai_perjanjian` dan `is_executive` disimpan dengan `(bool)` cast — **bukan** perbandingan `=== '1'`
 - Rows di JadwalPraktekPage dan JadwalHarianPage menggunakan UUID string sebagai array key
+- Poster: asset lokal dikonversi ke data URI base64 sebelum dirender di Browsershot (file:// tidak diizinkan)
 
 ---
 
@@ -342,9 +365,11 @@ ADMIN_PATH=manage                  # Path admin panel (ganti di production)
 SESSION_ENCRYPT=true               # Enkripsi payload session
 SESSION_SECURE_COOKIE=false        # Set true di production (HTTPS)
 TRUSTED_PROXIES=                   # IP load balancer/proxy di production
+CSP_ENFORCE=false                  # true = Content-Security-Policy ditegakkan (blocking), false = Report-Only
 
 # Chatbot
 N8N_URL=https://...                # Webhook N8N untuk AI chatbot
+# Batas pemakaian AI (burst & harian) diatur sebagai konstanta di app/Livewire/Chatbot/Panel.php
 
 # Cache (untuk rate limiter)
 CACHE_STORE=database               # Gunakan redis di production untuk performa
@@ -357,18 +382,21 @@ CACHE_STORE=database               # Gunakan redis di production untuk performa
 ### Selesai
 
 - [x] Arsitektur multi-tenant (slug URL per RS)
-- [x] Admin panel Filament (21 resource)
+- [x] Admin panel Filament (21 resource + 1 page)
 - [x] Portal publik semua halaman
+- [x] Refactor: `UnitLayanan` dihapus, `PoliKlinik` langsung ke `RumahSakit`
+- [x] Executive Clinic — flag `executive_clinic` di RS, `is_executive` di jadwal, tampilan warna brand `#e8cd84`
+- [x] Jadwal portal — groupBy dokter, semua slot jam tampil per baris dokter
 - [x] JadwalPraktek — 2 mode (Per Hari & Per Dokter), HTML table + Tom Select
-- [x] JadwalPraktek — checkbox sesuai_perjanjian sync via `$wire.set()` (bug timing fix)
+- [x] JadwalPraktek — checkbox `sesuai_perjanjian` dan `is_executive` sync via `$wire.set()`
 - [x] JadwalHarian — override harian + tracking perubahan status (JadwalHarianPerubahan)
-- [x] JadwalHarian — Tom Select untuk poliklinik & dokter
+- [x] JadwalHarian — Tom Select untuk poliklinik & dokter, kolom `is_executive`
 - [x] Cron GenerateJadwalHarian (daily 00:05, skip jika sudah ada)
 - [x] SoftDelete + Restore: Dokter, Spesialis, PoliKlinik
 - [x] Composite slug uniqueness per RS (Promo, Spesialis, Halaman, PoliKlinik)
 - [x] Halaman jadwal 2 mode (Per Hari + Per Poli)
 - [x] Nama dokter di kartu jadwal dapat diklik → profil dokter
-- [x] Badge Sesuai Perjanjian di portal (Per Hari & Profil Dokter)
+- [x] Badge Sesuai Perjanjian (hijau) di portal — jadwal, detail poli, profil dokter
 - [x] Global search Ctrl+K (FULLTEXT MySQL + LIKE fallback)
 - [x] Chatbot AI (persistent session, fullscreen mobile, smart scroll)
 - [x] Security hardening (rate limit, headers, session encrypt, Livewire Locked, admin path)
@@ -382,12 +410,25 @@ CACHE_STORE=database               # Gunakan redis di production untuk performa
 - [x] Mobile bottom bar (Emergency + Hotline + Chatbot)
 - [x] SEO meta tags (artesaos/seotools)
 - [x] Landing page (hero, Tom Select, no jQuery)
-- [x] Test suite (Unit + Feature, 235+ passing)
+- [x] Test suite (Unit + Feature, 242+ passing)
+- [x] PosterTemplate — CRUD upload asset (background, logo, shape), zone editor drag-drop
+- [x] GeneratePosterPage — form + download PNG 1080×1920 via Browsershot
+- [x] Sitemap XML otomatis per rumah sakit (`/sitemap.xml` index + `/{rumahsakit}/sitemap.xml`, di-cache 6 jam)
+- [x] Content-Security-Policy (CSP) header — mode Report-Only dengan toggle `CSP_ENFORCE`
+- [x] Chatbot — rate limiting AI 2 lapis (burst per menit + kuota harian, via `RateLimiter`, angka dikonfigurasi sebagai konstanta)
+- [x] Chatbot — opsi pemulihan saat respons gagal (restart percakapan, kirim ulang pesan, daftar kontak non-emergency)
+- [x] Lazy loading (`loading="lazy"`) pada gambar below-the-fold di seluruh halaman publik
+- [x] JadwalHarianPerubahan — snapshot nilai asli (`*_asli`) untuk deteksi "kembali ke semula" tanpa bergantung pada `JadwalPraktek`
+- [x] JadwalHarian — penanda visual baris Executive (highlight background amber + ikon bintang) di tabel admin
+- [x] JadwalPraktek — validasi `waktu_mulai` wajib diisi kecuali `sesuai_perjanjian` dicentang (form & kedua mode tabel)
+
+### Dalam Pengerjaan
+
+- [ ] Generate Poster — fix bug field `hariIni`, `jam_mulai`/`waktu_mulai`, dan `libur` antar model
+- [ ] Generate Poster — implementasi `previewPoster()` (saat ini stub)
 
 ### Dalam Pertimbangan
 
-- [ ] Sitemap otomatis per rumah sakit
 - [ ] Notifikasi jadwal (email/WhatsApp)
 - [ ] Export jadwal ke PDF/Excel
-- [ ] Dark mode portal publik
-- [ ] Content-Security-Policy (CSP) header
+- [ ] Optimasi gambar (resize/kompresi otomatis saat upload — `intervention/image` atau WebP)

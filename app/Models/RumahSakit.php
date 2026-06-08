@@ -35,6 +35,7 @@ class RumahSakit extends Model
         'lokasi_google_map',
         'tentang_kami',
         'gambar_tentang',
+        'executive_clinic',
     ];
 
     /**
@@ -43,7 +44,8 @@ class RumahSakit extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'aktif' => 'boolean',
+        'aktif'            => 'boolean',
+        'executive_clinic' => 'boolean',
     ];
 
     /**
@@ -73,5 +75,10 @@ class RumahSakit extends Model
     public function linkLayanan(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(LinkLayanan::class, 'rumah_sakit_id');
+    }
+
+    public function poliklinik(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(PoliKlinik::class, 'rumah_sakit_id');
     }
 }

@@ -97,11 +97,11 @@
                     </p>
                 </div>
             @else
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+                <div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-7">
                     @foreach($jadwalPerPoli as $poliId => $sesiList)
                         @php
                             $poli  = $sesiList->first()->poliklinik;
-                            $warna = $poli->unitLayanan?->warnaHex() ?? '#4d51b2';
+                            $warna = '#4d51b2';
                         @endphp
                         <div
                             wire:key="poli-{{ $poliId }}"
@@ -118,7 +118,7 @@
                                     @if($poli->gambar)
                                         <img src="{{ Storage::url($poli->gambar) }}"
                                              alt="{{ $poli->nama }}"
-                                             class="w-7 h-7 object-contain">
+                                             class="w-7 h-7 object-contain" loading="lazy">
                                     @else
                                         <span class="material-symbols-outlined text-[18px]"
                                               style="color: {{ $warna }};">local_hospital</span>
@@ -126,15 +126,12 @@
                                 </div>
                                 <div class="min-w-0">
                                     <p class="text-sm font-bold text-white leading-snug truncate">{{ $poli->nama }}</p>
-                                    @if($poli->unitLayanan)
-                                        <p class="text-[10px] text-white/70 mt-0.5 truncate">{{ $poli->unitLayanan->nama }}</p>
-                                    @endif
                                 </div>
                             </div>
 
                             <div class="divide-y divide-outline-variant/15 flex-1">
-                                @foreach($sesiList as $sesi)
-                                    @include('rumah_sakit.pages._jadwal-praktek-row', ['sesi' => $sesi, 'warna' => $warna])
+                                @foreach($sesiList->groupBy(fn($s) => $s->dokter_id ? 'd'.$s->dokter_id : 'n'.($s->nama_dokter ?? '')) as $sesiGroup)
+                                    @include('rumah_sakit.pages._jadwal-praktek-row', ['sesiGroup' => $sesiGroup, 'warna' => $warna])
                                 @endforeach
                             </div>
 
@@ -176,14 +173,15 @@
                     </p>
                 </div>
             @else
-                @php $warna = $selectedPoli?->unitLayanan?->warnaHex() ?? '#4d51b2'; @endphp
+                @php $warna = '#4d51b2'; @endphp
 
                 <div class="flex items-center gap-3 mb-6">
                     @if($selectedPoli?->gambar)
                         <img src="{{ Storage::url($selectedPoli->gambar) }}"
                              alt="{{ $selectedPoli->nama }}"
                              class="w-10 h-10 rounded-full object-cover shrink-0"
-                             style="outline: 2px solid {{ $warna }}55; outline-offset: 2px;">
+                             style="outline: 2px solid {{ $warna }}55; outline-offset: 2px;"
+                             loading="lazy">
                     @else
                         <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
                              style="background-color: {{ $warna }}18; outline: 2px solid {{ $warna }}40; outline-offset: 2px;">
@@ -192,9 +190,6 @@
                     @endif
                     <div>
                         <h2 class="text-xl font-bold text-on-surface">{{ $selectedPoli?->nama }}</h2>
-                        @if($selectedPoli?->unitLayanan)
-                            <p class="text-xs text-on-surface-variant">{{ $selectedPoli->unitLayanan->nama }}</p>
-                        @endif
                     </div>
                 </div>
 
@@ -229,8 +224,8 @@
                                 </div>
                             @else
                                 <div class="divide-y divide-outline-variant/15 flex-1">
-                                    @foreach($sesiHari as $sesi)
-                                        @include('rumah_sakit.pages._jadwal-praktek-row', ['sesi' => $sesi, 'warna' => $warna])
+                                    @foreach($sesiHari->groupBy(fn($s) => $s->dokter_id ? 'd'.$s->dokter_id : 'n'.($s->nama_dokter ?? '')) as $sesiGroup)
+                                        @include('rumah_sakit.pages._jadwal-praktek-row', ['sesiGroup' => $sesiGroup, 'warna' => $warna])
                                     @endforeach
                                 </div>
                             @endif

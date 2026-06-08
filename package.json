@@ -15,6 +15,7 @@
     },
     "dependencies": {
         "preline": "^4.2.0",
+        "puppeteer": "^25.1.0",
         "swiper": "^12.1.4"
     }
 }

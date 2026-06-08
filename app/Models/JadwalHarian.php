@@ -24,6 +24,7 @@ class JadwalHarian extends Model
         'status_layanan',
         'catatan',
         'sumber',
+        'is_executive',
     ];
 
     protected function casts(): array
@@ -33,6 +34,7 @@ class JadwalHarian extends Model
             'status_layanan' => StatusLayanan::class,
             'jam_mulai'      => 'datetime:H:i',
             'jam_selesai'    => 'datetime:H:i',
+            'is_executive'   => 'boolean',
         ];
     }
 

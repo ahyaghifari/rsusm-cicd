@@ -16,7 +16,7 @@ class SpesialisResource extends BaseRumahSakitResource
 
     protected static ?int $navigationSort = 3;
     protected static string | null $navigationGroup = 'Dokter';
-    protected static ?string $navigationIcon = 'fas-stethoscope';
+    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
 
     public static function form(Form $form): Form
     {
