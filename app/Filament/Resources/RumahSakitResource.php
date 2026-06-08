@@ -63,6 +63,10 @@ class RumahSakitResource extends BaseResource
                     ->default(true),
                 Forms\Components\Toggle::make('executive_clinic')
                     ->default(false),
+                Forms\Components\Toggle::make('tanya_dokter_aktif')
+                    ->label('Aktifkan Fitur Tanya Dokter')
+                    ->helperText('Jika nonaktif, menu & halaman konsultasi chat tidak muncul di portal publik RS ini.')
+                    ->default(false),
                 Forms\Components\Section::make('Tentang RS')
                     ->description('Konten untuk section "Kenapa Memilih Kami" di halaman beranda.')
                     ->collapsible()

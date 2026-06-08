@@ -21,7 +21,7 @@
                 <h1 class="text-2xl md:text-4xl font-bold text-primary leading-tight">{{ $dokter->nama }}</h1>
                 <p class="font-bold text-white bg-linear-to-r from-yellow-500 to-amber-600
                           w-fit rounded-full px-3 py-1 mt-3 text-sm md:text-base">
-                    {{ $dokter->spesialis->nama }}
+                    {{ $dokter->namaSpesialis() }}
                 </p>
                 <hr class="my-4 border-gray-300">
                 <p class="text-gray-700 mt-3 leading-7 md:leading-8 text-sm md:text-base text-justify">

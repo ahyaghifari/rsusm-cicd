@@ -32,6 +32,8 @@ Route::prefix('{rumahsakit}')
 
         Route::get('dokter-kami', App\Livewire\Dokter\Find::class)->name('rumahsakit.dokter_kami');
         Route::get('dokter-kami/{dokter}', App\Livewire\Dokter\Show::class)->name('rumahsakit.dokter_show');
+        Route::get('tanya-dokter', App\Livewire\Pages\TanyaDokter::class)->name('rumahsakit.tanya_dokter');
+        Route::get('konsultasi/{sesi:token}', App\Livewire\Pages\KonsultasiChat::class)->name('rumahsakit.konsultasi');
         Route::get('jadwal-praktek', App\Livewire\Pages\JadwalPraktek::class)->name('rumahsakit.jadwal_praktek');
         Route::get('rawat-jalan', App\Livewire\Pages\RawatJalan::class)->name('rumahsakit.rawat_jalan');
         Route::get('rawat-jalan/{poliklinik}', App\Livewire\Pages\PoliKlinikDetail::class)->name('rumahsakit.rawat_jalan_show');

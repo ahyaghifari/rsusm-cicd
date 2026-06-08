@@ -71,7 +71,7 @@ class DokterPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_dokter');
+        return $user->can('{{ ForceDeleteAny }}');
     }
 
     /**
@@ -87,7 +87,7 @@ class DokterPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_dokter');
+        return $user->can('{{ RestoreAny }}');
     }
 
     /**

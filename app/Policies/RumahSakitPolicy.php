@@ -71,7 +71,7 @@ class RumahSakitPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_rumah::sakit');
+        return $user->can('{{ ForceDeleteAny }}');
     }
 
     /**
@@ -87,7 +87,7 @@ class RumahSakitPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_rumah::sakit');
+        return $user->can('{{ RestoreAny }}');
     }
 
     /**

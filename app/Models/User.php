@@ -64,11 +64,34 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->hasAnyRole(['super_admin', 'admin', 'humas', 'informasi']);
+        return match ($panel->getId()) {
+            'dokter' => $this->hasRole('dokter'),
+            default => $this->hasAnyRole(['super_admin', 'admin', 'humas', 'informasi']),
+        };
     }
 
     public function isSuperAdmin(): bool
     {
         return $this->hasRole('super_admin');
+    }
+
+    public function bisaMenanganiDokter(int $dokterId): bool
+    {
+        $dokter = Dokter::find($dokterId);
+
+        if (! $dokter) {
+            return false;
+        }
+
+        if ($this->hasRole('dokter') && $this->id === $dokter->user_id) {
+            return true;
+        }
+
+        if ($this->hasAnyRole(['super_admin', 'admin', 'humas', 'informasi'])
+            && ($this->hasRole('super_admin') || $this->rumah_sakit_id === $dokter->rumah_sakit_id)) {
+            return true;
+        }
+
+        return false;
     }
 }

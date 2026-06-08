@@ -71,7 +71,7 @@ class PartnerPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_partner');
+        return $user->can('{{ ForceDeleteAny }}');
     }
 
     /**
@@ -87,7 +87,7 @@ class PartnerPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_partner');
+        return $user->can('{{ RestoreAny }}');
     }
 
     /**

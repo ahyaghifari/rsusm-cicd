@@ -407,7 +407,7 @@
                         <h4 class="font-semibold text-on-surface leading-snug">{{ $dk->nama }}</h4>
                         <span class="inline-block mt-2 mb-4 px-3 py-1 text-xs font-semibold
                                      text-primary bg-primary/10 rounded-full mx-auto">
-                            {{ $dk->spesialis->nama }}
+                            {{ $dk->namaSpesialis() }}
                         </span>
 
                         {{-- Tombol --}}

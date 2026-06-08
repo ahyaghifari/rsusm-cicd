@@ -25,6 +25,9 @@ class RolesAndPermissionsSeeder extends Seeder
         $humas      = Role::firstOrCreate(['name' => 'humas',       'guard_name' => 'web']);
         $informasi  = Role::firstOrCreate(['name' => 'informasi',   'guard_name' => 'web']);
 
+        // Dokter: hanya untuk akses dashboard konsultasi chat (Fase 3) — tidak ke resource admin lain
+        Role::firstOrCreate(['name' => 'dokter', 'guard_name' => 'web']);
+
         $allPermissions = Permission::all();
 
         // Admin: all resources except rumah_sakit, gedung, unit_layanan, and shield role management

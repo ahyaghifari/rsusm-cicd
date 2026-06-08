@@ -82,6 +82,12 @@
                     <span class="{{ $gridIconClass }}">stethoscope</span>
                     <span class="{{ $gridLabelClass }}">Cari Dokter</span>
                 </a>
+                @if($currentRumahSakit->tanya_dokter_aktif)
+                <a wire:navigate href="{{ rumahsakit_route('rumahsakit.tanya_dokter') }}" class="{{ $gridItemClass }}">
+                    <span class="{{ $gridIconClass }}">chat</span>
+                    <span class="{{ $gridLabelClass }}">Tanya Dokter</span>
+                </a>
+                @endif
                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.jadwal_praktek') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">calendar_month</span>
                     <span class="{{ $gridLabelClass }}">Jadwal Praktek</span>
@@ -212,6 +218,11 @@
                         </div>
                     </div>
                 </div>
+
+                @if($currentRumahSakit->tanya_dokter_aktif)
+                <a class="text-sm text-navbar-nav-foreground hover:text-primary-hover focus:outline-hidden focus:text-primary-focus"
+                    wire:navigate href="{{ rumahsakit_route('rumahsakit.tanya_dokter') }}">Tanya Dokter</a>
+                @endif
 
                 <a class="text-sm text-navbar-nav-foreground hover:text-primary-hover focus:outline-hidden focus:text-primary-focus"
                     wire:navigate href="{{ rumahsakit_route('rumahsakit.hubungi_kami') }}">Hubungi Kami</a>

@@ -36,6 +36,7 @@ class RumahSakit extends Model
         'tentang_kami',
         'gambar_tentang',
         'executive_clinic',
+        'tanya_dokter_aktif',
     ];
 
     /**
@@ -44,8 +45,9 @@ class RumahSakit extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'aktif'            => 'boolean',
-        'executive_clinic' => 'boolean',
+        'aktif'              => 'boolean',
+        'executive_clinic'   => 'boolean',
+        'tanya_dokter_aktif' => 'boolean',
     ];
 
     /**

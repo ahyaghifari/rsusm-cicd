@@ -71,7 +71,7 @@ class RawatInapPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_rawat::inap');
+        return $user->can('{{ ForceDeleteAny }}');
     }
 
     /**
@@ -87,7 +87,7 @@ class RawatInapPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_rawat::inap');
+        return $user->can('{{ RestoreAny }}');
     }
 
     /**

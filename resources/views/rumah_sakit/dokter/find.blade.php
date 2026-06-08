@@ -79,7 +79,7 @@
                             <span class="inline-flex items-center bg-linear-to-r from-amber-500 to-amber-400
                                          text-white text-[11px] font-bold uppercase tracking-wider
                                          px-2.5 py-1 rounded-full shadow-sm max-w-full truncate">
-                                {{ $d->spesialis->nama }}
+                                {{ $d->namaSpesialis() }}
                             </span>
                         </div>
 
@@ -106,7 +106,7 @@
                         {{-- Footer --}}
                         <div class="flex items-center justify-between mt-4 pt-3 border-t border-outline-variant/20">
                             <span class="text-[11px] text-on-surface-variant uppercase tracking-widest font-semibold">
-                                Spesialis
+                                {{ $d->spesialis?->nama ? 'SPESIALIS' : 'UMUM';}}
                             </span>
                             <span class="inline-flex items-center gap-1 text-sm font-bold text-primary
                                          group-hover:gap-2 transition-all duration-200">

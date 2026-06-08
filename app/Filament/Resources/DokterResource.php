@@ -72,7 +72,7 @@ class DokterResource extends BaseRumahSakitResource
                                     ->where('rumah_sakit_id', $rumahSakitId)
                                     ->pluck('nama', 'id');
                             })
-                            ->required()
+                            ->helperText('Kosongkan jika dokter ini adalah dokter umum (tanpa spesialisasi tertentu) — akan ditampilkan sebagai "Dokter Umum".')
                             ->disabled(fn (Forms\Get $get) => static::isSuperAdmin() && !$get('rumah_sakit_id'))
                             ->searchable()
                             ->preload(),
@@ -81,6 +81,33 @@ class DokterResource extends BaseRumahSakitResource
                         Forms\Components\RichEditor::make('pelatihan')
                             ->placeholder('Masukkan riwayat pelatihan dokter...'),
                     ])->columnSpan(1),
+
+                Forms\Components\Section::make('Konsultasi Chat')
+                    ->description('Pengaturan untuk fitur Tanya Dokter (chat real-time bersesi).')
+                    ->schema([
+                        Forms\Components\Toggle::make('dapat_konsultasi')
+                            ->label('Termasuk Dokter Telemedicine')
+                            ->helperText('Tentukan apakah dokter ini ikut serta dalam layanan Tanya Dokter. Diatur oleh admin — biasanya tidak sering berubah.')
+                            ->live()
+                            ->default(false),
+                        // Forms\Components\Toggle::make('tersedia_konsultasi')
+                        //     ->label('Status: Tersedia untuk Sesi Chat Sekarang')
+                        //     ->helperText('Status real-time — aktifkan saat dokter sedang online & siap menerima sesi chat dari pasien. Bisa berubah-ubah setiap hari.')
+                        //     ->disabled(fn (Forms\Get $get) => ! $get('dapat_konsultasi'))
+                        //     ->default(false),
+                        Forms\Components\TextInput::make('durasi_sesi_menit')
+                            ->label('Durasi Sesi (menit)')
+                            ->numeric()
+                            ->default(30)
+                            ->required(),
+                        Forms\Components\Select::make('user_id')
+                            ->label('Akun Login Dokter (opsional)')
+                            ->relationship('user', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->helperText('Hubungkan ke akun User jika dokter ini akan login & membalas chat sendiri. Kosongkan jika hanya admin/CS yang akan membalas atas nama dokter.'),
+                    ])
+                    ->columnSpanFull(),
             ])->columns(2);
     }
 
@@ -97,6 +124,7 @@ class DokterResource extends BaseRumahSakitResource
                 static::rsTableColumn(),
                 Tables\Columns\TextColumn::make('spesialis.nama')
                     ->label('Spesialis')
+                    ->placeholder('Dokter Umum')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\IconColumn::make('aktif')

@@ -30,7 +30,9 @@ class Dokter extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'aktif' => 'boolean',
+        'aktif'               => 'boolean',
+        'dapat_konsultasi'    => 'boolean',
+        'tersedia_konsultasi' => 'boolean',
     ];
 
     /**
@@ -58,10 +60,35 @@ class Dokter extends Model
     }
 
     /**
+     * Nama spesialis untuk ditampilkan — jatuh ke "Dokter Umum" jika dokter
+     * tidak memiliki spesialisasi tertentu (spesialis_id kosong).
+     */
+    public function namaSpesialis(): string
+    {
+        return $this->spesialis?->nama ?? 'Umum';
+    }
+
+    /**
      * Get the jadwal praktek for the dokter.
      */
     public function jadwalPraktek(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(JadwalPraktek::class, 'dokter_id');
+    }
+
+    /**
+     * Get the user account linked to this dokter (jika dokter login & balas chat sendiri).
+     */
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Get the konsultasi chat sessions for the dokter.
+     */
+    public function sesiKonsultasi(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(SesiKonsultasi::class, 'dokter_id');
     }
 }

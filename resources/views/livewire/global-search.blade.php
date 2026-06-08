@@ -76,9 +76,7 @@
                                     </div>
                                     <div class="min-w-0">
                                         <p class="text-sm font-semibold text-on-surface truncate">{{ $dokter->nama }}</p>
-                                        @if($dokter->spesialis)
-                                            <p class="text-xs text-on-surface-variant truncate">{{ $dokter->spesialis->nama }}</p>
-                                        @endif
+                                        <p class="text-xs text-on-surface-variant truncate">{{ $dokter->namaSpesialis() }}</p>
                                     </div>
                                     <span class="material-symbols-outlined text-on-surface-variant text-[16px] ml-auto shrink-0">chevron_right</span>
                                 </a>
