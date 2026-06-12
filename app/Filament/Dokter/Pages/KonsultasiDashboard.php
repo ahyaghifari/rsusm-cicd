@@ -3,9 +3,11 @@
 namespace App\Filament\Dokter\Pages;
 
 use App\Enums\PengirimPesan;
+use Illuminate\Support\Str;
 use App\Enums\StatusSesiKonsultasi;
 use App\Events\PesanDikirim;
 use App\Events\SesiStatusBerubah;
+use App\Jobs\SendWebPushNotification;
 use App\Models\Dokter;
 use App\Models\SesiKonsultasi;
 use Filament\Notifications\Notification;
@@ -17,11 +19,10 @@ use Livewire\Attributes\Validate;
 
 class KonsultasiDashboard extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
-
-    protected static ?string $title = 'Dashboard Konsultasi';
-
+    protected static ?string $navigationIcon  = 'heroicon-o-chat-bubble-left-right';
+    protected static ?string $title          = 'Dashboard Konsultasi';
     protected static ?string $navigationLabel = 'Konsultasi';
+    protected static ?int    $navigationSort  = 1;
 
     protected static string $view = 'filament.dokter.pages.konsultasi-dashboard';
 
@@ -41,6 +42,9 @@ class KonsultasiDashboard extends Page
 
     #[Validate('required|string|max:1000')]
     public string $balasan = '';
+
+    public bool   $tampilFormAkhiri  = false;
+    public string $kesimpulanInput   = '';
 
     public function mount(): void
     {
@@ -63,6 +67,13 @@ class KonsultasiDashboard extends Page
         return SesiKonsultasi::query()
             ->where('dokter_id', $this->dokter->id)
             ->whereIn('status', [StatusSesiKonsultasi::MENUNGGU, StatusSesiKonsultasi::BERLANGSUNG])
+            ->with('latestPesan')
+            ->withCount([
+                'pesan as belum_dibaca' => function ($q) {
+                    $q->where('pengirim', PengirimPesan::PASIEN->value)
+                      ->whereRaw('`konsultasi_pesan`.`created_at` > IFNULL(`sesi_konsultasi`.`dokter_baca_at`, "1970-01-01 00:00:00")');
+                },
+            ])
             ->orderByRaw("FIELD(status, 'BERLANGSUNG', 'MENUNGGU')")
             ->orderBy('created_at')
             ->get();
@@ -74,7 +85,7 @@ class KonsultasiDashboard extends Page
             return null;
         }
 
-        return SesiKonsultasi::with('pesan')->find($this->sesiAktifId);
+        return SesiKonsultasi::with(['pesan', 'rumahSakit'])->find($this->sesiAktifId);
     }
 
     public function pilihSesi(int $sesiId): void
@@ -88,8 +99,14 @@ class KonsultasiDashboard extends Page
     {
         $sesi = $sesiId ? SesiKonsultasi::find($sesiId) : null;
 
-        $this->sesiAktifId = $sesi?->id;
-        $this->sesiAktifToken = $sesi?->token ?? '';
+        $this->sesiAktifId      = $sesi?->id;
+        $this->sesiAktifToken   = $sesi?->token ?? '';
+        $this->tampilFormAkhiri = false;
+        $this->kesimpulanInput  = '';
+
+        if ($sesi) {
+            $sesi->update(['dokter_baca_at' => now()]);
+        }
     }
 
     /**
@@ -108,6 +125,10 @@ class KonsultasiDashboard extends Page
     #[On('echo:konsultasi.{sesiAktifToken},PesanDikirim')]
     public function pesanMasuk(): void
     {
+        // Dokter sedang melihat sesi ini → tandai terbaca seketika
+        if ($this->sesiAktifId) {
+            SesiKonsultasi::where('id', $this->sesiAktifId)->update(['dokter_baca_at' => now()]);
+        }
         // memicu render ulang — riwayat dibaca langsung dari relasi sesiAktif->pesan
     }
 
@@ -152,25 +173,51 @@ class KonsultasiDashboard extends Page
 
         broadcast(new PesanDikirim($sesi, $pesan))->toOthers();
 
+        if ($sesi->push_subscription) {
+            $chatUrl = route('rumahsakit.konsultasi', [
+                'rumahsakit' => $sesi->rumahSakit->slug,
+                'sesi'       => $sesi->token,
+            ]);
+            SendWebPushNotification::dispatch(
+                $sesi->id,
+                'Pesan dari ' . $this->dokter->nama,
+                $pesan->isi,
+                $chatUrl,
+                $sesi->token,
+            );
+        }
+
         $this->reset('balasan');
     }
 
-    public function akhiri(int $sesiId): void
+    public function siapAkhiri(): void
+    {
+        $this->tampilFormAkhiri = true;
+    }
+
+    public function batalAkhiri(): void
+    {
+        $this->tampilFormAkhiri = false;
+        $this->kesimpulanInput  = '';
+    }
+
+    public function akhiriDenganKesimpulan(): void
     {
         $sesi = SesiKonsultasi::where('dokter_id', $this->dokter->id)
             ->where('status', StatusSesiKonsultasi::BERLANGSUNG)
-            ->findOrFail($sesiId);
+            ->findOrFail($this->sesiAktifId);
 
         $sesi->update([
             'status'      => StatusSesiKonsultasi::SELESAI,
             'berakhir_at' => now(),
+            'kesimpulan'  => trim($this->kesimpulanInput) ?: null,
         ]);
 
         broadcast(new SesiStatusBerubah($sesi))->toOthers();
 
-        if ($this->sesiAktifId === $sesi->id) {
-            $this->pilihSesiInternal(null);
-        }
+        $this->tampilFormAkhiri = false;
+        $this->kesimpulanInput  = '';
+        $this->pilihSesiInternal(null);
 
         Notification::make()->title('Sesi konsultasi diakhiri')->success()->send();
     }

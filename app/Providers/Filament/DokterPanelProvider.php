@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Dokter\Pages\KonsultasiDashboard;
+use App\Filament\Dokter\Pages\RiwayatKonsultasi;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -32,12 +33,13 @@ class DokterPanelProvider extends PanelProvider
             ->brandLogoHeight('5rem')
             ->brandName('Dokter - RSU Syifa Medika')
             ->colors([
-                'primary' => '#002d6a',
+                'primary' => '#006c4b',
                 'gray' => Color::Slate
             ])
             ->sidebarWidth('15rem')
             ->pages([
                 KonsultasiDashboard::class,
+                RiwayatKonsultasi::class,
             ])
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
@@ -49,7 +51,7 @@ class DokterPanelProvider extends PanelProvider
                  * Tanpa baris ini, listener broadcasting di panel dokter diam saja tanpa error
                  * ("works on reload, not live") karena window.Echo tidak pernah ada.
                  */
-                fn (): string => Blade::render("@vite(['resources/js/app.js'])")
+                fn (): string => Blade::render("@vite(['resources/css/app.css', 'resources/js/app.js'])")
             )
             ->profile()
             ->middleware([

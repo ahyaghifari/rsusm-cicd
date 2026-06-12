@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class SesiKonsultasi extends Model
 {
@@ -25,12 +26,16 @@ class SesiKonsultasi extends Model
         'dibalas_oleh',
         'mulai_at',
         'berakhir_at',
+        'kesimpulan',
+        'push_subscription',
+        'dokter_baca_at',
     ];
 
     protected $casts = [
-        'status'      => StatusSesiKonsultasi::class,
-        'mulai_at'    => 'datetime',
-        'berakhir_at' => 'datetime',
+        'status'         => StatusSesiKonsultasi::class,
+        'mulai_at'       => 'datetime',
+        'berakhir_at'    => 'datetime',
+        'dokter_baca_at' => 'datetime',
     ];
 
     public function getRouteKeyName(): string
@@ -56,6 +61,11 @@ class SesiKonsultasi extends Model
     public function pesan(): HasMany
     {
         return $this->hasMany(KonsultasiPesan::class, 'sesi_id');
+    }
+
+    public function latestPesan(): HasOne
+    {
+        return $this->hasOne(KonsultasiPesan::class, 'sesi_id')->latestOfMany();
     }
 
     public function sisaDetik(): int

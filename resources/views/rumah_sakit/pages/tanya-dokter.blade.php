@@ -29,10 +29,15 @@
         @else
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($dokter as $d)
-                <div class="p-[1.5px] rounded-2xl bg-outline-variant/25 shadow-sm">
+                {{-- Outer wrapper: border tipis — hijau jika tersedia, abu jika tidak --}}
+                <div @class([
+                    'p-[1.5px] rounded-2xl shadow-sm transition-colors duration-200',
+                    'bg-green-400/70 shadow-green-100' => $d->tersedia_konsultasi,
+                    'bg-outline-variant/25'             => ! $d->tersedia_konsultasi,
+                ])>
                     <div class="bg-white rounded-2xl overflow-hidden flex flex-col h-full">
 
-                        <div class="relative h-48 bg-surface-container overflow-hidden">
+                        <div class="relative h-48 bg-gray-100 overflow-hidden">
                             @if($d->foto)
                                 <img src="{{ Storage::url($d->foto) }}" alt="{{ $d->nama }}"
                                      class="absolute inset-0 w-full h-full object-contain" loading="lazy">
@@ -46,7 +51,7 @@
                             <div class="absolute top-3 right-3">
                                 @if($d->tersedia_konsultasi)
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-green-100 text-green-700 border border-green-200">
-                                        <span class="size-1.5 rounded-full bg-green-500"></span>
+                                        <span class="size-1.5 rounded-full bg-green-500 animate-pulse"></span>
                                         Tersedia
                                     </span>
                                 @else
@@ -58,9 +63,23 @@
                             </div>
                         </div>
 
-                        <div class="p-4 flex flex-col gap-1 grow">
-                            <p class="font-semibold text-on-surface">{{ $d->nama }}</p>
-                            <p class="text-xs text-on-surface-variant">{{ $d->namaSpesialis() }}</p>
+                        <div class="p-4 flex flex-col gap-2 grow">
+                            <div>
+                                <p class="font-semibold text-on-surface">{{ $d->nama }}</p>
+                                <p class="text-xs text-on-surface-variant mt-0.5">{{ $d->namaSpesialis() }}</p>
+                            </div>
+
+                            {{-- Info sesi: durasi & harga --}}
+                            <div class="flex items-center gap-3 mt-1">
+                                <span class="inline-flex items-center gap-1 text-[11px] text-on-surface-variant/80">
+                                    <span class="material-symbols-outlined text-[13px]">timer</span>
+                                    {{ $d->durasi_sesi_menit }} menit / sesi
+                                </span>
+                                <span class="inline-flex items-center gap-1 text-[11px] text-on-surface-variant/80">
+                                    <span class="material-symbols-outlined text-[13px]">payments</span>
+                                    Rp —
+                                </span>
+                            </div>
                         </div>
 
                         <div class="p-4 pt-0">
@@ -75,8 +94,7 @@
                                 <button type="button" disabled
                                     class="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-semibold
                                            bg-gray-100 text-gray-400 cursor-not-allowed">
-                                    <span class="material-symbols-outlined text-[16px]">chat</span>
-                                    Dokter Sedang Tidak Tersedia
+                                    Sedang Tidak Tersedia
                                 </button>
                             @endif
                         </div>
@@ -94,7 +112,7 @@
     {{-- Modal pengisian data sebelum memulai sesi --}}
     @if($dokterDipilih)
         @php($dokterTerpilih = $dokter->firstWhere('id', $dokterDipilih))
-        <div class="fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div class="fixed inset-0 z-200 flex items-center justify-center p-4">
 
             {{-- Backdrop --}}
             <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="batalkanPilihan"></div>
@@ -108,10 +126,10 @@
 
                 <div class="p-6">
                     <div class="flex items-center gap-3 mb-5">
-                        <div class="w-12 h-12 rounded-full bg-surface-container overflow-hidden flex items-center justify-center shrink-0">
+                        <div class="w-12 h-12 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center shrink-0">
                             @if($dokterTerpilih?->foto)
                                 <img src="{{ Storage::url($dokterTerpilih->foto) }}" alt="{{ $dokterTerpilih->nama }}"
-                                     class="w-full h-full object-cover">
+                                     class="w-full h-full object-contain">
                             @else
                                 <span class="material-symbols-outlined text-2xl text-on-surface-variant/40">person</span>
                             @endif
@@ -122,9 +140,21 @@
                         </div>
                     </div>
 
+                    {{-- Info sesi ringkas --}}
+                    <div class="flex items-center gap-4 mb-4 px-3 py-2.5 rounded-xl bg-surface-container/50 border border-outline-variant/20">
+                        <span class="inline-flex items-center gap-1.5 text-xs text-on-surface-variant">
+                            <span class="material-symbols-outlined text-[15px]">timer</span>
+                            {{ $dokterTerpilih?->durasi_sesi_menit }} menit
+                        </span>
+                        <span class="w-px h-4 bg-outline-variant/30"></span>
+                        <span class="inline-flex items-center gap-1.5 text-xs text-on-surface-variant">
+                            <span class="material-symbols-outlined text-[15px]">payments</span>
+                            Rp —
+                        </span>
+                    </div>
+
                     <p class="text-sm text-on-surface-variant mb-4">
-                        Isi data berikut untuk memulai sesi konsultasi chat. Sesi akan berlangsung
-                        selama {{ $dokterTerpilih?->durasi_sesi_menit }} menit.
+                        Isi data berikut untuk memulai sesi konsultasi chat.
                     </p>
 
                     <form wire:submit="mulaiSesi" class="flex flex-col gap-4">

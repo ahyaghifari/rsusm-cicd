@@ -81,7 +81,10 @@ class AdminPanelProvider extends PanelProvider
                             background-color: #ffe4fe !important; /* Ganti warna di sini */
                         }
                     </style>
-                ')
+                ',
+                
+                ),
+                
             )
             ->middleware([
                 EncryptCookies::class,

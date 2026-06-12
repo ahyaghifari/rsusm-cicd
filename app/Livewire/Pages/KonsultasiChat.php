@@ -7,6 +7,7 @@ use App\Enums\StatusSesiKonsultasi;
 use App\Events\PesanDikirim;
 use App\Livewire\RsPortalComponent;
 use App\Models\SesiKonsultasi;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
@@ -51,13 +52,35 @@ class KonsultasiChat extends RsPortalComponent
     public function statusBerubah(): void
     {
         $this->sesi->refresh();
+
+        if (in_array($this->sesi->status, [StatusSesiKonsultasi::SELESAI, StatusSesiKonsultasi::KEDALUWARSA])) {
+            $this->dispatch('sesi-berakhir');
+        }
     }
+
+    public function simpanPushSubscription(string $json): void
+    {
+        $this->sesi->update(['push_subscription' => $json]);
+    }
+
+    private const MSG_LIMIT   = 20;  // maks. pesan dalam 1 menit
+    private const MSG_SECONDS = 60;
 
     public function kirim(): void
     {
         $this->validate();
 
         abort_unless($this->sesi->status === StatusSesiKonsultasi::BERLANGSUNG, 403);
+
+        $key = 'chat-pesan:' . $this->sesi->token;
+
+        if (RateLimiter::tooManyAttempts($key, self::MSG_LIMIT)) {
+            $tunggu = RateLimiter::availableIn($key);
+            $this->addError('pesanBaru', "Terlalu banyak pesan. Tunggu {$tunggu} detik sebelum mengirim lagi.");
+            return;
+        }
+
+        RateLimiter::hit($key, self::MSG_SECONDS);
 
         $pesan = $this->sesi->pesan()->create([
             'pengirim' => PengirimPesan::PASIEN,

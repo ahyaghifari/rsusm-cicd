@@ -12,6 +12,7 @@ Sistem informasi multi-tenant untuk manajemen dan portal publik rumah sakit. Sat
 | Admin Panel | Filament 3.x |
 | Reactive UI | Livewire 3 |
 | Real-Time | Laravel Reverb (WebSocket self-hosted) + Laravel Echo (Pusher protocol) |
+| Web Push | minishlink/web-push v10 (VAPID, server-side push notification saat browser tertutup) |
 | Styling | Tailwind CSS v4 |
 | Asset Bundler | Vite |
 | Database | MySQL (dev & prod) |
@@ -140,10 +141,14 @@ Dua mode tampilan:
 
 - **Tanpa login**: pasien mengisi nama + kontak, pilih dokter yang `tersedia_konsultasi`, lalu sesi (`SesiKonsultasi`) dibuat dengan token UUID — diakses lewat URL `/{rumahsakit}/konsultasi/{token}` (`getRouteKeyName() => 'token'`)
 - **Real-time via Laravel Reverb**: status sesi (`MENUNGGU` → `BERLANGSUNG` → `SELESAI`/`KEDALUWARSA`) dan pesan chat (`KonsultasiPesan`) tersinkron langsung di kedua sisi tanpa reload — event `SesiStatusBerubah` & `PesanDikirim` di-broadcast lewat channel publik `konsultasi.{token}` dan private channel `konsultasi.dokter.{dokterId}`
-- **1 sesi aktif per pasien**: cookie `konsultasi_sesi_{rumah_sakit_id}` (umur = `durasi_sesi_menit` milik dokter) menyimpan token sesi aktif pasien — membuka kembali halaman "Tanya Dokter" saat masih ada sesi `MENUNGGU`/`BERLANGSUNG` akan otomatis redirect ke sesi tsb, alih-alih membuat sesi baru
-- **Sisi dokter**: panel Filament terpisah (`/dokter`), halaman `KonsultasiDashboard` — toggle ketersediaan, antrean sesi masuk (live), terima sesi, jendela chat balasan (`wire:poll.visible.5s` sebagai jaring pengaman di samping update WebSocket — lihat [reverb/06](../reverb/06-race-condition-subscribe-channel-dinamis.md))
-- **Rate limiting**: burst + harian per kombinasi IP + session, via `RateLimiter` (sama pola dengan chatbot AI)
-- Dokumentasi belajar lengkap (konsep dasar Reverb/Pusher/Echo sampai setiap bug nyata yang ditemukan & cara memperbaikinya) ada di [reverb/](../reverb/)
+- **1 sesi aktif per pasien**: cookie `konsultasi_sesi_{rumah_sakit_id}` (umur = `durasi_sesi_menit` milik dokter) menyimpan token sesi aktif pasien — membuka kembali halaman "Tanya Dokter" saat masih ada sesi aktif akan otomatis redirect ke sesi tsb, alih-alih membuat sesi baru
+- **Push notification 3 lapisan** saat dokter membalas: (1) in-app toast via Alpine.js global listener (`globalKonsultasiListener` di layout `rumah_sakit.blade.php`) saat pasien di halaman lain dalam tab yang sama; (2) `new Notification()` browser notification API jika tab tidak aktif (`document.hidden`); (3) Web Push via service worker (`public/sw.js`) + VAPID + `minishlink/web-push` saat browser tertutup sepenuhnya — subscription disimpan di kolom `sesi_konsultasi.push_subscription`, pengiriman via `SendWebPushNotification` job (queue)
+- **Banner izin push notifikasi**: custom Alpine component `pushPermisiBanner(token)` — gradient violet/indigo dengan animasi bel, muncul hanya jika `Notification.permission === 'default'` dan belum di-skip via `localStorage`; browser dialog hanya dipicu saat klik tombol "Aktifkan", bukan otomatis
+- **Kesimpulan/catatan dokter**: dokter mengisi kesimpulan di form modal sebelum mengakhiri sesi; pasien dapat membaca di halaman chat setelah sesi selesai; dokter dapat mengedit kembali dari halaman Riwayat
+- **Rate limiting pesan pasien**: 10 pesan per 60 detik per token sesi via `RateLimiter`
+- **Dokter — KonsultasiDashboard**: toggle ketersediaan, antrean sesi live dengan preview pesan terakhir + badge unread merah (`belum_dibaca` via `withCount` + `whereRaw` berdasarkan `dokter_baca_at`), warna kartu berbeda untuk BERLANGSUNG vs MENUNGGU, terima sesi, jendela chat balasan (`wire:poll.visible.5s` sebagai jaring pengaman — lihat [reverb/06](../reverb/06-race-condition-subscribe-channel-dinamis.md)), form kesimpulan sebelum akhiri
+- **Dokter — RiwayatKonsultasi**: daftar sesi selesai/kedaluwarsa, pencarian nama pasien, transkrip percakapan, edit kesimpulan
+- Dokumentasi belajar lengkap (konsep dasar Reverb/Pusher/Echo, push notification VAPID, dan setiap bug nyata yang ditemukan & cara memperbaikinya) ada di [reverb/](../reverb/)
 
 #### Homepage RS
 
@@ -330,6 +335,11 @@ npm run dev
 
 # 8. Jalankan
 php artisan serve
+
+# 9. (Opsional) Fitur Tanya Dokter — jalankan di terminal terpisah:
+php artisan reverb:start            # WebSocket server (real-time chat)
+php artisan queue:work              # Worker untuk Web Push notification (Layer 3)
+# Di production: gunakan Supervisor — lihat reverb/08-production-reverb-queue-setup.md
 ```
 
 Admin panel tersedia di `/{ADMIN_PATH}` (default: `/manage`).
@@ -364,6 +374,9 @@ php artisan test
 - Poster: asset lokal dikonversi ke data URI base64 sebelum dirender di Browsershot (file:// tidak diizinkan)
 - Reverb/Echo: `namespace: ''` **wajib** di konfigurasi `new Echo({...})` (`resources/js/echo.js`) — Echo defaultnya menambahkan prefiks `App.Events` yang tidak cocok dengan `broadcastAs()` nama pendek; nama event di `broadcastAs()` & `#[On('echo:...')]` harus sama persis (lihat [reverb/05](../reverb/05-mismatch-namespace-echo-broadcastas.md))
 - Reverb/Echo: listener Livewire dengan placeholder channel **dinamis** (`#[On('echo:topik.{propertiYangBerubah},Event')]`) punya jendela rawan *race condition* saat propertinya berubah — pertimbangkan `wire:poll.visible.Ns` sebagai jaring pengaman (lihat [reverb/06](../reverb/06-race-condition-subscribe-channel-dinamis.md))
+- Web Push/VAPID: `sesiAktifToken` di `KonsultasiDashboard` harus `string` (bukan `?string`) karena placeholder `#[On('echo:konsultasi.{sesiAktifToken},...')]` tidak bisa di-resolve Livewire jika nilainya null — nilai kosong menghasilkan channel yang tidak pernah dipakai
+- Web Push: route yang di-pass ke job (`SendWebPushNotification`) wajib menyertakan parameter `rumahsakit` (slug) karena URI multi-tenant — eager-load `rumahSakit` di `sesiAktif()` sebelum dispatch
+- `push_subscription` disimpan sebagai TEXT JSON mentah; dibersihkan dari DB otomatis saat endpoint kadaluwarsa (laporan `sendNotification` dicek di job)
 
 ---
 
@@ -385,6 +398,21 @@ N8N_URL=https://...                # Webhook N8N untuk AI chatbot
 
 # Cache (untuk rate limiter)
 CACHE_STORE=database               # Gunakan redis di production untuk performa
+
+# Laravel Reverb (WebSocket self-hosted)
+REVERB_APP_ID=...
+REVERB_APP_KEY=...
+REVERB_APP_SECRET=...
+REVERB_HOST=localhost
+REVERB_PORT=8080
+REVERB_SCHEME=http
+
+# Web Push — VAPID keys (generate via web-push library atau Node.js crypto)
+# Lihat reverb/07-push-notification-pasien.md untuk cara generate
+VAPID_PUBLIC_KEY=...               # EC P-256 public key (URL-safe base64)
+VAPID_PRIVATE_KEY=...              # EC P-256 private key (URL-safe base64)
+VAPID_SUBJECT="${APP_URL}"         # Identitas pengirim (URL atau mailto:)
+VITE_VAPID_PUBLIC_KEY="${VAPID_PUBLIC_KEY}"  # Diekspos ke frontend via Vite
 ```
 
 ---
@@ -435,6 +463,15 @@ CACHE_STORE=database               # Gunakan redis di production untuk performa
 - [x] JadwalPraktek — validasi `waktu_mulai` wajib diisi kecuali `sesuai_perjanjian` dicentang (form & kedua mode tabel)
 - [x] Tanya Dokter — konsultasi chat real-time via Laravel Reverb (token UUID, tanpa login, broadcasting dua arah pasien ↔ dokter, panel Filament terpisah untuk dokter)
 - [x] Tanya Dokter — 1 sesi aktif per pasien via cookie (redirect otomatis ke sesi aktif, umur cookie = durasi sesi dokter)
+- [x] Tanya Dokter — push notification 3 lapisan: in-app toast (Alpine.js global), browser Notification API, Web Push VAPID via service worker (`public/sw.js`) + `minishlink/web-push` job
+- [x] Tanya Dokter — banner izin push notifikasi kustom (gradient violet/indigo, animasi bel, dipicu hanya saat klik "Aktifkan")
+- [x] Tanya Dokter — kesimpulan/catatan dokter (form modal sebelum akhiri sesi, tampil di chat pasien, dapat diedit dari Riwayat)
+- [x] Tanya Dokter — rate limiting pesan pasien: 10 pesan per 60 detik per token sesi
+- [x] Tanya Dokter — KonsultasiDashboard: preview pesan terakhir per sesi di kartu antrean
+- [x] Tanya Dokter — KonsultasiDashboard: badge unread merah per sesi (via `dokter_baca_at` + `withCount`)
+- [x] Tanya Dokter — KonsultasiDashboard: warna kartu berbeda BERLANGSUNG vs MENUNGGU
+- [x] Tanya Dokter — RiwayatKonsultasi: daftar sesi selesai/kedaluwarsa, cari nama pasien, transkrip, edit kesimpulan
+- [x] Tanya Dokter — hapus semua kelas `dark:` dari halaman dokter (konsultasi-dashboard & riwayat-konsultasi)
 
 ### Dalam Pengerjaan
 
