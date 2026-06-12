@@ -52,7 +52,7 @@
     <!-- Promo FAB — floating mandiri -->
     @include('rumah_sakit.partials.promo-fab')
     @include('rumah_sakit.partials.promo-popup')
-    @include('rumah_sakit.partials.jadwal-poliklinik-popup')
+    
 
     <!-- Chatbot Floating Button -->
     @include('rumah_sakit.chatbot.floating')

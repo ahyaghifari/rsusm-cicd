@@ -807,5 +807,7 @@
         document.addEventListener('livewire:navigated', initPartnerSwipers);
     </script>
 
+    @include('rumah_sakit.partials.jadwal-poliklinik-popup')
+
 
 </div>
