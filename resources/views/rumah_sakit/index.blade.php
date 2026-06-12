@@ -809,5 +809,4 @@
 
     @include('rumah_sakit.partials.jadwal-poliklinik-popup')
 
-
 </div>

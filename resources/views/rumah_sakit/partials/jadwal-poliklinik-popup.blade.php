@@ -23,7 +23,7 @@ function jadwalPoliklinikPopup() {
     x-transition:leave="transition ease-in duration-200"
     x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0"
-    class="fixed inset-0 z-190 flex items-center justify-center sm:p-4"
+    class="fixed inset-0 z-210 flex items-center justify-center sm:p-4"
     style="display:none;">
 
     {{-- Backdrop --}}
