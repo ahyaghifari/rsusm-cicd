@@ -1,5 +1,5 @@
 <x-filament-widgets::widget>
-    <x-filament::section>
+    <x-filament::section collapsible collapsed>
         <x-slot name="heading">
             Popup Jadwal Poliklinik
         </x-slot>

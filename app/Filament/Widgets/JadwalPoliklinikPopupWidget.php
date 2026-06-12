@@ -16,7 +16,7 @@ class JadwalPoliklinikPopupWidget extends Widget implements HasForms
 
     protected static string $view = 'filament.widgets.jadwal-poliklinik-popup-widget';
 
-    protected static ?int $sort = 1;
+    protected static ?int $sort = 100;
 
     protected int|string|array $columnSpan = 'full';
 
