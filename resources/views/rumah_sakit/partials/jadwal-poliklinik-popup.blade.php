@@ -49,11 +49,11 @@ function jadwalPoliklinikPopup() {
             </span>
         </div>
 
-        {{-- Poster --}}
-        <div class="flex-1 min-h-0 flex items-center justify-center bg-gray-50 overflow-auto">
+        {{-- Poster: tampil ukuran penuh, scroll kalau lebih panjang dari viewport --}}
+        <div class="flex-1 min-h-0 overflow-y-auto bg-gray-50">
             <img src="{{ Storage::url($currentRumahSakit->jadwal_poliklinik_gambar) }}"
                  alt="Jadwal Poliklinik {{ $currentRumahSakit->nama }}"
-                 class="max-w-full max-h-full object-contain"
+                 class="block w-full h-auto"
                  loading="lazy">
         </div>
 
@@ -64,7 +64,7 @@ function jadwalPoliklinikPopup() {
                class="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl
                       bg-primary text-white text-sm font-semibold hover:opacity-90 transition-colors">
                 <span class="material-symbols-outlined text-[18px]">calendar_month</span>
-                Lihat Jadwal Praktek Lengkap
+                Lihat Jadwal Praktek
             </a>
         </div>
     </div>
