@@ -42,6 +42,7 @@ class PoliKlinikDetail extends RsPortalComponent
                 WHEN 'MINGGU'  THEN 7
                 ELSE 8 END")
             ->orderBy('waktu_mulai')
+            ->orderBy('is_executive')
             ->with('dokter')
             ->get()
             ->groupBy(fn ($j) => $j->hari->value);
