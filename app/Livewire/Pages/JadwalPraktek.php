@@ -55,6 +55,7 @@ class JadwalPraktek extends RsPortalComponent
                     $q->where('aktif', true)->where('rumah_sakit_id', $rs->id)
                 )
                 ->when($this->poliklinikId, fn ($q) => $q->where('poliklinik_id', $this->poliklinikId))
+                ->orderBy('is_executive')
                 ->orderBy('waktu_mulai')
                 ->get()
                 ->groupBy('poliklinik_id');
@@ -67,6 +68,7 @@ class JadwalPraktek extends RsPortalComponent
             $rawJadwal = JadwalPraktekModel::with('dokter')
                 ->where('poliklinik_id', $this->poliklinikId)
                 ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rs->id))
+                ->orderBy('is_executive')
                 ->orderBy('waktu_mulai')
                 ->get()
                 ->groupBy(fn ($j) => $j->hari->value);

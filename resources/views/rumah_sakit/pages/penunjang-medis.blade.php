@@ -1,4 +1,4 @@
-﻿<div>
+<div>
     <x-page-hero
         title="Penunjang Medis"
         subtitle="Layanan penunjang diagnostik dan medis berkualitas tinggi untuk mendukung proses perawatan Anda."
