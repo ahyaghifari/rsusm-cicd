@@ -1,4 +1,18 @@
 <div>
+    <style>
+        .layanan-unggulan h1 { font-size: 1.75rem; font-weight: 700; color: var(--color-primary); margin-top: 1.5rem; margin-bottom: 0.75rem; line-height: 1.3; }
+        .layanan-unggulan h2 { font-size: 1.35rem; font-weight: 700; color: var(--color-primary); margin-top: 1.5rem; margin-bottom: 0.5rem; }
+        .layanan-unggulan h3 { font-size: 1.1rem; font-weight: 600; color: var(--color-on-surface); margin-top: 1.25rem; margin-bottom: 0.4rem; }
+        .layanan-unggulan p { margin-bottom: 1rem; }
+        .layanan-unggulan ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+        .layanan-unggulan ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
+        .layanan-unggulan li { margin-bottom: 0.35rem; }
+        .layanan-unggulan strong { font-weight: 700; color: var(--color-on-surface); }
+        .layanan-unggulan em { font-style: italic; }
+        .layanan-unggulan a { color: var(--color-primary); text-decoration: underline; }
+        .layanan-unggulan blockquote { border-left: 4px solid var(--color-primary); padding-left: 1rem; margin: 1rem 0; color: #6b7280; font-style: italic; }
+        .layanan-unggulan hr { border-color: var(--color-outline-variant); margin: 1.5rem 0; opacity: 0.3; }
+    </style>
     <x-page-hero title="Layanan Unggulan" />
 
     <div class="w-11/12 lg:w-10/12 mx-auto py-12 flex flex-col gap-10">
@@ -49,9 +63,9 @@
                     </h2>
                 </div>
 
-                <div class="text-sm md:text-base text-on-surface-variant leading-relaxed
+                <div class="layanan-unggulan text-sm md:text-base text-on-surface-variant leading-relaxed
                             prose prose-sm max-w-none">
-                    {!! str($layanan->deskripsi)->sanitizeHtml() !!}
+                    {!! $layanan->deskripsi !!}
                 </div>
             </div>
 
