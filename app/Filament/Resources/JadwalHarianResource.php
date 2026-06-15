@@ -23,6 +23,7 @@ class JadwalHarianResource extends BaseResource
     protected static ?string $navigationLabel = 'Jadwal Harian';
     protected static ?string $modelLabel = 'Jadwal Harian';
     protected static ?string $pluralModelLabel = 'Jadwal Harian';
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function getEloquentQuery(): Builder
     {
