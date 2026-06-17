@@ -33,10 +33,9 @@ class RawatInapResource extends BaseRumahSakitResource
                             ->relationship('rumahSakit', 'nama')
                             ->preload()
                             ->live()
-                            ->dehydrated(false)
                             ->visible(fn () => static::isSuperAdmin())
                             ->required(fn () => static::isSuperAdmin())
-                            ->default(1),
+                            ->default(fn () => static::isSuperAdmin() ? null : static::rumahSakitId()),
                         Forms\Components\Select::make('gedung_id')
                             ->label('Gedung')
                             ->options(function (Forms\Get $get) {
@@ -162,6 +161,24 @@ class RawatInapResource extends BaseRumahSakitResource
             //         Tables\Actions\DeleteBulkAction::make(),
             //     ]),
             // ]);
+    }
+
+    public static function mutateFormDataBeforeCreate(array $data): array
+    {
+        if (! static::isSuperAdmin()) {
+            $data['rumah_sakit_id'] = static::rumahSakitId();
+        }
+
+        return $data;
+    }
+
+    public static function mutateFormDataBeforeSave(array $data): array
+    {
+        if (! static::isSuperAdmin()) {
+            $data['rumah_sakit_id'] = static::rumahSakitId();
+        }
+
+        return $data;
     }
 
     public static function getRelations(): array
