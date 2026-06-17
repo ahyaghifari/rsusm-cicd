@@ -8,7 +8,7 @@ function promoPopup(rsSlug) {
         init() {
             const last = localStorage.getItem(this.storageKey);
             const now  = Math.floor(Date.now() / 1000);
-            if (!last || now - parseInt(last) > 43200) {
+            if (!last || now - parseInt(last) > 3600) {
                 setTimeout(() => { this.visible = true; }, 1500);
             }
             window.__promoPopup = this;
