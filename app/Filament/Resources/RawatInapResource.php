@@ -136,9 +136,9 @@ class RawatInapResource extends BaseRumahSakitResource
                 Tables\Columns\IconColumn::make('aktif')
                     ->boolean()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('sort_order')
-                    ->numeric()
-                    ->sortable(),
+                // Tables\Columns\TextColumn::make('sort_order')
+                //     ->numeric()
+                //     ->sortable(),
             ])
             ->defaultSort('sort_order', 'asc')
             ->reorderable('sort_order')
