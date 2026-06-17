@@ -25,7 +25,7 @@ class GeneratePosterPage extends Page
     protected static ?string $navigationLabel = 'Generate Poster';
     protected static ?string $title           = 'Generate Poster Jadwal';
     protected static ?string $navigationGroup = 'Poster Jadwal';
-    // protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = false;
     protected static string  $view            = 'filament.resources.poster-jadwal-resource.pages.generate-poster-page';
 
     // ── State ─────────────────────────────────────────────────────────────────
