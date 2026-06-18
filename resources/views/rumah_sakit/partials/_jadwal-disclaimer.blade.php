@@ -1,7 +1,7 @@
 {{-- Disclaimer jadwal: hanya tampilkan kontak berkategori PENDAFTARAN --}}
 @php $kontakJadwal = isset($kontakRumahSakit) ? $kontakRumahSakit->where('kategori', 'PENDAFTARAN') : collect(); @endphp
 @if($kontakJadwal->isNotEmpty())
-<div class="mt-8 mx-auto max-w-2xl">
+<div class="{{ ($noCenter ?? false) ? 'flex-1 min-w-0' : 'mt-8 mx-auto max-w-2xl' }}">
     <div class="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
         <span class="material-symbols-outlined text-amber-500 text-[20px] shrink-0 mt-0.5"
               style="font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;">

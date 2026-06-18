@@ -36,7 +36,9 @@ class DokterResource extends BaseRumahSakitResource
                         Forms\Components\TextInput::make('slug')
                             ->required()
                             ->maxLength(255)
-                            ->unique(Dokter::class, ignoreRecord: true),
+                            ->unique(Dokter::class, 'slug', ignoreRecord: true, modifyRuleUsing: function ($rule, Forms\Get $get) {
+                                return $rule->where('rumah_sakit_id', static::isSuperAdmin() ? $get('rumah_sakit_id') : static::rumahSakitId());
+                            }),
                         Forms\Components\FileUpload::make('foto')
                             ->image()
                             ->directory('dokter/foto')

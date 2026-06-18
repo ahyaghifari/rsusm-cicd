@@ -60,7 +60,7 @@
                                  bg-red-500 border border-white text-[7px] font-bold
                                  text-white flex items-center justify-center">1</span>
                 </div>
-                <p class="text-[11px] font-bold text-primary uppercase tracking-wide truncate">Asisten</p>
+                <p class="text-[11px] font-bold text-primary uppercase tracking-wide truncate">Tanya Syifa</p>
             </div>
             <p class="text-[10px] font-medium text-on-surface-variant truncate w-full text-center">
                 Tanya Kami

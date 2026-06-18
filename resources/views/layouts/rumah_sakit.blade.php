@@ -50,7 +50,6 @@
     <livewire:global-search />
 
     <!-- Promo FAB — floating mandiri -->
-    @include('rumah_sakit.partials.promo-fab')
     @include('rumah_sakit.partials.promo-popup')
     
 
