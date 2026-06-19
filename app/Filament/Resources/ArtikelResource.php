@@ -38,8 +38,7 @@ class ArtikelResource extends BaseRumahSakitResource
     {
         return $form
             ->schema([
-                static::rsFormField()->live(),
-
+                static::rsFormField(),
                 TextInput::make('judul')
                     ->required()
                     ->maxLength(255)
@@ -176,17 +175,23 @@ class ArtikelResource extends BaseRumahSakitResource
 
     public static function mutateFormDataBeforeCreate(array $data): array
     {
-        if (! static::isSuperAdmin()) {
+        if (!static::isSuperAdmin()) {
+
             $data['rumah_sakit_id'] = static::rumahSakitId();
+
         }
+
         return $data;
     }
 
     public static function mutateFormDataBeforeSave(array $data): array
     {
-        if (! static::isSuperAdmin()) {
+        if (!static::isSuperAdmin()) {
+
             $data['rumah_sakit_id'] = static::rumahSakitId();
+
         }
+
         return $data;
     }
 
