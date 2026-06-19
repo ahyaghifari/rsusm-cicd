@@ -32,22 +32,32 @@
 
         {{-- Ringkasan --}}
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-green-50 border border-green-200 rounded-2xl p-4 text-center">
-                <p class="text-3xl font-bold text-green-700">{{ $ringkasan[1] }}</p>
-                <p class="text-sm text-green-700 font-medium mt-1">Kosong</p>
+            <div class="bg-green-600 rounded-2xl p-4 text-center shadow-sm">
+                <p class="text-3xl font-bold text-white">{{ $ringkasan[1] }}</p>
+                <p class="text-sm text-white/90 font-medium mt-1">Kosong</p>
             </div>
-            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center">
-                <p class="text-3xl font-bold text-amber-700">{{ $ringkasan[2] }}</p>
-                <p class="text-sm text-amber-700 font-medium mt-1">Reservasi</p>
+            <div class="bg-amber-500 rounded-2xl p-4 text-center shadow-sm">
+                <p class="text-3xl font-bold text-white">{{ $ringkasan[2] }}</p>
+                <p class="text-sm text-white/90 font-medium mt-1">Reservasi</p>
             </div>
-            <div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-center">
-                <p class="text-3xl font-bold text-red-700">{{ $ringkasan[3] }}</p>
-                <p class="text-sm text-red-700 font-medium mt-1">Terisi</p>
+            <div class="bg-red-600 rounded-2xl p-4 text-center shadow-sm">
+                <p class="text-3xl font-bold text-white">{{ $ringkasan[3] }}</p>
+                <p class="text-sm text-white/90 font-medium mt-1">Terisi</p>
             </div>
-            <div class="bg-gray-100 border border-gray-300 rounded-2xl p-4 text-center">
-                <p class="text-3xl font-bold text-gray-600">{{ $ringkasan[6] }}</p>
-                <p class="text-sm text-gray-600 font-medium mt-1">Perbaikan</p>
+            <div class="bg-gray-600 rounded-2xl p-4 text-center shadow-sm">
+                <p class="text-3xl font-bold text-white">{{ $ringkasan[6] }}</p>
+                <p class="text-sm text-white/90 font-medium mt-1">Perbaikan</p>
             </div>
+        </div>
+
+        {{-- Tombol ke halaman Rawat Inap --}}
+        <div class="flex justify-center mb-8">
+            <a wire:navigate href="{{ rumahsakit_route('rumahsakit.rawat_inap') }}"
+               class="inline-flex items-center gap-2 text-sm font-semibold text-primary
+                      border border-primary/30 hover:bg-primary/8 px-4 py-2 rounded-full transition-colors">
+                <span class="material-symbols-outlined text-[18px]">list_alt</span>
+                Lihat Daftar Rawat Inap
+            </a>
         </div>
 
         {{-- Filter --}}
