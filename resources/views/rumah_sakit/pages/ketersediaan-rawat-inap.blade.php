@@ -3,12 +3,32 @@
 
     <div class="mt-5 w-10/12 mx-auto pb-16">
 
-        {{-- Indikator data diperbarui --}}
-        @if($lastSyncedAt)
-            <p class="text-xs text-on-surface-variant text-center mb-6">
-                Data diperbarui pukul {{ \Illuminate\Support\Carbon::parse($lastSyncedAt)->translatedFormat('H:i:s, d F Y') }}
-            </p>
-        @endif
+        {{-- Indikator waktu dimuat + countdown — wire:key dibuat beda tiap render (timestamp
+             berubah) supaya Livewire mount ulang elemen ini dari nol setiap kali wire:poll
+             jalan, sehingga countdown ikut reset balik ke 30 detik selaras dengan poll-nya --}}
+        <div
+            wire:key="ketersediaan-countdown-{{ $loadedAt->timestamp }}"
+            x-data="{
+                seconds: 30,
+                timer: null,
+                init() {
+                    this.timer = setInterval(() => {
+                        this.seconds = this.seconds > 0 ? this.seconds - 1 : 0;
+                    }, 1000);
+                },
+                destroy() {
+                    clearInterval(this.timer);
+                }
+            }"
+            class="flex items-center justify-center gap-2 text-xs text-on-surface-variant text-center mb-6"
+        >
+            <span>Dimuat pukul {{ $loadedAt->translatedFormat('H:i:s, d F Y') }}</span>
+            <span class="text-outline-variant">&middot;</span>
+            <span class="inline-flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">autorenew</span>
+                Memperbarui dalam <span class="font-bold tabular-nums" x-text="seconds"></span> detik
+            </span>
+        </div>
 
         {{-- Ringkasan --}}
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -32,21 +52,21 @@
 
         {{-- Filter --}}
         <div class="flex flex-col sm:flex-row gap-3 mb-8">
-            <select wire:model.live="kelasFilter"
-                class="w-full sm:w-64 rounded-xl border-gray-300 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500">
-                <option value="">Semua Kelas</option>
-                @foreach($kelasOptions as $kelas)
-                    <option value="{{ $kelas->id }}">{{ $kelas->nama }}</option>
-                @endforeach
-            </select>
+            @include('rumah_sakit.pages._searchable-select', [
+                'property'     => 'kelasFilter',
+                'options'      => $kelasOptions->map(fn ($k) => ['value' => $k->id, 'label' => $k->nama])->values()->toArray(),
+                'placeholder'  => '— Semua Kelas —',
+                'currentValue' => $kelasFilter,
+                'wrapperClass' => 'w-full sm:w-64',
+            ])
 
-            <select wire:model.live="namaKamarFilter"
-                class="w-full sm:w-64 rounded-xl border-gray-300 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500">
-                <option value="">Semua Kamar</option>
-                @foreach($namaKamarOptions as $namaKamar)
-                    <option value="{{ $namaKamar }}">{{ $namaKamar }}</option>
-                @endforeach
-            </select>
+            @include('rumah_sakit.pages._searchable-select', [
+                'property'     => 'namaKamarFilter',
+                'options'      => $namaKamarOptions->map(fn ($n) => ['value' => $n, 'label' => $n])->values()->toArray(),
+                'placeholder'  => '— Semua Kamar —',
+                'currentValue' => $namaKamarFilter,
+                'wrapperClass' => 'w-full sm:w-64',
+            ])
         </div>
 
         {{-- List Kamar --}}
@@ -63,10 +83,10 @@
                     @php $first = $beds->first(); @endphp
                     <div class="bg-white rounded-2xl border border-outline-variant/20 shadow-sm p-5">
                         <div class="flex items-start justify-between gap-2 mb-3">
-                            <h3 class="font-bold text-on-surface text-sm leading-snug">{{ $first->nama_kamar }}</h3>
-                            @if($first->kelasRawatInap)
+                            <h3 class="font-bold text-on-surface text-sm leading-snug">{{ $first['nama_kamar'] }}</h3>
+                            @if($first['kelas_nama'])
                                 <span class="shrink-0 text-[11px] font-bold uppercase tracking-wide bg-primary/10 text-primary px-2 py-1 rounded-full">
-                                    {{ $first->kelasRawatInap->nama }}
+                                    {{ $first['kelas_nama'] }}
                                 </span>
                             @endif
                         </div>
@@ -74,8 +94,7 @@
                         <div class="space-y-2">
                             @foreach($beds as $bed)
                                 @php
-                                    $statusEnum = $bed->status_enum;
-                                    $colorClass = match($bed->status) {
+                                    $colorClass = match($bed['status']) {
                                         1 => 'bg-green-100 text-green-700',
                                         2 => 'bg-amber-100 text-amber-700',
                                         3 => 'bg-red-100 text-red-700',
@@ -84,13 +103,13 @@
                                     };
                                 @endphp
                                 <div class="flex items-center justify-between gap-2 text-sm">
-                                    <span class="text-on-surface-variant">{{ $bed->tempat_tidur }}</span>
+                                    <span class="text-on-surface-variant">{{ $bed['tempat_tidur'] }}</span>
                                     <span class="text-[11px] font-bold px-2 py-1 rounded-full {{ $colorClass }}">
-                                        {{ $statusEnum?->getLabel() ?? \App\Enums\StatusKetersediaanKamar::labelFor($bed->status) }}
+                                        {{ \App\Enums\StatusKetersediaanKamar::labelFor($bed['status']) }}
                                     </span>
                                 </div>
-                                @if($bed->keterangan)
-                                    <p class="text-xs text-on-surface-variant/80 italic">{{ $bed->keterangan }}</p>
+                                @if($bed['keterangan'])
+                                    <p class="text-xs text-on-surface-variant/80 italic">{{ $bed['keterangan'] }}</p>
                                 @endif
                             @endforeach
                         </div>

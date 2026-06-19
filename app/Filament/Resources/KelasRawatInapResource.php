@@ -54,6 +54,7 @@ class KelasRawatInapResource extends BaseRumahSakitResource
     {
         return $table
             ->columns([
+                static::rsTableColumn(),
                 TextColumn::make('nama')
                     ->searchable()
                     ->sortable(),
@@ -69,8 +70,6 @@ class KelasRawatInapResource extends BaseRumahSakitResource
                 TextColumn::make('rawat_inap_count')
                     ->label('Jumlah Tipe Kamar')
                     ->state(fn (KelasRawatInap $record): int => $record->rawatInap()->count()),
-
-                static::rsTableColumn(),
             ])
             ->filters([
                 static::rsTableFilter(),

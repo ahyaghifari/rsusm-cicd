@@ -25,9 +25,4 @@ class KelasRawatInap extends Model
     {
         return $this->hasMany(RawatInap::class, 'kelas_rawat_inap_id');
     }
-
-    public function ketersediaan(): HasMany
-    {
-        return $this->hasMany(RawatInapKetersediaan::class, 'kelas_rawat_inap_id');
-    }
 }
