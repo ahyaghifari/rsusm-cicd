@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Client untuk data ketersediaan kamar dari sistem Ranap.
@@ -31,6 +32,7 @@ class RanapApiClient
         $path = storage_path(config('services.ranap.mock_path'));
 
         if (! file_exists($path)) {
+            Log::warning("RanapApiClient: fixture tidak ditemukan di {$path}, ketersediaan rawat inap akan tampil kosong.");
             return [];
         }
 
