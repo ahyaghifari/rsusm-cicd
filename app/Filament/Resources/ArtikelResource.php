@@ -22,6 +22,8 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
+use FilamentTiptapEditor\TiptapEditor;
+use FilamentTiptapEditor\Enums\TiptapOutput;
 
 class ArtikelResource extends BaseRumahSakitResource
 {
@@ -110,6 +112,18 @@ class ArtikelResource extends BaseRumahSakitResource
                     ->maxLength(300)
                     ->columnSpanFull()
                     ->helperText('Ditampilkan di card listing & meta description.'),
+
+                // TiptapEditor::make('konten')
+                //     ->profile('default')
+                //     ->tools([]) // individual tools to use in the editor, overwrites profile
+                //     // ->disk('string') // optional, defaults to config setting
+                //     // ->directory('string or Closure returning a string') // optional, defaults to config setting
+                //     // ->acceptedFileTypes(['array of file types']) // optional, defaults to config setting
+                //     // ->maxSize('integer in KB') // optional, defaults to config setting
+                //     ->output(TiptapOutput::Html) // optional, change the format for saved data, default is html
+                //     ->maxContentWidth('5xl')
+                //     ->required()
+                //     ->columnSpanFull(),
 
                 RichEditor::make('konten')
                     ->required()
