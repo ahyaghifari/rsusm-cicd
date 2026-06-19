@@ -13,7 +13,7 @@ use Livewire\WithPagination;
 
 class Artikel extends Component
 {
-    use WithPagination, SoftDeletes;
+    use WithPagination;
 
     #[Locked]
     public int $rumah_sakit_id;
