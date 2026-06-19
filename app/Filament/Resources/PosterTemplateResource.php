@@ -24,7 +24,7 @@ class PosterTemplateResource extends Resource
     protected static ?string $pluralModelLabel = 'Template Poster';
 
     protected static ?string $navigationGroup = 'Poster Jadwal';
-    // protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = false;
 
     // ── Form ──────────────────────────────────────────────────────────────────
 

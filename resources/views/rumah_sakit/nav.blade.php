@@ -130,6 +130,10 @@
                     <span class="{{ $gridIconClass }}">handshake</span>
                     <span class="{{ $gridLabelClass }}">Partner Kami</span>
                 </a>
+                <a wire:navigate href="{{ rumahsakit_route('rumahsakit.artikel') }}" class="{{ $gridItemClass }}">
+                    <span class="{{ $gridIconClass }}">newspaper</span>
+                    <span class="{{ $gridLabelClass }}">Artikel</span>
+                </a>
                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.faq') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">help</span>
                     <span class="{{ $gridLabelClass }}">FAQ</span>
@@ -236,6 +240,8 @@
                     <div class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden min-w-60 bg-white shadow-md rounded-lg mt-2 after:h-4 after:absolute after:-bottom-4 after:inset-s-0 after:w-full before:h-4 before:absolute before:-top-4 before:inset-s-0 before:w-full z-50 text-on-surface"
                         role="menu" aria-orientation="vertical" aria-labelledby="hs-dropdown-media-informasi">
                         <div class="p-1 space-y-0.5">
+                            <a wire:navigate href="{{ rumahsakit_route('rumahsakit.artikel') }}"
+                               class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">Artikel & Berita</a>
                             <a wire:navigate href="{{ rumahsakit_route('rumahsakit.magazine') }}"
                                class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">Syifa Magazine</a>
                             <a wire:navigate href="{{ rumahsakit_route('rumahsakit.faq') }}"

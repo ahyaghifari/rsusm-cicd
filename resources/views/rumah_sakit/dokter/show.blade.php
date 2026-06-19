@@ -84,7 +84,7 @@
                           hover:shadow-xl hover:scale-105 active:scale-95
                           transition-all duration-150 whitespace-nowrap">
                     <span class="material-symbols-outlined text-[18px]">assignment</span>
-                    Daftar Online Sekarang
+                    Daftar Sekarang
                 </a>
             @endif
             @include('rumah_sakit.partials._jadwal-disclaimer', ['noCenter' => $punyaLinkDaftar])

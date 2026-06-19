@@ -122,7 +122,7 @@ class GlobalSearch extends Component
 
             // Halaman statis
             $results['halaman'] = Halaman::when($isMySQL,
-                    fn ($q2) => $q2->whereFullText(['judul', 'kata_kunci'], $bq, ['mode' => 'boolean']),
+                    fn ($q2) => $q2->whereFullText(['judul', 'kata_kunci', 'konten'], $bq, ['mode' => 'boolean']),
                     fn ($q2) => $q2->where(fn ($q3) => $q3
                         ->where('judul', 'like', $like)
                         ->orWhere('kata_kunci', 'like', $like)

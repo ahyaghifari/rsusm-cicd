@@ -58,8 +58,6 @@ document.addEventListener('alpine:init', () => {
     </div>
 
     <div class="relative">
-        <span x-show="!open"
-              class="absolute -inset-1 rounded-full border-2 border-primary animate-ping opacity-50 pointer-events-none"></span>
         <button
             @click="$store.chatbot.toggle()"
             :aria-expanded="open"

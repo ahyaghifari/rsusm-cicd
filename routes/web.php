@@ -48,4 +48,6 @@ Route::prefix('{rumahsakit}')
         Route::get('info/{slug}', App\Livewire\Pages\HalamanStatis::class)->name('rumahsakit.halaman_statis');
         Route::get('magazine', App\Livewire\Pages\Magazines::class)->name('rumahsakit.magazine');
         Route::get('faq', App\Livewire\Pages\Faq::class)->name('rumahsakit.faq');
+        Route::get('artikel', App\Livewire\Pages\Artikel::class)->name('rumahsakit.artikel');
+        Route::get('artikel/{artikel:slug}', App\Livewire\Pages\ArtikelDetail::class)->name('rumahsakit.artikel_detail');
     });
