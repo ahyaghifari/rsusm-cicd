@@ -57,7 +57,6 @@ class RumahSakitResource extends BaseResource
                     ->image()
                     ->directory('rumah-sakit/logo'),
                 Forms\Components\Textarea::make('link_pendaftaran_online'),
-                Forms\Components\Textarea::make('lokasi_google_map'),
                 Forms\Components\Toggle::make('aktif')
                     ->required()
                     ->default(true),
@@ -81,6 +80,20 @@ class RumahSakitResource extends BaseResource
                             ->label('Deskripsi "Kenapa Memilih Kami"')
                             ->nullable()
                             ->columnSpanFull(),
+                    ]),
+                Forms\Components\Section::make('Google')
+                    ->description('Embed lokasi Google Maps & CTA "Tulis Ulasan Anda" / "Lihat Ulasan Lainnya" di halaman beranda.')
+                    ->collapsible()
+                    ->visible(fn () => static::isSuperAdmin())
+                    ->schema([
+                        Forms\Components\Textarea::make('lokasi_google_map')
+                            ->label('Embed Google Maps')
+                            ->columnSpanFull(),
+                        Forms\Components\TextInput::make('google_place_id')
+                            ->label('Google Place ID')
+                            ->maxLength(255)
+                            ->nullable()
+                            ->helperText('Cari Place ID lewat Place ID Finder resmi Google: https://developers.google.com/maps/documentation/places/web-service/place-id'),
                     ]),
             ]);
     }

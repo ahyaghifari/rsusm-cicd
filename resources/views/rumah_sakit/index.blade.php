@@ -753,6 +753,11 @@
     </section>
     @endif
 
+    {{-- ============================================================ --}}
+    {{-- GOOGLE REVIEW CTA                                            --}}
+    {{-- ============================================================ --}}
+    @include('rumah_sakit.partials.google-review-cta')
+
     <script>
         function initPartnerSwipers() {
             if (typeof window.Swiper === 'undefined') return;

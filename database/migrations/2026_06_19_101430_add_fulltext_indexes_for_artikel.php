@@ -9,13 +9,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (DB::getDriverName() !== 'mysql') return;
-
-        DB::statement('ALTER TABLE artikel ADD FULLTEXT INDEX ft_search (judul, ringkasan, konten)');
-        
         Schema::table('artikel', function (Blueprint $table) {
             $table->softDeletes()->after('updated_at');
         });
+
+        if (DB::getDriverName() !== 'mysql') return;
+
+        DB::statement('ALTER TABLE artikel ADD FULLTEXT INDEX ft_search (judul, ringkasan, konten)');
     }
 
     public function down(): void
