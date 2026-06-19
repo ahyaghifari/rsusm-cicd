@@ -50,18 +50,10 @@
             </div>
         </div>
 
-        {{-- Tombol ke halaman Rawat Inap --}}
-        <div class="flex justify-center mb-8">
-            <a wire:navigate href="{{ rumahsakit_route('rumahsakit.rawat_inap') }}"
-               class="inline-flex items-center gap-2 text-sm font-semibold text-primary
-                      border border-primary/30 hover:bg-primary/8 px-4 py-2 rounded-full transition-colors">
-                <span class="material-symbols-outlined text-[18px]">list_alt</span>
-                Lihat Daftar Rawat Inap
-            </a>
-        </div>
+        
 
         {{-- Filter --}}
-        <div class="flex flex-col sm:flex-row gap-3 mb-8">
+        <div class="flex flex-col sm:flex-row gap-3 mb-8 w-full">
             @include('rumah_sakit.pages._searchable-select', [
                 'property'     => 'kelasFilter',
                 'options'      => $kelasOptions->map(fn ($k) => ['value' => $k->id, 'label' => $k->nama])->values()->toArray(),
@@ -127,6 +119,16 @@
                 @endforeach
             </div>
         @endif
+
+        {{-- Tombol ke halaman Rawat Inap --}}
+        <div class="flex justify-center my-8">
+            <a wire:navigate href="{{ rumahsakit_route('rumahsakit.rawat_inap') }}"
+               class="inline-flex items-center gap-2 text-sm font-semibold text-primary
+                      border border-primary/30 hover:bg-primary/8 px-4 py-2 rounded-full transition-colors">
+                <span class="material-symbols-outlined text-[18px]">list_alt</span>
+                Lihat Daftar Rawat Inap
+            </a>
+        </div>
 
     </div>
 </div>
