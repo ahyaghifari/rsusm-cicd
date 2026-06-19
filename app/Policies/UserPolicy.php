@@ -95,7 +95,7 @@ class UserPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_user');
+        return $user->can('{{ ForceDeleteAny }}');
     }
 
     /**
@@ -117,7 +117,7 @@ class UserPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_user');
+        return $user->can('{{ RestoreAny }}');
     }
 
     /**

@@ -36,6 +36,10 @@ class RumahSakit extends Model
         'tentang_kami',
         'gambar_tentang',
         'executive_clinic',
+        'tanya_dokter_aktif',
+        'jadwal_poliklinik_gambar',
+        'jadwal_poliklinik_aktif',
+        'google_place_id',
     ];
 
     /**
@@ -44,8 +48,10 @@ class RumahSakit extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'aktif'            => 'boolean',
-        'executive_clinic' => 'boolean',
+        'aktif'                   => 'boolean',
+        'executive_clinic'        => 'boolean',
+        'tanya_dokter_aktif'      => 'boolean',
+        'jadwal_poliklinik_aktif' => 'boolean',
     ];
 
     /**
@@ -75,6 +81,24 @@ class RumahSakit extends Model
     public function linkLayanan(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(LinkLayanan::class, 'rumah_sakit_id');
+    }
+
+    public function googleWriteReviewUrl(): ?string
+    {
+        if (! $this->google_place_id) {
+            return null;
+        }
+
+        return 'https://search.google.com/local/writereview?placeid=' . $this->google_place_id;
+    }
+
+    public function googleReviewsUrl(): ?string
+    {
+        if (! $this->google_place_id) {
+            return null;
+        }
+
+        return 'https://search.google.com/local/reviews?placeid=' . $this->google_place_id;
     }
 
     public function poliklinik(): \Illuminate\Database\Eloquent\Relations\HasMany

@@ -53,9 +53,9 @@ class KontakResource extends BaseRumahSakitResource
                     ->maxSize(2048)
                     ->nullable(),
 
-                Forms\Components\Textarea::make('logo')
-                    ->rows(10)
-                    ->nullable(),
+                // Forms\Components\Textarea::make('logo')
+                //     ->rows(10)
+                //     ->nullable(),
 
                 Forms\Components\Toggle::make('aktif')
                     ->default(true)

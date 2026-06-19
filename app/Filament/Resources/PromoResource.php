@@ -118,7 +118,8 @@ class PromoResource extends BaseRumahSakitResource
 
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->mutateFormDataUsing(fn (array $data, Promo $record): array => static::mutateFormDataBeforeSave($data, $record)),
             ]);
             // ->bulkActions([
             //     Tables\Actions\DeleteBulkAction::make(),

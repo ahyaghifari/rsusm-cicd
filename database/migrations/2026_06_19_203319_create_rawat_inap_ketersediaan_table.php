@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('rawat_inap_ketersediaan', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('rumah_sakit_id')->constrained('rumah_sakit')->cascadeOnDelete();
+            $table->integer('external_id');
+            $table->integer('ruang_kamar');
+            $table->string('tempat_tidur', 100);
+            $table->unsignedTinyInteger('status');
+            $table->timestamp('tanggal_update_api')->nullable();
+            $table->string('keterangan')->nullable();
+            $table->string('ruangan', 50);
+            $table->string('nama_kamar', 150);
+            $table->foreignId('kelas_rawat_inap_id')->nullable()->constrained('kelas_rawat_inap')->nullOnDelete();
+            $table->timestamp('synced_at');
+            $table->timestamps();
+
+            $table->unique(['external_id', 'rumah_sakit_id']);
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('rawat_inap_ketersediaan');
+    }
+};

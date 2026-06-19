@@ -1,4 +1,4 @@
-﻿<div>
+<div>
     <x-page-hero
         title="Fasilitas Pendukung"
         subtitle="Berbagai fasilitas lengkap kami hadirkan untuk mendukung kenyamanan dan kemudahan selama kunjungan Anda."

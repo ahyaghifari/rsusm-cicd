@@ -1,6 +1,7 @@
 @php
-    $galeri   = $kamarInap->gambar ?? collect();
-    $isVip    = in_array($kamarInap->kelas, ['VIP', 'VVIP', 'VIP Plus', 'VIP+']);
+    $galeri      = $kamarInap->gambar ?? collect();
+    $namaKelas   = $kamarInap->kelasRawatInap?->nama;
+    $isVip       = (bool) $kamarInap->kelasRawatInap?->is_vip;
 @endphp
 
 <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-outline-variant/15
@@ -16,22 +17,24 @@
              alt="{{ $kamarInap->nama }}" loading="lazy">
 
         {{-- Badge kelas (bottom left) --}}
+        @if($namaKelas)
         <div class="absolute bottom-3 left-3">
             @if($isVip)
                 <span class="inline-flex items-center gap-1 bg-amber-400 text-amber-900
                              text-[11px] font-bold px-2.5 py-1 rounded-full shadow">
                     <span class="material-symbols-outlined text-[11px]"
                           style="font-variation-settings:'FILL' 1">star</span>
-                    {{ $kamarInap->kelas }}
+                    {{ $namaKelas }}
                 </span>
             @else
                 <span class="inline-flex items-center gap-1 bg-white/90 backdrop-blur-sm text-primary
                              text-[11px] font-bold px-2.5 py-1 rounded-full shadow">
                     <span class="material-symbols-outlined text-[11px]">hotel</span>
-                    {{ $kamarInap->kelas }}
+                    {{ $namaKelas }}
                 </span>
             @endif
         </div>
+        @endif
 
         {{-- Badge jumlah foto (top right) --}}
         @if($galeri->isNotEmpty())
@@ -141,7 +144,7 @@
 
                     {{-- 6 pertama selalu tampil --}}
                     @foreach($kamarInap->fasilitasRawatInap->take(6) as $f)
-                        <span class="inline-flex items-center gap-0.5 text-[11px] text-on-surface-variant
+                        <span class="inline-flex items-center gap-0.5  text-sm text-on-surface-variant
                                      bg-surface-container px-2 py-1 rounded-full leading-none">
                             <span class="material-symbols-outlined text-[10px] text-primary"
                                   style="font-variation-settings:'FILL' 1">check_circle</span>
@@ -156,7 +159,7 @@
                                   x-transition:enter="transition ease-out duration-150"
                                   x-transition:enter-start="opacity-0 scale-90"
                                   x-transition:enter-end="opacity-100 scale-100"
-                                  class="inline-flex items-center gap-0.5 text-[11px] text-on-surface-variant
+                                  class="inline-flex items-center gap-0.5 text-sm text-on-surface-variant
                                          bg-surface-container px-2 py-1 rounded-full leading-none">
                                 <span class="material-symbols-outlined text-[10px] text-primary"
                                       style="font-variation-settings:'FILL' 1">check_circle</span>
@@ -166,7 +169,7 @@
 
                         {{-- Tombol toggle --}}
                         <button @click="expanded = !expanded"
-                                class="inline-flex items-center gap-0.5 text-[11px] font-semibold
+                                class="inline-flex items-center gap-0.5 text-sm font-semibold
                                        text-primary hover:text-primary/70 px-2 py-1 rounded-full
                                        border border-primary/20 hover:bg-primary/8 transition-colors leading-none">
                             <span x-show="!expanded">+{{ $sisanya }} lainnya</span>

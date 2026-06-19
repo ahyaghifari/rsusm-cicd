@@ -39,6 +39,23 @@
                 </div>
             </div>
         @endif
+
+        @if($currentRumahSakit->google_place_id)
+            <div class="flex flex-wrap gap-2 mt-3">
+                <a href="{{ $currentRumahSakit->googleWriteReviewUrl() }}" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white
+                          text-xs font-semibold hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20">
+                    <span class="material-symbols-outlined text-[14px]">edit</span>
+                    Tulis Ulasan
+                </a>
+                <a href="{{ $currentRumahSakit->googleReviewsUrl() }}" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-primary/30
+                          text-primary text-xs font-semibold hover:bg-primary/8 transition-colors">
+                    <span class="material-symbols-outlined text-[14px]">reviews</span>
+                    Lihat Ulasan Lainnya
+                </a>
+            </div>
+        @endif
     </div>
     <div class="mt-5 lg:mt-0 lg:col-span-3 lg:border-l-2 border-primary/50 lg:pl-4">
         <p class="font-semibold text-xl lg:text-2xl text-on-surface mb-4">Hubungi Kami</p>

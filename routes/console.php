@@ -15,3 +15,10 @@ Schedule::command('jadwal:generate-harian')
     ->withoutOverlapping()
     ->runInBackground()
     ->appendOutputTo(storage_path('logs/jadwal-harian-cron.log'));
+
+// Sync ketersediaan kamar rawat inap dari sistem Ranap setiap 30 detik
+Schedule::command('rawat-inap:sync-ketersediaan')
+    ->everyThirtySeconds()
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/rawat-inap-ketersediaan-cron.log'));

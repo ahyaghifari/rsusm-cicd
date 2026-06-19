@@ -11,6 +11,8 @@ Sistem informasi multi-tenant untuk manajemen dan portal publik rumah sakit. Sat
 | Framework | Laravel 12 |
 | Admin Panel | Filament 3.x |
 | Reactive UI | Livewire 3 |
+| Real-Time | Laravel Reverb (WebSocket self-hosted) + Laravel Echo (Pusher protocol) |
+| Web Push | minishlink/web-push v10 (VAPID, server-side push notification saat browser tertutup) |
 | Styling | Tailwind CSS v4 |
 | Asset Bundler | Vite |
 | Database | MySQL (dev & prod) |
@@ -97,6 +99,10 @@ RumahSakit (slug, executive_clinic)
 | `/promo/{slug}` | Detail promo |
 | `/info/{slug}` | Halaman statis CMS |
 | `/magazine` | Arsip majalah digital |
+| `/artikel` | Daftar artikel & berita |
+| `/artikel/{slug}` | Detail artikel |
+| `/tanya-dokter` | Mulai sesi konsultasi chat dengan dokter |
+| `/konsultasi/{token}` | Jendela chat sesi konsultasi (akses via token, tanpa login) |
 | `/faq` | FAQ |
 
 #### Halaman Jadwal Praktek
@@ -113,6 +119,7 @@ Dua mode tampilan:
 - Sesi executive dikelompokkan per dokter — semua slot jam tampil sekaligus dalam satu baris
 - Di bawah jadwal terdapat **disclaimer** dengan nomor kontak PENDAFTARAN (klik langsung `tel:` / WhatsApp)
 - Nama dokter yang terhubung ke profil dapat diklik → navigasi ke profil dokter
+- Tombol **"Daftar Sekarang"** (link ke `link_pendaftaran_online` milik RS) tampil di halaman ini dan di halaman profil dokter (`dokter/show.blade.php`)
 
 #### Global Search
 
@@ -123,7 +130,7 @@ Dua mode tampilan:
 - SQLite/test: fallback LIKE
 - Hasil dikelompokkan per kategori, klik langsung navigasi
 
-#### Chatbot Asisten (Syifa Medika Assistant)
+#### Chatbot Asisten ("Tanya Syifa")
 
 - **Mobile**: tombol di bottom bar, panel fullscreen
 - **Desktop**: FAB floating bottom-right dengan tooltip animasi, panel setinggi layar
@@ -134,6 +141,43 @@ Dua mode tampilan:
 - AI backend via N8N webhook (`N8N_URL` env)
 - **Rate limiting 2 lapis**: burst (maks. pesan dalam jendela singkat) + kuota harian — keduanya reset otomatis via `RateLimiter`, angka diatur sebagai konstanta agar mudah disesuaikan dengan kuota Gemini
 - **Opsi pemulihan saat respons gagal**: tombol restart percakapan, kirim ulang pesan terakhir, dan daftar kontak langsung (kategori OPERASIONAL/PENDAFTARAN — di luar emergency, hotline, sosial media)
+
+#### Tanya Dokter — Konsultasi Chat Real-Time
+
+- **Tanpa login**: pasien mengisi nama + kontak, pilih dokter yang `tersedia_konsultasi`, lalu sesi (`SesiKonsultasi`) dibuat dengan token UUID — diakses lewat URL `/{rumahsakit}/konsultasi/{token}` (`getRouteKeyName() => 'token'`)
+- **Real-time via Laravel Reverb**: status sesi (`MENUNGGU` → `BERLANGSUNG` → `SELESAI`/`KEDALUWARSA`) dan pesan chat (`KonsultasiPesan`) tersinkron langsung di kedua sisi tanpa reload — event `SesiStatusBerubah` & `PesanDikirim` di-broadcast lewat channel publik `konsultasi.{token}` dan private channel `konsultasi.dokter.{dokterId}`
+- **1 sesi aktif per pasien**: cookie `konsultasi_sesi_{rumah_sakit_id}` (umur = `durasi_sesi_menit` milik dokter) menyimpan token sesi aktif pasien — membuka kembali halaman "Tanya Dokter" saat masih ada sesi aktif akan otomatis redirect ke sesi tsb, alih-alih membuat sesi baru
+- **Push notification 3 lapisan** saat dokter membalas: (1) in-app toast via Alpine.js global listener (`globalKonsultasiListener` di layout `rumah_sakit.blade.php`) saat pasien di halaman lain dalam tab yang sama; (2) `new Notification()` browser notification API jika tab tidak aktif (`document.hidden`); (3) Web Push via service worker (`public/sw.js`) + VAPID + `minishlink/web-push` saat browser tertutup sepenuhnya — subscription disimpan di kolom `sesi_konsultasi.push_subscription`, pengiriman via `SendWebPushNotification` job (queue)
+- **Banner izin push notifikasi**: custom Alpine component `pushPermisiBanner(token)` — gradient violet/indigo dengan animasi bel, muncul hanya jika `Notification.permission === 'default'` dan belum di-skip via `localStorage`; browser dialog hanya dipicu saat klik tombol "Aktifkan", bukan otomatis
+- **Kesimpulan/catatan dokter**: dokter mengisi kesimpulan di form modal sebelum mengakhiri sesi; pasien dapat membaca di halaman chat setelah sesi selesai; dokter dapat mengedit kembali dari halaman Riwayat
+- **Rate limiting pesan pasien**: 10 pesan per 60 detik per token sesi via `RateLimiter`
+- **Dokter — KonsultasiDashboard**: toggle ketersediaan, antrean sesi live dengan preview pesan terakhir + badge unread merah (`belum_dibaca` via `withCount` + `whereRaw` berdasarkan `dokter_baca_at`), warna kartu berbeda untuk BERLANGSUNG vs MENUNGGU, terima sesi, jendela chat balasan (`wire:poll.visible.5s` sebagai jaring pengaman — lihat [reverb/06](../reverb/06-race-condition-subscribe-channel-dinamis.md)), form kesimpulan sebelum akhiri
+- **Dokter — RiwayatKonsultasi**: daftar sesi selesai/kedaluwarsa, pencarian nama pasien, transkrip percakapan, edit kesimpulan
+- Dokumentasi belajar lengkap (konsep dasar Reverb/Pusher/Echo, push notification VAPID, dan setiap bug nyata yang ditemukan & cara memperbaikinya) ada di [reverb/](../reverb/)
+- **Panel Filament terpisah untuk Dokter** (`DokterPanelProvider`, path `/dokter`, login sendiri) — KonsultasiDashboard & RiwayatKonsultasi di atas diakses lewat panel ini, bukan panel admin utama
+
+#### Artikel & Berita
+
+- CRUD per RS: `ArtikelResource` (rich text editor, gambar cover, kategori, tanggal publish, toggle unggulan/aktif) + `KategoriArtikelResource` (CRUD sederhana via modal)
+- Halaman publik list (`/artikel`): artikel unggulan ditonjolkan di atas, grid 3 kolom untuk sisanya, pagination
+- Halaman detail (`/artikel/{slug}`): konten lengkap + section "Artikel Lainnya" (3 artikel terbaru selain yang sedang dibuka)
+- Diurutkan berdasarkan `tanggal_publish` (terbaru dulu) — **tidak** ada `sort_order` manual seperti Magazine/FAQ
+- Slug unik per RS (composite), bukan global — sama seperti Promo/Spesialis/Halaman/PoliKlinik
+- Link ada di dropdown navigasi "Media Informasi" (sejajar Syifa Magazine & FAQ), juga di grid menu mobile
+- Detail implementasi lengkap: [issues/artikel-berita.md](../issues/artikel-berita.md)
+
+#### Popup Otomatis (Homepage)
+
+- **Popup Jadwal Poliklinik**: admin upload gambar (`jadwal_poliklinik_gambar` — biasanya hasil dari Generate Poster) + toggle `jadwal_poliklinik_aktif` lewat widget dashboard Filament (`JadwalPoliklinikPopupWidget`). Saat aktif, tampil sebagai modal fullscreen di homepage publik setelah delay 1.8 detik
+- **Popup Promo**: widget dashboard serupa (`PromoPopupWidget`) untuk mengaktifkan/nonaktifkan popup promo yang sudah ada di homepage
+- Kedua widget hanya terlihat untuk role `super_admin`, `admin`, `humas`, `informasi`
+
+#### CTA Google Review
+
+- Tombol "Tulis Ulasan Anda" & "Lihat Ulasan Lainnya" di homepage (bawah section FAQ) dan di footer (bawah embed Google Maps)
+- Redirect langsung ke halaman resmi Google Business Profile RS berdasarkan `google_place_id` — **tanpa** form survei/filter kepuasan perantara (pasien tidak puas pun bisa langsung menulis ulasan publik)
+- Rating yang didorong adalah rating **per rumah sakit** (mengikuti Google Business Profile), bukan breakdown per dokter/layanan individual
+- Detail keputusan scope: [issues/google-review.md](../issues/google-review.md)
 
 #### Homepage RS
 
@@ -177,6 +221,8 @@ Path admin dikonfigurasi via env: `ADMIN_PATH=manage` (default). Akses di `/{ADM
 | **Jadwal Harian** | Override jadwal harian + tracking perubahan status, kolom `is_executive` |
 | **Poster Template** | Upload background PNG, logo, shape; zone editor drag-drop interaktif |
 | **Generate Poster** | Form pilih template + tanggal → generate PNG 1080×1920 via Browsershot |
+| Artikel & Berita | CRUD artikel + rich text editor, kategori, gambar cover, toggle unggulan/aktif |
+| Kategori Artikel | CRUD kategori per RS (modal sederhana) |
 | Rawat Inap | Kelas kamar, fasilitas, galeri foto |
 | Gedung | Manajemen gedung |
 | Banner | Spanduk promosi beranda |
@@ -242,6 +288,8 @@ Slug bersifat unik **per RS** (composite unique), bukan global:
 - `spesialis`: unique `(slug, rumah_sakit_id)`
 - `halaman`: unique `(slug, rumah_sakit_id)`
 - `poliklinik`: unique `(slug, rumah_sakit_id)`
+- `artikel`, `kategori_artikel`: unique `(slug, rumah_sakit_id)`
+- `dokter`: **diperbaiki** dari unique global → composite `(slug, rumah_sakit_id)` — bug lama yang menyebabkan RS kedua gagal insert dokter dengan nama sama (lihat migrasi `2026_06_17_000002_fix_slug_unique_to_composite_dokter.php`)
 
 ---
 
@@ -320,6 +368,11 @@ npm run dev
 
 # 8. Jalankan
 php artisan serve
+
+# 9. (Opsional) Fitur Tanya Dokter — jalankan di terminal terpisah:
+php artisan reverb:start            # WebSocket server (real-time chat)
+php artisan queue:work              # Worker untuk Web Push notification (Layer 3)
+# Di production: gunakan Supervisor — lihat reverb/08-production-reverb-queue-setup.md
 ```
 
 Admin panel tersedia di `/{ADMIN_PATH}` (default: `/manage`).
@@ -352,6 +405,11 @@ php artisan test
 - `sesuai_perjanjian` dan `is_executive` disimpan dengan `(bool)` cast — **bukan** perbandingan `=== '1'`
 - Rows di JadwalPraktekPage dan JadwalHarianPage menggunakan UUID string sebagai array key
 - Poster: asset lokal dikonversi ke data URI base64 sebelum dirender di Browsershot (file:// tidak diizinkan)
+- Reverb/Echo: `namespace: ''` **wajib** di konfigurasi `new Echo({...})` (`resources/js/echo.js`) — Echo defaultnya menambahkan prefiks `App.Events` yang tidak cocok dengan `broadcastAs()` nama pendek; nama event di `broadcastAs()` & `#[On('echo:...')]` harus sama persis (lihat [reverb/05](../reverb/05-mismatch-namespace-echo-broadcastas.md))
+- Reverb/Echo: listener Livewire dengan placeholder channel **dinamis** (`#[On('echo:topik.{propertiYangBerubah},Event')]`) punya jendela rawan *race condition* saat propertinya berubah — pertimbangkan `wire:poll.visible.Ns` sebagai jaring pengaman (lihat [reverb/06](../reverb/06-race-condition-subscribe-channel-dinamis.md))
+- Web Push/VAPID: `sesiAktifToken` di `KonsultasiDashboard` harus `string` (bukan `?string`) karena placeholder `#[On('echo:konsultasi.{sesiAktifToken},...')]` tidak bisa di-resolve Livewire jika nilainya null — nilai kosong menghasilkan channel yang tidak pernah dipakai
+- Web Push: route yang di-pass ke job (`SendWebPushNotification`) wajib menyertakan parameter `rumahsakit` (slug) karena URI multi-tenant — eager-load `rumahSakit` di `sesiAktif()` sebelum dispatch
+- `push_subscription` disimpan sebagai TEXT JSON mentah; dibersihkan dari DB otomatis saat endpoint kadaluwarsa (laporan `sendNotification` dicek di job)
 
 ---
 
@@ -373,6 +431,21 @@ N8N_URL=https://...                # Webhook N8N untuk AI chatbot
 
 # Cache (untuk rate limiter)
 CACHE_STORE=database               # Gunakan redis di production untuk performa
+
+# Laravel Reverb (WebSocket self-hosted)
+REVERB_APP_ID=...
+REVERB_APP_KEY=...
+REVERB_APP_SECRET=...
+REVERB_HOST=localhost
+REVERB_PORT=8080
+REVERB_SCHEME=http
+
+# Web Push — VAPID keys (generate via web-push library atau Node.js crypto)
+# Lihat reverb/07-push-notification-pasien.md untuk cara generate
+VAPID_PUBLIC_KEY=...               # EC P-256 public key (URL-safe base64)
+VAPID_PRIVATE_KEY=...              # EC P-256 private key (URL-safe base64)
+VAPID_SUBJECT="${APP_URL}"         # Identitas pengirim (URL atau mailto:)
+VITE_VAPID_PUBLIC_KEY="${VAPID_PUBLIC_KEY}"  # Diekspos ke frontend via Vite
 ```
 
 ---
@@ -421,14 +494,38 @@ CACHE_STORE=database               # Gunakan redis di production untuk performa
 - [x] JadwalHarianPerubahan — snapshot nilai asli (`*_asli`) untuk deteksi "kembali ke semula" tanpa bergantung pada `JadwalPraktek`
 - [x] JadwalHarian — penanda visual baris Executive (highlight background amber + ikon bintang) di tabel admin
 - [x] JadwalPraktek — validasi `waktu_mulai` wajib diisi kecuali `sesuai_perjanjian` dicentang (form & kedua mode tabel)
+- [x] Tanya Dokter — konsultasi chat real-time via Laravel Reverb (token UUID, tanpa login, broadcasting dua arah pasien ↔ dokter, panel Filament terpisah untuk dokter)
+- [x] Tanya Dokter — 1 sesi aktif per pasien via cookie (redirect otomatis ke sesi aktif, umur cookie = durasi sesi dokter)
+- [x] Tanya Dokter — push notification 3 lapisan: in-app toast (Alpine.js global), browser Notification API, Web Push VAPID via service worker (`public/sw.js`) + `minishlink/web-push` job
+- [x] Tanya Dokter — banner izin push notifikasi kustom (gradient violet/indigo, animasi bel, dipicu hanya saat klik "Aktifkan")
+- [x] Tanya Dokter — kesimpulan/catatan dokter (form modal sebelum akhiri sesi, tampil di chat pasien, dapat diedit dari Riwayat)
+- [x] Tanya Dokter — rate limiting pesan pasien: 10 pesan per 60 detik per token sesi
+- [x] Tanya Dokter — KonsultasiDashboard: preview pesan terakhir per sesi di kartu antrean
+- [x] Tanya Dokter — KonsultasiDashboard: badge unread merah per sesi (via `dokter_baca_at` + `withCount`)
+- [x] Tanya Dokter — KonsultasiDashboard: warna kartu berbeda BERLANGSUNG vs MENUNGGU
+- [x] Tanya Dokter — RiwayatKonsultasi: daftar sesi selesai/kedaluwarsa, cari nama pasien, transkrip, edit kesimpulan
+- [x] Tanya Dokter — hapus semua kelas `dark:` dari halaman dokter (konsultasi-dashboard & riwayat-konsultasi)
+- [x] Tanya Dokter — Panel Filament terpisah untuk Dokter (`/dokter`, `DokterPanelProvider`)
+- [x] Generate Poster — fix bug field `hariIni`, `jam_mulai`/`waktu_mulai`, dan `libur` antar model
+- [x] Generate Poster — implementasi `previewPoster()` (render HTML preview + buka di tab baru)
+- [x] Artikel & Berita — CRUD + kategori, halaman publik list (unggulan + grid + pagination) & detail, link di dropdown "Media Informasi"
+- [x] Popup Jadwal Poliklinik — admin upload gambar (mis. hasil Generate Poster) + toggle aktif via widget dashboard, tampil modal di homepage publik
+- [x] Popup Promo — widget dashboard untuk toggle popup promo homepage
+- [x] CTA Google Review — tombol redirect ke Google Business Profile (homepage + footer), tanpa survei perantara
+- [x] Tombol "Daftar Sekarang" di halaman profil dokter & Jadwal Praktek (link ke `link_pendaftaran_online`)
+- [x] Chatbot — nama tampilan diubah jadi "Tanya Syifa" (FAB & bottom bar)
+- [x] Fix slug `dokter` dari unique global → composite per RS
 
 ### Dalam Pengerjaan
 
-- [ ] Generate Poster — fix bug field `hariIni`, `jam_mulai`/`waktu_mulai`, dan `libur` antar model
-- [ ] Generate Poster — implementasi `previewPoster()` (saat ini stub)
+- [ ] Poster — dukung gaya layout berbeda antar cabang (`grid_shape` vs `list_polos`), karena humas/desainer tiap cabang berbeda gaya — lihat [issues/poster-multi-cabang-layout-dan-scoping.md](../issues/poster-multi-cabang-layout-dan-scoping.md)
+- [ ] `PosterTemplateResource` belum ter-scope per RS (humas RS A bisa lihat/edit template RS B) — gap di dokumen yang sama
 
 ### Dalam Pertimbangan
 
+- [ ] Live antrian konsultasi disambungkan ke chatbot
+- [ ] Foto 360° untuk tiap kamar rawat inap — viewer sudah ada eksperimen (`@photo-sphere-viewer/core`), menunggu pengambilan foto ulang (task fotografi, bukan koding)
+- [ ] Info ketersediaan kamar rawat inap real-time — perlu sinkronisasi dengan sistem Ranap, tetap disertai arahan konfirmasi ke resepsionis
 - [ ] Notifikasi jadwal (email/WhatsApp)
 - [ ] Export jadwal ke PDF/Excel
 - [ ] Optimasi gambar (resize/kompresi otomatis saat upload — `intervention/image` atau WebP)

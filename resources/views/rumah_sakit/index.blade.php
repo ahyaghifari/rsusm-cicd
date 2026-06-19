@@ -407,7 +407,7 @@
                         <h4 class="font-semibold text-on-surface leading-snug">{{ $dk->nama }}</h4>
                         <span class="inline-block mt-2 mb-4 px-3 py-1 text-xs font-semibold
                                      text-primary bg-primary/10 rounded-full mx-auto">
-                            {{ $dk->spesialis->nama }}
+                            {{ $dk->namaSpesialis() }}
                         </span>
 
                         {{-- Tombol --}}
@@ -753,6 +753,11 @@
     </section>
     @endif
 
+    {{-- ============================================================ --}}
+    {{-- GOOGLE REVIEW CTA                                            --}}
+    {{-- ============================================================ --}}
+    @include('rumah_sakit.partials.google-review-cta')
+
     <script>
         function initPartnerSwipers() {
             if (typeof window.Swiper === 'undefined') return;
@@ -807,5 +812,6 @@
         document.addEventListener('livewire:navigated', initPartnerSwipers);
     </script>
 
+    @include('rumah_sakit.partials.jadwal-poliklinik-popup')
 
 </div>

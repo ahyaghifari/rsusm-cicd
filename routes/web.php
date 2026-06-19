@@ -15,6 +15,10 @@ Route::get('/poster-preview/{key}', function (string $key) {
     return response($html)->header('Content-Type', 'text/html; charset=utf-8');
 })->name('poster.preview')->middleware('auth');
 
+// ── [TEST] Preview 360 — spike teknis Photo Sphere Viewer, lihat issues/test-360-viewer.md.
+// Komentar baris ini sebelum push ke production kalau spike sudah tidak diperlukan lagi.
+Route::view('/test-360-viewer', 'test-360-viewer')->name('test.360_viewer');
+
 Route::get('/', [PortalController::class, 'index'])->middleware('throttle:portal')->name('home');
 Route::get('/cari-spesialis', [PortalController::class, 'spesialis'])->middleware('throttle:public-api')->name('cari_spesialis');
 
@@ -32,10 +36,13 @@ Route::prefix('{rumahsakit}')
 
         Route::get('dokter-kami', App\Livewire\Dokter\Find::class)->name('rumahsakit.dokter_kami');
         Route::get('dokter-kami/{dokter}', App\Livewire\Dokter\Show::class)->name('rumahsakit.dokter_show');
+        Route::get('tanya-dokter', App\Livewire\Pages\TanyaDokter::class)->name('rumahsakit.tanya_dokter');
+        Route::get('konsultasi/{sesi:token}', App\Livewire\Pages\KonsultasiChat::class)->name('rumahsakit.konsultasi');
         Route::get('jadwal-praktek', App\Livewire\Pages\JadwalPraktek::class)->name('rumahsakit.jadwal_praktek');
         Route::get('rawat-jalan', App\Livewire\Pages\RawatJalan::class)->name('rumahsakit.rawat_jalan');
         Route::get('rawat-jalan/{poliklinik}', App\Livewire\Pages\PoliKlinikDetail::class)->name('rumahsakit.rawat_jalan_show');
         Route::get('rawat-inap', App\Livewire\Pages\RawatInap::class)->name('rumahsakit.rawat_inap');
+        Route::get('ketersediaan-rawat-inap', App\Livewire\Pages\KetersediaanRawatInap::class)->name('rumahsakit.ketersediaan_rawat_inap');
         Route::get('unggulan', App\Livewire\Pages\LayananUnggulan::class)->name('rumahsakit.unggulan');
         Route::get('fasilitas-pendukung', App\Livewire\Pages\FasilitasPendukung::class)->name('rumahsakit.fasilitas_pendukung');
         Route::get('penunjang-medis', App\Livewire\Pages\PenunjangMedis::class)->name('rumahsakit.penunjang_medis');
@@ -46,4 +53,6 @@ Route::prefix('{rumahsakit}')
         Route::get('info/{slug}', App\Livewire\Pages\HalamanStatis::class)->name('rumahsakit.halaman_statis');
         Route::get('magazine', App\Livewire\Pages\Magazines::class)->name('rumahsakit.magazine');
         Route::get('faq', App\Livewire\Pages\Faq::class)->name('rumahsakit.faq');
+        Route::get('artikel', App\Livewire\Pages\Artikel::class)->name('rumahsakit.artikel');
+        Route::get('artikel/{artikel:slug}', App\Livewire\Pages\ArtikelDetail::class)->name('rumahsakit.artikel_detail');
     });

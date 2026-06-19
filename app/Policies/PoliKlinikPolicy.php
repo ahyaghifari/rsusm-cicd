@@ -71,7 +71,7 @@ class PoliKlinikPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_poli::klinik');
+        return $user->can('{{ ForceDeleteAny }}');
     }
 
     /**
@@ -87,7 +87,7 @@ class PoliKlinikPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_poli::klinik');
+        return $user->can('{{ RestoreAny }}');
     }
 
     /**

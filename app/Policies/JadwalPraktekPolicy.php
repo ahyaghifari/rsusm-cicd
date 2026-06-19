@@ -71,7 +71,7 @@ class JadwalPraktekPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_jadwal::praktek');
+        return $user->can('{{ ForceDeleteAny }}');
     }
 
     /**
@@ -87,7 +87,7 @@ class JadwalPraktekPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_jadwal::praktek');
+        return $user->can('{{ RestoreAny }}');
     }
 
     /**

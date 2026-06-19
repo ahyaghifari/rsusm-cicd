@@ -21,7 +21,7 @@
                 <h1 class="text-2xl md:text-4xl font-bold text-primary leading-tight">{{ $dokter->nama }}</h1>
                 <p class="font-bold text-white bg-linear-to-r from-yellow-500 to-amber-600
                           w-fit rounded-full px-3 py-1 mt-3 text-sm md:text-base">
-                    {{ $dokter->spesialis->nama }}
+                    {{ $dokter->namaSpesialis() }}
                 </p>
                 <hr class="my-4 border-gray-300">
                 <p class="text-gray-700 mt-3 leading-7 md:leading-8 text-sm md:text-base text-justify">
@@ -74,7 +74,21 @@
             </div>
         @endif
 
-        @include('rumah_sakit.partials._jadwal-disclaimer')
+        @php $punyaLinkDaftar = (bool) $rs->link_pendaftaran_online; @endphp
+        <div class="mt-8 flex flex-col md:flex-row gap-4 md:items-stretch">
+            @if($punyaLinkDaftar)
+                <a href="{{ $rs->link_pendaftaran_online }}" target="_blank"
+                   class="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl
+                          bg-tertiary text-on-tertiary font-bold text-sm
+                          border-2 border-white shadow-lg shadow-tertiary/40
+                          hover:shadow-xl hover:scale-105 active:scale-95
+                          transition-all duration-150 whitespace-nowrap">
+                    <span class="material-symbols-outlined text-[18px]">assignment</span>
+                    Daftar Sekarang
+                </a>
+            @endif
+            @include('rumah_sakit.partials._jadwal-disclaimer', ['noCenter' => $punyaLinkDaftar])
+        </div>
 
         {{-- ============================================================ --}}
         {{-- Pendidikan & Pelatihan --}}

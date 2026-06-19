@@ -43,12 +43,12 @@ class AdminPanelProvider extends PanelProvider
             ->font('Plus Jakarta Sans', provider: GoogleFontProvider::class)
             ->navigationGroups([
                 NavigationGroup::make()
-                    ->label('Media Informasi'),
-                NavigationGroup::make()
                     ->label('Dokter'),
                 NavigationGroup::make()
                     ->label('Poliklinik / Rawat Jalan'),
                 NavigationGroup::make()
+                    ->label('Media Informasi'),
+                    NavigationGroup::make()
                     ->label('Layanan'),
                 NavigationGroup::make()
                     ->label('Rawat Inap'),
@@ -81,7 +81,10 @@ class AdminPanelProvider extends PanelProvider
                             background-color: #ffe4fe !important; /* Ganti warna di sini */
                         }
                     </style>
-                ')
+                ',
+                
+                ),
+                
             )
             ->middleware([
                 EncryptCookies::class,

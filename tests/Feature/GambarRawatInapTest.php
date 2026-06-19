@@ -33,7 +33,6 @@ class GambarRawatInapTest extends TestCase
             'rumah_sakit_id' => $rs->id,
             'gedung_id' => $gedung->id,
             'nama' => 'Kamar Test',
-            'kelas' => 'VIP',
             'harga' => 500000,
             'kapasitas' => 2,
             'sort_order' => 1,

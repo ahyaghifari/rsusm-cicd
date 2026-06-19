@@ -13,7 +13,8 @@ class ManagePromo extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->mutateFormDataUsing(fn (array $data): array => PromoResource::mutateFormDataBeforeCreate($data)),
         ];
     }
 }

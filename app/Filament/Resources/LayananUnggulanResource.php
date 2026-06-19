@@ -59,9 +59,9 @@ class LayananUnggulanResource extends BaseRumahSakitResource
             ->columns([
                 static::rsTableColumn(),
 
-                Tables\Columns\TextColumn::make('sort_order')
-                    ->label('Urutan')
-                    ->sortable(),
+                // Tables\Columns\TextColumn::make('sort_order')
+                //     ->label('Urutan')
+                //     ->sortable(),
 
                 Tables\Columns\TextColumn::make('nama')
                     ->searchable()

@@ -58,20 +58,26 @@ document.addEventListener('alpine:init', () => {
     </div>
 
     <div class="relative">
-        <span x-show="!open"
-              class="absolute -inset-1 rounded-full border-2 border-primary animate-ping opacity-50 pointer-events-none"></span>
         <button
             @click="$store.chatbot.toggle()"
             :aria-expanded="open"
             :aria-label="open ? 'Tutup chatbot' : 'Buka chatbot Syifa Assistant'"
-            class="relative w-14 h-14 rounded-full bg-primary hover:bg-primary active:scale-95 border-none flex items-center justify-center cursor-pointer transition-all duration-150 shadow-lg"
+            class="relative h-14 rounded-full bg-primary hover:bg-primary active:scale-95 border-none flex items-center justify-center cursor-pointer transition-all duration-150 shadow-lg"
+            :class="open ? 'w-14' : 'pl-4 pr-5 gap-2'"
         >
-            <span class="material-symbols-outlined text-white text-[26px] absolute transition-all duration-200"
-                  :class="open ? 'opacity-0 scale-50 rotate-45' : 'opacity-100 scale-100 rotate-0'"
-                  aria-hidden="true">chat_bubble</span>
-            <span class="material-symbols-outlined text-white text-[26px] absolute transition-all duration-200"
-                  :class="open ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 -rotate-45'"
-                  aria-hidden="true">close</span>
+            <span class="relative w-6.5 h-6.5 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-white text-[26px] absolute transition-all duration-200"
+                      :class="open ? 'opacity-0 scale-50 rotate-45' : 'opacity-100 scale-100 rotate-0'"
+                      aria-hidden="true">chat_bubble</span>
+                <span class="material-symbols-outlined text-white text-[26px] absolute transition-all duration-200"
+                      :class="open ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 -rotate-45'"
+                      aria-hidden="true">close</span>
+            </span>
+            <span x-show="!open"
+                  x-transition:enter="transition ease-out duration-150"
+                  x-transition:enter-start="opacity-0"
+                  x-transition:enter-end="opacity-100"
+                  class="text-white text-sm font-semibold whitespace-nowrap">Tanya Syifa</span>
             <span x-show="showBadge && !open"
                   x-transition:leave="transition duration-150"
                   x-transition:leave-end="scale-0"

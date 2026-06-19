@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
             PoliKlinikSeeder::class,
             JadwalPraktekSeeder::class,
             HalamanSeeder::class,
+            ArtikelSeeder::class,
         ]);
 
         User::factory()->create([

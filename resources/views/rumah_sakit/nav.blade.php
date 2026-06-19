@@ -49,7 +49,7 @@
             <button type="button"
                 onclick="Livewire.dispatch('open-search')"
                 title="Cari (Ctrl+K)"
-                class="p-2 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg text-layer-foreground shadow-2xs hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none">
+                class="p-2 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg text-layer-foreground shadow-2xs bg-neutral-900/20 hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none">
                 <span class="material-symbols-outlined text-[16px]">search</span>
             </button>
 
@@ -82,6 +82,12 @@
                     <span class="{{ $gridIconClass }}">stethoscope</span>
                     <span class="{{ $gridLabelClass }}">Cari Dokter</span>
                 </a>
+                @if($currentRumahSakit->tanya_dokter_aktif)
+                <a wire:navigate href="{{ rumahsakit_route('rumahsakit.tanya_dokter') }}" class="{{ $gridItemClass }}">
+                    <span class="{{ $gridIconClass }}">chat</span>
+                    <span class="{{ $gridLabelClass }}">Tanya Dokter</span>
+                </a>
+                @endif
                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.jadwal_praktek') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">calendar_month</span>
                     <span class="{{ $gridLabelClass }}">Jadwal Praktek</span>
@@ -93,6 +99,10 @@
                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.rawat_inap') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">bed</span>
                     <span class="{{ $gridLabelClass }}">Rawat Inap</span>
+                </a>
+                <a wire:navigate href="{{ rumahsakit_route('rumahsakit.ketersediaan_rawat_inap') }}" class="{{ $gridItemClass }}">
+                    <span class="{{ $gridIconClass }}">monitor_heart</span>
+                    <span class="{{ $gridLabelClass }}">Ketersediaan Kamar</span>
                 </a>
                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.unggulan') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">star</span>
@@ -123,6 +133,10 @@
                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.partner_kami') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">handshake</span>
                     <span class="{{ $gridLabelClass }}">Partner Kami</span>
+                </a>
+                <a wire:navigate href="{{ rumahsakit_route('rumahsakit.artikel') }}" class="{{ $gridItemClass }}">
+                    <span class="{{ $gridIconClass }}">newspaper</span>
+                    <span class="{{ $gridLabelClass }}">Artikel</span>
                 </a>
                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.faq') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">help</span>
@@ -155,6 +169,10 @@
                                 href="{{ rumahsakit_route('rumahsakit.dokter_kami') }}">Cari Dokter</a>
                             <a wire:navigate class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200"
                                 href="{{ rumahsakit_route('rumahsakit.jadwal_praktek') }}">Jadwal Praktek</a>
+                            @if($currentRumahSakit->tanya_dokter_aktif)
+                            <a wire:navigate class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200"
+                                href="{{ rumahsakit_route('rumahsakit.tanya_dokter') }}">Tanya Dokter</a>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -176,6 +194,7 @@
                         <div class="p-1 space-y-0.5">
                             <a wire:navigate href="{{ rumahsakit_route('rumahsakit.rawat_jalan') }}" class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">Rawat Jalan</a>
                             <a wire:navigate href="{{ rumahsakit_route('rumahsakit.rawat_inap') }}" class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">Rawat Inap</a>
+                            <a wire:navigate href="{{ rumahsakit_route('rumahsakit.ketersediaan_rawat_inap') }}" class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">Ketersediaan Kamar</a>
                             <a wire:navigate href="{{ rumahsakit_route('rumahsakit.unggulan') }}" class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">Unggulan</a>
                             <a wire:navigate href="{{ rumahsakit_route('rumahsakit.penunjang_medis') }}" class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">Penunjang Medis</a>
                             <a wire:navigate href="{{ rumahsakit_route('rumahsakit.fasilitas_pendukung') }}" class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">Fasilitas Pendukung</a>
@@ -205,19 +224,39 @@
                                     {{ $h->judul }}
                                 </a>
                             @endforeach
-                            <a wire:navigate href="{{ rumahsakit_route('rumahsakit.magazine') }}"
-                               class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">Syifa Magazine</a>
                             <a wire:navigate href="{{ rumahsakit_route('rumahsakit.partner_kami') }}"
                                class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">Partner Kami</a>
                         </div>
                     </div>
                 </div>
 
-                <a class="text-sm text-navbar-nav-foreground hover:text-primary-hover focus:outline-hidden focus:text-primary-focus"
-                    wire:navigate href="{{ rumahsakit_route('rumahsakit.hubungi_kami') }}">Hubungi Kami</a>
+                <!-- Dropdown Media Informasi -->
+                <div class="m-1 hs-dropdown [--trigger:hover] relative inline-flex">
+                    <button id="hs-dropdown-media-informasi" type="button"
+                        class="hs-dropdown-toggle inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer text-layer-foreground hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none"
+                        aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
+                        Media Informasi
+                        <svg class="hs-dropdown-open:rotate-180 size-4" xmlns="http://www.w3.org/2000/svg"
+                            width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+                    </button>
+                    <div class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden min-w-60 bg-white shadow-md rounded-lg mt-2 after:h-4 after:absolute after:-bottom-4 after:inset-s-0 after:w-full before:h-4 before:absolute before:-top-4 before:inset-s-0 before:w-full z-50 text-on-surface"
+                        role="menu" aria-orientation="vertical" aria-labelledby="hs-dropdown-media-informasi">
+                        <div class="p-1 space-y-0.5">
+                            <a wire:navigate href="{{ rumahsakit_route('rumahsakit.artikel') }}"
+                               class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">Artikel & Berita</a>
+                            <a wire:navigate href="{{ rumahsakit_route('rumahsakit.magazine') }}"
+                               class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">Syifa Magazine</a>
+                            <a wire:navigate href="{{ rumahsakit_route('rumahsakit.faq') }}"
+                               class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">FAQ</a>
+                        </div>
+                    </div>
+                </div>
 
                 <a class="text-sm text-navbar-nav-foreground hover:text-primary-hover focus:outline-hidden focus:text-primary-focus"
-                    wire:navigate href="{{ rumahsakit_route('rumahsakit.faq') }}">FAQ</a>
+                    wire:navigate href="{{ rumahsakit_route('rumahsakit.hubungi_kami') }}">Hubungi Kami</a>
             </div>
             {{-- ===== END DESKTOP ===== --}}
 
