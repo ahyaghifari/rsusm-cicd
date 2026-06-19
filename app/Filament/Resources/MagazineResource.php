@@ -19,7 +19,7 @@ class MagazineResource extends BaseRumahSakitResource
     protected static ?string $pluralModelLabel = 'Magazine';
     protected static string | null $navigationGroup = 'Media Informasi';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 7;
 
     public static function form(Form $form): Form
     {

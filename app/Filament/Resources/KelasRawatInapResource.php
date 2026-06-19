@@ -17,7 +17,7 @@ class KelasRawatInapResource extends BaseRumahSakitResource
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';
 
-    protected static ?string $navigationLabel = 'Kelas Rawat Inap';
+    protected static ?string $navigationLabel = 'Kelas';
 
     protected static ?string $modelLabel = 'Kelas Rawat Inap';
 

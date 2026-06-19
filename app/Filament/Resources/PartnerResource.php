@@ -15,7 +15,7 @@ class PartnerResource extends BaseRumahSakitResource
     protected static ?string $model = Partner::class;
 
     protected static ?int $navigationSort = 6;
-    protected static string | null $navigationGroup = 'Media Informasi';
+    protected static string | null $navigationGroup = 'Tentang Kami';
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
 
     protected static ?string $navigationLabel = 'Partner';
