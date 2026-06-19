@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ArtikelResource\Pages;
 use App\Models\Artikel;
+use App\Models\KategoriArtikel;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
@@ -80,7 +81,14 @@ class ArtikelResource extends BaseRumahSakitResource
                             ->afterStateUpdated(fn ($state, Forms\Set $set) => $set('slug', \Illuminate\Support\Str::slug($state))),
                         TextInput::make('slug')
                             ->required(),
-                    ]),
+                    ])
+                    ->createOptionUsing(function (array $data, Forms\Get $get): KategoriArtikel {
+                        $data['rumah_sakit_id'] = static::isSuperAdmin()
+                            ? $get('rumah_sakit_id')
+                            : static::rumahSakitId();
+                    
+                        return KategoriArtikel::create($data);
+                    }),
 
                 FileUpload::make('gambar')
                     ->image()
