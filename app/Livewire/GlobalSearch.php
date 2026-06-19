@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Artikel;
 use App\Models\Dokter;
 use App\Models\Faq;
 use App\Models\Halaman;
@@ -126,6 +127,19 @@ class GlobalSearch extends Component
                     fn ($q2) => $q2->where(fn ($q3) => $q3
                         ->where('judul', 'like', $like)
                         ->orWhere('kata_kunci', 'like', $like)
+                    )
+                )
+                ->where('rumah_sakit_id', $rsId)
+                ->where('aktif', true)
+                ->limit(5)
+                ->get(['id', 'judul', 'slug']);
+
+            // artikel berita
+            $results['artikel'] = Artikel::when($isMySQL,
+                    fn ($q2) => $q2->whereFullText(['judul', 'ringkasan', 'konten'], $bq, ['mode' => 'boolean']),
+                    fn ($q2) => $q2->where(fn ($q3) => $q3
+                        ->where('judul', 'like', $like)
+                        ->orWhere('ringkasan', 'like', $like)
                     )
                 )
                 ->where('rumah_sakit_id', $rsId)

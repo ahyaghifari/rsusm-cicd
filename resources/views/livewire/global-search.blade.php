@@ -160,6 +160,33 @@
                             @endforeach
                         @endif
 
+                        {{-- Artikel --}}
+                        @if($results['artikel']->isNotEmpty())
+                            <p class="px-4 pt-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Artikel & Berita</p>
+                            @foreach($results['artikel'] as $artikel)
+                                <a wire:navigate
+                                   href="{{ route('rumahsakit.artikel_detail', ['rumahsakit' => $rsSlug, 'artikel' => $artikel->slug]) }}"
+                                   wire:click="close"
+                                   class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-variant transition-colors">
+                                    <div class="shrink-0 w-9 h-9 rounded-full overflow-hidden bg-secondary/10 flex items-center justify-center">
+                                        @if($artikel->gambar)
+                                            <img src="{{ asset('storage/' . $artikel->gambar) }}"
+                                                 alt="{{ $artikel->judul }}"
+                                                 class="w-full h-full object-cover"
+                                                 loading="lazy">
+                                        @else
+                                            <span class="material-symbols-outlined text-secondary text-[18px]">newspaper</span>
+                                        @endif
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-semibold text-on-surface truncate">{{ $artikel->judul }}</p>
+                                    </div>
+                                    <span class="material-symbols-outlined text-on-surface-variant text-[16px] ml-auto shrink-0">chevron_right</span>
+                                </a>
+                            @endforeach
+                        @endif
+                        
+
                     </div>
                 @endif
 
