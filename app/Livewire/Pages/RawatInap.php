@@ -84,7 +84,10 @@ class RawatInap extends Component
             'gedungs'      => $gedungs,
             'rawatInap'    => $rawatInap,
             'totalRooms'   => $totalRooms,
-            'kelasOptions' => KelasRawatInap::where('rumah_sakit_id', $this->rumah_sakit_id)->orderBy('nama')->get(),
+            'kelasOptions' => KelasRawatInap::where('rumah_sakit_id', $this->rumah_sakit_id)
+                ->whereHas('rawatInap', fn ($q) => $q->where('aktif', true))
+                ->orderBy('nama')
+                ->get(),
         ]);
     }
 }

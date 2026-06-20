@@ -2,32 +2,37 @@
     <x-page-hero title="Rawat Inap" subtitle="Pilih kelas kamar sesuai kebutuhan dan kenyamanan Anda" />
 
     {{-- Rail kelas + tautan cek ketersediaan --}}
-    <div class="mt-7 w-10/12 mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div class="mt-7 w-10/12 mx-auto flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
 
         @if($kelasOptions->isNotEmpty())
-        <div class="flex flex-wrap items-center gap-2">
-            <button wire:click="$set('kelasFilter', null)" type="button"
-                class="px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-200
-                       {{ ! $kelasFilter
-                           ? 'bg-primary text-white border-primary shadow-md shadow-primary/25'
-                           : 'bg-white text-on-surface-variant border-outline-variant hover:border-primary/40 hover:text-primary' }}">
-                Semua Kelas
-            </button>
-            @foreach($kelasOptions as $kelas)
-                @php $aktif = $kelasFilter === $kelas->id; @endphp
-                <button wire:click="$set('kelasFilter', {{ $kelas->id }})" type="button"
-                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-200
-                           {{ $aktif
-                               ? ($kelas->is_vip
-                                   ? 'bg-amber-400 text-amber-900 border-amber-400 shadow-md shadow-amber-400/30'
-                                   : 'bg-primary text-white border-primary shadow-md shadow-primary/25')
+        <div>
+            <span class="text-xs font-bold text-on-surface-variant/70 uppercase tracking-wide mb-2 block">Pilih Kelas Kamar</span>
+            <div class="flex flex-wrap items-center gap-2">
+                <button wire:click="$set('kelasFilter', null)" type="button"
+                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-200 hover:scale-105 active:scale-95
+                           {{ ! $kelasFilter
+                               ? 'bg-primary text-white border-primary shadow-md shadow-primary/25'
                                : 'bg-white text-on-surface-variant border-outline-variant hover:border-primary/40 hover:text-primary' }}">
-                    @if($kelas->is_vip)
-                        <span class="material-symbols-outlined text-[14px]" style="font-variation-settings:'FILL' 1">star</span>
-                    @endif
-                    {{ $kelas->nama }}
+                    <span class="material-symbols-outlined text-[16px]">grid_view</span>
+                    Semua Kelas
                 </button>
-            @endforeach
+                @foreach($kelasOptions as $kelas)
+                    @php $aktif = $kelasFilter === $kelas->id; @endphp
+                    <button wire:click="$set('kelasFilter', {{ $kelas->id }})" type="button"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-200 hover:scale-105 active:scale-95
+                               {{ $aktif
+                                   ? ($kelas->is_vip
+                                       ? 'bg-amber-400 text-amber-900 border-amber-400 shadow-md shadow-amber-400/30 ring-2 ring-amber-200'
+                                       : 'bg-primary text-white border-primary shadow-md shadow-primary/25')
+                                   : 'bg-white text-on-surface-variant border-outline-variant hover:border-primary/40 hover:text-primary' }}">
+                        <span class="material-symbols-outlined text-[16px] {{ ! $aktif && $kelas->is_vip ? 'text-amber-500' : '' }}"
+                              @if($kelas->is_vip) style="font-variation-settings:'FILL' 1" @endif>
+                            {{ $kelas->is_vip ? 'star' : 'bed' }}
+                        </span>
+                        {{ $kelas->nama }}
+                    </button>
+                @endforeach
+            </div>
         </div>
         @endif
 
