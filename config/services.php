@@ -40,7 +40,7 @@ return [
         // Tiap RS punya identifier sendiri di rumah_sakit.ranap_kode_api (contoh: "rsa"), yang
         // disambung oleh RanapApiClient jadi {base_url}/{kode}/bed. RS yang kolom ranap_kode_api
         // -nya masih kosong otomatis fallback ke fixture lokal (mock_path).
-        'base_url' => env('RANAP_API_BASE_URL'),
+        'base_url' => env('RANAP_API_BASE_UR'),
         'mock_path' => 'app/mock/ranap-ketersediaan.json',
     ],
 
