@@ -183,7 +183,7 @@
                     @else
                     <div class="flex gap-2 items-end flex-shrink-0" data-msg="bot">
                         <div class="w-7 h-7 rounded-full bg-white border-2 border-primary flex items-center justify-center flex-shrink-0 mb-4 p-1">
-                            <img src="{{ asset('img/favicon.png') }}" alt="">
+                            <img src="{{ asset('img/tanya-syifa.png') }}" alt="">
                         </div>
                         <div class="flex flex-col max-w-[80%]">
                             <div class="px-3 py-2 rounded-[15px] rounded-bl-[4px] bg-white border border-[#d6c0ce] text-[13px] leading-snug text-[#0b1c30] break-words">

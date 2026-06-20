@@ -51,10 +51,11 @@
             aria-label="Buka chatbot"
         >
             <div class="flex items-center gap-1.5">
-                <div class="relative shrink-0">
-                    <span class="material-symbols-outlined text-white bg-primary
-                                 text-[11px] p-1 rounded leading-none block"
-                          aria-hidden="true">chat_bubble</span>
+                <div class="relative shrink-0 w-7 h-7 flex items-center justify-center">
+                    <img src="{{ asset('img/tanya-syifa.png') }}"
+                         alt=""
+                         class="w-fit h-6"
+                         aria-hidden="true">
                     <span x-show="$store.chatbot.showBadge && !$store.chatbot.open"
                           class="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full
                                  bg-red-500 border border-white text-[7px] font-bold

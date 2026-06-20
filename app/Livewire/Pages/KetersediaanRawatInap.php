@@ -2,21 +2,53 @@
 
 namespace App\Livewire\Pages;
 
-use App\Livewire\RsPortalComponent;
 use App\Models\KelasRawatInap;
+use App\Models\RumahSakit;
 use App\Services\RanapApiClient;
+use Artesaos\SEOTools\Facades\OpenGraph;
+use Artesaos\SEOTools\Facades\SEOMeta;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\Locked;
+use Livewire\Component;
 
-class KetersediaanRawatInap extends RsPortalComponent
+class KetersediaanRawatInap extends Component
 {
+    #[Locked]
+    public int $rumah_sakit_id;
+
     public ?int $kelasFilter = null;
 
     public ?string $namaKamarFilter = null;
 
+    public function boot(): void
+    {
+        // Re-bind currentRumahSakit ke container agar tersedia bagi komponen lain
+        // (mis. GlobalSearch) yang berjalan bersamaan dalam satu Livewire AJAX request.
+        // RumahSakitMiddleware tidak jalan di /livewire/update, jadi kita bind manual.
+        // Ini juga yang dibutuhkan agar wire:poll tidak error BindingResolutionException
+        // setelah request awal, karena poll selalu lewat /livewire/update.
+        if (! empty($this->rumah_sakit_id) && ! app()->bound('currentRumahSakit')) {
+            $rs = RumahSakit::find($this->rumah_sakit_id);
+            if ($rs) {
+                app()->instance('currentRumahSakit', $rs);
+            }
+        }
+    }
+
     public function mount(): void
     {
-        $this->seo('Ketersediaan Rawat Inap', 'Cek ketersediaan kamar rawat inap secara real-time di ' . $this->rs->nama . '.');
+        $rs = current_rumahsakit();
+        $this->rumah_sakit_id = $rs->id;
+
+        $fullTitle = 'Ketersediaan Rawat Inap - ' . $rs->nama;
+        $desc      = 'Cek ketersediaan kamar rawat inap secara real-time di ' . $rs->nama . '.';
+        SEOMeta::setTitle($fullTitle);
+        SEOMeta::setDescription($desc);
+        OpenGraph::setTitle($fullTitle);
+        OpenGraph::setDescription($desc);
+        OpenGraph::setUrl(request()->url());
+        OpenGraph::addProperty('site_name', $rs->nama);
     }
 
     public function render()
@@ -26,17 +58,19 @@ class KetersediaanRawatInap extends RsPortalComponent
         // issues/ketersediaan-rawat-inap-plan.md.
         $ranapRumahSakitId = (int) config('services.ranap.rumah_sakit_id');
 
-        if ($ranapRumahSakitId !== $this->rs->id) {
+        if ($ranapRumahSakitId !== $this->rumah_sakit_id) {
             return view('rumah_sakit.pages.ketersediaan-rawat-inap', [
                 'kamarList'        => collect(),
                 'ringkasan'        => $this->emptyRingkasan(),
                 'kelasOptions'     => collect(),
                 'namaKamarOptions' => collect(),
                 'loadedAt'         => Carbon::now(),
+                'totalBed'         => 0,
+                'jumlahHasil'      => 0,
             ]);
         }
 
-        $kelasByApiId = KelasRawatInap::where('rumah_sakit_id', $this->rs->id)
+        $kelasByApiId = KelasRawatInap::where('rumah_sakit_id', $this->rumah_sakit_id)
             ->whereNotNull('id_kelas_api')
             ->get()
             ->keyBy('id_kelas_api');
@@ -76,9 +110,11 @@ class KetersediaanRawatInap extends RsPortalComponent
         return view('rumah_sakit.pages.ketersediaan-rawat-inap', [
             'kamarList'        => $kamarList,
             'ringkasan'        => $ringkasan,
-            'kelasOptions'     => KelasRawatInap::where('rumah_sakit_id', $this->rs->id)->orderBy('nama')->get(),
+            'kelasOptions'     => KelasRawatInap::where('rumah_sakit_id', $this->rumah_sakit_id)->orderBy('nama')->get(),
             'namaKamarOptions' => $namaKamarOptions,
             'loadedAt'         => Carbon::now(),
+            'totalBed'         => $semuaBed->count(),
+            'jumlahHasil'      => $beds->count(),
         ]);
     }
 

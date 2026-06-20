@@ -1,18 +1,59 @@
 <div>
-    <x-page-hero title="Rawat Inap" />
+    <x-page-hero title="Rawat Inap" subtitle="Pilih kelas kamar sesuai kebutuhan dan kenyamanan Anda" />
 
-    <div class="mt-5 w-10/12 mx-auto flex justify-center">
+    {{-- Rail kelas + tautan cek ketersediaan --}}
+    <div class="mt-7 w-10/12 mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+
+        @if($kelasOptions->isNotEmpty())
+        <div class="flex flex-wrap items-center gap-2">
+            <button wire:click="$set('kelasFilter', null)" type="button"
+                class="px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-200
+                       {{ ! $kelasFilter
+                           ? 'bg-primary text-white border-primary shadow-md shadow-primary/25'
+                           : 'bg-white text-on-surface-variant border-outline-variant hover:border-primary/40 hover:text-primary' }}">
+                Semua Kelas
+            </button>
+            @foreach($kelasOptions as $kelas)
+                @php $aktif = $kelasFilter === $kelas->id; @endphp
+                <button wire:click="$set('kelasFilter', {{ $kelas->id }})" type="button"
+                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-200
+                           {{ $aktif
+                               ? ($kelas->is_vip
+                                   ? 'bg-amber-400 text-amber-900 border-amber-400 shadow-md shadow-amber-400/30'
+                                   : 'bg-primary text-white border-primary shadow-md shadow-primary/25')
+                               : 'bg-white text-on-surface-variant border-outline-variant hover:border-primary/40 hover:text-primary' }}">
+                    @if($kelas->is_vip)
+                        <span class="material-symbols-outlined text-[14px]" style="font-variation-settings:'FILL' 1">star</span>
+                    @endif
+                    {{ $kelas->nama }}
+                </button>
+            @endforeach
+        </div>
+        @endif
+
         <a wire:navigate href="{{ rumahsakit_route('rumahsakit.ketersediaan_rawat_inap') }}"
-           class="inline-flex items-center gap-2 text-sm font-semibold text-primary
-                  border border-primary/30 hover:bg-primary/8 px-4 py-2 rounded-full transition-colors">
-            <span class="material-symbols-outlined text-[18px]">monitor_heart</span>
-            Cek Ketersediaan Kamar
+           class="inline-flex items-center gap-2 text-sm font-semibold text-tertiary hover:text-tertiary/80
+                  transition-colors shrink-0 group {{ $kelasOptions->isEmpty() ? 'mx-auto' : '' }}">
+            <span class="relative flex size-2">
+                <span class="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping"></span>
+                <span class="relative inline-flex rounded-full size-2 bg-emerald-500"></span>
+            </span>
+            Cek ketersediaan kamar real-time
+            <span class="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">arrow_forward</span>
         </a>
     </div>
 
-    <div class="mt-5 w-10/12 mx-auto">
-        @if($hasGedung)
+    <div class="mt-10 w-10/12 mx-auto">
+        @if($totalRooms === 0)
+            <div class="flex flex-col items-center justify-center py-24 text-center">
+                <div class="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                    <span class="material-symbols-outlined text-4xl text-primary">bed</span>
+                </div>
+                <p class="text-lg font-semibold text-on-surface">Tidak ada kamar yang sesuai kelas ini</p>
+            </div>
+        @elseif($hasGedung)
             @foreach($gedungs as $gedung)
+                @continue($gedung->rawatInap->isEmpty())
 
                 <section class="mt-20">
                     <div class="grid grid-cols-5 items-center gap-5">
@@ -24,7 +65,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
 
                         @foreach($gedung->rawatInap as $room)
-                                <div data-aos="fade-up"> 
+                                <div data-aos="fade-up">
                                     <x-rawat-inap :rawat-inap="$room" />
                                 </div>
                         @endforeach
@@ -33,11 +74,11 @@
                 </section>
 
             @endforeach
-        
+
         @else
                 @foreach($rawatInap as $room)
 
-                    <div data-aos="fade-up"> 
+                    <div data-aos="fade-up">
                         <x-rawat-inap :rawat-inap="$room" />
                     </div>
 

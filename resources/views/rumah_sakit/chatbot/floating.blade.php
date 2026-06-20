@@ -65,10 +65,12 @@ document.addEventListener('alpine:init', () => {
             class="relative h-14 rounded-full bg-primary hover:bg-primary active:scale-95 border-none flex items-center justify-center cursor-pointer transition-all duration-150 shadow-lg"
             :class="open ? 'w-14' : 'pl-4 pr-5 gap-2'"
         >
-            <span class="relative w-6.5 h-6.5 flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-white text-[26px] absolute transition-all duration-200"
-                      :class="open ? 'opacity-0 scale-50 rotate-45' : 'opacity-100 scale-100 rotate-0'"
-                      aria-hidden="true">chat_bubble</span>
+            <span class="relative w-8 h-8 flex items-center justify-center shrink-0">
+                <img src="{{ asset('img/tanya-syifa.png') }}"
+                     alt=""
+                     class="w-7 h-fit absolute transition-all duration-200"
+                     :class="open ? 'opacity-0 scale-50 rotate-45' : 'opacity-100 scale-100 rotate-0'"
+                     aria-hidden="true">
                 <span class="material-symbols-outlined text-white text-[26px] absolute transition-all duration-200"
                       :class="open ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 -rotate-45'"
                       aria-hidden="true">close</span>

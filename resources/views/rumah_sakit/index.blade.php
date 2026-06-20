@@ -571,7 +571,7 @@
     {{-- PROMO                                                        --}}
     {{-- ============================================================ --}}
     @if($promos->count() > 0)
-    <section class="mt-24" data-aos="fade-up">
+    <section class="mt-32 min-h-screen" data-aos="fade-up">
         <div class="w-11/12 lg:w-10/12 mx-auto">
 
             <div class="flex items-end justify-between mb-8">
@@ -585,61 +585,27 @@
                 </a>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 flex-wrap gap-5 items-center md:items-start">
                 @foreach($promos as $p)
-                <a wire:navigate
-                   href="{{ route('rumahsakit.promo_detail', ['rumahsakit' => $rs->slug, 'promo' => $p->slug]) }}"
-                   class="group bg-white rounded-2xl overflow-hidden shadow-sm border border-outline-variant/20
-                          hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col animate-fade-in"
-                   style="animation-delay: {{ $loop->index * 50 }}ms">
-
-                    @if($p->gambar)
-                    <div class="h-48 overflow-hidden relative bg-surface-container/30">
+                @if($p->gambar)
+                    <a wire:navigate
+                    href="{{ route('rumahsakit.promo_detail', ['rumahsakit' => $rs->slug, 'promo' => $p->slug]) }}"
+                    class="group bg-red-400 w-fit"
+                    style="animation-delay: {{ $loop->index * 50 }}ms">
+                     <div class="relative bg-green-400 w-fit flex items-center">
                         <img src="{{ Storage::url($p->gambar) }}" alt="{{ $p->judul }}"
-                             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                             loading="lazy">
+                            class="w-full h-fit object-contain group-hover:scale-105 transition-transform duration-500"
+                            loading="lazy">
                         @if($p->popup)
-                        <div class="absolute top-3 right-3">
-                            <span class="inline-flex items-center gap-1 text-[10px] font-bold bg-yellow-400 text-primary px-2 py-0.5 rounded-full">
-                                <span class="material-symbols-outlined text-[10px]">star</span> Unggulan
-                            </span>
-                        </div>
+                            <div class="absolute top-3 right-3">
+                                <span class="inline-flex items-center gap-1 text-[10px] font-bold bg-yellow-400 text-primary px-2 py-0.5 rounded-full">
+                                    <span class="material-symbols-outlined text-[10px]">star</span> Unggulan
+                                </span>
+                            </div>
                         @endif
                     </div>
-                    @else
-                    <div class="h-48 bg-primary/8 flex items-center justify-center relative">
-                        <span class="material-symbols-outlined text-6xl text-primary/30">local_offer</span>
-                        @if($p->popup)
-                        <div class="absolute top-3 right-3">
-                            <span class="inline-flex items-center gap-1 text-[10px] font-bold bg-yellow-400 text-primary px-2 py-0.5 rounded-full">
-                                <span class="material-symbols-outlined text-[10px]">star</span> Unggulan
-                            </span>
-                        </div>
-                        @endif
-                    </div>
-                    @endif
-
-                    <div class="p-4 flex flex-col flex-1">
-                        <h3 class="font-bold text-on-surface text-sm leading-snug mb-2 line-clamp-2
-                                   group-hover:text-primary transition-colors duration-200">
-                            {{ $p->judul }}
-                        </h3>
-                        @if($p->deskripsi)
-                        <p class="text-xs text-on-surface-variant line-clamp-2 flex-1 leading-relaxed">
-                            {{ strip_tags($p->deskripsi) }}
-                        </p>
-                        @else
-                        <div class="flex-1"></div>
-                        @endif
-                        <div class="flex items-center gap-1 mt-3 text-xs font-semibold text-primary
-                                    pt-3 border-t border-outline-variant/20">
-                            Lihat Detail
-                            <span class="material-symbols-outlined text-[13px] group-hover:translate-x-0.5 transition-transform">
-                                arrow_forward
-                            </span>
-                        </div>
-                    </div>
-                </a>
+                    </a>
+                @endif
                 @endforeach
             </div>
 
@@ -651,7 +617,7 @@
     {{-- FAQ                                                          --}}
     {{-- ============================================================ --}}
     @if($faqs->isNotEmpty())
-    <section class="mt-24" data-aos="fade-up">
+    <section class="mt-32 min-h-screen" data-aos="fade-up">
         <div class="w-11/12 lg:w-10/12 mx-auto">
 
             {{-- Header --}}

@@ -104,4 +104,26 @@ class KetersediaanRawatInapTest extends TestCase
             ->assertSee('BED A')
             ->assertDontSee('BED B');
     }
+
+    public function test_render_ulang_tidak_error_walau_binding_currentrumahsakit_hilang(): void
+    {
+        // Mensimulasikan request AJAX wire:poll/Livewire update — RumahSakitMiddleware
+        // tidak jalan di /livewire/update sehingga binding 'currentRumahSakit' di
+        // container tidak otomatis tersedia lagi. boot() di komponen ini harus
+        // re-bind manual dari $rumah_sakit_id yang sudah di-mount, bukan error
+        // BindingResolutionException.
+        $this->putFixture([
+            ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED A', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => null],
+        ]);
+
+        $component = Livewire::test(KetersediaanRawatInap::class);
+
+        app()->forgetInstance('currentRumahSakit');
+        $this->assertFalse(app()->bound('currentRumahSakit'));
+
+        // Trigger render ulang lewat AJAX (mirip efek wire:poll) tanpa binding ter-set.
+        $component->set('kelasFilter', null)->assertSee('BED A');
+
+        $this->assertTrue(app()->bound('currentRumahSakit'));
+    }
 }
