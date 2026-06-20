@@ -21,6 +21,8 @@ class LinkLayananResource extends BaseRumahSakitResource
     protected static ?string $navigationLabel = 'Link Layanan';
 
     protected static ?string $modelLabel = 'Link Layanan';
+    protected static bool $shouldRegisterNavigation = false;
+
 
     public static function form(Form $form): Form
     {

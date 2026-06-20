@@ -21,6 +21,8 @@ class KetersediaanRawatInap extends Component
 
     public ?string $namaKamarFilter = null;
 
+    public string $groupBy = 'kelas';
+
     public function boot(): void
     {
         // Re-bind currentRumahSakit ke container agar tersedia bagi komponen lain
@@ -55,27 +57,15 @@ class KetersediaanRawatInap extends Component
     {
         // Data ketersediaan tidak disimpan ke database — selalu diambil langsung dari
         // API/fixture Ranap setiap render (termasuk tiap wire:poll). Lihat
-        // issues/ketersediaan-rawat-inap-plan.md.
-        $ranapRumahSakitId = (int) config('services.ranap.rumah_sakit_id');
-
-        if ($ranapRumahSakitId !== $this->rumah_sakit_id) {
-            return view('rumah_sakit.pages.ketersediaan-rawat-inap', [
-                'kamarList'        => collect(),
-                'ringkasan'        => $this->emptyRingkasan(),
-                'kelasOptions'     => collect(),
-                'namaKamarOptions' => collect(),
-                'loadedAt'         => Carbon::now(),
-                'totalBed'         => 0,
-                'jumlahHasil'      => 0,
-            ]);
-        }
+        // issues/link-layanan-static-dan-ranap-multi-tenant.md.
+        $rs = RumahSakit::find($this->rumah_sakit_id);
 
         $kelasByApiId = KelasRawatInap::where('rumah_sakit_id', $this->rumah_sakit_id)
             ->whereNotNull('id_kelas_api')
             ->get()
             ->keyBy('id_kelas_api');
 
-        $semuaBed = collect(app(RanapApiClient::class)->fetch())
+        $semuaBed = collect(app(RanapApiClient::class)->fetch($rs?->ranap_kode_api))
             ->map(function (array $r) use ($kelasByApiId) {
                 $kelas = $kelasByApiId->get($r['idKelas'] ?? null);
 
@@ -89,14 +79,19 @@ class KetersediaanRawatInap extends Component
                     'kelas_id'      => $kelas?->id,
                     'kelas_nama'    => $kelas?->nama,
                 ];
-            });
+            })
+            ->reject(fn (array $r) => $r['status'] === 0);
 
         $namaKamarOptions = $semuaBed->pluck('nama_kamar')->unique()->sort()->values();
+
+        $sortKeys = $this->groupBy === 'kelas'
+            ? ['kelas_nama', 'nama_kamar', 'tempat_tidur']
+            : ['nama_kamar', 'tempat_tidur'];
 
         $beds = $semuaBed
             ->when($this->kelasFilter, fn (Collection $c) => $c->where('kelas_id', $this->kelasFilter))
             ->when($this->namaKamarFilter, fn (Collection $c) => $c->where('nama_kamar', $this->namaKamarFilter))
-            ->sortBy(['nama_kamar', 'tempat_tidur']);
+            ->sortBy($sortKeys);
 
         $ringkasan = $this->emptyRingkasan();
         foreach ($beds as $bed) {
@@ -105,7 +100,9 @@ class KetersediaanRawatInap extends Component
             }
         }
 
-        $kamarList = $beds->groupBy(fn ($bed) => $bed['ruang_kamar'] . '|' . $bed['nama_kamar']);
+        $kamarList = $this->groupBy === 'kelas'
+            ? $beds->groupBy(fn ($bed) => $bed['kelas_id'] ?? 'tanpa-kelas')
+            : $beds->groupBy(fn ($bed) => $bed['ruang_kamar'] . '|' . $bed['nama_kamar']);
 
         return view('rumah_sakit.pages.ketersediaan-rawat-inap', [
             'kamarList'        => $kamarList,

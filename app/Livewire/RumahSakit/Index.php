@@ -6,7 +6,6 @@ use App\Models\Banner;
 use App\Models\Dokter;
 use App\Models\Faq;
 use App\Models\LayananUnggulan;
-use App\Models\LinkLayanan;
 use App\Models\Partner;
 use App\Models\Promo;
 use App\Models\RumahSakit;
@@ -58,11 +57,6 @@ class Index extends Component
             ->limit(3)
             ->get();
 
-        $linkLayanan = LinkLayanan::where('rumah_sakit_id', $this->rs->id)
-            ->where('aktif', true)
-            ->orderBy('sort_order')
-            ->get();
-
         $partnerAsuransi = Partner::where('rumah_sakit_id', $this->rs->id)
             ->where('kategori', 'ASURANSI')
             ->where('aktif', true)
@@ -94,7 +88,6 @@ class Index extends Component
             'banner'             => $banner,
             'layanan_unggulan'   => $layananUnggulan,
             'dokter_kami'        => $dokterKami,
-            'link_layanan'       => $linkLayanan,
             'partner_asuransi'   => $partnerAsuransi,
             'partner_perusahaan' => $partnerPerusahaan,
             'promos'             => $promos,

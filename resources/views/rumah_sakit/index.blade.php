@@ -219,10 +219,33 @@
     </script> --}}
 
     <!-- link layanan -->
-    @if($link_layanan->count() > 0)
     @php
-        $fallbackIcons = ['hotel', 'calendar_clock', 'monitor_heart', 'vaccines', 'medical_services', 'emergency'];
+        $layananStatic = [
+            [
+                'label'       => 'Ketersediaan Ruang Rawat',
+                'deskripsi'   => 'Cek ketersediaan kamar rawat inap secara real-time.',
+                'icon'        => 'bed',
+                'href'        => rumahsakit_route('rumahsakit.ketersediaan_rawat_inap'),
+                'eksternal'   => false,
+            ],
+            [
+                'label'       => 'Jadwal Praktek Dokter',
+                'deskripsi'   => 'Lihat jadwal praktik seluruh dokter spesialis.',
+                'icon'        => 'calendar_clock',
+                'href'        => rumahsakit_route('rumahsakit.jadwal_praktek'),
+                'eksternal'   => false,
+            ],
+            [
+                'label'       => 'Pantauan Antrian',
+                'deskripsi'   => 'Pantau antrian poliklinik secara langsung.',
+                'icon'        => 'confirmation_number',
+                'href'        => $rs->link_antrian,
+                'eksternal'   => true,
+            ],
+        ];
+        $layananStatic = array_filter($layananStatic, fn ($l) => ! empty($l['href']));
     @endphp
+    @if(count($layananStatic) > 0)
     <section class="relative overflow-hidden py-16">
         {{-- Background gradient --}}
         <div class="absolute inset-0 bg-linear-to-br from-primary via-primary to-secondary/80"></div>
@@ -242,10 +265,10 @@
             </div>
 
             {{-- Cards --}}
-            <div class="grid md:grid-cols-{{ min($link_layanan->count(), 3) }} gap-6">
-                @foreach($link_layanan as $layanan)
-                @php $icon = $fallbackIcons[$loop->index % count($fallbackIcons)]; @endphp
-                <a href="{{ $layanan->link }}" target="_blank" rel="noopener noreferrer"
+            <div class="grid md:grid-cols-{{ min(count($layananStatic), 3) }} gap-6">
+                @foreach($layananStatic as $layanan)
+                <a @if(! $layanan['eksternal']) wire:navigate @else target="_blank" rel="noopener noreferrer" @endif
+                    href="{{ $layanan['href'] }}"
                     class="group relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 flex flex-col
                            hover:bg-white hover:border-white hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)]
                            hover:-translate-y-2 transition-all duration-300 cursor-pointer overflow-hidden">
@@ -256,26 +279,19 @@
                     {{-- Icon --}}
                     <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-7 shrink-0
                                 bg-white/20 group-hover:bg-primary/10 transition-colors duration-300">
-                        @if($layanan->gambar)
-                            <img src="{{ Storage::url($layanan->gambar) }}"
-                                 class="w-10 h-10 object-cover rounded-xl" alt="{{ $layanan->label }}" loading="lazy">
-                        @else
-                            <span class="material-symbols-outlined text-white group-hover:text-primary text-4xl transition-colors duration-300">
-                                {{ $icon }}
-                            </span>
-                        @endif
+                        <span class="material-symbols-outlined text-white group-hover:text-primary text-4xl transition-colors duration-300">
+                            {{ $layanan['icon'] }}
+                        </span>
                     </div>
 
                     {{-- Konten --}}
                     <div class="flex-1">
                         <h3 class="text-white group-hover:text-on-surface text-xl font-bold mb-3 leading-snug transition-colors duration-300">
-                            {{ $layanan->label }}
+                            {{ $layanan['label'] }}
                         </h3>
-                        @if($layanan->deskripsi_singkat)
                         <p class="text-white/65 group-hover:text-on-surface-variant text-sm leading-relaxed transition-colors duration-300">
-                            {{ $layanan->deskripsi_singkat }}
+                            {{ $layanan['deskripsi'] }}
                         </p>
-                        @endif
                     </div>
 
                     {{-- CTA --}}
@@ -319,7 +335,7 @@
 
     <!-- layanan unggulan -->
     @if(count($layanan_unggulan) > 0)
-    <section id="unggulan" class="bg-secondary mt-24 relative overflow-hidden py-16">
+    <section id="unggulan" class="bg-secondary mt-20 md:mt-40 relative overflow-hidden py-16">
 
         {{-- Dekorasi background --}}
         <div class="absolute inset-0 opacity-[0.06] pointer-events-none"
@@ -382,7 +398,7 @@
     @endif
 
     <!-- dokter kami -->
-    <section class="mt-24">
+    <section class="mt-20 md:mt-40">
         <div class="w-11/12 lg:w-10/12 mx-auto">
             <h2 class="text-tertiary text-4xl text-center font-bold">Dokter Kami</h2>
             <p class="text-on-surface-variant text-center mt-4 w-4/6 mx-auto text-sm md:text-base">
@@ -441,7 +457,7 @@
     {{-- ============================================================ --}}
     {{-- CTA — Siap Melayani                                          --}}
     {{-- ============================================================ --}}
-    <section class="mt-24 relative overflow-hidden" data-aos="fade-up">
+    <section class="mt-20 md:mt-40 relative overflow-hidden" data-aos="fade-up">
 
         <div class="absolute inset-0"
              style="background: linear-gradient(135deg, #4d51b2 0%, #3a3e99 50%, #2e3180 100%);"></div>
@@ -503,7 +519,7 @@
 
     <!-- asuransi dan perusahaan rekanan -->
     @if($partner_asuransi->count() > 0 || $partner_perusahaan->count() > 0)
-    <section class="mt-24 py-16 bg-surface-container-low overflow-hidden">
+    <section class="mt-20 md:mt-40 py-16 bg-surface-container-low overflow-hidden">
         <div class="w-10/12 mx-auto mb-10">
             <h2 class="text-on-surface text-3xl font-bold text-center">Partner & Rekanan Kami</h2>
             <p class="text-on-surface-variant text-center mt-3">Kami bekerja sama dengan berbagai mitra terpercaya untuk memberikan pelayanan terbaik bagi pasien.</p>
@@ -571,7 +587,7 @@
     {{-- PROMO                                                        --}}
     {{-- ============================================================ --}}
     @if($promos->count() > 0)
-    <section class="mt-32 min-h-screen" data-aos="fade-up">
+    <section class="mt-20 md:mt-40" data-aos="fade-up">
         <div class="w-11/12 lg:w-10/12 mx-auto">
 
             <div class="flex items-end justify-between mb-8">
@@ -617,7 +633,7 @@
     {{-- FAQ                                                          --}}
     {{-- ============================================================ --}}
     @if($faqs->isNotEmpty())
-    <section class="mt-32 min-h-screen" data-aos="fade-up">
+    <section class="mt-20 md:mt-40" data-aos="fade-up">
         <div class="w-11/12 lg:w-10/12 mx-auto">
 
             {{-- Header --}}

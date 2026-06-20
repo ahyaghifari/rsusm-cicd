@@ -85,4 +85,36 @@
                 @endforeach
         @endif
     </div>
+
+    <script>
+        function initCarousels() {
+            // Tunggu sedikit agar DOM fully rendered
+            setTimeout(() => {
+                // HSE Carousel: auto-initialize semua elemen dengan [data-hs-carousel]
+                if (window.HSStaticMethods && typeof window.HSStaticMethods.autoInit === 'function') {
+                    window.HSStaticMethods.autoInit();
+                }
+
+                // Trigger lazy loading untuk gambar yang baru ditambahkan
+                if (window.LazyLoad) {
+                    window.LazyLoad.updateImages();
+                }
+
+                // Trigger AOS refresh untuk fade-up animations
+                if (window.AOS && typeof window.AOS.refresh === 'function') {
+                    window.AOS.refresh();
+                }
+            }, 100);
+        }
+
+        // Init on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initCarousels);
+        } else {
+            initCarousels();
+        }
+
+        // Reinit saat Livewire update (filter diubah)
+        document.addEventListener('livewire:updated', initCarousels);
+    </script>
 </div>

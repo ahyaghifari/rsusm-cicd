@@ -29,7 +29,6 @@ class KetersediaanRawatInapTest extends TestCase
 
         app()->instance('currentRumahSakit', $this->rs);
 
-        config(['services.ranap.rumah_sakit_id' => $this->rs->id]);
         config(['services.ranap.mock_path' => 'app/mock/ranap-ketersediaan-test.json']);
     }
 
@@ -46,16 +45,19 @@ class KetersediaanRawatInapTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_halaman_kosong_jika_rs_bukan_yang_dikonfigurasi_ranap(): void
+    public function test_halaman_tampil_dari_fixture_walau_rs_belum_punya_ranap_kode_api(): void
     {
-        config(['services.ranap.rumah_sakit_id' => 999]);
+        // Multi-tenant: RS tanpa rumah_sakit.ranap_kode_api tetap fallback ke fixture
+        // lokal (bukan halaman kosong) — lihat issues/link-layanan-static-dan-ranap-multi-tenant.md.
+        $this->assertNull($this->rs->ranap_kode_api);
 
         $this->putFixture([
             ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED 1', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'X', 'namaKamar' => 'KAMAR X', 'idKelas' => null],
         ]);
 
         Livewire::test(KetersediaanRawatInap::class)
-            ->assertSee('Data ketersediaan belum tersedia');
+            ->assertSee('BED 1')
+            ->assertDontSee('Data ketersediaan belum tersedia');
     }
 
     public function test_halaman_tampilkan_ringkasan_dan_kamar_dari_fixture(): void

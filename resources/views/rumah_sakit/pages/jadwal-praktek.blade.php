@@ -239,13 +239,14 @@
         <div class="mt-8 flex flex-col md:flex-row gap-4 md:items-stretch">
             @if($punyaLinkDaftar)
                 <a href="{{ $currentRumahSakit->link_pendaftaran_online }}" target="_blank"
-                   class="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl
-                          bg-tertiary text-on-tertiary font-bold text-sm
-                          border-2 border-white shadow-lg shadow-tertiary/40
-                          hover:shadow-xl hover:scale-105 active:scale-95
-                          transition-all duration-150 whitespace-nowrap">
-                    <span class="material-symbols-outlined text-[18px]">assignment</span>
-                    Daftar Sekarang
+                   class="group shrink-0 inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl
+                          bg-tertiary hover:bg-tertiary/90 text-on-tertiary font-bold text-base
+                          shadow-lg shadow-tertiary/30 hover:shadow-xl hover:shadow-tertiary/40
+                          hover:-translate-y-1 active:scale-95
+                          transition-all duration-200 whitespace-nowrap">
+                    <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform duration-200">event</span>
+                    <span>Daftar Sekarang</span>
+                    <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-100 -ml-1 transition-all duration-200">arrow_forward</span>
                 </a>
             @endif
             @include('rumah_sakit.partials._jadwal-disclaimer', ['noCenter' => $punyaLinkDaftar])

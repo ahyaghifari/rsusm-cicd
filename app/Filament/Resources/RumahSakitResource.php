@@ -95,6 +95,23 @@ class RumahSakitResource extends BaseResource
                             ->nullable()
                             ->helperText('Cari Place ID lewat Place ID Finder resmi Google: https://developers.google.com/maps/documentation/places/web-service/place-id'),
                     ]),
+                Forms\Components\Section::make('Integrasi Eksternal')
+                    ->description('Identifier API ketersediaan rawat inap & link pantauan antrian, khusus RS ini.')
+                    ->collapsible()
+                    ->visible(fn () => static::isSuperAdmin())
+                    ->schema([
+                        Forms\Components\TextInput::make('ranap_kode_api')
+                            ->label('Kode API Ranap')
+                            ->maxLength(50)
+                            ->nullable()
+                            ->helperText('Identifier RS di sistem Ranap, contoh: "rsa". Kosongkan jika RS ini belum terhubung ke API Ranap (akan pakai data contoh/fixture).'),
+                        Forms\Components\TextInput::make('link_antrian')
+                            ->label('Link Pantauan Antrian')
+                            ->url()
+                            ->maxLength(255)
+                            ->nullable()
+                            ->helperText('URL situs eksternal pantauan antrian poliklinik RS ini. Ditampilkan sebagai kartu "Pantauan Antrian" di halaman utama & portal.'),
+                    ]),
             ]);
     }
 

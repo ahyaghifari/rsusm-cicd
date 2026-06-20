@@ -36,13 +36,12 @@ return [
     ],
 
     'ranap' => [
-        // Belum ada endpoint resmi dari sistem Ranap — kosongkan dulu, RanapApiClient
-        // akan fallback baca fixture lokal (mock_path) selama ini kosong.
-        'url' => env('RANAP_API_URL'),
+        // Base URL tanpa kode RS & tanpa trailing slash, contoh: https://ranap.example.com/api.
+        // Tiap RS punya identifier sendiri di rumah_sakit.ranap_kode_api (contoh: "rsa"), yang
+        // disambung oleh RanapApiClient jadi {base_url}/{kode}/bed. RS yang kolom ranap_kode_api
+        // -nya masih kosong otomatis fallback ke fixture lokal (mock_path).
+        'base_url' => env('RANAP_API_BASE_URL'),
         'mock_path' => 'app/mock/ranap-ketersediaan.json',
-        // Data ketersediaan belum punya identifier cabang RS — sementara semua data
-        // ditandai milik 1 RS ini. Lihat issues/ketersediaan-rawat-inap-plan.md, Keputusan #2.
-        'rumah_sakit_id' => env('RANAP_RUMAH_SAKIT_ID'),
     ],
 
 ];

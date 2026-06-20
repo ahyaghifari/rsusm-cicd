@@ -45,6 +45,22 @@
                 </div>
             </div>
 
+            <div class="px-5 pt-4 flex items-center gap-2">
+                <span class="text-xs font-bold text-on-surface-variant shrink-0">Tampilan</span>
+                <div class="inline-flex rounded-full border border-outline-variant/30 p-0.5 bg-surface-container-lowest">
+                    <button type="button" wire:click="$set('groupBy', 'kelas')"
+                        class="px-3 py-1 rounded-full text-xs font-bold transition-colors
+                               {{ $groupBy === 'kelas' ? 'bg-primary text-white' : 'text-on-surface-variant hover:text-on-surface' }}">
+                        Per Kelas
+                    </button>
+                    <button type="button" wire:click="$set('groupBy', 'kamar')"
+                        class="px-3 py-1 rounded-full text-xs font-bold transition-colors
+                               {{ $groupBy === 'kamar' ? 'bg-primary text-white' : 'text-on-surface-variant hover:text-on-surface' }}">
+                        Per Kamar
+                    </button>
+                </div>
+            </div>
+
             <div class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 @include('rumah_sakit.pages._searchable-select', [
                     'property'     => 'kelasFilter',
@@ -136,11 +152,18 @@
 
                         <div class="p-5">
                             <div class="flex items-start justify-between gap-2 mb-3">
-                                <h3 class="font-bold text-on-surface text-sm leading-snug">{{ $first['nama_kamar'] }}</h3>
-                                @if($first['kelas_nama'])
+                                @if($groupBy === 'kelas')
+                                    <h3 class="font-bold text-on-surface text-sm leading-snug">{{ $first['kelas_nama'] ?? 'Tanpa Kelas' }}</h3>
                                     <span class="shrink-0 text-[11px] font-bold uppercase tracking-wide bg-primary/10 text-primary px-2 py-1 rounded-full">
-                                        {{ $first['kelas_nama'] }}
+                                        {{ $beds->count() }} bed
                                     </span>
+                                @else
+                                    <h3 class="font-bold text-on-surface text-sm leading-snug">{{ $first['nama_kamar'] }}</h3>
+                                    @if($first['kelas_nama'])
+                                        <span class="shrink-0 text-[11px] font-bold uppercase tracking-wide bg-primary/10 text-primary px-2 py-1 rounded-full">
+                                            {{ $first['kelas_nama'] }}
+                                        </span>
+                                    @endif
                                 @endif
                             </div>
 
@@ -156,8 +179,13 @@
                                         };
                                     @endphp
                                     <div class="flex items-center justify-between gap-2 text-sm">
-                                        <span class="text-on-surface-variant">{{ $bed['tempat_tidur'] }}</span>
-                                        <span class="text-[11px] font-bold px-2 py-1 rounded-full {{ $colorClass }}">
+                                        <span class="text-on-surface-variant">
+                                            {{ $bed['tempat_tidur'] }}
+                                            @if($groupBy === 'kelas')
+                                                <span class="block text-[10px] text-on-surface-variant/70">{{ $bed['nama_kamar'] }}</span>
+                                            @endif
+                                        </span>
+                                        <span class="text-[11px] font-bold px-2 py-1 rounded-full {{ $colorClass }} shrink-0">
                                             {{ \App\Enums\StatusKetersediaanKamar::labelFor($bed['status']) }}
                                         </span>
                                     </div>

@@ -8,10 +8,9 @@ use Illuminate\Support\Facades\Log;
 /**
  * Client untuk data ketersediaan kamar dari sistem Ranap.
  *
- * Belum ada endpoint/autentikasi resmi dari sistem Ranap (lihat
- * issues/ketersediaan-rawat-inap-plan.md, Keputusan #1). Untuk sekarang fetch() membaca
- * fixture JSON lokal. Saat endpoint asli + auth sudah tersedia, ganti isi method ini jadi
- * HTTP call — pemanggil (command sync) tidak perlu berubah.
+ * Tiap RS punya identifier sendiri di URL API ({base_url}/{kode}/bed, kolom
+ * rumah_sakit.ranap_kode_api). Kalau $kodeApi kosong (RS belum terhubung ke Ranap), fetch()
+ * fallback membaca fixture JSON lokal supaya halaman tetap bisa di-demo dengan data contoh.
  */
 class RanapApiClient
 {
@@ -21,11 +20,13 @@ class RanapApiClient
      *     keterangan: ?string, ruangan: string, namaKamar: string, idKelas: ?int
      * }>
      */
-    public function fetch(): array
+    public function fetch(?string $kodeApi = null): array
     {
-        $url = config('services.ranap.url');
+        $baseUrl = config('services.ranap.base_url');
 
-        if ($url) {
+        if ($baseUrl && $kodeApi) {
+            $url = rtrim($baseUrl, '/') . '/' . trim($kodeApi, '/') . '/bed';
+
             return Http::timeout(10)->get($url)->throw()->json() ?? [];
         }
 

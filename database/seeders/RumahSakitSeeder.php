@@ -23,6 +23,7 @@ class RumahSakitSeeder extends Seeder
             'lokasi_google_map'      => null,
             'tentang_kami'           => '<p>RSU Syifa Medika Banjarbaru hadir untuk masyarakat yang ingin mendapatkan pelayanan kesehatan yang berkualitas. RSU Syifa Medika Banjarbaru merupakan pelayanan kesehatan yang jujur dalam pelayanan dan selalu memberikan kemudahan karena didukung oleh staff medis yang profesional, bersertifikasi, ahli di bidangnya serta didukung oleh peralatan yang mutakhir dan terkini sesuai dengan moto kami yaitu <strong>Pelayanan yang profesional dan terpercaya</strong>.</p>',
             'gambar_tentang'         => null,
+            'link_antrian'           => 'https://simgos.rsusyifamedika.co.id/apps/AntrianOnline/',
         ]);
 
         RumahSakit::create([

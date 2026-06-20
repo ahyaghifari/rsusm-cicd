@@ -40,6 +40,8 @@ class RumahSakit extends Model
         'jadwal_poliklinik_gambar',
         'jadwal_poliklinik_aktif',
         'google_place_id',
+        'ranap_kode_api',
+        'link_antrian',
     ];
 
     /**

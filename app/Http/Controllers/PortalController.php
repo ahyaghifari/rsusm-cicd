@@ -12,9 +12,7 @@ class PortalController extends Controller
 {
     public function index()
     {
-        $rumahsakit = RumahSakit::where('aktif', true)
-            ->with(['linkLayanan' => fn($q) => $q->where('aktif', true)])
-            ->get();
+        $rumahsakit = RumahSakit::where('aktif', true)->get();
 
         $promos = Promo::with('rumahSakit')
             ->whereHas('rumahSakit', fn($q) => $q->where('aktif', true))

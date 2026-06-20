@@ -240,14 +240,22 @@
                                 <span class="material-symbols-outlined text-[13px]">calendar_month</span>
                                 Jadwal Praktek
                             </a>
-                            @foreach($rs->linkLayanan as $ll)
-                            <a href="{{ $ll->link }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()"
+                            <a href="/{{ $rs->slug }}/ketersediaan-rawat-inap" onclick="event.stopPropagation()"
+                               class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium
+                                      bg-surface-container border border-outline-variant/40 text-on-surface-variant
+                                      hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-colors">
+                                <span class="material-symbols-outlined text-[13px]">bed</span>
+                                Ketersediaan Kamar
+                            </a>
+                            @if($rs->link_antrian)
+                            <a href="{{ $rs->link_antrian }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()"
                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium
                                       bg-surface-container border border-outline-variant/40 text-on-surface-variant
                                       hover:bg-surface-container-high hover:text-on-surface transition-colors">
-                                {{ $ll->label }}
+                                <span class="material-symbols-outlined text-[13px]">confirmation_number</span>
+                                Pantauan Antrian
                             </a>
-                            @endforeach
+                            @endif
                         </div>
 
                         {{-- Tombol Kunjungi --}}
@@ -306,59 +314,26 @@
 
         <!-- Promo Grid -->
         <div id="promo-grid"
-            class="{{ $promos->isEmpty() ? 'hidden' : 'grid' }} grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full relative z-10 transition-all duration-300">
+            class="{{ $promos->isEmpty() ? 'hidden' : 'grid' }} grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-5 w-full relative z-10 transition-all duration-300 items-center md:items-start">
             @foreach($promos as $p)
-            <div class="promo-card group bg-surface-container-lowest rounded-2xl overflow-hidden shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] border border-outline-variant/30 transition-all duration-300 hover:-translate-y-1.5 flex flex-col"
-                data-hospital="{{ $p->rumahSakit->slug }}" style="transition: all 0.3s ease, opacity 0.3s ease, transform 0.3s ease;">
-
-                @if($p->gambar)
-                <div class="h-56 overflow-hidden relative cursor-pointer promo-img-wrapper">
-                    <img alt="{{ $p->judul }}"
-                        class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
-                        src="{{ Storage::url($p->gambar) }}">
-                    <div class="absolute top-4 left-4 bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md tracking-wider uppercase">
-                        {{ $p->rumahSakit->lokasi }}
-                    </div>
+            @if($p->gambar)
+            <a href="{{ route('rumahsakit.promo_detail', ['rumahsakit' => $p->rumahSakit->slug, 'promo' => $p->slug]) }}"
+               class="promo-card group w-fit"
+               data-hospital="{{ $p->rumahSakit->slug }}">
+                <div class="relative w-fit flex items-center overflow-hidden rounded-2xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.15)] group-hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.25)] transition-shadow duration-300">
+                    <img src="{{ Storage::url($p->gambar) }}" alt="{{ $p->judul }}"
+                        class="w-full h-fit object-contain group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy">
                     @if($p->popup)
-                    <div class="absolute top-4 right-4">
-                        <span class="inline-flex items-center gap-0.5 text-[10px] font-bold uppercase bg-yellow-400 text-primary px-2 py-0.5 rounded-full shadow-sm">
+                    <div class="absolute top-3 right-3">
+                        <span class="inline-flex items-center gap-1 text-[10px] font-bold bg-yellow-400 text-primary px-2 py-0.5 rounded-full">
                             <span class="material-symbols-outlined text-[10px]">star</span> Unggulan
                         </span>
                     </div>
                     @endif
-                    <div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
-                        <span class="material-symbols-outlined text-white text-4xl bg-primary-container/85 p-3 rounded-full shadow-lg transform scale-75 group-hover:scale-100 transition-transform duration-300">zoom_in</span>
-                    </div>
                 </div>
-                @else
-                <div class="h-56 overflow-hidden relative bg-secondary/10 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-7xl text-secondary/30">local_offer</span>
-                    <div class="absolute top-4 left-4 bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md tracking-wider uppercase">
-                        {{ $p->rumahSakit->lokasi }}
-                    </div>
-                </div>
-                @endif
-
-                <div class="p-6 flex flex-col grow">
-                    <h3 class="text-lg font-bold text-on-surface mb-2 line-clamp-2 group-hover:text-secondary transition-colors">
-                        {{ $p->judul }}
-                    </h3>
-                    @if($p->deskripsi)
-                    <p class="text-body-sm text-on-surface-variant mb-4 line-clamp-3 grow">
-                        {{ strip_tags($p->deskripsi) }}
-                    </p>
-                    @else
-                    <div class="grow"></div>
-                    @endif
-                    <div class="border-t border-outline-variant/30 pt-4 flex justify-end items-center mt-auto">
-                        <a href="{{ route('rumahsakit.promo_detail', ['rumahsakit' => $p->rumahSakit->slug, 'promo' => $p->slug]) }}"
-                           class="text-label-md font-bold text-secondary hover:text-secondary-container flex items-center gap-1 transition-colors">
-                            Lihat Detail
-                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
+            </a>
+            @endif
             @endforeach
         </div>
 
@@ -371,24 +346,6 @@
             </p>
         </div>
     </section>
-
-    <!-- Lightbox Modal -->
-    <div id="promo-lightbox"
-        class="fixed inset-0 z-100 bg-black/85 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300 backdrop-blur-sm">
-        <button id="promo-lightbox-close"
-            class="absolute top-6 right-6 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-2.5 rounded-full transition-all cursor-pointer shadow-lg">
-            <span class="material-symbols-outlined text-2xl">close</span>
-        </button>
-        <div class="relative max-w-4xl max-h-[85vh] w-full flex flex-col items-center transform scale-95 opacity-0 transition-all duration-300"
-            id="promo-lightbox-content">
-            <img id="promo-lightbox-img" src="" alt="Promo Poster"
-                class="max-h-[70vh] w-auto max-w-full object-contain rounded-xl shadow-2xl border border-white/10">
-            <div class="mt-4 text-center text-white px-6 py-3 bg-white/15 backdrop-blur-md rounded-2xl max-w-xl shadow-lg border border-white/5">
-                <h3 id="promo-lightbox-title" class="text-lg font-bold"></h3>
-                <p id="promo-lightbox-desc" class="text-sm text-white/85 mt-1"></p>
-            </div>
-        </div>
-    </div>
 
 </main>
 
