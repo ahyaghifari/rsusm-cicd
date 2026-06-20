@@ -193,6 +193,15 @@ Dua mode tampilan:
 - Tombol silang-tautan dengan halaman `/rawat-inap` (masing-masing mengarah ke satu sama lain)
 - Detail desain & keputusan: [issues/ketersediaan-rawat-inap-plan.md](../issues/ketersediaan-rawat-inap-plan.md), [issues/link-layanan-static-dan-ranap-multi-tenant.md](../issues/link-layanan-static-dan-ranap-multi-tenant.md)
 
+#### Live Antrian Poliklinik per Dokter
+
+- **`Dokter.nomor_poli_antrian`** (integer, nullable) — identifier dokter ini di sistem antrian eksternal. `Dokter.kuota_pasien` (text, nullable) — info kuota/ketersediaan rawat jalan, free text, tampil di profil dokter publik
+- **`AntrianApiClient`**: fetch live ke `{rumah_sakit.link_antrian}/api/public/poli/{nomor_poli_antrian}` — base URL-nya **reuse kolom `link_antrian`** yang sama dengan kartu "Pantauan Antrian" (bukan kolom/env terpisah), jadi otomatis multi-tenant per RS
+- **Basic Auth**: kredensial **global** (sama untuk semua RS) dari `config('services.antrian.username'/'password')` (env `ANTRIAN_API_USERNAME`/`ANTRIAN_API_PASSWORD`)
+- **Tanpa cache**: status diambil langsung tiap halaman profil dokter di-render, sama seperti pola `RanapApiClient`. Kalau base URL kosong, request gagal, atau timeout — fungsi return `null` (dicatat sebagai log warning) dan blok status di halaman publik otomatis tidak ikut tampil, tidak ada error yang terlihat pengunjung
+- **Admin (`DokterResource`)**: section "API Antrian" — field `nomor_poli_antrian` + tombol "Tes" (`suffixAction`) yang langsung fetch API pakai nilai yang sedang diketik (belum perlu disimpan) dan tampilkan respons mentah (ID, nama poli, nama dokter, status) via notifikasi — supaya admin tahu nomornya benar sebelum disimpan. Section ini **hanya terlihat untuk role `super_admin` dan `admin`**
+- Respons API yang diharapkan: `{id, nama_poli, nama_dokter, status}` — field `id` ditafsirkan sebagai nomor antrian yang sedang berjalan
+
 #### Homepage RS
 
 Seksi berurutan:
@@ -228,7 +237,7 @@ Path admin dikonfigurasi via env: `ADMIN_PATH=manage` (default). Akses di `/{ADM
 | Modul | Keterangan |
 |---|---|
 | Rumah Sakit | CRUD data RS, logo, gambar, about, `executive_clinic` (super admin only) |
-| Dokter | Manajemen dokter + foto + deskripsi (SoftDelete + Restore) |
+| Dokter | Manajemen dokter + foto + deskripsi + kuota pasien (SoftDelete + Restore). Section "API Antrian" hanya untuk role `super_admin`/`admin` |
 | Spesialis | Spesialisasi per RS (SoftDelete + Restore) |
 | Poliklinik | Klinik per RS (SoftDelete + Restore) |
 | **Jadwal Praktek** | Jadwal rawat jalan per poliklinik — 2 mode editable, kolom `is_executive` |
@@ -402,7 +411,7 @@ Akun yang dibuat otomatis oleh `DatabaseSeeder`:
 
 ```bash
 php artisan test
-# 279+ tests passing (Unit + Feature)
+# 301+ tests passing (Unit + Feature)
 ```
 
 ---
@@ -428,6 +437,8 @@ php artisan test
 - Web Push: route yang di-pass ke job (`SendWebPushNotification`) wajib menyertakan parameter `rumahsakit` (slug) karena URI multi-tenant — eager-load `rumahSakit` di `sesiAktif()` sebelum dispatch
 - `push_subscription` disimpan sebagai TEXT JSON mentah; dibersihkan dari DB otomatis saat endpoint kadaluwarsa (laporan `sendNotification` dicek di job)
 - **`RsPortalComponent` + `wire:poll`/interaksi AJAX berulang tidak cocok**: `RumahSakitMiddleware` (yang men-set binding `currentRumahSakit` ke container) cuma jalan di request awal (full page load), **tidak** jalan di `/livewire/update` (request AJAX untuk `wire:poll` & tiap `wire:click`/`wire:model` setelahnya) — pakai `RsPortalComponent::boot()` di komponen yang sering re-render via AJAX akan `BindingResolutionException` setelah interaksi pertama. Solusi: simpan `rumah_sakit_id` sebagai `#[Locked] public int` lalu re-bind manual di `boot()` komponen itu sendiri (`if (! app()->bound('currentRumahSakit')) { ... }`) — lihat `KetersediaanRawatInap.php` & `RawatInap.php` (kedua Livewire page ini sengaja **tidak** extends `RsPortalComponent` karena alasan ini)
+- `RumahSakit.link_antrian` dipakai **dua kali** untuk dua tujuan berbeda: (1) URL klik langsung untuk kartu publik "Pantauan Antrian", dan (2) base URL `AntrianApiClient` untuk fetch JSON live status. Kalau salah satu kebutuhan berubah formatnya, kolom ini perlu dipecah jadi dua
+- Test Filament `Panel` butuh instance yang benar-benar terdaftar (`Filament\Facades\Filament::getPanel('admin')`), **bukan** `app(\Filament\Panel::class)` — instance kosong dari container tidak punya `id()`, akan error `Exception: A panel has been registered without an id()` begitu kode memanggil `$panel->getId()` (mis. di `User::canAccessPanel()`)
 
 ---
 
@@ -469,6 +480,11 @@ VITE_VAPID_PUBLIC_KEY="${VAPID_PUBLIC_KEY}"  # Diekspos ke frontend via Vite
 # Kosongkan untuk fallback ke fixture storage/app/mock/ranap-ketersediaan.json
 # Identifier per RS diisi di kolom rumah_sakit.ranap_kode_api (Filament, bukan .env)
 RANAP_API_BASE_URL=
+
+# Live Antrian Poliklinik — base URL-nya dari kolom rumah_sakit.link_antrian (per RS),
+# bukan env. Kredensial Basic Auth di bawah ini global (sama untuk semua RS).
+ANTRIAN_API_USERNAME=
+ANTRIAN_API_PASSWORD=
 ```
 
 ---
@@ -543,6 +559,10 @@ RANAP_API_BASE_URL=
 - [x] Fix bug `RsPortalComponent` + `wire:poll` — `KetersediaanRawatInap` & `RawatInap` pindah ke `boot()` re-bind manual supaya tidak `BindingResolutionException` di request AJAX lanjutan
 - [x] Link Layanan — static-kan 3 kartu di homepage & portal listing (model/resource lama tetap ada, cuma tidak ditampilkan otomatis lagi)
 - [x] Kolom `rumah_sakit.link_antrian` — link eksternal pantauan antrian per RS (kartu ke-3 di "Informasi & Layanan")
+- [x] Live Antrian per Dokter — `AntrianApiClient` fetch live (Basic Auth global) ke `{link_antrian}/api/public/poli/{nomor_poli_antrian}`, tanpa cache, tampil di profil dokter publik
+- [x] `Dokter.kuota_pasien` — info kuota/ketersediaan rawat jalan (free text), tampil di profil dokter publik di atas Jadwal Praktek
+- [x] `DokterResource` — section "API Antrian" dibatasi hanya untuk role `super_admin`/`admin`; field `kuota_pasien` & toggle `aktif` dirapikan ke layout full-width di luar 2-kolom section
+- [x] Fix 3 test pra-eksisting yang gagal: `UserTest` (pakai `Filament::getPanel('admin')` yang benar-benar terdaftar, bukan `Panel` kosong) & `ChatbotPanelTest` (`MAX_MESSAGES` disesuaikan ke nilai aktual 50)
 
 ### Dalam Pengerjaan
 
