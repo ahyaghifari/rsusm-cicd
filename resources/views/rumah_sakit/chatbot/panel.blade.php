@@ -6,10 +6,10 @@
         {{-- Header --}}
         <div class="bg-[#d606b0] px-4 py-3 flex items-center gap-3 flex-shrink-0">
             <div class="w-10 h-10 rounded-full bg-white border-2 border-white/35 flex items-center justify-center flex-shrink-0 p-1">
-                <img src="{{ asset('img/favicon.png') }}" alt="">
+                <img src="{{ asset('img/tanya-syifa.png') }}" alt="Tanya Syifa">
             </div>
             <div class="flex-1 min-w-0">
-                <div class="text-white text-[15px] font-medium truncate">Syifa Medika Assistant</div>
+                <div class="text-white text-[15px] font-medium truncate">Tanya Syifa</div>
                 <div class="text-white/80 text-[11.5px] flex items-center gap-1 truncate">
                     <span class="w-[7px] h-[7px] rounded-full bg-[#96f6c8] inline-block flex-shrink-0"></span>
                     @if($this->branchSelected)
@@ -231,7 +231,7 @@
                     class="flex gap-2 items-end flex-shrink-0"
                 >
                     <div class="w-7 h-7 rounded-full bg-white border-2 border-primary flex items-center justify-center flex-shrink-0 mb-4 p-1">
-                        <img src="{{ asset('img/favicon.png') }}" alt="">
+                        <img src="{{ asset('img/tanya-syifa.png') }}" alt="Tanya Syifa">
                     </div>
                     <div class="bg-white border border-[#d6c0ce] rounded-[15px] rounded-bl-[4px] px-3.5 py-3 flex gap-1 items-center mt-2">
                         <span class="w-[5px] h-[5px] rounded-full bg-[#d606b0] animate-bounce inline-block" style="animation-delay:0s"></span>

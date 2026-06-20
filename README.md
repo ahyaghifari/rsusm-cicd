@@ -29,7 +29,7 @@ Sistem informasi multi-tenant untuk manajemen dan portal publik rumah sakit. Sat
 Project ini menggunakan arsitektur **multi-tenant berbasis kolom** (`rumah_sakit_id`). Semua entitas konten dimiliki oleh satu `RumahSakit`. Akses data dibatasi di level resource Filament dan middleware route.
 
 ```
-RumahSakit (slug, executive_clinic)
+RumahSakit (slug, executive_clinic, ranap_kode_api, link_antrian, google_place_id)
 ├── User (admin rumah sakit, terikat ke 1 RS)
 ├── Dokter → Spesialis                          (SoftDeletes)
 ├── Spesialis                                   (SoftDeletes)
@@ -38,7 +38,8 @@ RumahSakit (slug, executive_clinic)
 ├── JadwalHarian (override harian per tanggal, is_executive)
 │   └── JadwalHarianPerubahan (1-to-1, tracking perubahan status)
 ├── PosterTemplate (background PNG, logo, shape_poli, config zona JSON)
-├── RawatInap → Gedung
+├── KelasRawatInap (master kelas, id_kelas_api opsional, is_vip)
+├── RawatInap → Gedung (kelas_rawat_inap_id FK ke KelasRawatInap)
 │   ├── GambarRawatInap
 │   └── FasilitasRawatInap
 ├── LayananUnggulan
@@ -90,6 +91,7 @@ RumahSakit (slug, executive_clinic)
 | `/rawat-jalan` | Daftar poliklinik |
 | `/rawat-jalan/{poliklinik}` | Detail poliklinik + jadwal |
 | `/rawat-inap` | Informasi kelas rawat inap |
+| `/ketersediaan-rawat-inap` | Ketersediaan kamar real-time (per bed, filter kelas & nama kamar) |
 | `/unggulan` | Layanan unggulan |
 | `/fasilitas-pendukung` | Fasilitas pendukung |
 | `/penunjang-medis` | Penunjang medis |
@@ -179,6 +181,18 @@ Dua mode tampilan:
 - Rating yang didorong adalah rating **per rumah sakit** (mengikuti Google Business Profile), bukan breakdown per dokter/layanan individual
 - Detail keputusan scope: [issues/google-review.md](../issues/google-review.md)
 
+#### Ketersediaan Rawat Inap (Real-Time, Tanpa Database)
+
+- Data ketersediaan kamar (per **tempat tidur**, bukan per kamar — 1 kamar bisa punya beberapa bed) diambil **langsung** dari API Ranap setiap kali halaman di-render (termasuk tiap `wire:poll.30s`) — **tidak ada tabel cache**, supaya tidak ada risiko data basi
+- **Multi-tenant per RS**: tiap RS punya identifier sendiri di kolom `rumah_sakit.ranap_kode_api` (mis. `"rsa"`), disambung `RanapApiClient` jadi `{base_url}/{kode}/bed`. RS yang kolomnya masih kosong otomatis fallback ke fixture lokal (`storage/app/mock/ranap-ketersediaan.json`) — jadi halaman tetap bisa di-demo sebelum kode API resmi didapat dari pihak Ranap
+- **Status bed**: 1 Kosong, 2 Reservasi, 3 Terisi, 6 Sedang Perbaikan (enum `StatusKetersediaanKamar`) — kode di luar daftar ini dapat label fallback "Status Tidak Dikenal", status `0` di-skip total dari hasil
+- **`KelasRawatInap`**: tabel master kelas per RS (gantikan kolom `kelas` string bebas yang lama di `RawatInap`) — dipakai untuk dropdown kelas di admin **dan** untuk resolve nama kelas dari `idKelas` milik API (`id_kelas_api`, nullable, unique per RS)
+- **Filter**: dropdown Kelas & Nama Kamar pakai Tom Select (`_searchable-select` partial, sama seperti filter spesialis di Dokter Kami) — opsi diambil dari hasil fetch saat render, diterapkan di memori (Collection PHP), bukan query SQL
+- **Toggle tampilan**: Per Kamar (default) atau Per Kelas — mengubah pengelompokan grid hasil
+- **Countdown visual** 30 detik selaras dengan `wire:poll` — pakai trik `wire:key` yang berubah tiap render supaya Alpine di-mount ulang dan timer reset, bukan cuma berhenti di 0
+- Tombol silang-tautan dengan halaman `/rawat-inap` (masing-masing mengarah ke satu sama lain)
+- Detail desain & keputusan: [issues/ketersediaan-rawat-inap-plan.md](../issues/ketersediaan-rawat-inap-plan.md), [issues/link-layanan-static-dan-ranap-multi-tenant.md](../issues/link-layanan-static-dan-ranap-multi-tenant.md)
+
 #### Homepage RS
 
 Seksi berurutan:
@@ -223,7 +237,8 @@ Path admin dikonfigurasi via env: `ADMIN_PATH=manage` (default). Akses di `/{ADM
 | **Generate Poster** | Form pilih template + tanggal → generate PNG 1080×1920 via Browsershot |
 | Artikel & Berita | CRUD artikel + rich text editor, kategori, gambar cover, toggle unggulan/aktif |
 | Kategori Artikel | CRUD kategori per RS (modal sederhana) |
-| Rawat Inap | Kelas kamar, fasilitas, galeri foto |
+| Rawat Inap | Kelas kamar (relasi ke Kelas Rawat Inap), fasilitas, galeri foto |
+| **Kelas Rawat Inap** | Master data kelas per RS, opsional `id_kelas_api` (cocokkan ke API Ranap) + toggle `is_vip` |
 | Gedung | Manajemen gedung |
 | Banner | Spanduk promosi beranda |
 | Promo | Promosi + popup (slug unik per RS) |
@@ -235,8 +250,10 @@ Path admin dikonfigurasi via env: `ADMIN_PATH=manage` (default). Akses di `/{ADM
 | Penunjang Medis | Lab, radiologi, farmasi (drag-drop sort) |
 | Partner | Mitra & rekanan |
 | Kontak | Nomor telepon, WhatsApp, sosial media (3 kategori) |
-| Link Layanan | Tautan cepat (drag-drop sort) |
+| Link Layanan | Tautan cepat (drag-drop sort) — **model/resource tetap ada**, tapi sudah tidak ditampilkan otomatis di homepage/portal (lihat catatan di bawah) |
 | User | Manajemen akun admin + penugasan RS |
+
+> **Catatan**: section "Informasi & Layanan" di homepage & kartu RS di portal listing sekarang **statis** (3 link fixed: Ketersediaan Kamar, Jadwal Praktek, Pantauan Antrian via `link_antrian`), bukan lagi di-loop dari `LinkLayanan`. Tabel/model/resource `LinkLayanan` **tidak dihapus** — datanya tetap bisa dikelola, hanya tidak lagi otomatis tampil di 2 lokasi itu. Detail: [issues/link-layanan-static-dan-ranap-multi-tenant.md](../issues/link-layanan-static-dan-ranap-multi-tenant.md)
 
 #### Jadwal Praktek — Fitur Khusus
 
@@ -385,7 +402,7 @@ Akun yang dibuat otomatis oleh `DatabaseSeeder`:
 
 ```bash
 php artisan test
-# 242+ tests passing (Unit + Feature)
+# 279+ tests passing (Unit + Feature)
 ```
 
 ---
@@ -410,6 +427,7 @@ php artisan test
 - Web Push/VAPID: `sesiAktifToken` di `KonsultasiDashboard` harus `string` (bukan `?string`) karena placeholder `#[On('echo:konsultasi.{sesiAktifToken},...')]` tidak bisa di-resolve Livewire jika nilainya null — nilai kosong menghasilkan channel yang tidak pernah dipakai
 - Web Push: route yang di-pass ke job (`SendWebPushNotification`) wajib menyertakan parameter `rumahsakit` (slug) karena URI multi-tenant — eager-load `rumahSakit` di `sesiAktif()` sebelum dispatch
 - `push_subscription` disimpan sebagai TEXT JSON mentah; dibersihkan dari DB otomatis saat endpoint kadaluwarsa (laporan `sendNotification` dicek di job)
+- **`RsPortalComponent` + `wire:poll`/interaksi AJAX berulang tidak cocok**: `RumahSakitMiddleware` (yang men-set binding `currentRumahSakit` ke container) cuma jalan di request awal (full page load), **tidak** jalan di `/livewire/update` (request AJAX untuk `wire:poll` & tiap `wire:click`/`wire:model` setelahnya) — pakai `RsPortalComponent::boot()` di komponen yang sering re-render via AJAX akan `BindingResolutionException` setelah interaksi pertama. Solusi: simpan `rumah_sakit_id` sebagai `#[Locked] public int` lalu re-bind manual di `boot()` komponen itu sendiri (`if (! app()->bound('currentRumahSakit')) { ... }`) — lihat `KetersediaanRawatInap.php` & `RawatInap.php` (kedua Livewire page ini sengaja **tidak** extends `RsPortalComponent` karena alasan ini)
 
 ---
 
@@ -446,6 +464,11 @@ VAPID_PUBLIC_KEY=...               # EC P-256 public key (URL-safe base64)
 VAPID_PRIVATE_KEY=...              # EC P-256 private key (URL-safe base64)
 VAPID_SUBJECT="${APP_URL}"         # Identitas pengirim (URL atau mailto:)
 VITE_VAPID_PUBLIC_KEY="${VAPID_PUBLIC_KEY}"  # Diekspos ke frontend via Vite
+
+# Ketersediaan Rawat Inap — base URL API Ranap (tanpa kode RS, tanpa trailing slash)
+# Kosongkan untuk fallback ke fixture storage/app/mock/ranap-ketersediaan.json
+# Identifier per RS diisi di kolom rumah_sakit.ranap_kode_api (Filament, bukan .env)
+RANAP_API_BASE_URL=
 ```
 
 ---
@@ -515,17 +538,23 @@ VITE_VAPID_PUBLIC_KEY="${VAPID_PUBLIC_KEY}"  # Diekspos ke frontend via Vite
 - [x] Tombol "Daftar Sekarang" di halaman profil dokter & Jadwal Praktek (link ke `link_pendaftaran_online`)
 - [x] Chatbot — nama tampilan diubah jadi "Tanya Syifa" (FAB & bottom bar)
 - [x] Fix slug `dokter` dari unique global → composite per RS
+- [x] Ketersediaan Rawat Inap — fetch live dari API Ranap per render (tanpa tabel cache), multi-tenant via `rumah_sakit.ranap_kode_api`, fallback fixture lokal kalau RS belum onboarding
+- [x] `KelasRawatInap` — tabel master kelas per RS, gantikan kolom `kelas` string bebas di `RawatInap`
+- [x] Fix bug `RsPortalComponent` + `wire:poll` — `KetersediaanRawatInap` & `RawatInap` pindah ke `boot()` re-bind manual supaya tidak `BindingResolutionException` di request AJAX lanjutan
+- [x] Link Layanan — static-kan 3 kartu di homepage & portal listing (model/resource lama tetap ada, cuma tidak ditampilkan otomatis lagi)
+- [x] Kolom `rumah_sakit.link_antrian` — link eksternal pantauan antrian per RS (kartu ke-3 di "Informasi & Layanan")
 
 ### Dalam Pengerjaan
 
 - [ ] Poster — dukung gaya layout berbeda antar cabang (`grid_shape` vs `list_polos`), karena humas/desainer tiap cabang berbeda gaya — lihat [issues/poster-multi-cabang-layout-dan-scoping.md](../issues/poster-multi-cabang-layout-dan-scoping.md)
 - [ ] `PosterTemplateResource` belum ter-scope per RS (humas RS A bisa lihat/edit template RS B) — gap di dokumen yang sama
+- [ ] Kode `ranap_kode_api` resmi untuk RS Banjarbaru — menunggu konfirmasi dari pihak Ranap, sementara masih fallback fixture
 
 ### Dalam Pertimbangan
 
 - [ ] Live antrian konsultasi disambungkan ke chatbot
 - [ ] Foto 360° untuk tiap kamar rawat inap — viewer sudah ada eksperimen (`@photo-sphere-viewer/core`), menunggu pengambilan foto ulang (task fotografi, bukan koding)
-- [ ] Info ketersediaan kamar rawat inap real-time — perlu sinkronisasi dengan sistem Ranap, tetap disertai arahan konfirmasi ke resepsionis
+- [ ] Pantauan Antrian internal (scraping) — saat ini masih link keluar via `link_antrian`, bisa diganti route internal kalau scraping dibangun
 - [ ] Notifikasi jadwal (email/WhatsApp)
 - [ ] Export jadwal ke PDF/Excel
 - [ ] Optimasi gambar (resize/kompresi otomatis saat upload — `intervention/image` atau WebP)

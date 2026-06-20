@@ -275,13 +275,13 @@ class ChatbotPanelTest extends TestCase
         $this->assertNotEmpty($userMsgs);
     }
 
-    public function test_messages_capped_at_100_in_session(): void
+    public function test_messages_capped_at_50_in_session(): void
     {
         $rs = $this->makeRS();
 
-        // Buat 110 messages langsung di session
+        // Buat 60 messages langsung di session
         $messages = [];
-        for ($i = 1; $i <= 110; $i++) {
+        for ($i = 1; $i <= 60; $i++) {
             $messages[] = ['type' => 'user', 'text' => "Pesan $i", 'time' => '10:00'];
         }
 
@@ -294,7 +294,7 @@ class ChatbotPanelTest extends TestCase
 
         $component = Livewire::test(Panel::class);
 
-        // mount() memotong ke 100 terakhir
-        $this->assertCount(100, $component->get('messages'));
+        // mount() memotong ke MAX_MESSAGES (50) terakhir
+        $this->assertCount(50, $component->get('messages'));
     }
 }

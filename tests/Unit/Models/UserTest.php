@@ -4,6 +4,7 @@ namespace Tests\Unit\Models;
 
 use App\Models\RumahSakit;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -36,12 +37,13 @@ class UserTest extends TestCase
     {
         $this->createRoles();
         $rs = RumahSakit::factory()->create();
+        $adminPanel = Filament::getPanel('admin');
 
         foreach (['super_admin', 'admin', 'humas', 'informasi'] as $role) {
             $user = User::factory()->create(['rumah_sakit_id' => $rs->id]);
             $user->assignRole($role);
             $this->assertTrue(
-                $user->canAccessPanel(app(\Filament\Panel::class)),
+                $user->canAccessPanel($adminPanel),
                 "Role $role seharusnya bisa akses panel"
             );
         }
@@ -51,7 +53,18 @@ class UserTest extends TestCase
     {
         $this->createRoles();
         $user = User::factory()->create();
-        $this->assertFalse($user->canAccessPanel(app(\Filament\Panel::class)));
+        $this->assertFalse($user->canAccessPanel(Filament::getPanel('admin')));
+    }
+
+    public function test_dokter_role_can_access_dokter_panel_but_not_admin_panel(): void
+    {
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'dokter', 'guard_name' => 'web']);
+
+        $user = User::factory()->create();
+        $user->assignRole('dokter');
+
+        $this->assertTrue($user->canAccessPanel(Filament::getPanel('dokter')));
+        $this->assertFalse($user->canAccessPanel(Filament::getPanel('admin')));
     }
 
     public function test_belongs_to_rumah_sakit(): void

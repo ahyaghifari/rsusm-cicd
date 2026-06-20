@@ -45,19 +45,39 @@
                 </div>
             </div>
 
-            <div class="px-5 pt-4 flex items-center gap-2">
-                <span class="text-xs font-bold text-on-surface-variant shrink-0">Tampilan</span>
-                <div class="inline-flex rounded-full border border-outline-variant/30 p-0.5 bg-surface-container-lowest">
-                    <button type="button" wire:click="$set('groupBy', 'kamar')"
-                        class="px-3 py-1 rounded-full text-xs font-bold transition-colors
-                               {{ $groupBy === 'kamar' ? 'bg-primary text-white' : 'text-on-surface-variant hover:text-on-surface' }}">
-                        Per Kamar
-                    </button>
-                    <button type="button" wire:click="$set('groupBy', 'kelas')"
-                        class="px-3 py-1 rounded-full text-xs font-bold transition-colors
-                               {{ $groupBy === 'kelas' ? 'bg-primary text-white' : 'text-on-surface-variant hover:text-on-surface' }}">
-                        Per Kelas
-                    </button>
+            <div class="px-5 pt-4 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-on-surface-variant shrink-0">Tampilan</span>
+                    <div class="inline-flex rounded-full border border-outline-variant/30 p-0.5 bg-surface-container-lowest">
+                        <button type="button" wire:click="$set('groupBy', 'kamar')"
+                            class="px-3 py-1 rounded-full text-xs font-bold transition-colors
+                                   {{ $groupBy === 'kamar' ? 'bg-primary text-white' : 'text-on-surface-variant hover:text-on-surface' }}">
+                            Per Kamar
+                        </button>
+                        <button type="button" wire:click="$set('groupBy', 'kelas')"
+                            class="px-3 py-1 rounded-full text-xs font-bold transition-colors
+                                   {{ $groupBy === 'kelas' ? 'bg-primary text-white' : 'text-on-surface-variant hover:text-on-surface' }}">
+                            Per Kelas
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-on-surface-variant shrink-0">Status</span>
+                    <div class="inline-flex flex-wrap rounded-full border border-outline-variant/30 p-0.5 bg-surface-container-lowest">
+                        <button type="button" wire:click="$set('statusFilter', null)"
+                            class="px-3 py-1 rounded-full text-xs font-bold transition-colors
+                                   {{ ! $statusFilter ? 'bg-primary text-white' : 'text-on-surface-variant hover:text-on-surface' }}">
+                            Semua
+                        </button>
+                        @foreach(\App\Enums\StatusKetersediaanKamar::cases() as $status)
+                            <button type="button" wire:click="$set('statusFilter', {{ $status->value }})"
+                                class="px-3 py-1 rounded-full text-xs font-bold transition-colors
+                                       {{ $statusFilter === $status->value ? 'bg-primary text-white' : 'text-on-surface-variant hover:text-on-surface' }}">
+                                {{ $status->getLabel() }}
+                            </button>
+                        @endforeach
+                    </div>
                 </div>
             </div>
 
@@ -80,12 +100,22 @@
             </div>
 
             @if($totalBed > 0)
-            <div class="px-5 pb-4 -mt-1 text-xs text-on-surface-variant">
-                Menampilkan <span class="font-bold text-primary tabular-nums">{{ $jumlahHasil }}</span>
-                dari <span class="font-bold tabular-nums">{{ $totalBed }}</span> tempat tidur
-                @if($kelasFilter || $namaKamarFilter)
-                    &middot; <span class="italic">filter aktif</span>
-                @endif
+            <div class="px-5 pb-4 -mt-1">
+                <p class="text-xs text-on-surface-variant">
+                    Menampilkan <span class="font-bold text-primary tabular-nums">{{ $jumlahHasil }}</span>
+                    dari <span class="font-bold tabular-nums">{{ $totalBed }}</span> tempat tidur
+                    @if($kelasFilter || $namaKamarFilter || $statusFilter)
+                        &middot; <span class="italic">filter aktif</span>
+                    @endif
+                </p>
+                {{-- Pengingat ringkas — daftar kamar di bawah bisa panjang, jadi disclaimer
+                     lengkap di paling bawah halaman belum tentu terlihat sebelum pengguna
+                     bertindak dari kartu kamar paling atas. Versi singkat ini selalu terlihat
+                     duluan tanpa perlu scroll. --}}
+                <p class="text-xs text-on-surface-variant/70 mt-1.5 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">info</span>
+                    Status dapat berubah sewaktu-waktu — konfirmasi ke resepsionis sebelum datang
+                </p>
             </div>
             @endif
         </div>
@@ -198,6 +228,58 @@
                 @endforeach
             </div>
         @endif
+
+        {{-- ============================================================ --}}
+        {{-- KONFIRMASI KE RESEPSIONIS — beda warna dari status (bukan      --}}
+        {{-- amber, supaya tidak tertukar persepsi dengan badge "Reservasi" --}}
+        {{-- yang juga amber di atas). Dipasang setelah data, sebelum CTA, --}}
+        {{-- supaya jadi pengingat terakhir sebelum pengguna bertindak.    --}}
+        {{-- ============================================================ --}}
+        <div class="mt-8 mx-auto max-w-2xl">
+            <div class="flex items-start gap-3 bg-primary/5 border border-primary/20 rounded-2xl px-5 py-4">
+                <span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5"
+                      style="font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;">
+                    support_agent
+                </span>
+                <div class="text-sm leading-relaxed">
+                    <p class="font-semibold text-on-surface">
+                        Status kamar bisa berubah dalam hitungan menit.
+                    </p>
+                    <p class="text-on-surface-variant mt-1">
+                        Data di atas diperbarui otomatis dari sistem rumah sakit, tapi kondisi sebenarnya saat Anda
+                        tiba bisa berbeda. Mohon konfirmasi ke resepsionis atau kontak pendaftaran berikut sebelum
+                        datang atau mengambil keputusan:
+                    </p>
+                    @if($kontakPendaftaran->isNotEmpty())
+                    <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+                        @foreach($kontakPendaftaran as $kontak)
+                            @if($kontak->link)
+                                <a href="{{ $kontak->link }}"
+                                   target="{{ str_starts_with($kontak->link, 'http') ? '_blank' : '_self' }}"
+                                   rel="{{ str_starts_with($kontak->link, 'http') ? 'noopener noreferrer' : '' }}"
+                                   class="inline-flex items-center gap-1.5 font-semibold text-primary
+                                          hover:text-primary/70 hover:underline transition-colors">
+                                    @if(str_contains($kontak->link, 'wa.me') || str_contains($kontak->link, 'whatsapp'))
+                                        <span class="material-symbols-outlined text-[14px]">chat</span>
+                                    @elseif(str_starts_with($kontak->link, 'tel:'))
+                                        <span class="material-symbols-outlined text-[14px]">call</span>
+                                    @else
+                                        <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+                                    @endif
+                                    {{ $kontak->label }}{{ $kontak->value ? ': ' . $kontak->value : '' }}
+                                </a>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 text-on-surface">
+                                    <span class="material-symbols-outlined text-[14px]">phone</span>
+                                    {{ $kontak->label }}{{ $kontak->value ? ': ' . $kontak->value : '' }}
+                                </span>
+                            @endif
+                        @endforeach
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
 
         {{-- CTA ke halaman Rawat Inap --}}
         <div class="flex justify-center my-10">

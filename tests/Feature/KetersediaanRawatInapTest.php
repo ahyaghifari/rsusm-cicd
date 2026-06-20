@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Livewire\Pages\KetersediaanRawatInap;
 use App\Models\KelasRawatInap;
+use App\Models\Kontak;
 use App\Models\RumahSakit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -105,6 +106,72 @@ class KetersediaanRawatInapTest extends TestCase
             ->set('namaKamarFilter', 'KAMAR A')
             ->assertSee('BED A')
             ->assertDontSee('BED B');
+    }
+
+    public function test_filter_status_menyaring_hasil(): void
+    {
+        $this->putFixture([
+            ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED KOSONG', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => null],
+            ['id' => 2, 'ruangKamar' => 1, 'tempatTidur' => 'BED TERISI', 'status' => 3, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => null],
+        ]);
+
+        Livewire::test(KetersediaanRawatInap::class)
+            ->set('statusFilter', 3)
+            ->assertSee('BED TERISI')
+            ->assertDontSee('BED KOSONG');
+    }
+
+    public function test_filter_status_kosongkan_kembali_tampilkan_semua(): void
+    {
+        $this->putFixture([
+            ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED KOSONG', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => null],
+            ['id' => 2, 'ruangKamar' => 1, 'tempatTidur' => 'BED TERISI', 'status' => 3, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => null],
+        ]);
+
+        Livewire::test(KetersediaanRawatInap::class)
+            ->set('statusFilter', 3)
+            ->set('statusFilter', null)
+            ->assertSee('BED TERISI')
+            ->assertSee('BED KOSONG');
+    }
+
+    public function test_disclaimer_konfirmasi_resepsionis_tampilkan_kontak_pendaftaran(): void
+    {
+        Kontak::create([
+            'rumah_sakit_id' => $this->rs->id,
+            'label' => 'Pendaftaran',
+            'value' => '0511-1234567',
+            'link' => 'tel:05111234567',
+            'kategori' => 'PENDAFTARAN',
+            'aktif' => true,
+        ]);
+
+        $this->putFixture([
+            ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED A', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => null],
+        ]);
+
+        Livewire::test(KetersediaanRawatInap::class)
+            ->assertSee('Status kamar bisa berubah dalam hitungan menit.')
+            ->assertSee('Pendaftaran: 0511-1234567');
+    }
+
+    public function test_disclaimer_tidak_tampilkan_kontak_kategori_lain(): void
+    {
+        Kontak::create([
+            'rumah_sakit_id' => $this->rs->id,
+            'label' => 'Sosial Media',
+            'value' => '@rsutest',
+            'link' => 'https://instagram.com/rsutest',
+            'kategori' => 'SOSIAL MEDIA',
+            'aktif' => true,
+        ]);
+
+        $this->putFixture([
+            ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED A', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => null],
+        ]);
+
+        Livewire::test(KetersediaanRawatInap::class)
+            ->assertDontSee('Sosial Media: @rsutest');
     }
 
     public function test_render_ulang_tidak_error_walau_binding_currentrumahsakit_hilang(): void

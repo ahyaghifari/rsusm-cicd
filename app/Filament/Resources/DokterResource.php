@@ -5,9 +5,12 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\DokterResource\Pages;
 use App\Filament\Resources\DokterResource\RelationManagers;
 use App\Models\Dokter;
+use App\Models\RumahSakit;
 use App\Models\Spesialis;
+use App\Services\AntrianApiClient;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -46,6 +49,11 @@ class DokterResource extends BaseRumahSakitResource
                         Forms\Components\Textarea::make('deskripsi')
                             ->rows(3)
                             ->maxLength(1000),
+                        Forms\Components\Textarea::make('kuota_pasien')
+                            ->label('Info Kuota / Ketersediaan Pasien')
+                            ->rows(2)
+                            ->nullable()
+                            ->helperText('Tampil di profil dokter (publik) sebagai info kuota rawat jalan. Kosongkan jika tidak ingin ditampilkan.'),
                         Forms\Components\Toggle::make('aktif')
                             ->required()
                             ->default(true),
@@ -83,6 +91,75 @@ class DokterResource extends BaseRumahSakitResource
                         Forms\Components\RichEditor::make('pelatihan')
                             ->placeholder('Masukkan riwayat pelatihan dokter...'),
                     ])->columnSpan(1),
+
+                Forms\Components\Section::make('API Antrian')
+                    ->description('Hubungkan dokter ini ke sistem live antrian poliklinik eksternal. Base URL API-nya mengikuti "Link Antrian" milik rumah sakit (kelola di menu Rumah Sakit).')
+                    ->collapsible()
+                    ->schema([
+                        Forms\Components\TextInput::make('nomor_poli_antrian')
+                            ->label('Nomor Poli Antrian')
+                            ->numeric()
+                            ->nullable()
+                            ->live()
+                            ->helperText('Identifier dokter ini di sistem antrian eksternal. Klik "Tes" untuk memastikan nomornya benar sebelum disimpan.')
+                            ->suffixAction(
+                                Forms\Components\Actions\Action::make('testAntrian')
+                                    ->label('Tes')
+                                    ->icon('heroicon-m-signal')
+                                    ->action(function (Forms\Get $get) {
+                                        $nomor = $get('nomor_poli_antrian');
+
+                                        if (! $nomor) {
+                                            Notification::make()
+                                                ->title('Isi nomor poli antrian dulu')
+                                                ->warning()
+                                                ->send();
+                                            return;
+                                        }
+
+                                        $rumahSakitId = static::isSuperAdmin()
+                                            ? $get('rumah_sakit_id')
+                                            : static::rumahSakitId();
+
+                                        $baseUrl = $rumahSakitId
+                                            ? RumahSakit::find($rumahSakitId)?->link_antrian
+                                            : null;
+
+                                        if (! $baseUrl) {
+                                            Notification::make()
+                                                ->title('Link Antrian rumah sakit belum diisi')
+                                                ->body('Isi "Link Antrian" di menu Rumah Sakit terlebih dahulu sebelum menguji nomor ini.')
+                                                ->warning()
+                                                ->send();
+                                            return;
+                                        }
+
+                                        $data = app(AntrianApiClient::class)->fetch($baseUrl, $nomor);
+
+                                        if (! $data) {
+                                            Notification::make()
+                                                ->title('Gagal mengambil data antrian')
+                                                ->body('Periksa nomor poli, atau pastikan Link Antrian rumah sakit benar.')
+                                                ->danger()
+                                                ->send();
+                                            return;
+                                        }
+
+                                        Notification::make()
+                                            ->title('Respons API Antrian')
+                                            ->body(
+                                                "ID: " . ($data['id'] ?? '-') . "\n" .
+                                                "Nama Poli: " . ($data['nama_poli'] ?? '-') . "\n" .
+                                                "Nama Dokter: " . ($data['nama_dokter'] ?? '-') . "\n" .
+                                                "Status: " . ($data['status'] ?? '-')
+                                            )
+                                            ->success()
+                                            ->persistent()
+                                            ->send();
+                                    })
+                            ),
+                    ])
+                    ->columnSpanFull(),
 
                 // Forms\Components\Section::make('Konsultasi Chat')
                 //     ->description('Pengaturan untuk fitur Tanya Dokter (chat real-time bersesi).')

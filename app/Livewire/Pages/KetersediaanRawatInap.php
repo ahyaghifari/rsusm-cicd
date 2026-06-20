@@ -3,6 +3,7 @@
 namespace App\Livewire\Pages;
 
 use App\Models\KelasRawatInap;
+use App\Models\Kontak;
 use App\Models\RumahSakit;
 use App\Services\RanapApiClient;
 use Artesaos\SEOTools\Facades\OpenGraph;
@@ -20,6 +21,8 @@ class KetersediaanRawatInap extends Component
     public ?int $kelasFilter = null;
 
     public ?string $namaKamarFilter = null;
+
+    public ?int $statusFilter = null;
 
     public string $groupBy = 'kamar';
 
@@ -91,6 +94,7 @@ class KetersediaanRawatInap extends Component
         $beds = $semuaBed
             ->when($this->kelasFilter, fn (Collection $c) => $c->where('kelas_id', $this->kelasFilter))
             ->when($this->namaKamarFilter, fn (Collection $c) => $c->where('nama_kamar', $this->namaKamarFilter))
+            ->when($this->statusFilter, fn (Collection $c) => $c->where('status', $this->statusFilter))
             ->sortBy($sortKeys);
 
         $ringkasan = $this->emptyRingkasan();
@@ -112,6 +116,13 @@ class KetersediaanRawatInap extends Component
             'loadedAt'         => Carbon::now(),
             'totalBed'         => $semuaBed->count(),
             'jumlahHasil'      => $beds->count(),
+            // Diquery eksplisit (bukan andalkan view()->share() dari RumahSakitMiddleware)
+            // karena middleware itu tidak jalan lagi di /livewire/update setelah wire:poll.
+            'kontakPendaftaran' => Kontak::where('rumah_sakit_id', $this->rumah_sakit_id)
+                ->where('kategori', 'PENDAFTARAN')
+                ->where('aktif', true)
+                ->orderBy('sort_order')
+                ->get(),
         ]);
     }
 
