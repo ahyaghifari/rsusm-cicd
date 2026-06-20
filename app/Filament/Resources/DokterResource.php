@@ -49,14 +49,6 @@ class DokterResource extends BaseRumahSakitResource
                         Forms\Components\Textarea::make('deskripsi')
                             ->rows(3)
                             ->maxLength(1000),
-                        Forms\Components\Textarea::make('kuota_pasien')
-                            ->label('Info Kuota / Ketersediaan Pasien')
-                            ->rows(2)
-                            ->nullable()
-                            ->helperText('Tampil di profil dokter (publik) sebagai info kuota rawat jalan. Kosongkan jika tidak ingin ditampilkan.'),
-                        Forms\Components\Toggle::make('aktif')
-                            ->required()
-                            ->default(true),
                     ])->columnSpan(1),
 
                 Forms\Components\Section::make('Relasi & Detail Medis')
@@ -92,9 +84,16 @@ class DokterResource extends BaseRumahSakitResource
                             ->placeholder('Masukkan riwayat pelatihan dokter...'),
                     ])->columnSpan(1),
 
+                Forms\Components\TextInput::make('kuota_pasien')
+                    ->label('Info Kuota / Ketersediaan Pasien')
+                    ->nullable()
+                    ->helperText('Tampil di profil dokter (publik) sebagai info kuota rawat jalan. Kosongkan jika tidak ingin ditampilkan.')
+                    ->columnSpanFull(),
+
                 Forms\Components\Section::make('API Antrian')
                     ->description('Hubungkan dokter ini ke sistem live antrian poliklinik eksternal. Base URL API-nya mengikuti "Link Antrian" milik rumah sakit (kelola di menu Rumah Sakit).')
                     ->collapsible()
+                    ->visible(fn () => static::user()->hasAnyRole(['super_admin', 'admin']))
                     ->schema([
                         Forms\Components\TextInput::make('nomor_poli_antrian')
                             ->label('Nomor Poli Antrian')
@@ -187,6 +186,11 @@ class DokterResource extends BaseRumahSakitResource
                 //             ->helperText('Hubungkan ke akun User jika dokter ini akan login & membalas chat sendiri. Kosongkan jika hanya admin/CS yang akan membalas atas nama dokter.'),
                 //     ])
                 //     ->columnSpanFull(),
+
+                Forms\Components\Toggle::make('aktif')
+                    ->required()
+                    ->default(true)
+                    ->columnSpanFull(),
             ])->columns(2);
     }
 

@@ -97,4 +97,39 @@ class DokterResourceTest extends TestCase
             ->get($this->adminUrl('dokters/create'))
             ->assertOk();
     }
+
+    public function test_super_admin_sees_section_api_antrian(): void
+    {
+        $this->actingAs($this->superAdmin())
+            ->get($this->adminUrl('dokters/create'))
+            ->assertSee('API Antrian');
+    }
+
+    public function test_admin_sees_section_api_antrian(): void
+    {
+        $rs   = RumahSakit::factory()->create();
+        $user = $this->adminUser($rs->id);
+        $user->givePermissionTo([
+            \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'view_any_dokter', 'guard_name' => 'web']),
+            \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'create_dokter', 'guard_name' => 'web']),
+        ]);
+
+        $this->actingAs($user)
+            ->get($this->adminUrl('dokters/create'))
+            ->assertSee('API Antrian');
+    }
+
+    public function test_humas_tidak_melihat_section_api_antrian(): void
+    {
+        $rs   = RumahSakit::factory()->create();
+        $user = $this->humasUser($rs->id);
+        $user->givePermissionTo([
+            \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'view_any_dokter', 'guard_name' => 'web']),
+            \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'create_dokter', 'guard_name' => 'web']),
+        ]);
+
+        $this->actingAs($user)
+            ->get($this->adminUrl('dokters/create'))
+            ->assertDontSee('API Antrian');
+    }
 }
