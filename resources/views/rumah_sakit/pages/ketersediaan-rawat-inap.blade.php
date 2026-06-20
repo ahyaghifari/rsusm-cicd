@@ -179,7 +179,11 @@
                                         };
                                     @endphp
                                     <div class="flex items-center justify-between gap-2 text-sm">
+                                         @if($groupBy === 'kamar')
                                         <span class="text-on-surface-variant">{{ $bed['tempat_tidur'] }}</span>
+                                        @else
+                                        <span class="text-on-surface-variant">{{ $bed['tempat_tidur'] }} - {{ $bed['nama_kamar'] }}</span>
+                                        @endif
                                         <span class="text-[11px] font-bold px-2 py-1 rounded-full {{ $colorClass }} shrink-0">
                                             {{ \App\Enums\StatusKetersediaanKamar::labelFor($bed['status']) }}
                                         </span>
