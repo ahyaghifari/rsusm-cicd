@@ -2,7 +2,7 @@
     <x-page-hero title="Rawat Inap" subtitle="Pilih kelas kamar sesuai kebutuhan dan kenyamanan Anda" />
 
     {{-- Rail kelas + tautan cek ketersediaan --}}
-    <div class="mt-7 w-10/12 mx-auto flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+    <div class="mt-7 w-10/12 mx-auto flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
 
         @if($kelasOptions->isNotEmpty())
         <div>
@@ -13,7 +13,6 @@
                            {{ ! $kelasFilter
                                ? 'bg-primary text-white border-primary shadow-md shadow-primary/25'
                                : 'bg-white text-on-surface-variant border-outline-variant hover:border-primary/40 hover:text-primary' }}">
-                    <span class="material-symbols-outlined text-[16px]">grid_view</span>
                     Semua Kelas
                 </button>
                 @foreach($kelasOptions as $kelas)
@@ -25,10 +24,6 @@
                                        ? 'bg-amber-400 text-amber-900 border-amber-400 shadow-md shadow-amber-400/30 ring-2 ring-amber-200'
                                        : 'bg-primary text-white border-primary shadow-md shadow-primary/25')
                                    : 'bg-white text-on-surface-variant border-outline-variant hover:border-primary/40 hover:text-primary' }}">
-                        <span class="material-symbols-outlined text-[16px] {{ ! $aktif && $kelas->is_vip ? 'text-amber-500' : '' }}"
-                              @if($kelas->is_vip) style="font-variation-settings:'FILL' 1" @endif>
-                            {{ $kelas->is_vip ? 'star' : 'bed' }}
-                        </span>
                         {{ $kelas->nama }}
                     </button>
                 @endforeach
