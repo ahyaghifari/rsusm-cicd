@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\KelasRawatInap;
 use App\Models\RawatInap;
 use Illuminate\Database\Seeder;
 
@@ -12,6 +13,24 @@ class RawatInapSeeder extends Seeder
      */
     public function run(): void
     {
+        $kelasData = [
+            ['nama' => 'VVIP', 'is_vip' => true],
+            ['nama' => 'VIP', 'is_vip' => true],
+            ['nama' => 'VIP Plus', 'is_vip' => true],
+            ['nama' => 'Kelas I', 'is_vip' => false],
+            ['nama' => 'Kelas II', 'is_vip' => false],
+            ['nama' => 'Kelas III', 'is_vip' => false],
+        ];
+
+        $kelasMap = [];
+        foreach ($kelasData as $kelas) {
+            $kelasMap[$kelas['nama']] = KelasRawatInap::create([
+                'rumah_sakit_id' => 1,
+                'nama'           => $kelas['nama'],
+                'is_vip'         => $kelas['is_vip'],
+            ])->id;
+        }
+
         $data = [
             [
                 'rumah_sakit_id' => 1,
@@ -126,6 +145,8 @@ class RawatInapSeeder extends Seeder
         ];
 
         foreach ($data as $item) {
+            $item['kelas_rawat_inap_id'] = $kelasMap[$item['kelas']];
+            unset($item['kelas']);
             RawatInap::create($item);
         }
     }

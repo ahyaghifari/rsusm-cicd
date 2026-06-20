@@ -42,6 +42,7 @@ Route::prefix('{rumahsakit}')
         Route::get('rawat-jalan', App\Livewire\Pages\RawatJalan::class)->name('rumahsakit.rawat_jalan');
         Route::get('rawat-jalan/{poliklinik}', App\Livewire\Pages\PoliKlinikDetail::class)->name('rumahsakit.rawat_jalan_show');
         Route::get('rawat-inap', App\Livewire\Pages\RawatInap::class)->name('rumahsakit.rawat_inap');
+        Route::get('ketersediaan-rawat-inap', App\Livewire\Pages\KetersediaanRawatInap::class)->name('rumahsakit.ketersediaan_rawat_inap');
         Route::get('unggulan', App\Livewire\Pages\LayananUnggulan::class)->name('rumahsakit.unggulan');
         Route::get('fasilitas-pendukung', App\Livewire\Pages\FasilitasPendukung::class)->name('rumahsakit.fasilitas_pendukung');
         Route::get('penunjang-medis', App\Livewire\Pages\PenunjangMedis::class)->name('rumahsakit.penunjang_medis');

@@ -100,6 +100,10 @@
                     <span class="{{ $gridIconClass }}">bed</span>
                     <span class="{{ $gridLabelClass }}">Rawat Inap</span>
                 </a>
+                <a wire:navigate href="{{ rumahsakit_route('rumahsakit.ketersediaan_rawat_inap') }}" class="{{ $gridItemClass }}">
+                    <span class="{{ $gridIconClass }}">monitor_heart</span>
+                    <span class="{{ $gridLabelClass }}">Ketersediaan Kamar</span>
+                </a>
                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.unggulan') }}" class="{{ $gridItemClass }}">
                     <span class="{{ $gridIconClass }}">star</span>
                     <span class="{{ $gridLabelClass }}">Unggulan</span>
@@ -190,6 +194,7 @@
                         <div class="p-1 space-y-0.5">
                             <a wire:navigate href="{{ rumahsakit_route('rumahsakit.rawat_jalan') }}" class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">Rawat Jalan</a>
                             <a wire:navigate href="{{ rumahsakit_route('rumahsakit.rawat_inap') }}" class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">Rawat Inap</a>
+                            <a wire:navigate href="{{ rumahsakit_route('rumahsakit.ketersediaan_rawat_inap') }}" class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">Ketersediaan Kamar</a>
                             <a wire:navigate href="{{ rumahsakit_route('rumahsakit.unggulan') }}" class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">Unggulan</a>
                             <a wire:navigate href="{{ rumahsakit_route('rumahsakit.penunjang_medis') }}" class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">Penunjang Medis</a>
                             <a wire:navigate href="{{ rumahsakit_route('rumahsakit.fasilitas_pendukung') }}" class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-gray-200">Fasilitas Pendukung</a>

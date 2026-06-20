@@ -16,7 +16,7 @@ class HalamanResource extends BaseRumahSakitResource
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationLabel = 'Halaman Statis';
     protected static ?int $navigationSort = 5;
-    protected static string | null $navigationGroup = 'Media Informasi';
+    protected static string | null $navigationGroup = 'Tentang Kami';
 
 
     public static function form(Form $form): Form

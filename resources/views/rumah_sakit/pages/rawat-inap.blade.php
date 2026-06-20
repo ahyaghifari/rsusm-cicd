@@ -1,6 +1,15 @@
 <div>
     <x-page-hero title="Rawat Inap" />
 
+    <div class="mt-5 w-10/12 mx-auto flex justify-center">
+        <a wire:navigate href="{{ rumahsakit_route('rumahsakit.ketersediaan_rawat_inap') }}"
+           class="inline-flex items-center gap-2 text-sm font-semibold text-primary
+                  border border-primary/30 hover:bg-primary/8 px-4 py-2 rounded-full transition-colors">
+            <span class="material-symbols-outlined text-[18px]">monitor_heart</span>
+            Cek Ketersediaan Kamar
+        </a>
+    </div>
+
     <div class="mt-5 w-10/12 mx-auto">
         @if($hasGedung)
             @foreach($gedungs as $gedung)

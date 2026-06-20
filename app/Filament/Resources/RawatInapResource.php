@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\RawatInapResource\Pages;
 use App\Filament\Resources\RawatInapResource\RelationManagers;
 use App\Models\Gedung;
+use App\Models\KelasRawatInap;
 use App\Models\RawatInap;
 use App\Models\RumahSakit;
 use Filament\Forms;
@@ -71,9 +72,24 @@ class RawatInapResource extends BaseRumahSakitResource
                         Forms\Components\TextInput::make('nama')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('kelas')
+                        Forms\Components\Select::make('kelas_rawat_inap_id')
+                            ->label('Kelas')
+                            ->options(function (Forms\Get $get) {
+                                $rumahSakitId = static::isSuperAdmin()
+                                    ? $get('rumah_sakit_id')
+                                    : static::rumahSakitId();
+
+                                if (! $rumahSakitId) {
+                                    return [];
+                                }
+
+                                return KelasRawatInap::where('rumah_sakit_id', $rumahSakitId)
+                                    ->pluck('nama', 'id');
+                            })
                             ->required()
-                            ->maxLength(255),
+                            ->searchable()
+                            ->disabled(fn (Forms\Get $get) => static::isSuperAdmin() && ! $get('rumah_sakit_id'))
+                            ->helperText('Kelola daftar kelas di menu "Kelas Rawat Inap".'),
                     ])->columns(2),
 
                 Forms\Components\Section::make('Kapasitas & Tarif')
@@ -123,9 +139,11 @@ class RawatInapResource extends BaseRumahSakitResource
                     ->searchable()
                     ->sortable()
                     ->placeholder('-'),
-                Tables\Columns\TextColumn::make('kelas')
+                Tables\Columns\TextColumn::make('kelasRawatInap.nama')
+                    ->label('Kelas')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->placeholder('-'),
                 Tables\Columns\TextColumn::make('harga')
                     ->money('IDR', locale: 'id')
                     ->sortable(),

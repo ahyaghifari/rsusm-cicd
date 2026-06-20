@@ -48,6 +48,14 @@ class RawatInap extends Model
     }
 
     /**
+     * Get the kelas (master data) for the rawat inap.
+     */
+    public function kelasRawatInap(): BelongsTo
+    {
+        return $this->belongsTo(KelasRawatInap::class, 'kelas_rawat_inap_id');
+    }
+
+    /**
      * Get the images for the rawat inap.
      */
     public function gambar(): HasMany

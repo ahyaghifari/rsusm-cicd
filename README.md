@@ -99,6 +99,10 @@ RumahSakit (slug, executive_clinic)
 | `/promo/{slug}` | Detail promo |
 | `/info/{slug}` | Halaman statis CMS |
 | `/magazine` | Arsip majalah digital |
+| `/artikel` | Daftar artikel & berita |
+| `/artikel/{slug}` | Detail artikel |
+| `/tanya-dokter` | Mulai sesi konsultasi chat dengan dokter |
+| `/konsultasi/{token}` | Jendela chat sesi konsultasi (akses via token, tanpa login) |
 | `/faq` | FAQ |
 
 #### Halaman Jadwal Praktek
@@ -115,6 +119,7 @@ Dua mode tampilan:
 - Sesi executive dikelompokkan per dokter — semua slot jam tampil sekaligus dalam satu baris
 - Di bawah jadwal terdapat **disclaimer** dengan nomor kontak PENDAFTARAN (klik langsung `tel:` / WhatsApp)
 - Nama dokter yang terhubung ke profil dapat diklik → navigasi ke profil dokter
+- Tombol **"Daftar Sekarang"** (link ke `link_pendaftaran_online` milik RS) tampil di halaman ini dan di halaman profil dokter (`dokter/show.blade.php`)
 
 #### Global Search
 
@@ -125,7 +130,7 @@ Dua mode tampilan:
 - SQLite/test: fallback LIKE
 - Hasil dikelompokkan per kategori, klik langsung navigasi
 
-#### Chatbot Asisten (Syifa Medika Assistant)
+#### Chatbot Asisten ("Tanya Syifa")
 
 - **Mobile**: tombol di bottom bar, panel fullscreen
 - **Desktop**: FAB floating bottom-right dengan tooltip animasi, panel setinggi layar
@@ -149,6 +154,30 @@ Dua mode tampilan:
 - **Dokter — KonsultasiDashboard**: toggle ketersediaan, antrean sesi live dengan preview pesan terakhir + badge unread merah (`belum_dibaca` via `withCount` + `whereRaw` berdasarkan `dokter_baca_at`), warna kartu berbeda untuk BERLANGSUNG vs MENUNGGU, terima sesi, jendela chat balasan (`wire:poll.visible.5s` sebagai jaring pengaman — lihat [reverb/06](../reverb/06-race-condition-subscribe-channel-dinamis.md)), form kesimpulan sebelum akhiri
 - **Dokter — RiwayatKonsultasi**: daftar sesi selesai/kedaluwarsa, pencarian nama pasien, transkrip percakapan, edit kesimpulan
 - Dokumentasi belajar lengkap (konsep dasar Reverb/Pusher/Echo, push notification VAPID, dan setiap bug nyata yang ditemukan & cara memperbaikinya) ada di [reverb/](../reverb/)
+- **Panel Filament terpisah untuk Dokter** (`DokterPanelProvider`, path `/dokter`, login sendiri) — KonsultasiDashboard & RiwayatKonsultasi di atas diakses lewat panel ini, bukan panel admin utama
+
+#### Artikel & Berita
+
+- CRUD per RS: `ArtikelResource` (rich text editor, gambar cover, kategori, tanggal publish, toggle unggulan/aktif) + `KategoriArtikelResource` (CRUD sederhana via modal)
+- Halaman publik list (`/artikel`): artikel unggulan ditonjolkan di atas, grid 3 kolom untuk sisanya, pagination
+- Halaman detail (`/artikel/{slug}`): konten lengkap + section "Artikel Lainnya" (3 artikel terbaru selain yang sedang dibuka)
+- Diurutkan berdasarkan `tanggal_publish` (terbaru dulu) — **tidak** ada `sort_order` manual seperti Magazine/FAQ
+- Slug unik per RS (composite), bukan global — sama seperti Promo/Spesialis/Halaman/PoliKlinik
+- Link ada di dropdown navigasi "Media Informasi" (sejajar Syifa Magazine & FAQ), juga di grid menu mobile
+- Detail implementasi lengkap: [issues/artikel-berita.md](../issues/artikel-berita.md)
+
+#### Popup Otomatis (Homepage)
+
+- **Popup Jadwal Poliklinik**: admin upload gambar (`jadwal_poliklinik_gambar` — biasanya hasil dari Generate Poster) + toggle `jadwal_poliklinik_aktif` lewat widget dashboard Filament (`JadwalPoliklinikPopupWidget`). Saat aktif, tampil sebagai modal fullscreen di homepage publik setelah delay 1.8 detik
+- **Popup Promo**: widget dashboard serupa (`PromoPopupWidget`) untuk mengaktifkan/nonaktifkan popup promo yang sudah ada di homepage
+- Kedua widget hanya terlihat untuk role `super_admin`, `admin`, `humas`, `informasi`
+
+#### CTA Google Review
+
+- Tombol "Tulis Ulasan Anda" & "Lihat Ulasan Lainnya" di homepage (bawah section FAQ) dan di footer (bawah embed Google Maps)
+- Redirect langsung ke halaman resmi Google Business Profile RS berdasarkan `google_place_id` — **tanpa** form survei/filter kepuasan perantara (pasien tidak puas pun bisa langsung menulis ulasan publik)
+- Rating yang didorong adalah rating **per rumah sakit** (mengikuti Google Business Profile), bukan breakdown per dokter/layanan individual
+- Detail keputusan scope: [issues/google-review.md](../issues/google-review.md)
 
 #### Homepage RS
 
@@ -192,6 +221,8 @@ Path admin dikonfigurasi via env: `ADMIN_PATH=manage` (default). Akses di `/{ADM
 | **Jadwal Harian** | Override jadwal harian + tracking perubahan status, kolom `is_executive` |
 | **Poster Template** | Upload background PNG, logo, shape; zone editor drag-drop interaktif |
 | **Generate Poster** | Form pilih template + tanggal → generate PNG 1080×1920 via Browsershot |
+| Artikel & Berita | CRUD artikel + rich text editor, kategori, gambar cover, toggle unggulan/aktif |
+| Kategori Artikel | CRUD kategori per RS (modal sederhana) |
 | Rawat Inap | Kelas kamar, fasilitas, galeri foto |
 | Gedung | Manajemen gedung |
 | Banner | Spanduk promosi beranda |
@@ -257,6 +288,8 @@ Slug bersifat unik **per RS** (composite unique), bukan global:
 - `spesialis`: unique `(slug, rumah_sakit_id)`
 - `halaman`: unique `(slug, rumah_sakit_id)`
 - `poliklinik`: unique `(slug, rumah_sakit_id)`
+- `artikel`, `kategori_artikel`: unique `(slug, rumah_sakit_id)`
+- `dokter`: **diperbaiki** dari unique global → composite `(slug, rumah_sakit_id)` — bug lama yang menyebabkan RS kedua gagal insert dokter dengan nama sama (lihat migrasi `2026_06_17_000002_fix_slug_unique_to_composite_dokter.php`)
 
 ---
 
@@ -472,14 +505,27 @@ VITE_VAPID_PUBLIC_KEY="${VAPID_PUBLIC_KEY}"  # Diekspos ke frontend via Vite
 - [x] Tanya Dokter — KonsultasiDashboard: warna kartu berbeda BERLANGSUNG vs MENUNGGU
 - [x] Tanya Dokter — RiwayatKonsultasi: daftar sesi selesai/kedaluwarsa, cari nama pasien, transkrip, edit kesimpulan
 - [x] Tanya Dokter — hapus semua kelas `dark:` dari halaman dokter (konsultasi-dashboard & riwayat-konsultasi)
+- [x] Tanya Dokter — Panel Filament terpisah untuk Dokter (`/dokter`, `DokterPanelProvider`)
+- [x] Generate Poster — fix bug field `hariIni`, `jam_mulai`/`waktu_mulai`, dan `libur` antar model
+- [x] Generate Poster — implementasi `previewPoster()` (render HTML preview + buka di tab baru)
+- [x] Artikel & Berita — CRUD + kategori, halaman publik list (unggulan + grid + pagination) & detail, link di dropdown "Media Informasi"
+- [x] Popup Jadwal Poliklinik — admin upload gambar (mis. hasil Generate Poster) + toggle aktif via widget dashboard, tampil modal di homepage publik
+- [x] Popup Promo — widget dashboard untuk toggle popup promo homepage
+- [x] CTA Google Review — tombol redirect ke Google Business Profile (homepage + footer), tanpa survei perantara
+- [x] Tombol "Daftar Sekarang" di halaman profil dokter & Jadwal Praktek (link ke `link_pendaftaran_online`)
+- [x] Chatbot — nama tampilan diubah jadi "Tanya Syifa" (FAB & bottom bar)
+- [x] Fix slug `dokter` dari unique global → composite per RS
 
 ### Dalam Pengerjaan
 
-- [ ] Generate Poster — fix bug field `hariIni`, `jam_mulai`/`waktu_mulai`, dan `libur` antar model
-- [ ] Generate Poster — implementasi `previewPoster()` (saat ini stub)
+- [ ] Poster — dukung gaya layout berbeda antar cabang (`grid_shape` vs `list_polos`), karena humas/desainer tiap cabang berbeda gaya — lihat [issues/poster-multi-cabang-layout-dan-scoping.md](../issues/poster-multi-cabang-layout-dan-scoping.md)
+- [ ] `PosterTemplateResource` belum ter-scope per RS (humas RS A bisa lihat/edit template RS B) — gap di dokumen yang sama
 
 ### Dalam Pertimbangan
 
+- [ ] Live antrian konsultasi disambungkan ke chatbot
+- [ ] Foto 360° untuk tiap kamar rawat inap — viewer sudah ada eksperimen (`@photo-sphere-viewer/core`), menunggu pengambilan foto ulang (task fotografi, bukan koding)
+- [ ] Info ketersediaan kamar rawat inap real-time — perlu sinkronisasi dengan sistem Ranap, tetap disertai arahan konfirmasi ke resepsionis
 - [ ] Notifikasi jadwal (email/WhatsApp)
 - [ ] Export jadwal ke PDF/Excel
 - [ ] Optimasi gambar (resize/kompresi otomatis saat upload — `intervention/image` atau WebP)
