@@ -21,7 +21,7 @@ class KetersediaanRawatInap extends Component
 
     public ?string $namaKamarFilter = null;
 
-    public string $groupBy = 'kelas';
+    public string $groupBy = 'kamar';
 
     public function boot(): void
     {

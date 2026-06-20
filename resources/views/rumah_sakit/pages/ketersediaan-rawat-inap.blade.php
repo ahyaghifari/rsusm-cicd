@@ -48,15 +48,15 @@
             <div class="px-5 pt-4 flex items-center gap-2">
                 <span class="text-xs font-bold text-on-surface-variant shrink-0">Tampilan</span>
                 <div class="inline-flex rounded-full border border-outline-variant/30 p-0.5 bg-surface-container-lowest">
-                    <button type="button" wire:click="$set('groupBy', 'kelas')"
-                        class="px-3 py-1 rounded-full text-xs font-bold transition-colors
-                               {{ $groupBy === 'kelas' ? 'bg-primary text-white' : 'text-on-surface-variant hover:text-on-surface' }}">
-                        Per Kelas
-                    </button>
                     <button type="button" wire:click="$set('groupBy', 'kamar')"
                         class="px-3 py-1 rounded-full text-xs font-bold transition-colors
                                {{ $groupBy === 'kamar' ? 'bg-primary text-white' : 'text-on-surface-variant hover:text-on-surface' }}">
                         Per Kamar
+                    </button>
+                    <button type="button" wire:click="$set('groupBy', 'kelas')"
+                        class="px-3 py-1 rounded-full text-xs font-bold transition-colors
+                               {{ $groupBy === 'kelas' ? 'bg-primary text-white' : 'text-on-surface-variant hover:text-on-surface' }}">
+                        Per Kelas
                     </button>
                 </div>
             </div>
