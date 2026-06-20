@@ -143,7 +143,7 @@
                 <p class="text-lg font-semibold text-on-surface">Data ketersediaan belum tersedia</p>
             </div>
         @else
-            <div class="grid grid-cols-1 {{ $groupBy === 'kelas' ? 'lg:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3' }} gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($kamarList as $beds)
                     @php $first = $beds->first(); @endphp
                     <div class="bg-white rounded-2xl border border-outline-variant/20 shadow-sm overflow-hidden flex flex-col">
@@ -167,61 +167,28 @@
                                 @endif
                             </div>
 
-                            @if($groupBy === 'kelas')
-                                {{-- Per kelas: 1 baris = 1 kamar fisik, bed-nya dijejer ke samping
-                                     sebagai chip kecil — supaya kartu nggak menjulang tinggi kalau
-                                     satu kelas mencakup banyak kamar. --}}
-                                <div class="space-y-3">
-                                    @foreach($beds->groupBy('nama_kamar') as $namaKamar => $bedsInRoom)
-                                        <div>
-                                            <p class="text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-wide mb-1.5">
-                                                {{ $namaKamar }}
-                                            </p>
-                                            <div class="flex flex-wrap gap-1.5">
-                                                @foreach($bedsInRoom as $bed)
-                                                    @php
-                                                        $colorClass = match($bed['status']) {
-                                                            1 => 'bg-emerald-100 text-emerald-700',
-                                                            2 => 'bg-amber-100 text-amber-700',
-                                                            3 => 'bg-rose-100 text-rose-700',
-                                                            6 => 'bg-slate-200 text-slate-600',
-                                                            default => 'bg-slate-200 text-slate-600',
-                                                        };
-                                                        $statusLabel = \App\Enums\StatusKetersediaanKamar::labelFor($bed['status']);
-                                                    @endphp
-                                                    <span class="text-[11px] font-semibold px-2 py-1 rounded-md {{ $colorClass }} cursor-default"
-                                                        title="{{ $bed['tempat_tidur'] }} · {{ $statusLabel }}{{ $bed['keterangan'] ? ' · ' . $bed['keterangan'] : '' }}">
-                                                        {{ $bed['tempat_tidur'] }}
-                                                    </span>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @else
-                                <div class="space-y-2">
-                                    @foreach($beds as $bed)
-                                        @php
-                                            $colorClass = match($bed['status']) {
-                                                1 => 'bg-emerald-100 text-emerald-700',
-                                                2 => 'bg-amber-100 text-amber-700',
-                                                3 => 'bg-rose-100 text-rose-700',
-                                                6 => 'bg-slate-200 text-slate-600',
-                                                default => 'bg-slate-200 text-slate-600',
-                                            };
-                                        @endphp
-                                        <div class="flex items-center justify-between gap-2 text-sm">
-                                            <span class="text-on-surface-variant">{{ $bed['tempat_tidur'] }}</span>
-                                            <span class="text-[11px] font-bold px-2 py-1 rounded-full {{ $colorClass }} shrink-0">
-                                                {{ \App\Enums\StatusKetersediaanKamar::labelFor($bed['status']) }}
-                                            </span>
-                                        </div>
-                                        @if($bed['keterangan'])
-                                            <p class="text-xs text-on-surface-variant/80 italic">{{ $bed['keterangan'] }}</p>
-                                        @endif
-                                    @endforeach
-                                </div>
-                            @endif
+                            <div class="space-y-2">
+                                @foreach($beds as $bed)
+                                    @php
+                                        $colorClass = match($bed['status']) {
+                                            1 => 'bg-emerald-100 text-emerald-700',
+                                            2 => 'bg-amber-100 text-amber-700',
+                                            3 => 'bg-rose-100 text-rose-700',
+                                            6 => 'bg-slate-200 text-slate-600',
+                                            default => 'bg-slate-200 text-slate-600',
+                                        };
+                                    @endphp
+                                    <div class="flex items-center justify-between gap-2 text-sm">
+                                        <span class="text-on-surface-variant">{{ $bed['tempat_tidur'] }}</span>
+                                        <span class="text-[11px] font-bold px-2 py-1 rounded-full {{ $colorClass }} shrink-0">
+                                            {{ \App\Enums\StatusKetersediaanKamar::labelFor($bed['status']) }}
+                                        </span>
+                                    </div>
+                                    @if($bed['keterangan'])
+                                        <p class="text-xs text-on-surface-variant/80 italic">{{ $bed['keterangan'] }}</p>
+                                    @endif
+                                @endforeach
+                            </div>
                         </div>
                     </div>
                 @endforeach
