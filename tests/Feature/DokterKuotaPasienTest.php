@@ -73,7 +73,7 @@ class DokterKuotaPasienTest extends TestCase
     {
         $this->rs->update(['link_antrian' => 'https://antrian.example.com']);
         Http::fake([
-            'antrian.example.com/api/public/5' => Http::response([
+            'antrian.example.com/api/public/poli/5' => Http::response([
                 'id' => '12',
                 'nama_poli' => 'Poli Umum',
                 'nama_dokter' => 'dr. Test',

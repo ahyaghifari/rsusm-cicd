@@ -44,5 +44,11 @@ return [
         'mock_path' => 'app/mock/ranap-ketersediaan.json',
     ],
 
+    'antrian' => [
+        // Basic Auth — kredensial global, sama untuk semua RS (base URL-nya sendiri per RS,
+        // dari kolom rumah_sakit.link_antrian — lihat AntrianApiClient).
+        'username' => env('ANTRIAN_API_USERNAME'),
+        'password' => env('ANTRIAN_API_PASSWORD'),
+    ],
 
 ];

@@ -10,7 +10,10 @@ use Illuminate\Support\Facades\Log;
  *
  * Base URL-nya **per RS**, bukan config global — diambil dari kolom
  * `rumah_sakit.link_antrian` (sama kolom yang dipakai kartu "Pantauan Antrian"). Endpoint:
- * {link_antrian}/api/public/{nomor_poli_antrian}.
+ * {link_antrian}/api/public/poli/{nomor_poli_antrian}.
+ *
+ * Autentikasi Basic Auth — kredensialnya global (sama untuk semua RS), dari
+ * config('services.antrian.username'/'password') (env ANTRIAN_API_USERNAME/PASSWORD).
  */
 class AntrianApiClient
 {
@@ -27,7 +30,12 @@ class AntrianApiClient
         $url = rtrim($baseUrl, '/') . '/api/public/poli/' . $nomorPoliAntrian;
 
         try {
-            $response = Http::timeout(10)->get($url);
+            $response = Http::timeout(10)
+                ->withBasicAuth(
+                    config('services.antrian.username') ?? '',
+                    config('services.antrian.password') ?? '',
+                )
+                ->get($url);
         } catch (\Throwable $e) {
             Log::warning("AntrianApiClient: gagal menghubungi {$url} — " . $e->getMessage());
             return null;

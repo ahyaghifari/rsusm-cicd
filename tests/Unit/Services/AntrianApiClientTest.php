@@ -13,10 +13,10 @@ class AntrianApiClientTest extends TestCase
         $this->assertNull((new AntrianApiClient)->fetch(null, 5));
     }
 
-    public function test_fetch_menyambung_url_dengan_pola_api_public_nomor(): void
+    public function test_fetch_menyambung_url_dengan_pola_api_public_poli_nomor(): void
     {
         Http::fake([
-            'antrian.example.com/api/public/5' => Http::response([
+            'antrian.example.com/api/public/poli/5' => Http::response([
                 'id' => '12',
                 'nama_poli' => 'Poli Umum',
                 'nama_dokter' => 'dr. Test',
@@ -30,7 +30,25 @@ class AntrianApiClientTest extends TestCase
         $this->assertSame('Poli Umum', $result['nama_poli']);
         $this->assertSame('BERLANGSUNG', $result['status']);
 
-        Http::assertSent(fn ($request) => $request->url() === 'https://antrian.example.com/api/public/5');
+        Http::assertSent(fn ($request) => $request->url() === 'https://antrian.example.com/api/public/poli/5');
+    }
+
+    public function test_fetch_mengirim_basic_auth_dari_config(): void
+    {
+        config([
+            'services.antrian.username' => 'admin',
+            'services.antrian.password' => 'rahasia',
+        ]);
+        Http::fake([
+            'antrian.example.com/*' => Http::response(['id' => '1', 'status' => 'OK']),
+        ]);
+
+        (new AntrianApiClient)->fetch('https://antrian.example.com', 5);
+
+        Http::assertSent(function ($request) {
+            $expected = 'Basic ' . base64_encode('admin:rahasia');
+            return $request->header('Authorization')[0] === $expected;
+        });
     }
 
     public function test_fetch_mengembalikan_null_jika_respons_gagal(): void
@@ -45,11 +63,11 @@ class AntrianApiClientTest extends TestCase
     public function test_fetch_membersihkan_trailing_slash_pada_base_url(): void
     {
         Http::fake([
-            'antrian.example.com/api/public/7' => Http::response(['id' => '1', 'status' => 'OK']),
+            'antrian.example.com/api/public/poli/7' => Http::response(['id' => '1', 'status' => 'OK']),
         ]);
 
         (new AntrianApiClient)->fetch('https://antrian.example.com/', 7);
 
-        Http::assertSent(fn ($request) => $request->url() === 'https://antrian.example.com/api/public/7');
+        Http::assertSent(fn ($request) => $request->url() === 'https://antrian.example.com/api/public/poli/7');
     }
 }
