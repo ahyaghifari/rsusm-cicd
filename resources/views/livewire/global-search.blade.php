@@ -20,7 +20,7 @@
                     type="text"
                     wire:model.live.debounce.350ms="query"
                     placeholder="Cari dokter, poliklinik, promo, FAQ..."
-                    class="flex-1 bg-transparent text-on-surface placeholder-on-surface-variant text-sm outline-none"
+                    class="flex-1 bg-transparent text-on-surface placeholder-on-surface-variant text-sm outline-none p-3 rounded-lg"
                     autofocus
                     autocomplete="off"
                 />
