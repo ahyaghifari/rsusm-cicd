@@ -360,59 +360,19 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-3 mt-8 gap-5 sm:gap-6">
                 @foreach($dokter_kami as $dk)
-                {{-- Gradient border wrapper — sama seperti kartu di halaman Dokter Kami.
-                     Di mobile lebarnya dikecilkan & dipusatkan supaya tidak penuh selebar layar. --}}
-                <div class="w-[78%] mx-auto sm:w-auto sm:mx-0
-                             p-[1.5px] rounded-2xl animate-fade-in
-                             bg-outline-variant/25
-                             hover:bg-linear-to-br hover:from-amber-400 hover:via-primary hover:to-amber-300
-                             shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-400"
-                     style="animation-delay: {{ $loop->index * 60 }}ms">
-                <a wire:navigate href="{{ route('rumahsakit.dokter_show', [$currentRumahSakit->slug, $dk->slug]) }}"
-                   class="group bg-white rounded-2xl overflow-hidden flex flex-col h-full">
-
-                    {{-- Foto dengan badge spesialis --}}
-                    <div class="relative overflow-hidden aspect-square bg-gray-100 shrink-0">
-                        <img src="{{ Storage::url($dk->foto) }}" alt="{{ $dk->nama }}"
-                             class="w-full h-full object-contain object-bottom
-                                    group-hover:scale-105 transition-transform duration-700"
-                             loading="lazy">
-
-                        <div class="absolute bottom-0 left-0 right-0 px-3 pb-2">
-                            <span class="inline-flex items-center bg-linear-to-r from-amber-500 to-amber-400
-                                         text-white text-[10px] font-bold uppercase tracking-wider
-                                         px-2 py-0.5 rounded-full shadow-sm max-w-full truncate">
-                                {{ $dk->namaSpesialis() }}
-                            </span>
-                        </div>
-                    </div>
-
-                    {{-- Info — tanpa deskripsi, langsung nama + footer --}}
-                    <div class="p-4 flex flex-col flex-1">
-                        <h4 class="font-bold text-on-surface text-lg leading-snug mb-3 flex-1
-                                   group-hover:text-primary transition-colors duration-200">
-                            {{ $dk->nama }}
-                        </h4>
-
-                        <div class="flex items-center justify-between pt-2 border-t border-outline-variant/20">
-                            <span class="text-xs text-on-surface-variant uppercase tracking-widest font-semibold">
-                                {{ $dk->spesialis?->nama ? 'SPESIALIS' : 'UMUM' }}
-                            </span>
-                            <span class="inline-flex items-center gap-1 text-xs font-bold text-primary
-                                         group-hover:gap-1.5 transition-all duration-200">
-                                Profil
-                                <span class="material-symbols-outlined text-[13px]">arrow_forward</span>
-                            </span>
-                        </div>
-                    </div>
-                </a>
-                </div>{{-- end gradient border wrapper --}}
+                    {{-- Lebar dikecilkan & dipusatkan khusus di mobile (homepage cuma tampil 3
+                         dokter, beda konteks dari grid penuh di halaman Dokter Kami) --}}
+                    <x-dokter-card
+                        :dokter="$dk"
+                        :rumahsakit-slug="$currentRumahSakit->slug"
+                        :delay="$loop->index * 60"
+                        class="w-[78%] mx-auto sm:w-auto sm:mx-0" />
                 @endforeach
             </div>
         </div>
-        <div class="mt-8">
+        <div class="mt-8 flex justify-center">
             <a href="{{ rumahsakit_route('rumahsakit.dokter_kami') }}"
-               class="w-fit sm:w-auto self-start border-2 border-tertiary bg-tertiary text-white px-6 py-2 rounded-lg text-label-md font-label-md transition-colors flex items-center gap-2 text-sm mx-auto cursor-pointer">
+               class="inline-flex items-center gap-2 border-2 border-tertiary bg-tertiary text-white px-6 py-2 rounded-lg text-label-md font-label-md transition-colors text-sm cursor-pointer">
                 Lihat Selengkapnya
                 <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
             </a>
