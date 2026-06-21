@@ -34,60 +34,71 @@
 
                         {{-- Konten slide --}}
                         <div class="relative z-10 h-full flex flex-col items-center justify-center text-center
-                                    px-6 py-6 md:py-10 gap-4 md:gap-5">
+                                    px-6 py-6 md:py-10 gap-5 md:gap-6">
 
-                            {{-- Nama RS --}}
+                            {{-- Nama RS — untuk RS yang ada foto: lebih besar di mobile, hurufnya sendiri
+                                 diberi outline tipis warna campuran primary+gold (bukan kotak/bingkai di
+                                 luar teks — stroke langsung di glyph-nya, fill putih tetap dipertahankan
+                                 supaya tetap mudah dibaca). --}}
                             <div>
                                 <p class="{{ $hasFoto ? 'text-white/65' : 'text-on-surface-variant' }}
-                                          text-[10px] md:text-xs uppercase tracking-[0.25em] font-semibold mb-1">
+                                          text-[10px] md:text-sm lg:text-lg uppercase tracking-[0.25em] font-semibold mb-2">
                                     Selamat Datang di
                                 </p>
-                                <h1 class="{{ $hasFoto ? 'text-white' : 'text-on-surface' }}
-                                           text-xl md:text-4xl lg:text-5xl font-bold leading-tight uppercase">
+                                @if($hasFoto)
+                                <h1 class="text-white text-3xl md:text-4xl lg:text-5xl font-bold leading-tight uppercase"
+                                    style="text-shadow: 1px 1px 3px color-mix(in srgb, var(--color-primary) 55%, var(--color-amber-400) 45%);">
                                     {{ $currentRumahSakit->nama }}
                                 </h1>
-                                <div class="mt-2.5 h-0.5 w-12 md:w-16 bg-yellow-400 rounded-full mx-auto"></div>
+                                @else
+                                <h1 class="text-on-surface text-xl md:text-4xl lg:text-5xl font-bold leading-tight uppercase">
+                                    {{ $currentRumahSakit->nama }}
+                                </h1>
+                                @endif
+                                <div class="mt-3 h-0.5 w-12 md:w-16 bg-yellow-400 rounded-full mx-auto"></div>
                             </div>
 
                             {{-- Quick Nav — termasuk "Buat Janji Dokter" sebagai CTA utama (ditonjolkan
-                                 warna kuning), digabung satu baris dengan nav lainnya --}}
+                                 warna kuning), digabung satu baris dengan nav lainnya. Di atas foto,
+                                 pill solid putih dipakai (bukan kaca transparan) supaya kontras terjamin
+                                 di foto apa pun, dengan ikon warna primary sebagai penanda brand. Pill
+                                 dibuat lebih kecil di mobile supaya tidak berebut tempat dengan plakat nama. --}}
                             @php
                                 $navClass = $hasFoto
-                                    ? 'bg-white/15 hover:bg-white/25 border border-white/25 text-white backdrop-blur-sm'
+                                    ? 'bg-white/95 hover:bg-white text-on-surface shadow-md hover:shadow-lg hover:-translate-y-0.5'
                                     : 'bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface';
+                                $navIconClass = $hasFoto ? 'text-primary' : '';
+                                $pillClass = 'inline-flex items-center gap-1 md:gap-1.5 px-2.5 py-1 md:px-3 md:py-1.5
+                                              rounded-full text-[10px] md:text-xs font-semibold transition-all duration-150';
+                                $iconSize = 'text-[11px] md:text-[13px]';
                             @endphp
-                            <div class="flex flex-wrap justify-center gap-2">
+                            <div class="flex flex-wrap justify-center gap-1.5 md:gap-2">
                                 @if($currentRumahSakit->link_pendaftaran_online)
                                 <a href="{{ $currentRumahSakit->link_pendaftaran_online }}" target="_blank"
-                                   class="inline-flex items-center gap-1.5 bg-yellow-400 hover:bg-yellow-300
-                                          text-primary px-3 py-1.5 rounded-full
-                                          text-xs font-bold shadow-lg transition-colors">
-                                    <span class="material-symbols-outlined text-[13px]">event</span>
+                                   class="{{ $pillClass }} bg-yellow-400 hover:bg-yellow-300 text-primary font-bold
+                                          shadow-md hover:shadow-lg hover:-translate-y-0.5">
+                                    <span class="material-symbols-outlined {{ $iconSize }}">event</span>
                                     Buat Janji Dokter
                                 </a>
                                 @endif
                                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.dokter_kami') }}"
-                                   class="inline-flex items-center gap-1.5 {{ $navClass }}
-                                          px-3 py-1.5 rounded-full text-xs font-semibold transition-colors">
-                                    <span class="material-symbols-outlined text-[13px]">stethoscope</span>
+                                   class="{{ $pillClass }} {{ $navClass }}">
+                                    <span class="material-symbols-outlined {{ $iconSize }} {{ $navIconClass }}">stethoscope</span>
                                     Cari Dokter
                                 </a>
                                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.jadwal_praktek') }}"
-                                   class="inline-flex items-center gap-1.5 {{ $navClass }}
-                                          px-3 py-1.5 rounded-full text-xs font-semibold transition-colors">
-                                    <span class="material-symbols-outlined text-[13px]">calendar_month</span>
+                                   class="{{ $pillClass }} {{ $navClass }}">
+                                    <span class="material-symbols-outlined {{ $iconSize }} {{ $navIconClass }}">calendar_month</span>
                                     Jadwal Praktek
                                 </a>
                                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.rawat_inap') }}"
-                                   class="inline-flex items-center gap-1.5 {{ $navClass }}
-                                          px-3 py-1.5 rounded-full text-xs font-semibold transition-colors">
-                                    <span class="material-symbols-outlined text-[13px]">bed</span>
+                                   class="{{ $pillClass }} {{ $navClass }}">
+                                    <span class="material-symbols-outlined {{ $iconSize }} {{ $navIconClass }}">bed</span>
                                     Rawat Inap
                                 </a>
                                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.unggulan') }}"
-                                   class="inline-flex items-center gap-1.5 {{ $navClass }}
-                                          px-3 py-1.5 rounded-full text-xs font-semibold transition-colors">
-                                    <span class="material-symbols-outlined text-[13px]">star</span>
+                                   class="{{ $pillClass }} {{ $navClass }}">
+                                    <span class="material-symbols-outlined {{ $iconSize }} {{ $navIconClass }}">star</span>
                                     Layanan Unggulan
                                 </a>
                             </div>
