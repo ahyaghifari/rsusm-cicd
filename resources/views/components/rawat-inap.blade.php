@@ -144,7 +144,7 @@
 
                     {{-- 6 pertama selalu tampil --}}
                     @foreach($kamarInap->fasilitasRawatInap->take(6) as $f)
-                        <span class="inline-flex items-center gap-0.5  text-sm text-on-surface-variant
+                        <span class="inline-flex items-center gap-0.5  md:text-sm text-on-surface-variant
                                      bg-surface-container px-2 py-1 rounded-full leading-none">
                             <span class="material-symbols-outlined text-[10px] text-primary"
                                   style="font-variation-settings:'FILL' 1">check_circle</span>
@@ -159,7 +159,7 @@
                                   x-transition:enter="transition ease-out duration-150"
                                   x-transition:enter-start="opacity-0 scale-90"
                                   x-transition:enter-end="opacity-100 scale-100"
-                                  class="inline-flex items-center gap-0.5 text-sm text-on-surface-variant
+                                  class="inline-flex items-center gap-0.5 md:text-sm text-on-surface-variant
                                          bg-surface-container px-2 py-1 rounded-full leading-none">
                                 <span class="material-symbols-outlined text-[10px] text-primary"
                                       style="font-variation-settings:'FILL' 1">check_circle</span>

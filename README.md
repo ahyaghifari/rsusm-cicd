@@ -258,7 +258,7 @@ Path admin dikonfigurasi via env: `ADMIN_PATH=manage` (default). Akses di `/{ADM
 | Fasilitas Pendukung | Fasilitas non-medis (drag-drop sort) |
 | Penunjang Medis | Lab, radiologi, farmasi (drag-drop sort) |
 | Partner | Mitra & rekanan |
-| Kontak | Nomor telepon, WhatsApp, sosial media (3 kategori) |
+| Kontak | Nomor telepon, WhatsApp, sosial media (4 kategori, termasuk RAWAT INAP) |
 | Link Layanan | Tautan cepat (drag-drop sort) — **model/resource tetap ada**, tapi sudah tidak ditampilkan otomatis di homepage/portal (lihat catatan di bawah) |
 | User | Manajemen akun admin + penugasan RS |
 
@@ -305,7 +305,8 @@ Path admin dikonfigurasi via env: `ADMIN_PATH=manage` (default). Akses di `/{ADM
 |---|---|
 | `SOSIAL MEDIA` | Ikon di footer kiri |
 | `OPERASIONAL` | Card di footer kanan + halaman Hubungi Kami |
-| `PENDAFTARAN` | Disclaimer halaman jadwal + footer kanan |
+| `PENDAFTARAN` | Disclaimer halaman Jadwal Praktek + footer kanan |
+| `RAWAT INAP` | Disclaimer halaman Ketersediaan Rawat Inap (dedicated, **bukan** reuse `PENDAFTARAN` lagi) + ikut tampil di footer kanan/Hubungi Kami |
 
 #### Slug Uniqueness
 
@@ -315,7 +316,7 @@ Slug bersifat unik **per RS** (composite unique), bukan global:
 - `halaman`: unique `(slug, rumah_sakit_id)`
 - `poliklinik`: unique `(slug, rumah_sakit_id)`
 - `artikel`, `kategori_artikel`: unique `(slug, rumah_sakit_id)`
-- `dokter`: **diperbaiki** dari unique global → composite `(slug, rumah_sakit_id)` — bug lama yang menyebabkan RS kedua gagal insert dokter dengan nama sama (lihat migrasi `2026_06_17_000002_fix_slug_unique_to_composite_dokter.php`)
+- `dokter`: **diperbaiki** dari unique global → composite `(slug, rumah_sakit_id)` — bug lama yang menyebabkan RS kedua gagal insert dokter dengan nama sama (lihat migrasi `consolidate_dokter_table_alterations.php` — sejak pembersihan migrasi 2026-06-21, lihat [issues/migration-cleanup-plan.md](../issues/migration-cleanup-plan.md))
 
 ---
 
@@ -584,6 +585,14 @@ ANTRIAN_API_PASSWORD=
 - [x] `Dokter.kuota_pasien` — info kuota/ketersediaan rawat jalan (free text), tampil di profil dokter publik di atas Jadwal Praktek
 - [x] `DokterResource` — section "API Antrian" dibatasi hanya untuk role `super_admin`/`admin`; field `kuota_pasien` & toggle `aktif` dirapikan ke layout full-width di luar 2-kolom section
 - [x] Fix 3 test pra-eksisting yang gagal: `UserTest` (pakai `Filament::getPanel('admin')` yang benar-benar terdaftar, bukan `Panel` kosong) & `ChatbotPanelTest` (`MAX_MESSAGES` disesuaikan ke nilai aktual 50)
+- [x] Header desktop — Emergency & Hotline dibuat clickable (`tel:` link) dengan badge chip warna + shadow (bukan animasi, supaya tidak terlalu mencolok)
+- [x] Hero homepage — Emergency/Hotline dihapus dari hero (sudah ada di header), tombol "Buat Janji Dokter" digabung ke baris Quick Nav
+- [x] Section "Informasi & Layanan" homepage — versi mobile dibuat tile ringkas 3 kolom (ikon + label saja), versi desktop (kartu lengkap) tidak diubah
+- [x] Section "Dokter Kami" homepage — kartu diselaraskan dengan style halaman Dokter Kami (gradient border, badge spesialis di foto), tanpa deskripsi; 3 kolom konsisten dari mobile (lebar tiap kartu dikecilkan & dipusatkan) sampai desktop
+- [x] Mobile bottom bar — redesign badge Tanya Syifa (avatar bulat putih, meniru header panel chat) agar setara bobot visualnya dengan badge Emergency/Hotline; tambah efek hover per nav
+- [x] Fix bug filter di halaman Jadwal Praktek: `JadwalPraktek.php` (Livewire) pindah dari `RsPortalComponent` ke `Component` biasa + re-bind manual `currentRumahSakit` di `boot()` — pola sama dengan `KetersediaanRawatInap.php`, supaya filter hari/poli (lewat `/livewire/update`) tidak `BindingResolutionException`
+- [x] Kategori Kontak baru `RAWAT INAP` — dedicated untuk disclaimer halaman Ketersediaan Rawat Inap, tidak lagi reuse `PENDAFTARAN`
+- [x] Pembersihan migrasi database: 64 → 47 file, direktori `database/migrations/` sekarang cuma `*_create_*` dan `*_consolidate_*` (tidak ada lagi `add_*`/`fix_*`/`refactor_*`). Migrasi lama yang sudah pernah jalan tidak diubah/dihapus dari riwayat — diganti migrasi baru yang idempotent (`Schema::hasColumn`/`hasIndex`) sehingga aman dijalankan di production tanpa menyentuh tabel `migrations`. Detail & cara verifikasi: [issues/migration-cleanup-plan.md](../issues/migration-cleanup-plan.md)
 
 ### Dalam Pengerjaan
 
