@@ -146,8 +146,6 @@
                     @foreach($kamarInap->fasilitasRawatInap->take(6) as $f)
                         <span class="inline-flex items-center gap-1 text-xs md:text-sm text-on-surface
                                      bg-surface-container border border-outline-variant/20 px-2.5 py-1.5 rounded-full leading-none">
-                            <span class="material-symbols-outlined text-xs text-primary shrink-0"
-                                  style="font-variation-settings:'FILL' 1">check_circle</span>
                             {{ $f->nama }}
                         </span>
                     @endforeach
@@ -161,8 +159,6 @@
                                   x-transition:enter-end="opacity-100 scale-100"
                                   class="inline-flex items-center gap-1 text-xs md:text-sm text-on-surface
                                          bg-surface-container border border-outline-variant/20 px-2.5 py-1.5 rounded-full leading-none">
-                                <span class="material-symbols-outlined text-xs text-primary shrink-0"
-                                      style="font-variation-settings:'FILL' 1">check_circle</span>
                                 {{ $f->nama }}
                             </span>
                         @endforeach
