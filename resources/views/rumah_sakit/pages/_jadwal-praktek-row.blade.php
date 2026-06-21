@@ -79,10 +79,10 @@
                 @endif
 
                 @if($s->sesuai_perjanjian)
-                    <span class="inline-flex items-center gap-1 text-[10px] font-bold
+                    <span class="inline-flex items-center gap-1 text-[11px] font-bold
                                  text-green-700 bg-green-50 border border-green-200
                                  px-2 py-0.5 rounded-full shrink-0">
-                        <span class="material-symbols-outlined text-[10px]">calendar_clock</span>
+                        <span class="material-symbols-outlined text-[11px]">calendar_clock</span>
                         Perjanjian
                     </span>
                 @endif
@@ -90,7 +90,7 @@
         </div>
 
         @if($sesi->catatan)
-            <p class="text-[11px] text-on-surface-variant/60 italic mt-0.5 leading-snug">
+            <p class="text-xs text-on-surface-variant/60 italic mt-0.5 leading-snug">
                 {{ $sesi->catatan }}
             </p>
         @endif

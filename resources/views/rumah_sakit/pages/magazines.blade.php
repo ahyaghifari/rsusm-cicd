@@ -17,7 +17,9 @@
     @else
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
             @foreach($magazines as $magazine)
-            <div class="magazine-card group cursor-pointer"
+            <button type="button"
+                 class="magazine-card group cursor-pointer block w-full text-left appearance-none bg-transparent border-0 p-0"
+                 aria-label="Baca {{ $magazine->judul }}"
                  data-pdf-url="{{ Storage::url($magazine->file_pdf) }}"
                  data-judul="{{ $magazine->judul }}">
 
@@ -55,7 +57,7 @@
                         </p>
                     @endif
                 </div>
-            </div>
+            </button>
             @endforeach
         </div>
     @endif
@@ -98,6 +100,7 @@
     <div id="flipbook-controls"
          class="hidden shrink-0 items-center justify-center gap-4 py-3 border-t border-white/10">
         <button id="btn-prev"
+                aria-label="Halaman sebelumnya"
                 class="flex items-center gap-1 text-white/80 hover:text-white bg-white/10 hover:bg-white/20
                        px-4 py-2 rounded-lg text-sm transition-colors">
             <span class="material-symbols-outlined text-[16px]">chevron_left</span>
@@ -105,6 +108,7 @@
         </button>
         <span id="page-counter" class="text-white/60 text-sm min-w-20 text-center">Hal 1 / 1</span>
         <button id="btn-next"
+                aria-label="Halaman berikutnya"
                 class="flex items-center gap-1 text-white/80 hover:text-white bg-white/10 hover:bg-white/20
                        px-4 py-2 rounded-lg text-sm transition-colors">
             <span class="hidden sm:inline">Berikutnya</span>

@@ -1,6 +1,7 @@
 <div>
 <style>
-    .halaman-konten h1 { font-size: 1.75rem; font-weight: 700; color: var(--color-primary); margin-top: 1.5rem; margin-bottom: 0.75rem; line-height: 1.3; }
+    {{-- h1 dari rich-text otomatis diturunkan jadi h2 saat render (lihat blade di bawah) —
+         supaya halaman ini tidak pernah punya 2 <h1> (satu lagi dari <x-page-hero>). --}}
     .halaman-konten h2 { font-size: 1.35rem; font-weight: 700; color: var(--color-primary); margin-top: 1.5rem; margin-bottom: 0.5rem; }
     .halaman-konten h3 { font-size: 1.1rem; font-weight: 600; color: var(--color-on-surface); margin-top: 1.25rem; margin-bottom: 0.4rem; }
     .halaman-konten p { margin-bottom: 1rem; }
@@ -66,7 +67,7 @@
             <div class="flex-1 min-w-0">
                 <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/20 p-6 md:p-10">
                     <div class="halaman-konten text-gray-700 leading-relaxed text-sm md:text-base">
-                        {!! $halaman->konten !!}
+                        {!! preg_replace('/<(\/?)h1(\s|>)/i', '<$1h2$2', $halaman->konten) !!}
                     </div>
                 </div>
             </div>

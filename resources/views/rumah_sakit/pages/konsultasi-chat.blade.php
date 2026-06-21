@@ -39,7 +39,7 @@
                 {{-- Teks --}}
                 <div class="flex-1 min-w-0">
                     <p class="font-bold text-white text-sm leading-snug">Aktifkan Notifikasi Chat</p>
-                    <p class="text-white/70 text-[11.5px] mt-0.5 leading-relaxed">
+                    <p class="text-white/70 text-xs mt-0.5 leading-relaxed">
                         Agar kamu tahu saat dokter membalas — meski berpindah halaman atau menutup browser.
                     </p>
                     <div class="flex items-center gap-3 mt-2.5">
@@ -174,10 +174,10 @@
                         @if($p['pengirim'] === 'PASIEN')
                         <div class="flex flex-row-reverse gap-2 items-end shrink-0" data-msg="pasien">
                             <div class="flex flex-col items-end max-w-[80%]">
-                                <div class="px-3 py-2 rounded-[15px] rounded-br-sm bg-primary text-on-primary text-[13px] leading-snug wrap-break-word w-full">
+                                <div class="px-3 py-2 rounded-[15px] rounded-br-sm bg-primary text-on-primary text-sm leading-snug wrap-break-word w-full">
                                     {{ $p['isi'] }}
                                 </div>
-                                <div class="text-[10px] text-on-surface-variant/60 mt-0.5">{{ \Illuminate\Support\Carbon::parse($p['created_at'])->format('H:i') }}</div>
+                                <div class="text-[11px] text-on-surface-variant/60 mt-0.5">{{ \Illuminate\Support\Carbon::parse($p['created_at'])->format('H:i') }}</div>
                             </div>
                         </div>
                         @else
@@ -190,10 +190,10 @@
                                 @endif
                             </div>
                             <div class="flex flex-col max-w-[80%]">
-                                <div class="px-3 py-2 rounded-[15px] rounded-bl-sm bg-surface-container border border-outline-variant/30 text-[13px] leading-snug text-on-surface wrap-break-word">
+                                <div class="px-3 py-2 rounded-[15px] rounded-bl-sm bg-surface-container border border-outline-variant/30 text-sm leading-snug text-on-surface wrap-break-word">
                                     {{ $p['isi'] }}
                                 </div>
-                                <div class="text-[10px] text-on-surface-variant/60 mt-0.5">{{ \Illuminate\Support\Carbon::parse($p['created_at'])->format('H:i') }}</div>
+                                <div class="text-[11px] text-on-surface-variant/60 mt-0.5">{{ \Illuminate\Support\Carbon::parse($p['created_at'])->format('H:i') }}</div>
                             </div>
                         </div>
                         @endif
@@ -250,10 +250,10 @@
                         @if($p['pengirim'] === 'PASIEN')
                         <div class="flex flex-row-reverse gap-2 items-end shrink-0">
                             <div class="flex flex-col items-end max-w-[80%]">
-                                <div class="px-3 py-2 rounded-[15px] rounded-br-sm bg-surface-container border border-outline-variant/30 text-[13px] leading-snug text-on-surface wrap-break-word w-full">
+                                <div class="px-3 py-2 rounded-[15px] rounded-br-sm bg-surface-container border border-outline-variant/30 text-sm leading-snug text-on-surface wrap-break-word w-full">
                                     {{ $p['isi'] }}
                                 </div>
-                                <div class="text-[10px] text-on-surface-variant/60 mt-0.5">{{ \Illuminate\Support\Carbon::parse($p['created_at'])->format('d M Y, H:i') }}</div>
+                                <div class="text-[11px] text-on-surface-variant/60 mt-0.5">{{ \Illuminate\Support\Carbon::parse($p['created_at'])->format('d M Y, H:i') }}</div>
                             </div>
                         </div>
                         @else
@@ -266,10 +266,10 @@
                                 @endif
                             </div>
                             <div class="flex flex-col max-w-[80%]">
-                                <div class="px-3 py-2 rounded-[15px] rounded-bl-sm bg-white border border-outline-variant/30 text-[13px] leading-snug text-on-surface wrap-break-word">
+                                <div class="px-3 py-2 rounded-[15px] rounded-bl-sm bg-white border border-outline-variant/30 text-sm leading-snug text-on-surface wrap-break-word">
                                     {{ $p['isi'] }}
                                 </div>
-                                <div class="text-[10px] text-on-surface-variant/60 mt-0.5">{{ \Illuminate\Support\Carbon::parse($p['created_at'])->format('d M Y, H:i') }}</div>
+                                <div class="text-[11px] text-on-surface-variant/60 mt-0.5">{{ \Illuminate\Support\Carbon::parse($p['created_at'])->format('d M Y, H:i') }}</div>
                             </div>
                         </div>
                         @endif

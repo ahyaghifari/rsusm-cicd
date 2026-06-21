@@ -105,7 +105,7 @@
 
                         {{-- Footer --}}
                         <div class="flex items-center justify-between mt-4 pt-3 border-t border-outline-variant/20">
-                            <span class="text-[11px] text-on-surface-variant uppercase tracking-widest font-semibold">
+                            <span class="text-xs text-on-surface-variant uppercase tracking-widest font-semibold">
                                 {{ $d->spesialis?->nama ? 'SPESIALIS' : 'UMUM';}}
                             </span>
                             <span class="inline-flex items-center gap-1 text-sm font-bold text-primary

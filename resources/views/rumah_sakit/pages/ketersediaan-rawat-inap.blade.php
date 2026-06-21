@@ -50,12 +50,12 @@
                     <span class="text-xs font-bold text-on-surface-variant shrink-0">Tampilan</span>
                     <div class="inline-flex rounded-full border border-outline-variant/30 p-0.5 bg-surface-container-lowest">
                         <button type="button" wire:click="$set('groupBy', 'kamar')"
-                            class="px-3 py-1 rounded-full text-xs font-bold transition-colors
+                            class="px-3 py-1 rounded-full text-sm font-bold transition-colors
                                    {{ $groupBy === 'kamar' ? 'bg-primary text-white' : 'text-on-surface-variant hover:text-on-surface' }}">
                             Per Kamar
                         </button>
                         <button type="button" wire:click="$set('groupBy', 'kelas')"
-                            class="px-3 py-1 rounded-full text-xs font-bold transition-colors
+                            class="px-3 py-1 rounded-full text-sm font-bold transition-colors
                                    {{ $groupBy === 'kelas' ? 'bg-primary text-white' : 'text-on-surface-variant hover:text-on-surface' }}">
                             Per Kelas
                         </button>
@@ -66,13 +66,13 @@
                     <span class="text-xs font-bold text-on-surface-variant shrink-0">Status</span>
                     <div class="inline-flex flex-wrap rounded-full border border-outline-variant/30 p-0.5 bg-surface-container-lowest">
                         <button type="button" wire:click="$set('statusFilter', null)"
-                            class="px-3 py-1 rounded-full text-xs font-bold transition-colors
+                            class="px-3 py-1 rounded-full text-sm font-bold transition-colors
                                    {{ ! $statusFilter ? 'bg-primary text-white' : 'text-on-surface-variant hover:text-on-surface' }}">
                             Semua
                         </button>
                         @foreach(\App\Enums\StatusKetersediaanKamar::cases() as $status)
                             <button type="button" wire:click="$set('statusFilter', {{ $status->value }})"
-                                class="px-3 py-1 rounded-full text-xs font-bold transition-colors
+                                class="px-3 py-1 rounded-full text-sm font-bold transition-colors
                                        {{ $statusFilter === $status->value ? 'bg-primary text-white' : 'text-on-surface-variant hover:text-on-surface' }}">
                                 {{ $status->getLabel() }}
                             </button>

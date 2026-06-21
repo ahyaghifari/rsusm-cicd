@@ -42,9 +42,9 @@
                     {{-- Badge Unggulan --}}
                     @if($p->popup)
                         <div class="absolute top-3 left-3">
-                            <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase
+                            <span class="inline-flex items-center gap-1 text-xs font-bold uppercase
                                          tracking-widest bg-yellow-400 text-primary px-2.5 py-1 rounded-full shadow-sm">
-                                <span class="material-symbols-outlined text-[10px]">star</span> Unggulan
+                                <span class="material-symbols-outlined text-xs">star</span> Unggulan
                             </span>
                         </div>
                     @endif

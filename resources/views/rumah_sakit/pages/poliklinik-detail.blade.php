@@ -45,7 +45,7 @@
             {{-- ---------------------------------------------------- --}}
             {{-- KIRI: Deskripsi lengkap (2/3 lebar) --}}
             {{-- ---------------------------------------------------- --}}
-            <div class="lg:col-span-2" data-aos="fade-right">
+            <div class="lg:col-span-2">
                 @if($poliklinik->deskripsi)
                     <div class="flex items-center gap-3 mb-6">
                         <span class="w-1.5 h-8 bg-primary rounded-full shrink-0"></span>
@@ -66,7 +66,7 @@
             {{-- ---------------------------------------------------- --}}
             {{-- KANAN: Jadwal layanan (1/3 lebar) --}}
             {{-- ---------------------------------------------------- --}}
-            <div data-aos="fade-left">
+            <div>
                 @php $warna = '#4d51b2'; @endphp
                 <div class="sticky top-4">
                     <div class="flex items-center gap-3 mb-6">
@@ -103,7 +103,7 @@
                                             <span class="text-sm font-bold">{{ $hariLabel }}</span>
                                         </div>
                                         @if($isToday)
-                                            <span class="text-[10px] font-bold uppercase tracking-widest
+                                            <span class="text-xs font-bold uppercase tracking-widest
                                                          bg-white/20 px-2 py-0.5 rounded-full">Hari Ini</span>
                                         @endif
                                     </div>
@@ -170,17 +170,17 @@
                                                                     @endif
                                                                 @endif
                                                                 @if($s->sesuai_perjanjian)
-                                                                    <span class="inline-flex items-center gap-0.5 text-[10px] font-bold
+                                                                    <span class="inline-flex items-center gap-0.5 text-[11px] font-bold
                                                                                  text-green-700 bg-green-50 border border-green-200
                                                                                  px-1.5 py-0.5 rounded-full shrink-0">
-                                                                        <span class="material-symbols-outlined text-[10px]">calendar_clock</span>
+                                                                        <span class="material-symbols-outlined text-[11px]">calendar_clock</span>
                                                                         Perjanjian
                                                                     </span>
                                                                 @endif
                                                             @endforeach
                                                         </div>
                                                         @if($first->catatan)
-                                                            <p class="text-[11px] text-on-surface-variant/60 italic mt-0.5 leading-snug">
+                                                            <p class="text-xs text-on-surface-variant/60 italic mt-0.5 leading-snug">
                                                                 {{ $first->catatan }}
                                                             </p>
                                                         @endif

@@ -92,17 +92,17 @@
                 @if($galeri->count() > 4)
                     <button type="button"
                             class="hs-carousel-prev hs-carousel-disabled:opacity-20 hs-carousel-disabled:cursor-not-allowed
-                                   absolute -left-2.5 top-1/2 -translate-y-1/2 z-10
-                                   w-6 h-6 rounded-full bg-white shadow border border-outline-variant/30
+                                   absolute -left-3 top-1/2 -translate-y-1/2 z-10
+                                   w-8 h-8 rounded-full bg-white shadow border border-outline-variant/30
                                    flex items-center justify-center text-primary hover:bg-primary hover:text-white transition">
-                        <span class="material-symbols-outlined text-[14px]">chevron_left</span>
+                        <span class="material-symbols-outlined text-[16px]">chevron_left</span>
                     </button>
                     <button type="button"
                             class="hs-carousel-next hs-carousel-disabled:opacity-20 hs-carousel-disabled:cursor-not-allowed
-                                   absolute -right-2.5 top-1/2 -translate-y-1/2 z-10
-                                   w-6 h-6 rounded-full bg-white shadow border border-outline-variant/30
+                                   absolute -right-3 top-1/2 -translate-y-1/2 z-10
+                                   w-8 h-8 rounded-full bg-white shadow border border-outline-variant/30
                                    flex items-center justify-center text-primary hover:bg-primary hover:text-white transition">
-                        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
                     </button>
                 @endif
             </div>
@@ -139,7 +139,7 @@
             @endphp
             <div class="border-t border-outline-variant/20 pt-3 mt-auto"
                  x-data="{ expanded: false }">
-                <p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-semibold mb-2">Fasilitas</p>
+                <p class="text-xs text-on-surface-variant uppercase tracking-widest font-semibold mb-2">Fasilitas</p>
                 <div class="flex flex-wrap gap-1.5">
 
                     {{-- 6 pertama selalu tampil --}}

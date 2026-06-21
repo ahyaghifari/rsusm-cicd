@@ -1,6 +1,7 @@
 <div>
     <style>
-        .layanan-unggulan h1 { font-size: 1.75rem; font-weight: 700; color: var(--color-primary); margin-top: 1.5rem; margin-bottom: 0.75rem; line-height: 1.3; }
+        {{-- h1 dari rich-text otomatis diturunkan jadi h2 saat render (lihat blade di bawah) —
+             supaya halaman ini tidak pernah punya 2 <h1> (satu lagi dari <x-page-hero>). --}}
         .layanan-unggulan h2 { font-size: 1.35rem; font-weight: 700; color: var(--color-primary); margin-top: 1.5rem; margin-bottom: 0.5rem; }
         .layanan-unggulan h3 { font-size: 1.1rem; font-weight: 600; color: var(--color-on-surface); margin-top: 1.25rem; margin-bottom: 0.4rem; }
         .layanan-unggulan p { margin-bottom: 1rem; }
@@ -19,8 +20,6 @@
 
         @foreach($data as $layanan)
         <div
-            data-aos="{{ $loop->odd ? 'fade-right' : 'fade-left' }}"
-            data-aos-delay="{{ $loop->index * 60 }}"
             class="group bg-white rounded-2xl overflow-hidden shadow-sm border border-outline-variant/20
                    hover:shadow-xl transition-all duration-300
                    grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
@@ -65,7 +64,7 @@
 
                 <div class="layanan-unggulan text-sm md:text-base text-on-surface-variant leading-relaxed
                             prose prose-sm max-w-none">
-                    {!! $layanan->deskripsi !!}
+                    {!! preg_replace('/<(\/?)h1(\s|>)/i', '<$1h2$2', $layanan->deskripsi) !!}
                 </div>
             </div>
 

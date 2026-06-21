@@ -19,7 +19,7 @@
                 <span class="material-symbols-outlined text-[32px]">calendar_month</span>
                 <div class="text-center">
                     <p class="font-bold text-sm leading-tight">Per Hari</p>
-                    <p class="text-[11px] mt-0.5 leading-snug opacity-80">Lihat jadwal hari tertentu</p>
+                    <p class="text-xs mt-0.5 leading-snug opacity-80">Lihat jadwal hari tertentu</p>
                 </div>
             </button>
 
@@ -31,7 +31,7 @@
                 <span class="material-symbols-outlined text-[32px]">local_hospital</span>
                 <div class="text-center">
                     <p class="font-bold text-sm leading-tight">Per Poli</p>
-                    <p class="text-[11px] mt-0.5 leading-snug opacity-80">Lihat 1 poliklinik semua hari</p>
+                    <p class="text-xs mt-0.5 leading-snug opacity-80">Lihat 1 poliklinik semua hari</p>
                 </div>
             </button>
 
@@ -210,7 +210,7 @@
                                 </div>
                                 <div class="flex items-center gap-1.5">
                                     @if($isToday)
-                                        <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full"
+                                        <span class="text-xs font-bold uppercase px-2 py-0.5 rounded-full"
                                               style="background-color:rgba(255,255,255,0.2);">Hari Ini</span>
                                     @endif
                                     <span class="text-[11px] font-semibold opacity-70">{{ $sesiHari->count() }}x</span>

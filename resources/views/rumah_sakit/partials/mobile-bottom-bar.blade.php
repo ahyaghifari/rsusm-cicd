@@ -10,7 +10,7 @@
         {{-- Emergency --}}
         @if($currentRumahSakit->no_emergency)
         <a href="tel:{{ preg_replace('/[^0-9+]/', '', $currentRumahSakit->no_emergency) }}"
-           class="flex items-center justify-center gap-2 py-2.5
+           class="flex items-center justify-center gap-2 py-3.5
                   hover:bg-red-50 active:bg-red-50 transition-colors duration-150 min-w-0 px-2">
             <span class="flex items-center justify-center w-8 h-8 rounded-xl bg-red-600 shrink-0">
                 <span class="material-symbols-outlined text-white text-[17px] leading-none">emergency</span>
@@ -27,7 +27,7 @@
         {{-- Hotline --}}
         @if($currentRumahSakit->no_hotline)
         <a href="tel:{{ preg_replace('/[^0-9+]/', '', $currentRumahSakit->no_hotline) }}"
-           class="flex items-center justify-center gap-2 py-2.5
+           class="flex items-center justify-center gap-2 py-3.5
                   hover:bg-green-50 active:bg-green-50 transition-colors duration-150 min-w-0 px-2">
             <span class="flex items-center justify-center w-8 h-8 rounded-xl bg-green-600 shrink-0">
                 <span class="material-symbols-outlined text-white text-[17px] leading-none">call</span>
@@ -47,7 +47,7 @@
             x-data
             @click="$store.chatbot.toggle()"
             :aria-expanded="$store.chatbot.open"
-            class="flex items-center justify-center gap-2 py-2.5
+            class="flex items-center justify-center gap-2 py-3.5
                    hover:bg-primary/5 active:bg-primary/5 transition-colors duration-150 cursor-pointer min-w-0 px-2"
             aria-label="Buka chatbot Tanya Syifa"
         >
@@ -58,6 +58,8 @@
                      class="w-6 h-6 object-contain"
                      aria-hidden="true">
                 <span x-show="$store.chatbot.showBadge && !$store.chatbot.open"
+                      role="status"
+                      aria-label="1 pesan baru"
                       class="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full
                              bg-red-500 border border-white text-[7px] font-bold
                              text-white flex items-center justify-center">1</span>

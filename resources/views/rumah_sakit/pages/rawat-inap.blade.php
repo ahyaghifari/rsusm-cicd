@@ -65,7 +65,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
 
                         @foreach($gedung->rawatInap as $room)
-                                <div data-aos="fade-up">
+                                <div>
                                     <x-rawat-inap :rawat-inap="$room" />
                                 </div>
                         @endforeach
@@ -78,7 +78,7 @@
         @else
                 @foreach($rawatInap as $room)
 
-                    <div data-aos="fade-up">
+                    <div>
                         <x-rawat-inap :rawat-inap="$room" />
                     </div>
 
@@ -98,11 +98,6 @@
                 // Trigger lazy loading untuk gambar yang baru ditambahkan
                 if (window.LazyLoad) {
                     window.LazyLoad.updateImages();
-                }
-
-                // Trigger AOS refresh untuk fade-up animations
-                if (window.AOS && typeof window.AOS.refresh === 'function') {
-                    window.AOS.refresh();
                 }
             }, 100);
         }

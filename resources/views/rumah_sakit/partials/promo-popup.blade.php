@@ -44,7 +44,7 @@ function promoPopup(rsSlug) {
 
         {{-- Tombol tutup — absolute langsung di atas poster --}}
         <button @click="close()"
-            class="absolute top-3 right-3 z-20 w-8 h-8 bg-black/40 hover:bg-black/60
+            class="absolute top-3 right-3 z-20 w-11 h-11 bg-black/40 hover:bg-black/60
                    text-white rounded-full flex items-center justify-center transition-colors duration-150">
             <span class="material-symbols-outlined text-[18px]">close</span>
         </button>

@@ -1,7 +1,9 @@
 <div>
 
 <style>
-    .artikel h1 { font-size: 1.75rem; font-weight: 700; color: var(--color-primary); margin-top: 1.5rem; margin-bottom: 0.75rem; line-height: 1.3; }
+    {{-- h1 dari rich-text otomatis diturunkan jadi h2 saat render (lihat blade di bawah) —
+         supaya halaman ini tidak pernah punya 2 <h1> (satu lagi dari <x-page-hero> atau judul
+         artikel). --}}
     .artikel h2 { font-size: 1.35rem; font-weight: 700; color: var(--color-primary); margin-top: 1.5rem; margin-bottom: 0.5rem; }
     .artikel h3 { font-size: 1.1rem; font-weight: 600; color: var(--color-on-surface); margin-top: 1.25rem; margin-bottom: 0.4rem; }
     .artikel p { margin-bottom: 1rem; }
@@ -60,7 +62,7 @@
         <div class="artikel prose max-w-none text-on-surface/80 leading-relaxed
                     prose-headings:font-bold prose-headings:text-on-surface
                     prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
-            {!! $artikel->konten !!}
+            {!! preg_replace('/<(\/?)h1(\s|>)/i', '<$1h2$2', $artikel->konten) !!}
         </div>
 
     </div>
@@ -93,8 +95,8 @@
                 </div>
 
                 <div class="flex flex-col flex-1 p-4">
-                    <h3 class="font-bold text-on-surface text-xs md:text-sm leading-snug mb-1 line-clamp-2">{{ $a->judul }}</h3>
-                    <div class="mt-3 inline-flex items-center gap-1 text-[11px] md:text-xs font-semibold text-primary">
+                    <h3 class="font-bold text-on-surface text-sm leading-snug mb-1 line-clamp-2">{{ $a->judul }}</h3>
+                    <div class="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">
                         Baca Selengkapnya
                         <span class="material-symbols-outlined text-[13px] transition-transform group-hover:translate-x-1">arrow_forward</span>
                     </div>

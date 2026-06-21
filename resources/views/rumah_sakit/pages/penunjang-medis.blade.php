@@ -19,8 +19,6 @@
             <div class="flex flex-col gap-16">
                 @foreach($data as $medis)
                     <div
-                        data-aos="{{ $loop->odd ? 'fade-right' : 'fade-left' }}"
-                        data-aos-delay="{{ $loop->index * 80 }}"
                         class="group grid grid-cols-1 md:grid-cols-2 rounded-2xl overflow-hidden shadow-sm
                                border border-outline-variant/30 hover:shadow-xl transition-all duration-300">
 

@@ -40,7 +40,6 @@
                 @endphp
 
                 <div
-                    data-aos="fade-up"
                     class="group relative bg-white border border-outline-variant/30 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
                 >
                     {{-- Accent bar top --}}
@@ -126,7 +125,6 @@
                 @endphp
 
                 <div
-                    data-aos="fade-up"
                     class="group relative bg-white border border-outline-variant/30 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
                 >
                     {{-- Accent bar top --}}

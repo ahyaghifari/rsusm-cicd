@@ -22,7 +22,6 @@
     <!-- Assets (Tailwind v4 via Vite) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="{{ asset('css/portal.css') }}">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css">
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2/dist/css/tom-select.css" rel="stylesheet">
 </head>
@@ -39,11 +38,8 @@
     <x-footer-portal />
 
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2/dist/js/tom-select.complete.min.js"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
     <script>
-        AOS.init({ once: false, duration: 600, easing: 'ease-out-cubic' });
-
         function initGlightbox() {
             if (window._glb) { try { window._glb.destroy(); } catch(e) {} }
             window._glb = GLightbox({ selector: '.glightbox', touchNavigation: true, loop: true });

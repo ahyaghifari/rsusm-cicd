@@ -23,7 +23,6 @@
 
             {{-- Featured card (item pertama, full-width horizontal) --}}
             <div
-                data-aos="fade-up"
                 class="group grid grid-cols-1 md:grid-cols-2 rounded-2xl overflow-hidden shadow-sm
                        border border-outline-variant/30 hover:shadow-xl transition-all duration-300
                        {{ $rest->isNotEmpty() ? 'mb-10' : '' }}">
@@ -66,8 +65,6 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($rest as $f)
                         <div
-                            data-aos="fade-up"
-                            data-aos-delay="{{ $loop->index * 80 }}"
                             class="group bg-white rounded-2xl overflow-hidden shadow-sm
                                    border border-outline-variant/20 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
 

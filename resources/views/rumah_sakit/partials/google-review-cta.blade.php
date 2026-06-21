@@ -1,5 +1,5 @@
 @if($currentRumahSakit->google_place_id)
-<section class="mt-20 md:mt-40" data-aos="fade-up">
+<section class="mt-20 md:mt-40">
     <div class="w-11/12 lg:w-10/12 mx-auto">
 
         <div class="relative bg-white rounded-3xl border border-outline-variant/30 shadow-sm overflow-hidden">

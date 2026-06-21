@@ -14,6 +14,14 @@
 
 [x-cloak] { display: none !important; }
 
+/* ── Focus visible sitewide — banyak komponen pakai focus:outline-hidden tanpa
+   pengganti ring yang terlihat, jadi navigasi keyboard tidak punya indikator
+   visual sama sekali. Aturan global ini jadi jaring pengaman terakhir. ── */
+*:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
 /* ── Tom Select — portal theme ───────────────────────────── */
 .ts-portal-wrapper .ts-wrapper.single .ts-control {
     padding: 0.75rem 1rem;

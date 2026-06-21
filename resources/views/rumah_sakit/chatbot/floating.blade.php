@@ -61,7 +61,7 @@ document.addEventListener('alpine:init', () => {
         <button
             @click="$store.chatbot.toggle()"
             :aria-expanded="open"
-            :aria-label="open ? 'Tutup chatbot' : 'Buka chatbot Syifa Assistant'"
+            :aria-label="open ? 'Tutup chatbot' : 'Buka chatbot Tanya Syifa'"
             class="relative h-14 rounded-full bg-primary hover:bg-primary active:scale-95 border-none flex items-center justify-center cursor-pointer transition-all duration-150 shadow-lg"
             :class="open ? 'w-14' : 'pl-4 pr-5 gap-2'"
         >
@@ -83,6 +83,8 @@ document.addEventListener('alpine:init', () => {
             <span x-show="showBadge && !open"
                   x-transition:leave="transition duration-150"
                   x-transition:leave-end="scale-0"
+                  role="status"
+                  aria-label="1 pesan baru"
                   class="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 rounded-full bg-red-500 border-2 border-white text-[10px] font-medium text-white flex items-center justify-center">1</span>
         </button>
     </div>

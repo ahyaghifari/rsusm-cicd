@@ -28,7 +28,7 @@
             </div>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                 @foreach($partner_asuransi as $partner)
-                <div data-aos="zoom-in-up" class="bg-white border border-outline-variant/30 rounded-2xl px-5 py-5 flex flex-col items-center justify-center gap-3 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 min-h-[130px]">
+                <div class="bg-white border border-outline-variant/30 rounded-2xl px-5 py-5 flex flex-col items-center justify-center gap-3 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 min-h-[130px]">
                     @if($partner->logo)
                         <img src="{{ Storage::url($partner->logo) }}" alt="{{ $partner->nama }}" class="h-12 object-contain" loading="lazy">
                     @else
@@ -55,7 +55,7 @@
             </div>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                 @foreach($partner_perusahaan as $partner)
-                <div data-aos="zoom-in-up" class="bg-white border border-outline-variant/30 rounded-2xl px-5 py-5 flex flex-col items-center justify-center gap-3 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 min-h-[130px]">
+                <div class="bg-white border border-outline-variant/30 rounded-2xl px-5 py-5 flex flex-col items-center justify-center gap-3 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 min-h-[130px]">
                     @if($partner->logo)
                         <img src="{{ Storage::url($partner->logo) }}" alt="{{ $partner->nama }}" class="h-12 object-contain" loading="lazy">
                     @else

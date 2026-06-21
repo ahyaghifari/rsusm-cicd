@@ -29,7 +29,7 @@
              style="z-index: 10;">
 
             {{-- Teks welcome --}}
-            <div class="text-center" data-aos="fade-down">
+            <div class="text-center">
 
                 {{-- Label atas --}}
                 <span class="inline-flex items-center gap-2 text-white/70 text-xs uppercase tracking-[0.22em] font-semibold mb-4">
@@ -135,7 +135,7 @@
     <section class="relative py-16" style="background: rgba(248,249,255,0.72); backdrop-filter: blur(2px);">
         <div class="w-11/12 lg:w-10/12 mx-auto">
 
-            <div class="text-center mb-10" data-aos="fade-up">
+            <div class="text-center mb-10">
                 <h2 class="text-2xl md:text-3xl font-bold text-on-surface">Kunjungi Rumah Sakit Kami</h2>
                 <p class="text-on-surface-variant mt-2 text-sm md:text-base max-w-xl mx-auto">
                     Pilih rumah sakit terdekat dan temukan layanan kesehatan yang Anda butuhkan.
@@ -147,8 +147,7 @@
                 <div class="group bg-white rounded-2xl overflow-hidden shadow-sm
                             hover:shadow-xl hover:-translate-y-1 transition-all duration-300
                             border border-outline-variant/20 flex flex-col cursor-pointer"
-                     onclick="window.location='/{{ $rs->slug }}'"
-                     data-aos="fade-up">
+                     onclick="window.location='/{{ $rs->slug }}'">
 
                     {{-- Gambar --}}
                     <div class="h-56 overflow-hidden relative bg-primary/10">
@@ -278,8 +277,7 @@
 
     <!-- Promo Section -->
     <section id="promo-section"
-        class="mt-16 md:mt-24 mb-section-gap bg-secondary rounded-3xl p-8 md:p-10 shadow-[0_20px_50px_rgba(0,108,75,0.15)] border border-secondary-container/20 relative overflow-hidden w-full lg:w-10/12 mx-auto"
-        data-aos="fade-up">
+        class="mt-16 md:mt-24 mb-section-gap bg-secondary rounded-3xl p-8 md:p-10 shadow-[0_20px_50px_rgba(0,108,75,0.15)] border border-secondary-container/20 relative overflow-hidden w-full lg:w-10/12 mx-auto">
         <!-- Background Decorative Blobs -->
         <div class="absolute -top-24 -right-24 w-72 h-72 bg-secondary-container/15 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute -bottom-24 -left-24 w-72 h-72 bg-primary/20 rounded-full blur-3xl pointer-events-none"></div>

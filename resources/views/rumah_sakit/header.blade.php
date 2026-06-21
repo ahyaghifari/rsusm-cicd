@@ -12,12 +12,12 @@
 
     {{-- Cabang — mobile only (lg digantikan oleh kolom info di bawah) --}}
     <div class="lg:hidden flex flex-col items-end justify-center gap-1">
-        <span class="text-[9px] font-bold text-primary uppercase tracking-widest flex items-center gap-1">
+        <span class="text-xs font-bold text-primary uppercase tracking-widest flex items-center gap-1">
             <span class="material-symbols-outlined text-[12px]">location_on</span>Cabang
         </span>
         <select onchange="window.location.href='/' + this.value"
-                class="text-[10px] text-primary border border-primary/40 rounded-lg
-                       px-2 py-1 outline-none uppercase cursor-pointer bg-white
+                class="text-xs text-primary border border-primary/40 rounded-lg
+                       px-2 py-2 outline-none uppercase cursor-pointer bg-white
                        focus:ring-2 focus:ring-primary/20 transition-all">
             @foreach ($daftarRS as $rs)
                 <option class="text-slate-900 bg-white uppercase" value="{{ $rs->slug }}"

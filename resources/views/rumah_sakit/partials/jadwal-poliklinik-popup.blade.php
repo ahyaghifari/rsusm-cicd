@@ -35,7 +35,7 @@ function jadwalPoliklinikPopup() {
 
         {{-- Tombol tutup --}}
         <button @click="close()"
-            class="absolute top-3 right-3 z-20 w-9 h-9 bg-black/25 hover:bg-black/50
+            class="absolute top-3 right-3 z-20 w-11 h-11 bg-black/25 hover:bg-black/50
                    text-white rounded-full flex items-center justify-center transition-colors duration-150">
             <span class="material-symbols-outlined text-[20px]">close</span>
         </button>

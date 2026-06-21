@@ -21,10 +21,11 @@
                  x-transition:enter-end="opacity-100 translate-y-0">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4">
                     @foreach($poliklinik as $poli)
-                        <div
-                            onclick="window.location='{{ route('rumahsakit.rawat_jalan_show', ['rumahsakit' => $rsSlug, 'poliklinik' => $poli->slug]) }}'"
+                        <a
+                            wire:navigate
+                            href="{{ route('rumahsakit.rawat_jalan_show', ['rumahsakit' => $rsSlug, 'poliklinik' => $poli->slug]) }}"
                             wire:key="poli-card-{{ $poli->id }}"
-                            class="group bg-white rounded-2xl shadow-sm border border-outline-variant/30
+                            class="group block bg-white rounded-2xl shadow-sm border border-outline-variant/30
                                    hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300
                                    overflow-hidden cursor-pointer">
 
@@ -66,7 +67,7 @@
                                 </div>
 
                             </div>
-                        </div>
+                        </a>
                     @endforeach
                 </div>
             </div>

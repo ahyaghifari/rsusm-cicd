@@ -93,7 +93,7 @@
                                  : "background-color: {$warna}0f; color: {$warna};" }}">
                             <span class="text-sm font-bold">{{ $hariLabel }}</span>
                             @if($isToday)
-                                <span class="text-[10px] font-bold uppercase tracking-widest
+                                <span class="text-xs font-bold uppercase tracking-widest
                                              bg-white/20 px-2 py-0.5 rounded-full">Hari Ini</span>
                             @endif
                         </div>

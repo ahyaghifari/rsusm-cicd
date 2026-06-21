@@ -165,7 +165,7 @@
                     observer.observe(el, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
                 "
             >
-                <div class="bg-[#fff8fe] border border-[#d6c0ce] rounded-[9px] p-2.5 text-[11.5px] text-[#84727e] flex items-start gap-1.5 flex-shrink-0">
+                <div class="bg-[#fff8fe] border border-[#d6c0ce] rounded-[9px] p-2.5 text-xs text-[#84727e] flex items-start gap-1.5 flex-shrink-0">
                     <span class="material-symbols-outlined text-[#d606b0] text-[16px] flex-shrink-0" aria-hidden="true">info</span>
                     <span>Asisten ini memberikan informasi umum. Untuk darurat, segera hubungi IGD.</span>
                 </div>
@@ -174,10 +174,10 @@
                     @if($msg['type'] === 'user')
                     <div class="flex flex-row-reverse gap-2 items-end flex-shrink-0" data-msg="user">
                         <div class="flex flex-col items-end max-w-[80%]">
-                            <div class="px-3 py-2 rounded-[15px] rounded-br-[4px] bg-[#d606b0] text-white text-[13px] leading-snug break-words w-full">
+                            <div class="px-3 py-2 rounded-[15px] rounded-br-[4px] bg-[#d606b0] text-white text-sm leading-snug break-words w-full">
                                 {{ $msg['text'] }}
                             </div>
-                            <div class="text-[10px] text-[#84727e] mt-0.5">{{ $msg['time'] }}</div>
+                            <div class="text-[11px] text-[#84727e] mt-0.5">{{ $msg['time'] }}</div>
                         </div>
                     </div>
                     @else
@@ -186,7 +186,7 @@
                             <img src="{{ asset('img/tanya-syifa.png') }}" alt="">
                         </div>
                         <div class="flex flex-col max-w-[80%]">
-                            <div class="px-3 py-2 rounded-[15px] rounded-bl-[4px] bg-white border border-[#d6c0ce] text-[13px] leading-snug text-[#0b1c30] break-words">
+                            <div class="px-3 py-2 rounded-[15px] rounded-bl-[4px] bg-white border border-[#d6c0ce] text-sm leading-snug text-[#0b1c30] break-words">
                                 {!! nl2br(str($msg['text'])->sanitizeHtml()) !!}
                             </div>
 
@@ -217,7 +217,7 @@
                             </div>
                             @endif
 
-                            <div class="text-[10px] text-[#84727e] mt-0.5">{{ $msg['time'] }}</div>
+                            <div class="text-[11px] text-[#84727e] mt-0.5">{{ $msg['time'] }}</div>
                         </div>
                     </div>
                     @endif
@@ -249,7 +249,7 @@
                 style="padding-bottom: max(0.625rem, env(safe-area-inset-bottom, 0))"
                 x-data="{
                     msg: '',
-                    get remaining() { return 50 - this.msg.length; },
+                    get remaining() { return 200 - this.msg.length; },
                     send() {
                         const text = this.msg.trim();
                         if (!text) return;
@@ -269,8 +269,8 @@
                         wire:target="sendMessage,sendQuick"
                         type="text"
                         placeholder="Ketik pertanyaan Anda..."
-                        maxlength="50"
-                        class="flex-1 border border-[#d6c0ce] rounded-full px-4 py-2 text-[13px] font-sans text-[#0b1c30] bg-[#eff4ff] outline-none focus:border-[#d606b0] focus:bg-white placeholder-[#84727e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        maxlength="200"
+                        class="flex-1 border border-[#d6c0ce] rounded-full px-4 py-2 text-sm font-sans text-[#0b1c30] bg-[#eff4ff] outline-none focus:border-[#d606b0] focus:bg-white placeholder-[#84727e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label="Kotak pesan"
                     />
                     <button
@@ -284,13 +284,13 @@
                     </button>
                 </div>
                 <div class="flex items-center justify-between mt-1.5">
-                    <p class="text-[10.5px] text-[#84727e] flex items-center gap-1">
+                    <p class="text-xs text-[#84727e] flex items-center gap-1">
                         <span class="material-symbols-outlined text-[10px]" aria-hidden="true">verified_user</span>
                         <span>RSU Syifa Medika &bull; Layanan Informasi Kesehatan</span>
                     </p>
-                    <span class="text-[10.5px] font-medium tabular-nums"
+                    <span class="text-xs font-medium tabular-nums"
                           :class="remaining <= 20 ? (remaining <= 0 ? 'text-red-500' : 'text-amber-500') : 'text-[#b0a0ab]'"
-                          x-text="remaining + '/50'"></span>
+                          x-text="remaining + '/200'"></span>
                 </div>
             </div>
 

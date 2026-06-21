@@ -34,7 +34,7 @@
 
                         {{-- Konten slide --}}
                         <div class="relative z-10 h-full flex flex-col items-center justify-center text-center
-                                    px-6 py-6 md:py-10 gap-5 md:gap-6">
+                                    px-6 py-6 md:py-10 gap-4 md:gap-5">
 
                             {{-- Nama RS — untuk RS yang ada foto: lebih besar di mobile, hurufnya sendiri
                                  diberi outline tipis warna campuran primary+gold (bukan kotak/bingkai di
@@ -42,12 +42,11 @@
                                  supaya tetap mudah dibaca). --}}
                             <div>
                                 <p class="{{ $hasFoto ? 'text-white/65' : 'text-on-surface-variant' }}
-                                          text-[10px] md:text-sm lg:text-lg uppercase tracking-[0.25em] font-semibold mb-2">
+                                          text-[10px] md:text-sm lg:text-lg uppercase tracking-[0.25em] font-semibold mb-1">
                                     Selamat Datang di
                                 </p>
                                 @if($hasFoto)
-                                <h1 class="text-white text-3xl md:text-4xl lg:text-5xl font-bold leading-tight uppercase"
-                                    style="text-shadow: 1px 1px 3px color-mix(in srgb, var(--color-primary) 55%, var(--color-amber-400) 45%);">
+                                <h1 class="text-white text-3xl md:text-4xl lg:text-5xl font-bold leading-tight uppercase">
                                     {{ $currentRumahSakit->nama }}
                                 </h1>
                                 @else
@@ -55,7 +54,7 @@
                                     {{ $currentRumahSakit->nama }}
                                 </h1>
                                 @endif
-                                <div class="mt-3 h-0.5 w-12 md:w-16 bg-yellow-400 rounded-full mx-auto"></div>
+                                <div class="mt-2.5 h-0.5 w-12 md:w-16 bg-yellow-400 rounded-full mx-auto"></div>
                             </div>
 
                             {{-- Quick Nav — termasuk "Buat Janji Dokter" sebagai CTA utama (ditonjolkan
@@ -109,7 +108,7 @@
 
                     @foreach($banner as $banner)
                     <div class="hs-carousel-slide ">
-                        <img src="{{ Storage::url($banner->gambar) }}" class="w-full h-full object-contain" alt="">
+                        <img src="{{ Storage::url($banner->gambar) }}" class="w-full h-full object-contain" alt="{{ $banner->nama ?? 'Banner promosi' }}">
                     </div>
                     @endforeach
                    
@@ -275,7 +274,7 @@
             <img src="{{ asset('img/bg-header.png') }}"
                 class="absolute top-0 left-0 right-0 w-full h-full -z-10 opacity-50 bg-blend-overlay object-cover blur-xs"
                 alt="" loading="lazy">
-            <h2 class="text-on-surface text-lg lg:text-xl">Kenapa harus memilih</h2>
+            <h2 class="text-on-surface text-3xl lg:text-4xl font-bold leading-tight">Kenapa harus memilih</h2>
             @if($rs->logo)
                 <img src="{{ Storage::url($rs->logo) }}" class="h-24 lg:h-28 mt-2 object-contain" alt="{{ $rs->nama }}" loading="lazy">
             @endif
@@ -396,7 +395,7 @@
                         </h4>
 
                         <div class="flex items-center justify-between pt-2 border-t border-outline-variant/20">
-                            <span class="text-[9px] text-on-surface-variant uppercase tracking-widest font-semibold">
+                            <span class="text-xs text-on-surface-variant uppercase tracking-widest font-semibold">
                                 {{ $dk->spesialis?->nama ? 'SPESIALIS' : 'UMUM' }}
                             </span>
                             <span class="inline-flex items-center gap-1 text-xs font-bold text-primary
@@ -412,12 +411,10 @@
             </div>
         </div>
         <div class="mt-8">
-            <a href="{{ rumahsakit_route('rumahsakit.dokter_kami') }}">
-                <button
-                    class="w-fit sm:w-auto self-start border-2 border-tertiary bg-tertiary text-white px-6 py-2 rounded-lg text-label-md font-label-md transition-colors flex items-center gap-2 text-sm mx-auto cursor-pointer">
-                    Lihat Selengkapnya
-                    <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-                </button>
+            <a href="{{ rumahsakit_route('rumahsakit.dokter_kami') }}"
+               class="w-fit sm:w-auto self-start border-2 border-tertiary bg-tertiary text-white px-6 py-2 rounded-lg text-label-md font-label-md transition-colors flex items-center gap-2 text-sm mx-auto cursor-pointer">
+                Lihat Selengkapnya
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
             </a>
         </div>
     </section>
@@ -425,7 +422,7 @@
     {{-- ============================================================ --}}
     {{-- CTA — Siap Melayani                                          --}}
     {{-- ============================================================ --}}
-    <section class="mt-20 md:mt-40 relative overflow-hidden" data-aos="fade-up">
+    <section class="mt-20 md:mt-40 relative overflow-hidden">
 
         <div class="absolute inset-0"
              style="background: linear-gradient(135deg, #4d51b2 0%, #3a3e99 50%, #2e3180 100%);"></div>
@@ -555,7 +552,7 @@
     {{-- PROMO                                                        --}}
     {{-- ============================================================ --}}
     @if($promos->count() > 0)
-    <section class="mt-20 md:mt-40" data-aos="fade-up">
+    <section class="mt-20 md:mt-40">
         <div class="w-11/12 lg:w-10/12 mx-auto">
 
             <div class="flex items-end justify-between mb-8">
@@ -574,9 +571,9 @@
                 @if($p->gambar)
                     <a wire:navigate
                     href="{{ route('rumahsakit.promo_detail', ['rumahsakit' => $rs->slug, 'promo' => $p->slug]) }}"
-                    class="group bg-red-400 w-fit"
+                    class="group w-fit"
                     style="animation-delay: {{ $loop->index * 50 }}ms">
-                     <div class="relative bg-green-400 w-fit flex items-center">
+                     <div class="relative w-fit flex items-center">
                         <img src="{{ Storage::url($p->gambar) }}" alt="{{ $p->judul }}"
                             class="w-full h-fit object-contain group-hover:scale-105 transition-transform duration-500"
                             loading="lazy">
@@ -601,7 +598,7 @@
     {{-- FAQ                                                          --}}
     {{-- ============================================================ --}}
     @if($faqs->isNotEmpty())
-    <section class="mt-20 md:mt-40" data-aos="fade-up">
+    <section class="mt-20 md:mt-40">
         <div class="w-11/12 lg:w-10/12 mx-auto">
 
             {{-- Header --}}

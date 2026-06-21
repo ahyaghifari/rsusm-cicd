@@ -71,11 +71,11 @@
 
                             {{-- Info sesi: durasi & harga --}}
                             <div class="flex items-center gap-3 mt-1">
-                                <span class="inline-flex items-center gap-1 text-[11px] text-on-surface-variant/80">
+                                <span class="inline-flex items-center gap-1 text-xs text-on-surface-variant/80">
                                     <span class="material-symbols-outlined text-[13px]">timer</span>
                                     {{ $d->durasi_sesi_menit }} menit / sesi
                                 </span>
-                                <span class="inline-flex items-center gap-1 text-[11px] text-on-surface-variant/80">
+                                <span class="inline-flex items-center gap-1 text-xs text-on-surface-variant/80">
                                     <span class="material-symbols-outlined text-[13px]">payments</span>
                                     Rp —
                                 </span>
@@ -119,7 +119,7 @@
 
             <div class="relative z-10 w-full max-w-md bg-white rounded-3xl overflow-hidden shadow-2xl">
                 <button wire:click="batalkanPilihan"
-                    class="absolute top-3 right-3 z-20 w-8 h-8 bg-black/10 hover:bg-black/20
+                    class="absolute top-3 right-3 z-20 w-11 h-11 bg-black/10 hover:bg-black/20
                            text-on-surface-variant rounded-full flex items-center justify-center transition-colors duration-150">
                     <span class="material-symbols-outlined text-[18px]">close</span>
                 </button>
