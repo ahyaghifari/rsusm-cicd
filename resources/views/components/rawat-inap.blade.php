@@ -114,12 +114,12 @@
 
         {{-- Nama & Harga --}}
         <div class="flex items-start justify-between gap-3 mb-3">
-            <h4 class="font-bold text-lg text-on-surface leading-snug">{{ $kamarInap->nama }}</h4>
+            <h4 class="font-bold text-base md:text-lg text-on-surface leading-snug">{{ $kamarInap->nama }}</h4>
             <div class="text-right shrink-0 rounded-xl">
-                <p class="text-white font-bold text-lg leading-none tabular-nums bg-tertiary rounded-full py-1 px-2">
+                <p class="text-white font-bold text-base md:text-lg leading-none tabular-nums bg-tertiary rounded-full py-1 px-2">
                     Rp {{ number_format($kamarInap->harga, 0, ',', '.') }}
                 </p>
-                <p class="text-sm text-on-surface-variant mt-0.5">/malam</p>
+                <p class="text-xs md:text-sm text-on-surface-variant mt-0.5">/malam</p>
             </div>
         </div>
 
@@ -144,9 +144,9 @@
 
                     {{-- 6 pertama selalu tampil --}}
                     @foreach($kamarInap->fasilitasRawatInap->take(6) as $f)
-                        <span class="inline-flex items-center gap-0.5  md:text-sm text-on-surface-variant
-                                     bg-surface-container px-2 py-1 rounded-full leading-none">
-                            <span class="material-symbols-outlined text-[10px] text-primary"
+                        <span class="inline-flex items-center gap-1 text-xs md:text-sm text-on-surface
+                                     bg-surface-container border border-outline-variant/20 px-2.5 py-1.5 rounded-full leading-none">
+                            <span class="material-symbols-outlined text-xs text-primary shrink-0"
                                   style="font-variation-settings:'FILL' 1">check_circle</span>
                             {{ $f->nama }}
                         </span>
@@ -159,9 +159,9 @@
                                   x-transition:enter="transition ease-out duration-150"
                                   x-transition:enter-start="opacity-0 scale-90"
                                   x-transition:enter-end="opacity-100 scale-100"
-                                  class="inline-flex items-center gap-0.5 md:text-sm text-on-surface-variant
-                                         bg-surface-container px-2 py-1 rounded-full leading-none">
-                                <span class="material-symbols-outlined text-[10px] text-primary"
+                                  class="inline-flex items-center gap-1 text-xs md:text-sm text-on-surface
+                                         bg-surface-container border border-outline-variant/20 px-2.5 py-1.5 rounded-full leading-none">
+                                <span class="material-symbols-outlined text-xs text-primary shrink-0"
                                       style="font-variation-settings:'FILL' 1">check_circle</span>
                                 {{ $f->nama }}
                             </span>
@@ -169,12 +169,12 @@
 
                         {{-- Tombol toggle --}}
                         <button @click="expanded = !expanded"
-                                class="inline-flex items-center gap-0.5 text-sm font-semibold
-                                       text-primary hover:text-primary/70 px-2 py-1 rounded-full
-                                       border border-primary/20 hover:bg-primary/8 transition-colors leading-none">
+                                class="inline-flex items-center gap-1 text-xs md:text-sm font-semibold
+                                       text-primary hover:text-primary/70 px-2.5 py-1.5 rounded-full
+                                       border border-primary/30 hover:bg-primary/8 transition-colors leading-none">
                             <span x-show="!expanded">+{{ $sisanya }} lainnya</span>
-                            <span x-show="expanded" class="flex items-center gap-0.5">
-                                <span class="material-symbols-outlined text-[11px]">expand_less</span>
+                            <span x-show="expanded" class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-xs">expand_less</span>
                                 Sembunyikan
                             </span>
                         </button>
