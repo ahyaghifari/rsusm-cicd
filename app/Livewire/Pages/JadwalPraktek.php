@@ -2,12 +2,19 @@
 
 namespace App\Livewire\Pages;
 
-use App\Livewire\RsPortalComponent;
 use App\Models\JadwalPraktek as JadwalPraktekModel;
 use App\Models\PoliKlinik;
+use App\Models\RumahSakit;
+use Artesaos\SEOTools\Facades\OpenGraph;
+use Artesaos\SEOTools\Facades\SEOMeta;
+use Livewire\Attributes\Locked;
+use Livewire\Component;
 
-class JadwalPraktek extends RsPortalComponent
+class JadwalPraktek extends Component
 {
+    #[Locked]
+    public int $rumah_sakit_id;
+
     public string $viewMode    = 'hari'; // 'hari' | 'poli'
     public string $activeHari;
     public string $poliklinikId = '';
@@ -19,10 +26,33 @@ class JadwalPraktek extends RsPortalComponent
         4 => 'KAMIS',  5 => 'JUMAT', 6 => 'SABTU',
     ];
 
+    public function boot(): void
+    {
+        // RumahSakitMiddleware tidak jalan di /livewire/update (dipakai saat ganti filter
+        // hari/poli), jadi current_rumahsakit() akan error BindingResolutionException kalau
+        // dipanggil komponen lain (mis. GlobalSearch) dalam request yang sama. Bind manual di sini.
+        if (! empty($this->rumah_sakit_id) && ! app()->bound('currentRumahSakit')) {
+            $rs = RumahSakit::find($this->rumah_sakit_id);
+            if ($rs) {
+                app()->instance('currentRumahSakit', $rs);
+            }
+        }
+    }
+
     public function mount(): void
     {
-        $this->activeHari = self::$hariMap[now()->dayOfWeek];
-        $this->seo('Jadwal Praktek', 'Jadwal praktek dokter di poliklinik ' . $this->rs->nama . '.');
+        $rs = current_rumahsakit();
+        $this->rumah_sakit_id = $rs->id;
+        $this->activeHari     = self::$hariMap[now()->dayOfWeek];
+
+        $fullTitle = 'Jadwal Praktek - ' . $rs->nama;
+        $desc      = 'Jadwal praktek dokter di poliklinik ' . $rs->nama . '.';
+        SEOMeta::setTitle($fullTitle);
+        SEOMeta::setDescription($desc);
+        OpenGraph::setTitle($fullTitle);
+        OpenGraph::setDescription($desc);
+        OpenGraph::setUrl(request()->url());
+        OpenGraph::addProperty('site_name', $rs->nama);
     }
 
     public function setViewMode(string $mode): void
@@ -38,7 +68,7 @@ class JadwalPraktek extends RsPortalComponent
 
     public function render()
     {
-        $rs = $this->rs;
+        $rs = RumahSakit::find($this->rumah_sakit_id);
 
         $poliklinikList = PoliKlinik::where('rumah_sakit_id', $rs->id)
             ->where('aktif', true)
@@ -83,6 +113,7 @@ class JadwalPraktek extends RsPortalComponent
             : null;
 
         return view('rumah_sakit.pages.jadwal-praktek', [
+            'rs'             => $rs,
             'jadwalPerPoli'  => $jadwalPerPoli,
             'jadwalPerHari'  => $jadwalPerHari,
             'hariList'       => self::$hariList,

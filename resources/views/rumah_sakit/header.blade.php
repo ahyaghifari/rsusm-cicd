@@ -30,20 +30,32 @@
 
     {{-- Emergency + Hotline + Cabang — desktop only --}}
     <div class="hidden lg:flex justify-around col-span-2">
-        <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-white bg-red-600 p-2 rounded-xl">emergency</span>
-            <div>
-                <p class="text-xs text-red-600 font-semibold">EMERGENCY</p>
-                <p class="text-xs">{{ $currentRumahSakit->no_emergency ?? '—' }}</p>
+        @if($currentRumahSakit->no_emergency)
+        <a href="tel:{{ preg_replace('/[^0-9+]/', '', $currentRumahSakit->no_emergency) }}"
+           class="group flex items-center gap-2.5 bg-red-50 hover:bg-red-100
+                  border border-red-200 hover:border-red-300 rounded-xl
+                  pl-1.5 pr-3 py-1.5 shadow-sm hover:shadow-md
+                  transition-[background-color,border-color,box-shadow]">
+            <span class="material-symbols-outlined text-white bg-red-600 p-2 rounded-lg shrink-0 shadow-sm shadow-red-600/40">emergency</span>
+            <div class="text-left">
+                <p class="text-[11px] text-red-700 font-bold tracking-wide">EMERGENCY</p>
+                <p class="text-xs text-red-900 font-semibold group-hover:underline">{{ $currentRumahSakit->no_emergency }}</p>
             </div>
-        </div>
-        <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-white bg-green-600 p-2 rounded-2xl">call</span>
-            <div>
-                <p class="text-xs text-green-600 font-semibold">HOTLINE</p>
-                <p class="text-xs">{{ $currentRumahSakit->no_hotline ?? '—' }}</p>
+        </a>
+        @endif
+        @if($currentRumahSakit->no_hotline)
+        <a href="tel:{{ preg_replace('/[^0-9+]/', '', $currentRumahSakit->no_hotline) }}"
+           class="group flex items-center gap-2.5 bg-green-50 hover:bg-green-100
+                  border border-green-200 hover:border-green-300 rounded-xl
+                  pl-1.5 pr-3 py-1.5 shadow-sm hover:shadow-md
+                  transition-[background-color,border-color,box-shadow]">
+            <span class="material-symbols-outlined text-white bg-green-600 p-2 rounded-lg shrink-0 shadow-sm shadow-green-600/40">call</span>
+            <div class="text-left">
+                <p class="text-[11px] text-green-700 font-bold tracking-wide">HOTLINE</p>
+                <p class="text-xs text-green-900 font-semibold group-hover:underline">{{ $currentRumahSakit->no_hotline }}</p>
             </div>
-        </div>
+        </a>
+        @endif
         <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-white bg-primary p-2 rounded-xl">location_on</span>
             <div>

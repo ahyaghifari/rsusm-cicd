@@ -3,7 +3,7 @@
     <div class="w-full mx-auto overflow-hidden">
         <div id="hs-carousel" class="relative"
             data-hs-carousel='{"loadingClasses": "opacity-0", "dotsItemClasses": "hs-carousel-active:bg-primary hs-carousel-active:border-primary size-3 border border-line-4 border-primary rounded-full cursor-pointer", "isAutoPlay": true, "isInfiniteLoop": true, "speed": 6000}'>
-            <div class="hs-carousel relative w-full h-[50vh] md:h-[70vh] overflow-hidden">
+            <div class="hs-carousel relative w-full h-[60vh] md:h-[70vh] overflow-hidden">
                 <!-- Carousel Body -->
                 <div
                     class="hs-carousel-body flex flex-nowrap absolute top-0 bottom-0 inset-s-0 transition-transform duration-700 opacity-0">
@@ -49,45 +49,23 @@
                                 <div class="mt-2.5 h-0.5 w-12 md:w-16 bg-yellow-400 rounded-full mx-auto"></div>
                             </div>
 
-                            {{-- Quick Contact --}}
-                            <div class="flex flex-wrap justify-center gap-2">
-                                @if($currentRumahSakit->no_emergency)
-                                <a href="tel:{{ preg_replace('/[^0-9+]/', '', $currentRumahSakit->no_emergency) }}"
-                                   class="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700
-                                          text-white px-3 md:px-4 py-1.5 rounded-full
-                                          text-xs md:text-sm font-bold shadow-lg transition-colors">
-                                    <span class="text-[14px]">Emergency</span>
-                                    {{ $currentRumahSakit->no_emergency }}
-                                </a>
-                                @endif
-                                @if($currentRumahSakit->no_hotline)
-                                <a href="tel:{{ preg_replace('/[^0-9+]/', '', $currentRumahSakit->no_hotline) }}"
-                                   class="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700
-                                          text-white px-3 md:px-4 py-1.5 rounded-full
-                                          text-xs md:text-sm font-bold shadow-lg transition-colors">
-                                    <span class="text-[14px]">Hotline</span>
-                                    {{ $currentRumahSakit->no_hotline }}
-                                </a>
-                                @endif
-                                @if($currentRumahSakit->link_pendaftaran_online)
-                                    <a href="{{ $currentRumahSakit->link_pendaftaran_online }}" target="_blank"
-                                    class="inline-flex items-center gap-1.5 bg-yellow-400 hover:bg-yellow-300
-                                            text-primary px-3 md:px-4 py-1.5 rounded-full
-                                            text-xs md:text-sm font-bold shadow-lg transition-colors z-100">
-                                            <button>
-                                                <span class="text-[14px]">Buat Janji Dokter</span>
-                                            </button>
-                                    </a>
-                                @endif
-                            </div>
-
-                            {{-- Quick Nav --}}
+                            {{-- Quick Nav — termasuk "Buat Janji Dokter" sebagai CTA utama (ditonjolkan
+                                 warna kuning), digabung satu baris dengan nav lainnya --}}
                             @php
                                 $navClass = $hasFoto
                                     ? 'bg-white/15 hover:bg-white/25 border border-white/25 text-white backdrop-blur-sm'
                                     : 'bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface';
                             @endphp
                             <div class="flex flex-wrap justify-center gap-2">
+                                @if($currentRumahSakit->link_pendaftaran_online)
+                                <a href="{{ $currentRumahSakit->link_pendaftaran_online }}" target="_blank"
+                                   class="inline-flex items-center gap-1.5 bg-yellow-400 hover:bg-yellow-300
+                                          text-primary px-3 py-1.5 rounded-full
+                                          text-xs font-bold shadow-lg transition-colors">
+                                    <span class="material-symbols-outlined text-[13px]">event</span>
+                                    Buat Janji Dokter
+                                </a>
+                                @endif
                                 <a wire:navigate href="{{ rumahsakit_route('rumahsakit.dokter_kami') }}"
                                    class="inline-flex items-center gap-1.5 {{ $navClass }}
                                           px-3 py-1.5 rounded-full text-xs font-semibold transition-colors">
@@ -160,64 +138,6 @@
     </div>
     <!-- End Carousel -->
 
-    {{-- <script>
-        (function () {
-            function initCarouselDrag() {
-                const carouselEl = document.getElementById('hs-carousel');
-                if (!carouselEl) return;
-
-                const body = carouselEl.querySelector('.hs-carousel-body');
-                const prevBtn = carouselEl.querySelector('.hs-carousel-prev');
-                const nextBtn = carouselEl.querySelector('.hs-carousel-next');
-                if (!body || !prevBtn || !nextBtn) return;
-
-                // Cegah re-init ganda
-                if (body.dataset.dragInit) return;
-                body.dataset.dragInit = '1';
-
-                let startX = 0;
-                let dragging = false;
-                const THRESHOLD = 50;
-
-                body.style.cursor = 'grab';
-
-                // Nonaktifkan drag bawaan gambar
-                carouselEl.querySelectorAll('img').forEach(img => { img.draggable = false; });
-
-                body.addEventListener('pointerdown', (e) => {
-                    startX = e.clientX;
-                    dragging = true;
-                    body.setPointerCapture(e.pointerId);
-                    body.style.cursor = 'grabbing';
-                });
-
-                body.addEventListener('pointermove', (e) => {
-                    if (!dragging) return;
-                    e.preventDefault();
-                }, { passive: false });
-
-                body.addEventListener('pointerup', (e) => {
-                    if (!dragging) return;
-                    dragging = false;
-                    body.style.cursor = 'grab';
-
-                    const diff = startX - e.clientX;
-                    if (Math.abs(diff) > THRESHOLD) {
-                        diff > 0 ? nextBtn.click() : prevBtn.click();
-                    }
-                });
-
-                body.addEventListener('pointercancel', () => {
-                    dragging = false;
-                    body.style.cursor = 'grab';
-                });
-            }
-
-            document.addEventListener('DOMContentLoaded', initCarouselDrag);
-            document.addEventListener('livewire:navigated', initCarouselDrag);
-        })();
-    </script> --}}
-
     <!-- link layanan -->
     @php
         $layananStatic = [
@@ -264,8 +184,8 @@
                 </p>
             </div>
 
-            {{-- Cards --}}
-            <div class="grid md:grid-cols-{{ min(count($layananStatic), 3) }} gap-6">
+            {{-- Cards — desktop (md ke atas): kartu lengkap dengan deskripsi & CTA --}}
+            <div class="hidden md:grid md:grid-cols-{{ min(count($layananStatic), 3) }} gap-6">
                 @foreach($layananStatic as $layanan)
                 <a @if(! $layanan['eksternal']) wire:navigate @else target="_blank" rel="noopener noreferrer" @endif
                     href="{{ $layanan['href'] }}"
@@ -304,6 +224,28 @@
                 </a>
                 @endforeach
             </div>
+
+            {{-- Cards — mobile (di bawah md): tile ringkas ikon + label, 3 berjejer
+                 supaya tidak makan banyak tempat vertikal --}}
+            <div class="grid grid-cols-3 gap-3 md:hidden">
+                @foreach($layananStatic as $layanan)
+                <a @if(! $layanan['eksternal']) wire:navigate @else target="_blank" rel="noopener noreferrer" @endif
+                    href="{{ $layanan['href'] }}"
+                    class="group flex flex-col items-center gap-2 text-center
+                           bg-white/10 hover:bg-white/20 active:bg-white/25 border border-white/15
+                           rounded-2xl px-2 py-4 transition-colors duration-150">
+                    <span class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0
+                                 bg-white/15 group-hover:bg-white/25 transition-colors duration-150">
+                        <span class="material-symbols-outlined text-white text-[22px]">
+                            {{ $layanan['icon'] }}
+                        </span>
+                    </span>
+                    <span class="text-white text-[11px] font-semibold leading-tight">
+                        {{ $layanan['label'] }}
+                    </span>
+                </a>
+                @endforeach
+            </div>
         </div>
     </section>
     @endif
@@ -311,7 +253,7 @@
 
     <!-- kenapa memilih RSU -->
     @if($rs->tentang_kami)
-    <section class="flex flex-col lg:grid lg:grid-cols-2 mt-24">
+    <section class="flex flex-col lg:grid lg:grid-cols-2 lg:mt-24">
         <div>
             <img
                 src="{{ $rs->gambar_tentang ? Storage::url($rs->gambar_tentang) : asset('img/syifa-medika.webp') }}"
@@ -401,45 +343,60 @@
     <section class="mt-20 md:mt-40">
         <div class="w-11/12 lg:w-10/12 mx-auto">
             <h2 class="text-tertiary text-4xl text-center font-bold">Dokter Kami</h2>
-            <p class="text-on-surface-variant text-center mt-4 w-4/6 mx-auto text-sm md:text-base">
+            <p class="text-on-surface-variant text-center mt-4 w-5/6 md:w-4/6 mx-auto text-sm md:text-base">
                 Kami memiliki banyak dokter spesialis hingga sub spesialis ahli dibidangnya
                 dan melayani Anda secara profesional dan terpercaya.
             </p>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-8 gap-8 md:gap-10">
+            <div class="grid grid-cols-1 sm:grid-cols-3 mt-8 gap-5 sm:gap-6">
                 @foreach($dokter_kami as $dk)
-                <div class="group overflow-hidden bg-white rounded-2xl shadow-sm border border-outline-variant/20
-                            hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                {{-- Gradient border wrapper — sama seperti kartu di halaman Dokter Kami.
+                     Di mobile lebarnya dikecilkan & dipusatkan supaya tidak penuh selebar layar. --}}
+                <div class="w-[78%] mx-auto sm:w-auto sm:mx-0
+                             p-[1.5px] rounded-2xl animate-fade-in
+                             bg-outline-variant/25
+                             hover:bg-linear-to-br hover:from-amber-400 hover:via-primary hover:to-amber-300
+                             shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-400"
+                     style="animation-delay: {{ $loop->index * 60 }}ms">
+                <a wire:navigate href="{{ route('rumahsakit.dokter_show', [$currentRumahSakit->slug, $dk->slug]) }}"
+                   class="group bg-white rounded-2xl overflow-hidden flex flex-col h-full">
 
-                    {{-- Foto --}}
-                    <div class="aspect-square overflow-hidden bg-gray-100">
-                        <img alt="{{ $dk->nama }}"
-                             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                             src="{{ Storage::url($dk->foto) }}" loading="lazy">
-                    </div>
+                    {{-- Foto dengan badge spesialis --}}
+                    <div class="relative overflow-hidden aspect-square bg-gray-100 shrink-0">
+                        <img src="{{ Storage::url($dk->foto) }}" alt="{{ $dk->nama }}"
+                             class="w-full h-full object-contain object-bottom
+                                    group-hover:scale-105 transition-transform duration-700"
+                             loading="lazy">
 
-                    {{-- Info --}}
-                    <div class="p-5 text-center flex flex-col flex-1">
-                        <h4 class="font-semibold text-on-surface leading-snug">{{ $dk->nama }}</h4>
-                        <span class="inline-block mt-2 mb-4 px-3 py-1 text-xs font-semibold
-                                     text-primary bg-primary/10 rounded-full mx-auto">
-                            {{ $dk->namaSpesialis() }}
-                        </span>
-
-                        {{-- Tombol --}}
-                        <div class="mt-auto">
-                            <a wire:navigate
-                               href="{{ route('rumahsakit.dokter_show', [$currentRumahSakit->slug, $dk->slug]) }}"
-                               class="inline-flex items-center justify-center gap-1.5 w-full px-4 py-2 rounded-lg
-                                      bg-tertiary text-white text-sm font-semibold
-                                      hover:opacity-90 transition">
-                                <span class="material-symbols-outlined text-[16px]">person</span>
-                                Lihat Profil
-                            </a>
+                        <div class="absolute bottom-0 left-0 right-0 px-3 pb-2">
+                            <span class="inline-flex items-center bg-linear-to-r from-amber-500 to-amber-400
+                                         text-white text-[10px] font-bold uppercase tracking-wider
+                                         px-2 py-0.5 rounded-full shadow-sm max-w-full truncate">
+                                {{ $dk->namaSpesialis() }}
+                            </span>
                         </div>
                     </div>
 
-                </div>
+                    {{-- Info — tanpa deskripsi, langsung nama + footer --}}
+                    <div class="p-4 flex flex-col flex-1">
+                        <h4 class="font-bold text-on-surface text-lg leading-snug mb-3 flex-1
+                                   group-hover:text-primary transition-colors duration-200">
+                            {{ $dk->nama }}
+                        </h4>
+
+                        <div class="flex items-center justify-between pt-2 border-t border-outline-variant/20">
+                            <span class="text-[9px] text-on-surface-variant uppercase tracking-widest font-semibold">
+                                {{ $dk->spesialis?->nama ? 'SPESIALIS' : 'UMUM' }}
+                            </span>
+                            <span class="inline-flex items-center gap-1 text-xs font-bold text-primary
+                                         group-hover:gap-1.5 transition-all duration-200">
+                                Profil
+                                <span class="material-symbols-outlined text-[13px]">arrow_forward</span>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+                </div>{{-- end gradient border wrapper --}}
                 @endforeach
             </div>
         </div>

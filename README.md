@@ -439,6 +439,27 @@ php artisan test
 - **`RsPortalComponent` + `wire:poll`/interaksi AJAX berulang tidak cocok**: `RumahSakitMiddleware` (yang men-set binding `currentRumahSakit` ke container) cuma jalan di request awal (full page load), **tidak** jalan di `/livewire/update` (request AJAX untuk `wire:poll` & tiap `wire:click`/`wire:model` setelahnya) — pakai `RsPortalComponent::boot()` di komponen yang sering re-render via AJAX akan `BindingResolutionException` setelah interaksi pertama. Solusi: simpan `rumah_sakit_id` sebagai `#[Locked] public int` lalu re-bind manual di `boot()` komponen itu sendiri (`if (! app()->bound('currentRumahSakit')) { ... }`) — lihat `KetersediaanRawatInap.php` & `RawatInap.php` (kedua Livewire page ini sengaja **tidak** extends `RsPortalComponent` karena alasan ini)
 - `RumahSakit.link_antrian` dipakai **dua kali** untuk dua tujuan berbeda: (1) URL klik langsung untuk kartu publik "Pantauan Antrian", dan (2) base URL `AntrianApiClient` untuk fetch JSON live status. Kalau salah satu kebutuhan berubah formatnya, kolom ini perlu dipecah jadi dua
 - Test Filament `Panel` butuh instance yang benar-benar terdaftar (`Filament\Facades\Filament::getPanel('admin')`), **bukan** `app(\Filament\Panel::class)` — instance kosong dari container tidak punya `id()`, akan error `Exception: A panel has been registered without an id()` begitu kode memanggil `$panel->getId()` (mis. di `User::canAccessPanel()`)
+- **Migrasi yang sudah pernah `migrate` di environment manapun (termasuk production) tidak
+  boleh di-rename atau diedit isinya begitu saja** — Laravel melacak migrasi yang sudah jalan
+  berdasarkan *nama file* di tabel `migrations`. Tapi file LAMA tetap bisa diganti dengan **file
+  baru yang idempotent**: tulis `up()`-nya defensif (`Schema::hasColumn()`, `Schema::hasIndex()`,
+  `Schema::getColumns()/getIndexes()` untuk cek kondisi sebelum ubah skema), lalu hapus file
+  lama dan ganti file baru (nama+timestamp baru). Karena defensif, migrasi baru itu otomatis
+  no-op aman di environment yang sudah punya kolom/index-nya (production), dan tetap lengkap
+  membuat skema dari nol di environment baru/fresh yang tidak punya file lama itu lagi — **tidak
+  perlu mengubah apa pun di tabel `migrations` production**, baris lama di sana dibiarkan begitu
+  saja (Laravel tidak butuh filenya ada lagi untuk migrasi yang sudah tercatat selesai). Trade-off
+  yang diterima: `migrate:rollback` spesifik ke migrasi lama itu jadi tidak bisa lagi (filenya
+  sudah tidak ada) — jarang dibutuhkan, dan kontennya tetap ada di backup +
+  histori git. `down()` di migrasi konsolidasi semacam ini sebaiknya dikosongkan (tidak ada cara
+  aman membedakan "kolom ini saya buat atau sudah ada dari migrasi lama").
+  Lihat contoh nyata di `consolidate_dokter_table_alterations`,
+  `consolidate_kontak_table_alterations`, dkk — direktori migrasi sekarang cuma berisi
+  `*_create_*` dan `*_consolidate_*`, tidak ada lagi `add_*`/`fix_*`/`refactor_*`. Migrasi yang
+  menyentuh banyak tabel untuk **satu fitur** (mis. rollout fulltext index, soft delete) tetap
+  sah jadi satu file — dikelompokkan per fitur, bukan dipaksa per tabel. Detail analisis,
+  pemetaan file lama→baru, dan opsi-opsi yang dipertimbangkan:
+  [issues/migration-cleanup-plan.md](../issues/migration-cleanup-plan.md)
 
 ---
 

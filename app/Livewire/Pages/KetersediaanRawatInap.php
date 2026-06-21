@@ -118,8 +118,10 @@ class KetersediaanRawatInap extends Component
             'jumlahHasil'      => $beds->count(),
             // Diquery eksplisit (bukan andalkan view()->share() dari RumahSakitMiddleware)
             // karena middleware itu tidak jalan lagi di /livewire/update setelah wire:poll.
-            'kontakPendaftaran' => Kontak::where('rumah_sakit_id', $this->rumah_sakit_id)
-                ->where('kategori', 'PENDAFTARAN')
+            // Kategori RAWAT INAP dedicated (bukan reuse PENDAFTARAN) supaya admin bisa isi
+            // nomor/ekstensi khusus rawat inap kalau beda dari pendaftaran umum.
+            'kontakRawatInap' => Kontak::where('rumah_sakit_id', $this->rumah_sakit_id)
+                ->where('kategori', 'RAWAT INAP')
                 ->where('aktif', true)
                 ->orderBy('sort_order')
                 ->get(),

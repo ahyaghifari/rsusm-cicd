@@ -49,7 +49,7 @@
             <button type="button"
                 onclick="Livewire.dispatch('open-search')"
                 title="Cari (Ctrl+K)"
-                class="p-2 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg text-layer-foreground shadow-2xs bg-neutral-900/10 hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none">
+                class="p-2 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg text-layer-foreground shadow-2xs bg-neutral-900/10 hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none cursor-pointer">
                 <span class="material-symbols-outlined text-[16px]">search</span>
             </button>
 

@@ -6,24 +6,29 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
-        Schema::create('kontak', function (Blueprint $table) {
+        Schema::create('halaman', function (Blueprint $table) {
             $table->id();
             $table->foreignId('rumah_sakit_id')->constrained('rumah_sakit')->cascadeOnDelete();
-            $table->string('label', 255);
-            $table->string('value', 255);
-            $table->string('gambar', 255)->nullable();
-            $table->longText('logo')->nullable();
-            $table->longText('link')->nullable();
-            $table->enum('kategori', ['SOSIAL MEDIA', 'OPERASIONAL', 'PENDAFTARAN', 'RAWAT INAP']);
+            $table->string('slug', 100);
+            $table->string('judul', 255);
+            $table->longText('konten')->nullable();
             $table->boolean('aktif')->default(true);
             $table->timestamps();
+
+            $table->unique(['rumah_sakit_id', 'slug']);
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('kontak');
+        Schema::dropIfExists('halaman');
     }
 };

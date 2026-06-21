@@ -247,12 +247,12 @@
                     </p>
                     <p class="text-on-surface-variant mt-1">
                         Data di atas diperbarui otomatis dari sistem rumah sakit, tapi kondisi sebenarnya saat Anda
-                        tiba bisa berbeda. Mohon konfirmasi ke resepsionis atau kontak pendaftaran berikut sebelum
+                        tiba bisa berbeda. Mohon konfirmasi ke resepsionis atau kontak rawat inap berikut sebelum
                         datang atau mengambil keputusan:
                     </p>
-                    @if($kontakPendaftaran->isNotEmpty())
+                    @if($kontakRawatInap->isNotEmpty())
                     <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2">
-                        @foreach($kontakPendaftaran as $kontak)
+                        @foreach($kontakRawatInap as $kontak)
                             @if($kontak->link)
                                 <a href="{{ $kontak->link }}"
                                    target="{{ str_starts_with($kontak->link, 'http') ? '_blank' : '_self' }}"

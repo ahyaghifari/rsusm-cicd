@@ -235,10 +235,10 @@
             @endif
         @endif
 
-        @php $punyaLinkDaftar = (bool) $currentRumahSakit->link_pendaftaran_online; @endphp
+        @php $punyaLinkDaftar = (bool) $rs->link_pendaftaran_online; @endphp
         <div class="mt-8 flex flex-col md:flex-row gap-4 md:items-stretch">
             @if($punyaLinkDaftar)
-                <a href="{{ $currentRumahSakit->link_pendaftaran_online }}" target="_blank"
+                <a href="{{ $rs->link_pendaftaran_online }}" target="_blank"
                    class="group shrink-0 inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl
                           bg-tertiary hover:bg-tertiary/90 text-on-tertiary font-bold text-base
                           shadow-lg shadow-tertiary/30 hover:shadow-xl hover:shadow-tertiary/40

@@ -135,14 +135,14 @@ class KetersediaanRawatInapTest extends TestCase
             ->assertSee('BED KOSONG');
     }
 
-    public function test_disclaimer_konfirmasi_resepsionis_tampilkan_kontak_pendaftaran(): void
+    public function test_disclaimer_konfirmasi_resepsionis_tampilkan_kontak_rawat_inap(): void
     {
         Kontak::create([
             'rumah_sakit_id' => $this->rs->id,
-            'label' => 'Pendaftaran',
+            'label' => 'Rawat Inap',
             'value' => '0511-1234567',
             'link' => 'tel:05111234567',
-            'kategori' => 'PENDAFTARAN',
+            'kategori' => 'RAWAT INAP',
             'aktif' => true,
         ]);
 
@@ -152,7 +152,7 @@ class KetersediaanRawatInapTest extends TestCase
 
         Livewire::test(KetersediaanRawatInap::class)
             ->assertSee('Status kamar bisa berubah dalam hitungan menit.')
-            ->assertSee('Pendaftaran: 0511-1234567');
+            ->assertSee('Rawat Inap: 0511-1234567');
     }
 
     public function test_disclaimer_tidak_tampilkan_kontak_kategori_lain(): void
@@ -166,12 +166,24 @@ class KetersediaanRawatInapTest extends TestCase
             'aktif' => true,
         ]);
 
+        // PENDAFTARAN sengaja tidak ikut tampil di halaman ini lagi — sejak kategori RAWAT INAP
+        // dedicated ditambahkan, halaman ini hanya pakai kontak RAWAT INAP, bukan reuse PENDAFTARAN.
+        Kontak::create([
+            'rumah_sakit_id' => $this->rs->id,
+            'label' => 'Pendaftaran',
+            'value' => '0511-9999999',
+            'link' => 'tel:05119999999',
+            'kategori' => 'PENDAFTARAN',
+            'aktif' => true,
+        ]);
+
         $this->putFixture([
             ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED A', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => null],
         ]);
 
         Livewire::test(KetersediaanRawatInap::class)
-            ->assertDontSee('Sosial Media: @rsutest');
+            ->assertDontSee('Sosial Media: @rsutest')
+            ->assertDontSee('Pendaftaran: 0511-9999999');
     }
 
     public function test_render_ulang_tidak_error_walau_binding_currentrumahsakit_hilang(): void

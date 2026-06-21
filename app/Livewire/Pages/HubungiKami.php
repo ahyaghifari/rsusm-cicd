@@ -20,7 +20,7 @@ class HubungiKami extends RsPortalComponent
             ->get();
 
         return view('rumah_sakit.pages.hubungi-kami', [
-            'operasional'  => $kontak->whereIn('kategori', ['OPERASIONAL', 'PENDAFTARAN'])->sortBy('sort_order')->values(),
+            'operasional'  => $kontak->whereIn('kategori', ['OPERASIONAL', 'PENDAFTARAN', 'RAWAT INAP'])->sortBy('sort_order')->values(),
             'sosial_media' => $kontak->where('kategori', 'SOSIAL MEDIA')->sortBy('sort_order')->values(),
         ]);
     }

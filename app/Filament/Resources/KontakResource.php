@@ -30,6 +30,7 @@ class KontakResource extends BaseRumahSakitResource
                 Forms\Components\Select::make('kategori')
                     ->options([
                         'PENDAFTARAN' => 'Pendaftaran (tampil di halaman jadwal)',
+                        'RAWAT INAP' => 'Rawat Inap (tampil di halaman ketersediaan rawat inap)',
                         'OPERASIONAL' => 'Operasional',
                         'SOSIAL MEDIA' => 'Sosial Media',
                     ])
@@ -75,6 +76,7 @@ class KontakResource extends BaseRumahSakitResource
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'PENDAFTARAN' => 'warning',
+                        'RAWAT INAP' => 'primary',
                         'OPERASIONAL' => 'success',
                         'SOSIAL MEDIA' => 'info',
                         default => 'gray',
@@ -106,6 +108,7 @@ class KontakResource extends BaseRumahSakitResource
                 Tables\Filters\SelectFilter::make('kategori')
                     ->options([
                         'PENDAFTARAN' => 'Pendaftaran',
+                        'RAWAT INAP' => 'Rawat Inap',
                         'OPERASIONAL' => 'Operasional',
                         'SOSIAL MEDIA' => 'Sosial Media',
                     ])
