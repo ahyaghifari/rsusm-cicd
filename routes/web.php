@@ -15,10 +15,6 @@ Route::get('/poster-preview/{key}', function (string $key) {
     return response($html)->header('Content-Type', 'text/html; charset=utf-8');
 })->name('poster.preview')->middleware('auth');
 
-// ── [TEST] Preview 360 — spike teknis Photo Sphere Viewer, lihat issues/test-360-viewer.md.
-// Komentar baris ini sebelum push ke production kalau spike sudah tidak diperlukan lagi.
-Route::view('/test-360-viewer', 'test-360-viewer')->name('test.360_viewer');
-
 Route::get('/', [PortalController::class, 'index'])->middleware('throttle:portal')->name('home');
 Route::get('/cari-spesialis', [PortalController::class, 'spesialis'])->middleware('throttle:public-api')->name('cari_spesialis');
 
