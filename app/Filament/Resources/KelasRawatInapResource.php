@@ -41,13 +41,17 @@ class KelasRawatInapResource extends BaseRumahSakitResource
                     ->helperText('Cocokkan dengan field "idKelas" dari sistem Ranap, kalau kelas ini punya pasangan data ketersediaan real-time. Kosongkan kalau tidak ada.')
                     ->unique(KelasRawatInap::class, 'id_kelas_api', ignoreRecord: true, modifyRuleUsing: function ($rule, Forms\Get $get) {
                         return $rule->where('rumah_sakit_id', static::isSuperAdmin() ? $get('rumah_sakit_id') : static::rumahSakitId());
-                    })
-                    ->visible(fn () => static::isSuperAdmin()),
+                    }),
 
                 Forms\Components\Toggle::make('is_vip')
                     ->label('Tandai sebagai VIP')
                     ->helperText('Menentukan styling badge "VIP" di halaman publik Rawat Inap.')
                     ->default(false),
+
+                Forms\Components\Toggle::make('public')
+                    ->label('Tampil di Ketersediaan Rawat Inap')
+                    ->helperText('Matikan untuk menyembunyikan kelas ini beserta kamar-kamarnya dari halaman publik Ketersediaan Rawat Inap (mis. kelas khusus yang tidak untuk dipublikasikan).')
+                    ->default(true),
             ]);
     }
 
@@ -66,6 +70,10 @@ class KelasRawatInapResource extends BaseRumahSakitResource
 
                 IconColumn::make('is_vip')
                     ->label('VIP')
+                    ->boolean(),
+
+                IconColumn::make('public')
+                    ->label('Publik')
                     ->boolean(),
 
                 TextColumn::make('rawat_inap_count')

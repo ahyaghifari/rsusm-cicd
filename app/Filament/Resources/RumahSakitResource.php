@@ -84,6 +84,7 @@ class RumahSakitResource extends BaseResource
                 Forms\Components\Section::make('Google')
                     ->description('Embed lokasi Google Maps & CTA "Tulis Ulasan Anda" / "Lihat Ulasan Lainnya" di halaman beranda.')
                     ->collapsible()
+                    ->collapsed()
                     ->visible(fn () => static::isSuperAdmin())
                     ->schema([
                         Forms\Components\Textarea::make('lokasi_google_map')
@@ -98,6 +99,7 @@ class RumahSakitResource extends BaseResource
                 Forms\Components\Section::make('Integrasi Eksternal')
                     ->description('Identifier API ketersediaan rawat inap & link pantauan antrian, khusus RS ini.')
                     ->collapsible()
+                    ->collapsed()
                     ->visible(fn () => static::isSuperAdmin())
                     ->schema([
                         Forms\Components\TextInput::make('ranap_kode_api')

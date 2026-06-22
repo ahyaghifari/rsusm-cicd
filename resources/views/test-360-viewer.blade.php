@@ -60,7 +60,7 @@
                 setTimeout(() => {
                     new window.PSVViewer({
                         container: document.getElementById('viewer-360-test'),
-                        panorama: '{{ asset('img/360.jpg') }}',
+                        panorama: '{{ asset('img/361.jpg') }}',
                     });
                     psvInitialized = true;
                 }, 50);

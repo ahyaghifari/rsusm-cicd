@@ -10,10 +10,11 @@ class KelasRawatInap extends Model
 {
     protected $table = 'kelas_rawat_inap';
 
-    protected $fillable = ['rumah_sakit_id', 'nama', 'id_kelas_api', 'is_vip'];
+    protected $fillable = ['rumah_sakit_id', 'nama', 'id_kelas_api', 'is_vip', 'public'];
 
     protected $casts = [
         'is_vip' => 'boolean',
+        'public' => 'boolean',
     ];
 
     public function rumahSakit(): BelongsTo

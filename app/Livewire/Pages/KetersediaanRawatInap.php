@@ -68,6 +68,10 @@ class KetersediaanRawatInap extends Component
             ->get()
             ->keyBy('id_kelas_api');
 
+        // Kelas dengan public = false disembunyikan total dari halaman ini, termasuk
+        // kamar/bed yang merupakan kelas tersebut — bukan cuma dilepas dari labelnya.
+        $kelasTersembunyi = $kelasByApiId->where('public', false)->pluck('id')->all();
+
         $semuaBed = collect(app(RanapApiClient::class)->fetch($rs?->ranap_kode_api))
             ->map(function (array $r) use ($kelasByApiId) {
                 $kelas = $kelasByApiId->get($r['idKelas'] ?? null);
@@ -83,7 +87,8 @@ class KetersediaanRawatInap extends Component
                     'kelas_nama'    => $kelas?->nama,
                 ];
             })
-            ->reject(fn (array $r) => $r['status'] === 0);
+            ->reject(fn (array $r) => $r['status'] === 0)
+            ->reject(fn (array $r) => in_array($r['kelas_id'], $kelasTersembunyi, true));
 
         $namaKamarOptions = $semuaBed->pluck('nama_kamar')->unique()->sort()->values();
 
@@ -111,7 +116,10 @@ class KetersediaanRawatInap extends Component
         return view('rumah_sakit.pages.ketersediaan-rawat-inap', [
             'kamarList'        => $kamarList,
             'ringkasan'        => $ringkasan,
-            'kelasOptions'     => KelasRawatInap::where('rumah_sakit_id', $this->rumah_sakit_id)->orderBy('nama')->get(),
+            'kelasOptions'     => KelasRawatInap::where('rumah_sakit_id', $this->rumah_sakit_id)
+                ->where('public', true)
+                ->orderBy('nama')
+                ->get(),
             'namaKamarOptions' => $namaKamarOptions,
             'loadedAt'         => Carbon::now(),
             'totalBed'         => $semuaBed->count(),

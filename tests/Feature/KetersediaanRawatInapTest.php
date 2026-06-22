@@ -135,6 +135,34 @@ class KetersediaanRawatInapTest extends TestCase
             ->assertSee('BED KOSONG');
     }
 
+    public function test_kelas_non_public_disembunyikan_beserta_kamarnya(): void
+    {
+        $kelasPublik = KelasRawatInap::create([
+            'rumah_sakit_id' => $this->rs->id,
+            'nama' => 'Kelas 1',
+            'id_kelas_api' => 7,
+            'public' => true,
+        ]);
+
+        $kelasTersembunyi = KelasRawatInap::create([
+            'rumah_sakit_id' => $this->rs->id,
+            'nama' => 'Kelas Khusus',
+            'id_kelas_api' => 8,
+            'public' => false,
+        ]);
+
+        $this->putFixture([
+            ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED PUBLIK', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => 7],
+            ['id' => 2, 'ruangKamar' => 2, 'tempatTidur' => 'BED TERSEMBUNYI', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'B', 'namaKamar' => 'KAMAR B', 'idKelas' => 8],
+        ]);
+
+        Livewire::test(KetersediaanRawatInap::class)
+            ->assertSee('BED PUBLIK')
+            ->assertSee('Kelas 1')
+            ->assertDontSee('BED TERSEMBUNYI')
+            ->assertDontSee('Kelas Khusus');
+    }
+
     public function test_disclaimer_konfirmasi_resepsionis_tampilkan_kontak_rawat_inap(): void
     {
         Kontak::create([

@@ -128,7 +128,7 @@
                                 Antrian {{ $antrian['nama_poli'] ?? 'Poliklinik' }}
                             </p>
                             <p class="text-xs text-on-surface-variant mt-0.5">
-                                Nomor berjalan saat ini:
+                                Nomor Poli
                                 <span class="font-bold text-on-surface">{{ $antrian['id'] ?? '-' }}</span>
                             </p>
                         </div>

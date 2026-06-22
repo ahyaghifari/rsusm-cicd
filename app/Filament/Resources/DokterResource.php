@@ -93,6 +93,7 @@ class DokterResource extends BaseRumahSakitResource
                 Forms\Components\Section::make('API Antrian')
                     ->description('Hubungkan dokter ini ke sistem live antrian poliklinik eksternal. Base URL API-nya mengikuti "Link Antrian" milik rumah sakit (kelola di menu Rumah Sakit).')
                     ->collapsible()
+                    ->collapsed()
                     ->visible(fn () => static::user()->hasAnyRole(['super_admin', 'admin']))
                     ->schema([
                         Forms\Components\TextInput::make('nomor_poli_antrian')
