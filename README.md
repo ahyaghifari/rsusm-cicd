@@ -193,6 +193,16 @@ Dua mode tampilan:
 - Tombol silang-tautan dengan halaman `/rawat-inap` (masing-masing mengarah ke satu sama lain)
 - Detail desain & keputusan: [issues/ketersediaan-rawat-inap-plan.md](../issues/ketersediaan-rawat-inap-plan.md), [issues/link-layanan-static-dan-ranap-multi-tenant.md](../issues/link-layanan-static-dan-ranap-multi-tenant.md)
 
+#### Preview 360° Kamar Rawat Inap
+
+- **`RawatInap.foto_360`** (string, nullable) — path foto panorama equirectangular (disk `public`), 1 kamar maksimal 1 foto. Diupload admin lewat `RawatInapResource` (section "Fasilitas & Tampilan"), dilengkapi panduan crop rasio 2:1 (`imageEditorAspectRatios`) dan batas ukuran 10MB
+- **Badge "360°"** tampil di kartu kamar publik (`components/rawat-inap.blade.php`) hanya kalau `foto_360` terisi — kamar yang belum difoto ulang (progres fisik masih berjalan terpisah) tetap tampil normal tanpa elemen kosong/error
+- **Viewer**: Photo Sphere Viewer (`@photo-sphere-viewer/core`, di-bundle global via `resources/js/app.js` → `window.PSVViewer`, mengikuti pola integrasi library pihak ketiga yang sudah baku di project ini — lihat `Swiper`/`window.Swiper`). Validasi integrasi awal dilakukan lewat spike teknis di route `/test-360-viewer` sebelum schema & Filament field dibangun
+- **Modal kustom (bukan Preline `hs-overlay`)**: sempat dicoba pakai `hs-overlay`, tapi menyebabkan beberapa instance `PSVViewer` ter-create bersamaan (kedip-kedip/glitch) — karena script init viewer di halaman ini ikut di-render ulang Livewire tiap filter kelas diubah, dan `document.addEventListener` jadi menumpuk listener tiap kali script-nya ikut di-reinsert oleh morph DOM. Diganti modal vanilla (atribut `onclick` di markup + `function` declaration biasa, bukan `addEventListener`) — redefinisi function aman/idempotent, beda sifat dari `addEventListener`
+- **Modal dirender di level halaman** (`rawat-inap.blade.php`), bukan di dalam kartu kamar — kartu punya `hover:-translate-y-1` (CSS `transform`), dan ancestor dengan transform jadi *containing block* untuk descendant `position: fixed`, sehingga modal yang ditaruh di dalam kartu akan "fixed" relatif ke kartu yang ter-hover (bukan ke viewport)
+- **Aksesibilitas**: `role="dialog"` + `aria-modal` + `aria-labelledby`, fokus otomatis ke tombol tutup saat modal terbuka dan dikembalikan ke tombol trigger saat ditutup, focus trap (Tab tidak bisa keluar dialog), `motion-reduce:transition-none` untuk pengguna yang mengaktifkan *reduce motion*
+- Detail implementasi, keputusan scope (1 kolom vs tabel galeri terpisah), dan saran lanjutan: [issues/preview-360-kamar-rawat-inap.md](../issues/preview-360-kamar-rawat-inap.md), spike awal: [issues/test-360-viewer.md](../issues/test-360-viewer.md)
+
 #### Live Antrian Poliklinik per Dokter
 
 - **`Dokter.nomor_poli_antrian`** (integer, nullable) — identifier dokter ini di sistem antrian eksternal. `Dokter.kuota_pasien` (text, nullable) — info kuota/ketersediaan rawat jalan, free text, tampil di profil dokter publik
@@ -440,6 +450,8 @@ php artisan test
 - **`RsPortalComponent` + `wire:poll`/interaksi AJAX berulang tidak cocok**: `RumahSakitMiddleware` (yang men-set binding `currentRumahSakit` ke container) cuma jalan di request awal (full page load), **tidak** jalan di `/livewire/update` (request AJAX untuk `wire:poll` & tiap `wire:click`/`wire:model` setelahnya) — pakai `RsPortalComponent::boot()` di komponen yang sering re-render via AJAX akan `BindingResolutionException` setelah interaksi pertama. Solusi: simpan `rumah_sakit_id` sebagai `#[Locked] public int` lalu re-bind manual di `boot()` komponen itu sendiri (`if (! app()->bound('currentRumahSakit')) { ... }`) — lihat `KetersediaanRawatInap.php` & `RawatInap.php` (kedua Livewire page ini sengaja **tidak** extends `RsPortalComponent` karena alasan ini)
 - `RumahSakit.link_antrian` dipakai **dua kali** untuk dua tujuan berbeda: (1) URL klik langsung untuk kartu publik "Pantauan Antrian", dan (2) base URL `AntrianApiClient` untuk fetch JSON live status. Kalau salah satu kebutuhan berubah formatnya, kolom ini perlu dipecah jadi dua
 - Test Filament `Panel` butuh instance yang benar-benar terdaftar (`Filament\Facades\Filament::getPanel('admin')`), **bukan** `app(\Filament\Panel::class)` — instance kosong dari container tidak punya `id()`, akan error `Exception: A panel has been registered without an id()` begitu kode memanggil `$panel->getId()` (mis. di `User::canAccessPanel()`)
+- **Modal Preline (`hs-overlay`) tidak cocok untuk komponen yang sering di-render ulang Livewire** (mis. halaman dengan filter `wire:click`/`wire:model`) kalau init JS-nya pakai `document.addEventListener` — script yang sama ikut di-render ulang tiap interaksi, dan morph DOM Livewire kadang me-reinsert tag `<script>` itu sehingga browser mengeksekusinya ulang, menambah listener baru (bukan mengganti yang lama). Listener menumpuk → efek sampingnya tergantung apa yang di-trigger (di kasus viewer 360 rawat inap: beberapa instance `PSVViewer` dibuat bersamaan ke container yang sama, kelihatan kedip-kedip cepat). Solusi yang dipakai: modal vanilla dengan trigger lewat atribut `onclick` di markup (diparse ulang dari HTML, tidak pernah menumpuk) + `function namedFunction() {}` biasa (redefinisi idempotent, beda sifat dari `addEventListener`) — lihat `rawat-inap.blade.php` (`openModal360`/`closeModal360`) dan [issues/preview-360-kamar-rawat-inap.md](../issues/preview-360-kamar-rawat-inap.md)
+- **Ancestor dengan CSS `transform` jadi *containing block* untuk descendant `position: fixed`** — kartu/elemen apa pun yang punya `hover:scale-*`/`hover:-translate-y-*` dkk akan membuat modal/elemen `fixed` di dalamnya "nempel" relatif ke elemen itu (bukan ke viewport) selama transform-nya aktif (mis. saat di-hover), bukan benar-benar full-screen. Modal yang perlu benar-benar `fixed` ke viewport harus dirender di luar elemen manapun yang punya `transform`, biasanya di level halaman/root, bukan di dalam komponen kartu yang reusable
 - **Migrasi yang sudah pernah `migrate` di environment manapun (termasuk production) tidak
   boleh di-rename atau diedit isinya begitu saja** — Laravel melacak migrasi yang sudah jalan
   berdasarkan *nama file* di tabel `migrations`. Tapi file LAMA tetap bisa diganti dengan **file
@@ -593,6 +605,7 @@ ANTRIAN_API_PASSWORD=
 - [x] Fix bug filter di halaman Jadwal Praktek: `JadwalPraktek.php` (Livewire) pindah dari `RsPortalComponent` ke `Component` biasa + re-bind manual `currentRumahSakit` di `boot()` — pola sama dengan `KetersediaanRawatInap.php`, supaya filter hari/poli (lewat `/livewire/update`) tidak `BindingResolutionException`
 - [x] Kategori Kontak baru `RAWAT INAP` — dedicated untuk disclaimer halaman Ketersediaan Rawat Inap, tidak lagi reuse `PENDAFTARAN`
 - [x] Pembersihan migrasi database: 64 → 47 file, direktori `database/migrations/` sekarang cuma `*_create_*` dan `*_consolidate_*` (tidak ada lagi `add_*`/`fix_*`/`refactor_*`). Migrasi lama yang sudah pernah jalan tidak diubah/dihapus dari riwayat — diganti migrasi baru yang idempotent (`Schema::hasColumn`/`hasIndex`) sehingga aman dijalankan di production tanpa menyentuh tabel `migrations`. Detail & cara verifikasi: [issues/migration-cleanup-plan.md](../issues/migration-cleanup-plan.md)
+- [x] Preview 360° kamar rawat inap — kolom `RawatInap.foto_360`, upload via `RawatInapResource`, badge "360°" di kartu publik (tampil hanya kalau ada foto), viewer Photo Sphere Viewer dalam modal kustom (bukan Preline `hs-overlay`, lihat catatan di bagian Fitur), dilengkapi focus trap & pengembalian fokus (aksesibilitas dialog). Detail: [issues/preview-360-kamar-rawat-inap.md](../issues/preview-360-kamar-rawat-inap.md)
 
 ### Dalam Pengerjaan
 
@@ -603,7 +616,6 @@ ANTRIAN_API_PASSWORD=
 ### Dalam Pertimbangan
 
 - [ ] Live antrian konsultasi disambungkan ke chatbot
-- [ ] Foto 360° untuk tiap kamar rawat inap — viewer sudah ada eksperimen (`@photo-sphere-viewer/core`), menunggu pengambilan foto ulang (task fotografi, bukan koding)
 - [ ] Pantauan Antrian internal (scraping) — saat ini masih link keluar via `link_antrian`, bisa diganti route internal kalau scraping dibangun
 - [ ] Notifikasi jadwal (email/WhatsApp)
 - [ ] Export jadwal ke PDF/Excel

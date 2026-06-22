@@ -64,7 +64,7 @@ class Panel extends Component
             return "Halo! Selamat datang di <strong>{$branch->nama}</strong>.<br>
             Saya dapat membantu anda untuk memberikan informasi mengenai : <br>
              - 🧑🏻‍⚕️ Dokter Kami, Spesialis, dan Jadwal Prakteknya <br>
-             - 🛏️ Rawat Inap kami dan fasilitasnya <br>
+             - 🛏️ Rawat Inap kami, fasilitasnya dan ketersediannya saat ini<br>
              - 🩺 Rawat Jalan dan Poli <br>
              - ⭐ Fasilitas Kami (Unggulan, Pendukung, dan Penunjang Medis)<br>
              - 📢 Promo<br>

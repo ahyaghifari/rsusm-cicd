@@ -112,6 +112,16 @@ class RawatInapResource extends BaseRumahSakitResource
                             ->directory('rawat-inap/thumbnail')
                             ->disk('public')
                             ->columnSpanFull(),
+
+                        Forms\Components\FileUpload::make('foto_360')
+                            ->label('Foto 360°')
+                            ->image()
+                            ->imageEditorAspectRatios(['2:1'])
+                            ->maxSize(10240)
+                            ->directory('rawat-inap/foto-360')
+                            ->disk('public')
+                            ->helperText('Foto panorama equirectangular (rasio 2:1) dari kamera 360°. Kosongkan kalau kamar ini belum difoto ulang — tombol "Preview 360°" otomatis tidak tampil di halaman publik.')
+                            ->columnSpanFull(),
                     ]),
 
                 Forms\Components\Section::make('Pengaturan Tambahan')

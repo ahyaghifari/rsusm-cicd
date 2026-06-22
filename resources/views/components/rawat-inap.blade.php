@@ -8,17 +8,26 @@
             hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col">
 
     {{-- Gambar utama --}}
-    <a href="{{ Storage::url($kamarInap->thumbnail) }}"
-       class="glightbox relative overflow-hidden h-56 block shrink-0"
-       data-gallery="rawat-inap-{{ $kamarInap->id }}">
+    <div class="relative overflow-hidden h-56 shrink-0">
 
-        <img src="{{ Storage::url($kamarInap->thumbnail) }}"
-             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-             alt="{{ $kamarInap->nama }}" loading="lazy">
+        <a href="{{ Storage::url($kamarInap->thumbnail) }}"
+           class="glightbox absolute inset-0 block"
+           data-gallery="rawat-inap-{{ $kamarInap->id }}">
+
+            <img src="{{ Storage::url($kamarInap->thumbnail) }}"
+                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                 alt="{{ $kamarInap->nama }}" loading="lazy">
+
+            <div class="absolute inset-0 flex items-center justify-center">
+                <span class="material-symbols-outlined text-white text-4xl drop-shadow-lg
+                             opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100
+                             transition-all duration-300">zoom_in</span>
+            </div>
+        </a>
 
         {{-- Badge kelas (bottom left) --}}
         @if($namaKelas)
-        <div class="absolute bottom-3 left-3">
+        <div class="absolute bottom-3 left-3 z-10 pointer-events-none">
             @if($isVip)
                 <span class="inline-flex items-center gap-1 bg-amber-400 text-amber-900
                              text-[11px] font-bold px-2.5 py-1 rounded-full shadow">
@@ -38,7 +47,7 @@
 
         {{-- Badge jumlah foto (top right) --}}
         @if($galeri->isNotEmpty())
-            <span class="absolute top-3 right-3 inline-flex items-center gap-1
+            <span class="absolute top-3 right-3 z-10 inline-flex items-center gap-1
                          bg-black/50 backdrop-blur-sm text-white text-[11px] font-semibold
                          px-2 py-1 rounded-full pointer-events-none">
                 <span class="material-symbols-outlined text-[12px]">photo_library</span>
@@ -46,12 +55,32 @@
             </span>
         @endif
 
-        <div class="absolute inset-0 flex items-center justify-center">
-            <span class="material-symbols-outlined text-white text-4xl drop-shadow-lg
-                         opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100
-                         transition-all duration-300">zoom_in</span>
-        </div>
-    </a>
+        {{-- Preview 360° — badge interaktif (beda dari badge info di atas, ini benar-benar
+             bisa diklik), diletakkan di pojok yang masih kosong (bottom-right), berpasangan
+             dengan badge kelas di bottom-left supaya "info row" bawah foto konsisten: kiri =
+             apa kamarnya, kanan = cara lain melihatnya. Selalu tampil kalau foto_360 ada,
+             tidak digabung ke carousel galeri supaya tetap terlihat walau galeri foto
+             biasanya masih kosong (progres foto ulang per kamar belum selesai semua).
+
+             Trigger-nya saja yang ditaruh di sini — modal-nya sendiri dirender di
+             rawat-inap.blade.php (level halaman, di luar kartu ini), karena kartu kamar
+             punya `hover:-translate-y-1` (CSS transform). Ancestor dengan transform jadi
+             containing block untuk descendant `position: fixed`, jadi kalau modal-nya
+             ditaruh di sini, dia "fixed" relatif ke kartu yang sedang ter-hover itu (bukan
+             ke viewport) — kelihatan seperti kejepit/render di dalam kartu. --}}
+        @if($kamarInap->foto_360)
+            <button type="button" onclick="openModal360({{ $kamarInap->id }})"
+                    aria-label="Preview 360° kamar {{ $kamarInap->nama }}"
+                    class="absolute bottom-3 right-3 z-10 inline-flex items-center gap-1
+                           bg-primary text-white text-[11px] font-bold px-2.5 py-1 rounded-full
+                           shadow-lg shadow-primary/40 ring-1 ring-white/40
+                           hover:ring-white/80 hover:scale-105 active:scale-95
+                           transition-all duration-200">
+                <span class="material-symbols-outlined text-[12px]">360</span>
+                360°
+            </button>
+        @endif
+    </div>
 
     {{-- Hidden links galeri --}}
     @foreach($galeri as $g)

@@ -118,6 +118,37 @@ class RawatInapPageTest extends TestCase
             ->assertDontSee('Kamar VIP Mawar');
     }
 
+    public function test_tombol_preview_360_tampil_kalau_foto_360_terisi(): void
+    {
+        RawatInap::create([
+            'rumah_sakit_id' => $this->rs->id,
+            'nama'           => 'Kamar VIP Mawar',
+            'harga'          => 500000,
+            'kapasitas'      => 1,
+            'sort_order'     => 1,
+            'aktif'          => true,
+            'foto_360'       => 'rawat-inap/foto-360/contoh.jpg',
+        ]);
+
+        Livewire::test(RawatInapPage::class)
+            ->assertSee('Preview 360°');
+    }
+
+    public function test_tombol_preview_360_tidak_tampil_kalau_foto_360_null(): void
+    {
+        RawatInap::create([
+            'rumah_sakit_id' => $this->rs->id,
+            'nama'           => 'Kamar Reguler Melati',
+            'harga'          => 200000,
+            'kapasitas'      => 2,
+            'sort_order'     => 1,
+            'aktif'          => true,
+        ]);
+
+        Livewire::test(RawatInapPage::class)
+            ->assertDontSee('Preview 360°');
+    }
+
     public function test_render_ulang_tidak_error_walau_binding_currentrumahsakit_hilang(): void
     {
         // Sama seperti regresi yang sudah diperbaiki di KetersediaanRawatInap — filter
