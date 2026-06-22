@@ -52,8 +52,10 @@ class KetersediaanRawatInapTest extends TestCase
         // lokal (bukan halaman kosong) — lihat issues/link-layanan-static-dan-ranap-multi-tenant.md.
         $this->assertNull($this->rs->ranap_kode_api);
 
+        KelasRawatInap::create(['rumah_sakit_id' => $this->rs->id, 'nama' => 'Kelas X', 'id_kelas_api' => 1]);
+
         $this->putFixture([
-            ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED 1', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'X', 'namaKamar' => 'KAMAR X', 'idKelas' => null],
+            ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED 1', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'X', 'namaKamar' => 'KAMAR X', 'idKelas' => 1],
         ]);
 
         Livewire::test(KetersediaanRawatInap::class)
@@ -63,6 +65,8 @@ class KetersediaanRawatInapTest extends TestCase
 
     public function test_halaman_tampilkan_ringkasan_dan_kamar_dari_fixture(): void
     {
+        KelasRawatInap::create(['rumah_sakit_id' => $this->rs->id, 'nama' => 'Stroke Center', 'id_kelas_api' => 7]);
+
         $this->putFixture([
             ['id' => 3, 'ruangKamar' => 3, 'tempatTidur' => 'BED STROKE 01', 'status' => 3, 'tanggal' => '2026-06-19T02:07:37.000Z', 'keterangan' => null, 'ruangan' => '101020106', 'namaKamar' => 'STROKE CENTER', 'idKelas' => 7],
             ['id' => 4, 'ruangKamar' => 3, 'tempatTidur' => 'BED STROKE 02', 'status' => 1, 'tanggal' => '2026-06-19T02:07:37.000Z', 'keterangan' => null, 'ruangan' => '101020106', 'namaKamar' => 'STROKE CENTER', 'idKelas' => 7],
@@ -74,6 +78,19 @@ class KetersediaanRawatInapTest extends TestCase
             ->assertSee('BED STROKE 02')
             ->assertSee('Terisi')
             ->assertSee('Kosong');
+    }
+
+    public function test_idkelas_tidak_match_kelas_rawat_inap_manapun_disembunyikan(): void
+    {
+        // Beda dari "kelas non-public" — di sini idKelas-nya sama sekali tidak ada
+        // baris kelas_rawat_inap yang cocok (mis. belum dipetakan admin).
+        $this->putFixture([
+            ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED TANPA KELAS', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => 99],
+        ]);
+
+        Livewire::test(KetersediaanRawatInap::class)
+            ->assertDontSee('BED TANPA KELAS')
+            ->assertSee('Data ketersediaan belum tersedia');
     }
 
     public function test_kelas_resolve_dari_idKelas_tampil_di_halaman(): void
@@ -94,9 +111,11 @@ class KetersediaanRawatInapTest extends TestCase
 
     public function test_filter_nama_kamar_menyaring_hasil(): void
     {
+        KelasRawatInap::create(['rumah_sakit_id' => $this->rs->id, 'nama' => 'Kelas 1', 'id_kelas_api' => 5]);
+
         $this->putFixture([
-            ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED A', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => null],
-            ['id' => 2, 'ruangKamar' => 2, 'tempatTidur' => 'BED B', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'B', 'namaKamar' => 'KAMAR B', 'idKelas' => null],
+            ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED A', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => 5],
+            ['id' => 2, 'ruangKamar' => 2, 'tempatTidur' => 'BED B', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'B', 'namaKamar' => 'KAMAR B', 'idKelas' => 5],
         ]);
 
         // "KAMAR B" tetap dicek di dropdown filter (sengaja menampilkan semua pilihan),
@@ -110,9 +129,11 @@ class KetersediaanRawatInapTest extends TestCase
 
     public function test_filter_status_menyaring_hasil(): void
     {
+        KelasRawatInap::create(['rumah_sakit_id' => $this->rs->id, 'nama' => 'Kelas 1', 'id_kelas_api' => 5]);
+
         $this->putFixture([
-            ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED KOSONG', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => null],
-            ['id' => 2, 'ruangKamar' => 1, 'tempatTidur' => 'BED TERISI', 'status' => 3, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => null],
+            ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED KOSONG', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => 5],
+            ['id' => 2, 'ruangKamar' => 1, 'tempatTidur' => 'BED TERISI', 'status' => 3, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => 5],
         ]);
 
         Livewire::test(KetersediaanRawatInap::class)
@@ -123,9 +144,11 @@ class KetersediaanRawatInapTest extends TestCase
 
     public function test_filter_status_kosongkan_kembali_tampilkan_semua(): void
     {
+        KelasRawatInap::create(['rumah_sakit_id' => $this->rs->id, 'nama' => 'Kelas 1', 'id_kelas_api' => 5]);
+
         $this->putFixture([
-            ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED KOSONG', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => null],
-            ['id' => 2, 'ruangKamar' => 1, 'tempatTidur' => 'BED TERISI', 'status' => 3, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => null],
+            ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED KOSONG', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => 5],
+            ['id' => 2, 'ruangKamar' => 1, 'tempatTidur' => 'BED TERISI', 'status' => 3, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => 5],
         ]);
 
         Livewire::test(KetersediaanRawatInap::class)
@@ -221,8 +244,10 @@ class KetersediaanRawatInapTest extends TestCase
         // container tidak otomatis tersedia lagi. boot() di komponen ini harus
         // re-bind manual dari $rumah_sakit_id yang sudah di-mount, bukan error
         // BindingResolutionException.
+        KelasRawatInap::create(['rumah_sakit_id' => $this->rs->id, 'nama' => 'Kelas 1', 'id_kelas_api' => 5]);
+
         $this->putFixture([
-            ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED A', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => null],
+            ['id' => 1, 'ruangKamar' => 1, 'tempatTidur' => 'BED A', 'status' => 1, 'tanggal' => null, 'keterangan' => null, 'ruangan' => 'A', 'namaKamar' => 'KAMAR A', 'idKelas' => 5],
         ]);
 
         $component = Livewire::test(KetersediaanRawatInap::class);

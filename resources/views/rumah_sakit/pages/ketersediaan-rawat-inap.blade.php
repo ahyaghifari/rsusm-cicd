@@ -183,7 +183,7 @@
                         <div class="p-5">
                             <div class="flex items-start justify-between gap-2 mb-3">
                                 @if($groupBy === 'kelas')
-                                    <h3 class="font-bold text-on-surface leading-snug">{{ $first['kelas_nama'] ?? 'Non Kelas' }}</h3>
+                                    <h3 class="font-bold text-on-surface leading-snug">{{ $first['kelas_nama'] }}</h3>
                                     <span class="shrink-0 text-[11px] font-bold uppercase tracking-wide bg-primary/10 text-primary px-2 py-1 rounded-full">
                                         {{ $beds->count() }} bed
                                     </span>

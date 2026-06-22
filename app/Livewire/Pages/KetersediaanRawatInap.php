@@ -88,7 +88,9 @@ class KetersediaanRawatInap extends Component
                 ];
             })
             ->reject(fn (array $r) => $r['status'] === 0)
-            ->reject(fn (array $r) => in_array($r['kelas_id'], $kelasTersembunyi, true));
+            // idKelas yang tidak match ke kelas_rawat_inap manapun (kelas_id null) ikut
+            // disembunyikan — bukan ditampilkan sebagai "Non Kelas".
+            ->reject(fn (array $r) => $r['kelas_id'] === null || in_array($r['kelas_id'], $kelasTersembunyi, true));
 
         $namaKamarOptions = $semuaBed->pluck('nama_kamar')->unique()->sort()->values();
 
@@ -110,7 +112,7 @@ class KetersediaanRawatInap extends Component
         }
 
         $kamarList = $this->groupBy === 'kelas'
-            ? $beds->groupBy(fn ($bed) => $bed['kelas_id'] ?? 'tanpa-kelas')
+            ? $beds->groupBy('kelas_id')
             : $beds->groupBy(fn ($bed) => $bed['ruang_kamar'] . '|' . $bed['nama_kamar']);
 
         return view('rumah_sakit.pages.ketersediaan-rawat-inap', [
