@@ -110,7 +110,7 @@
             <div id="modal-360-{{ $room->id }}"
                  role="dialog" aria-modal="true" aria-labelledby="modal-360-title-{{ $room->id }}"
                  tabindex="-1"
-                 class="invisible opacity-0 fixed inset-0 z-60 bg-black/90
+                 class="invisible opacity-0 fixed inset-0 z-200 bg-black/90
                         flex items-center justify-center
                         transition-opacity duration-200 motion-reduce:transition-none"
                  onclick="if (event.target === this) closeModal360({{ $room->id }})">
