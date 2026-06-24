@@ -14,11 +14,9 @@ class Panel extends Component
     private const SESSION_KEY  = 'chatbot_state';
     private const MAX_MESSAGES = 50;
 
-    // ── Rate limit AI (ubah angka di sini sesuai kebutuhan/kuota) ─────────────
+    // ── Rate limit AI (burst tetap hardcode, limit harian custom via .env) ───
     private const AI_BURST_LIMIT   = 10;   // maks. pesan AI dalam jendela singkat
     private const AI_BURST_MINUTES = 10;  // panjang jendela singkat (menit), reset otomatis
-    private const AI_DAILY_LIMIT   = 100;  // maks. pesan AI per hari
-    private const AI_DAILY_HOURS   = 24;  // panjang jendela harian (jam), reset otomatis
 
     public bool $branchSelected = false;
     public ?string $activeBranchSlug = null;
@@ -110,26 +108,32 @@ class Panel extends Component
     }
 
     /**
-     * Cek batas pemakaian AI (burst & harian). Mengembalikan pesan ramah kalau
-     * batas tercapai (null kalau masih boleh lanjut). Key digabung IP + session
-     * supaya tidak mudah di-reset hanya dengan menghapus cookie.
+     * Cek batas pemakaian AI (burst & per-IP). Mengembalikan pesan ramah kalau
+     * batas tercapai (null kalau masih boleh lanjut). Key burst tetap IP+session
+     * (anti-spam jendela singkat), key kuota utama murni IP — sengaja dipilih
+     * murni IP (bukan IP+session) supaya tidak bisa dilewati dengan menghapus
+     * cookie/mode incognito. Konsekuensinya: pengunjung yang berbagi IP yang
+     * sama (mis. WiFi ruang tunggu RS) berbagi kuota yang sama.
      */
     private function aiRateLimited(): ?string
     {
-        $id       = request()?->ip() . '|' . session()->getId();
-        $burstKey = "chatbot-ai-burst:{$id}";
-        $dailyKey = "chatbot-ai-daily:{$id}";
+        $ip          = request()?->ip();
+        $burstId     = $ip . '|' . session()->getId();
+        $burstKey    = "chatbot-ai-burst:{$burstId}";
+        $dailyKey    = "chatbot-ai-daily-ip:{$ip}";
+        $dailyLimit  = (int) env('CHATBOT_AI_DAILY_LIMIT', 100);
+        $dailyHours  = (int) env('CHATBOT_AI_DAILY_HOURS', 6);
 
         if (RateLimiter::tooManyAttempts($burstKey, self::AI_BURST_LIMIT)) {
             return 'Anda mengirim pesan terlalu cepat. Silakan tunggu beberapa menit, lalu coba lagi.';
         }
 
-        if (RateLimiter::tooManyAttempts($dailyKey, self::AI_DAILY_LIMIT)) {
-            return 'Anda sudah mencapai batas tanya-jawab untuk hari ini. Silakan coba lagi besok, atau gunakan opsi kontak di bawah.';
+        if (RateLimiter::tooManyAttempts($dailyKey, $dailyLimit)) {
+            return "Anda sudah mencapai batas tanya-jawab ({$dailyLimit} pertanyaan / {$dailyHours} jam). Silakan coba lagi nanti, atau gunakan opsi kontak di bawah.";
         }
 
         RateLimiter::hit($burstKey, self::AI_BURST_MINUTES * 60);
-        RateLimiter::hit($dailyKey, self::AI_DAILY_HOURS * 3600);
+        RateLimiter::hit($dailyKey, $dailyHours * 3600);
 
         return null;
     }
@@ -171,7 +175,7 @@ class Panel extends Component
         if ($text === '') {
             $text = $this->inputMessage;
         }
-        $text = trim(mb_substr($text, 0, 150));
+        $text = trim(mb_substr($text, 0, 100));
         if (! $text || ! $this->branchSelected) return;
 
         $this->inputMessage = '';

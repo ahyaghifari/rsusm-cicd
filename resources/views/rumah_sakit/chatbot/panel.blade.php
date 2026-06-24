@@ -249,7 +249,7 @@
                 style="padding-bottom: max(0.625rem, env(safe-area-inset-bottom, 0))"
                 x-data="{
                     msg: '',
-                    get remaining() { return 200 - this.msg.length; },
+                    get remaining() { return 100 - this.msg.length; },
                     send() {
                         const text = this.msg.trim();
                         if (!text) return;
@@ -269,7 +269,7 @@
                         wire:target="sendMessage,sendQuick"
                         type="text"
                         placeholder="Ketik pertanyaan Anda..."
-                        maxlength="200"
+                        maxlength="100"
                         class="flex-1 border border-[#d6c0ce] rounded-full px-4 py-2 text-sm font-sans text-[#0b1c30] bg-[#eff4ff] outline-none focus:border-[#d606b0] focus:bg-white placeholder-[#84727e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label="Kotak pesan"
                     />
@@ -290,7 +290,7 @@
                     </p>
                     <span class="text-xs font-medium tabular-nums"
                           :class="remaining <= 20 ? (remaining <= 0 ? 'text-red-500' : 'text-amber-500') : 'text-[#b0a0ab]'"
-                          x-text="remaining + '/200'"></span>
+                          x-text="remaining + '/100'"></span>
                 </div>
             </div>
 

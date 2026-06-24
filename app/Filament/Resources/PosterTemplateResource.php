@@ -4,14 +4,12 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PosterTemplateResource\Pages;
 use App\Models\PosterTemplate;
-use App\Models\RumahSakit;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class PosterTemplateResource extends Resource
+class PosterTemplateResource extends BaseRumahSakitResource
 {
     protected static ?string $model = PosterTemplate::class;
 
@@ -35,11 +33,7 @@ class PosterTemplateResource extends Resource
             // ── Informasi Dasar ──────────────────────────────────────────────
             Forms\Components\Section::make('Informasi Template')
                 ->schema([
-                    Forms\Components\Select::make('rumah_sakit_id')
-                        ->label('Rumah Sakit')
-                        ->options(RumahSakit::where('aktif', true)->pluck('nama', 'id'))
-                        ->searchable()
-                        ->required(),
+                    static::rsFormField(),
 
                     Forms\Components\TextInput::make('nama')
                         ->label('Nama Template')
@@ -68,7 +62,7 @@ class PosterTemplateResource extends Resource
                         ->helperText('Wajib PNG agar transparansi terjaga. Desain di Canva lalu export PNG. Maks 5MB.')
                         ->live(),
                     ]),
-                    
+
                     Forms\Components\Group::make([
                     Forms\Components\FileUpload::make('logo_header')
                         ->label('Logo Header')
@@ -121,10 +115,7 @@ class PosterTemplateResource extends Resource
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('rumahSakit.nama')
-                    ->label('Rumah Sakit')
-                    ->sortable()
-                    ->searchable(),
+                static::rsTableColumn(),
 
                 Tables\Columns\IconColumn::make('is_default')
                     ->label('Default')
@@ -136,12 +127,16 @@ class PosterTemplateResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('rumah_sakit_id')
-                    ->label('Rumah Sakit')
-                    ->relationship('rumahSakit', 'nama'),
+                static::rsTableFilter(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ReplicateAction::make()
+                    ->label('Duplikat')
+                    ->beforeReplicaSaved(function (PosterTemplate $replica): void {
+                        $replica->nama = $replica->nama . ' (Copy)';
+                        $replica->is_default = false;
+                    }),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([

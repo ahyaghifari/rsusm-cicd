@@ -62,7 +62,7 @@ body {
     align-content: start;
 }
 
-.poli-card { overflow: hidden; }
+.poli-card { overflow: hidden; display: flex; flex-direction: column; }
 
 .poli-header {
     position: relative;
@@ -82,14 +82,18 @@ body {
     letter-spacing: 0.5px;
 }
 
-.poli-dokter { padding: 4px 8px; }
+.poli-dokter {
+    padding: 4px 8px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
 
 .dokter-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     line-height: 1.35;
-    margin-bottom: 2px;
 }
 
 /* Badge "Executive Clinic" di sudut kanan shape header */
@@ -316,7 +320,11 @@ body {
             $cardRadius      = (int) ($grid['card_radius']       ?? 8);
             $cardBorderWarna = $grid['card_border_warna'] ?? '#e5e7eb';
             $cardBorderWidth = (int) ($grid['card_border_width'] ?? 1);
-            $cardStyle = "border-radius:{$cardRadius}px; border:{$cardBorderWidth}px solid {$cardBorderWarna}; overflow:hidden;";
+            $cardMinHeight   = (int) ($grid['card_min_height'] ?? 0);
+            $dokterValign    = ($grid['dokter_valign'] ?? 'top') === 'center' ? 'center' : 'flex-start';
+            $dokterRowGap    = (int) ($grid['dokter_row_gap'] ?? 2);
+            $cardStyle = "border-radius:{$cardRadius}px; border:{$cardBorderWidth}px solid {$cardBorderWarna}; overflow:hidden;"
+                . ($cardMinHeight > 0 ? " min-height:{$cardMinHeight}px;" : '');
         @endphp
         @foreach ($poliList as $item)
         @php
@@ -330,7 +338,7 @@ body {
                 $shapeZoom = ($grid['shape_scale'] ?? 100) / 100;
                 $hasExec   = !empty(array_filter($jadwalRows, fn($r) => !empty($r['is_executive'])));
             @endphp
-            <div class="poli-header" style="overflow:hidden;">
+            <div class="poli-header" style="overflow:hidden; flex-shrink:0;">
                 @if ($shapeDataUri)
                 <img class="shape" src="{{ $shapeDataUri }}" alt=""
                      @if ($shapeZoom != 1.0) style="zoom:{{ $shapeZoom }};" @endif>
@@ -348,7 +356,7 @@ body {
 
             {{-- Daftar Dokter --}}
             @php $sizeJam = $grid['size_jam'] ?? 12; @endphp
-            <div class="poli-dokter" style="background:{{ $cardBg }};">
+            <div class="poli-dokter" style="background:{{ $cardBg }}; justify-content:{{ $dokterValign }}; gap:{{ $dokterRowGap }}px;">
                 @forelse ($jadwalRows as $row)
                 @php $isExec = ! empty($row['is_executive']); @endphp
                 <div class="dokter-row">

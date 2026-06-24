@@ -38,6 +38,7 @@ class PosterTemplate extends Model
     public static function defaultConfig(): array
     {
         return [
+            'layout' => 'grid_shape', // grid_shape (Banjarbaru) | list_polos (Barabai, belum diimplementasi)
             'tinggi_hero' => 25,    // % dari canvas 1920px; 0 = tidak tampil
             'zona_logo' => [
                 'x' => 60, 'y' => 60, 'w' => 300, 'h' => 120,
@@ -66,6 +67,9 @@ class PosterTemplate extends Model
                 'card_radius'       => 8,
                 'card_border_warna' => '#e5e7eb',
                 'card_border_width' => 1,
+                'card_min_height'   => 0,        // px, 0 = tidak dipakai
+                'dokter_valign'     => 'top',    // top | center
+                'dokter_row_gap'    => 2,        // px, jarak antar baris dokter
                 'font_nama_poli'    => ['sumber' => 'google', 'nama' => 'Montserrat'],
                 'size_nama_poli'    => 15,
                 'warna_nama_poli'   => '#FFFFFF',

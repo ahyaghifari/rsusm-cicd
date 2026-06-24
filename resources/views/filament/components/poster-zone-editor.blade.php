@@ -53,6 +53,9 @@
     $initialCardRadius       = (int)   ($savedConfig['grid']['card_radius']           ?? 8);
     $initialCardBorderWarna  =         ($savedConfig['grid']['card_border_warna']     ?? '#e5e7eb');
     $initialCardBorderWidth  = (int)   ($savedConfig['grid']['card_border_width']     ?? 1);
+    $initialCardMinHeight    = (int)   ($savedConfig['grid']['card_min_height']       ?? 0);
+    $initialDokterValign     =         ($savedConfig['grid']['dokter_valign']         ?? 'top');
+    $initialDokterRowGap     = (int)   ($savedConfig['grid']['dokter_row_gap']        ?? 2);
 @endphp
 
 <div
@@ -71,6 +74,9 @@
         initialCardRadius:       {{ $initialCardRadius }},
         initialCardBorderWarna:  @js($initialCardBorderWarna),
         initialCardBorderWidth:  {{ $initialCardBorderWidth }},
+        initialCardMinHeight:    {{ $initialCardMinHeight }},
+        initialDokterValign:     @js($initialDokterValign),
+        initialDokterRowGap:     {{ $initialDokterRowGap }},
         state: $wire.$entangle('{{ $getStatePath() }}')
     })"
     x-init="init()"
@@ -201,6 +207,28 @@
             <span class="text-sm text-gray-600 w-36 shrink-0">Ketebalan Outline</span>
             <input type="range" x-model="cardBorderWidth" @input="saveConfig()" min="0" max="10" step="1" class="flex-1 accent-indigo-400">
             <input type="number" x-model="cardBorderWidth" @input="saveConfig()" min="0" max="10" class="w-14 text-center text-sm border border-gray-300 rounded px-1 py-0.5">
+            <span class="text-sm text-gray-400 w-4">px</span>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-600 w-36 shrink-0">Tinggi Minimum Kartu</span>
+            <input type="range" x-model="cardMinHeight" @input="saveConfig()" min="0" max="600" step="10" class="flex-1 accent-indigo-400">
+            <input type="number" x-model="cardMinHeight" @input="saveConfig()" min="0" max="600" class="w-14 text-center text-sm border border-gray-300 rounded px-1 py-0.5">
+            <span class="text-sm text-gray-400 w-4">px</span>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-600 w-36 shrink-0">Posisi Dokter Vertikal</span>
+            <select x-model="dokterValign" @change="saveConfig()" class="flex-1 text-sm border border-gray-300 rounded px-2 py-1">
+                <option value="top">Atas (rapat)</option>
+                <option value="center">Tengah (kalau kartu lebih tinggi dari isi)</option>
+            </select>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-600 w-36 shrink-0">Jarak Antar Dokter</span>
+            <input type="range" x-model="dokterRowGap" @input="saveConfig()" min="0" max="20" step="1" class="flex-1 accent-indigo-400">
+            <input type="number" x-model="dokterRowGap" @input="saveConfig()" min="0" max="20" class="w-14 text-center text-sm border border-gray-300 rounded px-1 py-0.5">
             <span class="text-sm text-gray-400 w-4">px</span>
         </div>
 
@@ -338,6 +366,9 @@ function zoneEditor(config) {
         cardRadius:      config.initialCardRadius      ?? 8,
         cardBorderWarna: config.initialCardBorderWarna ?? '#e5e7eb',
         cardBorderWidth: config.initialCardBorderWidth ?? 1,
+        cardMinHeight:   config.initialCardMinHeight   ?? 0,
+        dokterValign:    config.initialDokterValign    ?? 'top',
+        dokterRowGap:    config.initialDokterRowGap    ?? 2,
         state: config.state,
 
         init() {
@@ -357,6 +388,9 @@ function zoneEditor(config) {
                 if (this.state.grid?.card_radius !== undefined)       this.cardRadius      = this.state.grid.card_radius;
                 if (this.state.grid?.card_border_warna !== undefined) this.cardBorderWarna = this.state.grid.card_border_warna;
                 if (this.state.grid?.card_border_width !== undefined) this.cardBorderWidth = this.state.grid.card_border_width;
+                if (this.state.grid?.card_min_height !== undefined)   this.cardMinHeight   = this.state.grid.card_min_height;
+                if (this.state.grid?.dokter_valign !== undefined)     this.dokterValign    = this.state.grid.dokter_valign;
+                if (this.state.grid?.dokter_row_gap !== undefined)    this.dokterRowGap    = this.state.grid.dokter_row_gap;
             }
             this.$nextTick(() => this.setupInteract());
         },
@@ -434,6 +468,9 @@ function zoneEditor(config) {
                     card_radius:      parseInt(this.cardRadius)     || 0,
                     card_border_warna: this.cardBorderWarna,
                     card_border_width: parseInt(this.cardBorderWidth) || 1,
+                    card_min_height:   parseInt(this.cardMinHeight)   || 0,
+                    dokter_valign:     this.dokterValign,
+                    dokter_row_gap:    parseInt(this.dokterRowGap)    || 0,
                 },
             };
         },

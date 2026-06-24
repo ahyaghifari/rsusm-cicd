@@ -274,7 +274,7 @@
             <img src="{{ asset('img/bg-header.png') }}"
                 class="absolute top-0 left-0 right-0 w-full h-full -z-10 opacity-50 bg-blend-overlay object-cover blur-xs"
                 alt="" loading="lazy">
-            <h2 class="text-on-surface text-3xl lg:text-4xl font-bold leading-tight">Kenapa harus memilih</h2>
+            <h2 class="text-on-surface text-2xl lg:text-3xl font-bold leading-tight">Kenapa harus memilih</h2>
             @if($rs->logo)
                 <img src="{{ Storage::url($rs->logo) }}" class="h-24 lg:h-28 mt-2 object-contain" alt="{{ $rs->nama }}" loading="lazy">
             @endif

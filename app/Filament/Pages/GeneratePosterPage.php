@@ -88,7 +88,12 @@ class GeneratePosterPage extends Page
                         Forms\Components\Select::make('template_id')
                             ->label('1. Pilih Template')
                             ->options(function () {
+                                $user = filament()->auth()->user();
+
                                 return PosterTemplate::with('rumahSakit')
+                                    ->when(! $user->isSuperAdmin(), fn ($q) =>
+                                        $q->where('rumah_sakit_id', $user->rumah_sakit_id)
+                                    )
                                     ->get()
                                     ->mapWithKeys(fn ($t) =>
                                         [$t->id => "[{$t->rumahSakit->lokasi}] {$t->nama}"]
