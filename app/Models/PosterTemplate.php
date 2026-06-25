@@ -85,8 +85,6 @@ class PosterTemplate extends Model
                 'size_jam'          => 9,
                 'weight_nama_dokter'=> '600',
                 'weight_jam'        => '500',
-                'ec_bg_warna'       => '#F0C040',
-                'ec_text_warna'     => '#1a1a2e',
             ],
             'font_tanggal'    => ['sumber' => 'google', 'nama' => 'Montserrat'],
             'font_keterangan' => ['sumber' => 'google', 'nama' => 'Poppins'],

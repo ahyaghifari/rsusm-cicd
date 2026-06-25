@@ -80,29 +80,18 @@ body {
     min-width: 0;
 }
 
-.poli-dokter-ec {
-    flex: 0 0 36%;
-    display: flex;
-    flex-direction: column;
-}
-
-.ec-col-header {
     font-size: 9px;
     font-weight: 700;
     text-align: center;
     padding: 2px 4px;
 }
 
-.dokter-row, .dokter-row-ec {
+.dokter-row {
     display: flex;
     align-items: center;
     line-height: 1.35;
+    justify-content: space-between;
 }
-
-.dokter-row { justify-content: space-between; }
-.dokter-row-ec { justify-content: center; padding: 0 4px; }
-
-.ec-perjanjian { color: #16a34a; font-style: italic; font-weight: 600; }
 </style>
 
 {{-- ── Google Fonts dynamic load ───────────────────────────────── --}}
@@ -314,10 +303,6 @@ body {
             $weightNamaDokter = $grid['weight_nama_dokter'] ?? '600';
             $weightJam       = $grid['weight_jam'] ?? '500';
 
-            // EC (Executive Clinic) styling
-            $ecBgWarna   = $grid['ec_bg_warna']   ?? '#F0C040';
-            $ecTextWarna = $grid['ec_text_warna'] ?? '#1a1a2e';
-
             // Box dokter ditarik ke atas, sebagian "di belakang" header nama poli (overlap = setengah
             // tinggi header). Tinggi header dihitung dari padding (5px atas+bawah) + tinggi baris teks.
             $headerHeightPx = 10 + (int) round($headerFontPx * 1.2);
@@ -328,8 +313,6 @@ body {
         @php
             $poli        = $item['poli'];
             $jadwalRows  = $item['jadwal'];
-            $regularRows = array_values(array_filter($jadwalRows, fn ($r) => empty($r['is_executive'])));
-            $ecRows      = array_values(array_filter($jadwalRows, fn ($r) => !empty($r['is_executive'])));
         @endphp
         <div class="poli-card">
 
@@ -344,8 +327,8 @@ body {
 
             <div class="poli-body" style="{{ $bodyStyle }} position:relative; z-index:1; margin-top:-{{ $overlapPx }}px; display:flex;">
                 {{-- Regular Dokter Column --}}
-                <div class="poli-dokter" style="background:{{ $cardBg }}; justify-content:{{ $dokterValign }}; gap:{{ $dokterRowGap }}px; padding-top:{{ $overlapPx + $cardPaddingTop }}px; flex:1; border-right:{{ count($ecRows) ? ($cardBorderWidth.'px solid ' . $cardBorderWarna) : 'none' }};">
-                    @forelse ($regularRows as $row)
+                <div class="poli-dokter" style="background:{{ $cardBg }}; justify-content:{{ $dokterValign }}; gap:{{ $dokterRowGap }}px; padding-top:{{ $overlapPx + $cardPaddingTop }}px; flex:1;">
+                    @forelse ($jadwalRows as $row)
                     <div class="dokter-row">
                         <span style="
                             font-family:{{ $fontNamaDokter }};
@@ -384,24 +367,6 @@ body {
                     <div style="color:#aaa; font-size:11px; font-style:italic;">Tidak ada jadwal</div>
                     @endforelse
                 </div>
-
-                {{-- Executive Clinic Column --}}
-                @if (count($ecRows))
-                <div style="background:{{ $cardBg }}; display:flex; flex-direction:column; justify-content:{{ $dokterValign }}; gap:{{ $dokterRowGap }}px; padding-top:{{ $overlapPx + $cardPaddingTop }}px; padding-left:4px; padding-right:4px; width:30%; position:relative;">
-                    {{-- EC Jadwal Rows --}}
-                    @foreach ($ecRows as $row)
-                    <div style="display:flex; align-items:center; justify-content:center;">
-                        @if ($row['libur'])
-                        <span style="font-family:{{ $fontIsi }}; font-size:{{ $sizeJam }}px; color:#ef4444; font-weight:700; text-align:center;">LIBUR</span>
-                        @elseif (!empty($row['sesuai_perjanjian']))
-                        <span class="ec-perjanjian" style="font-size:{{ $sizeJam }}px; text-align:center; font-size:{{ (int)($sizeJam * 0.85) }}px;">Sesuai Perjanjian</span>
-                        @else
-                        <span style="font-family:{{ $fontJam }}; font-size:{{ $sizeJam }}px; font-weight:{{ $weightJam }}; color:{{ $grid['warna_jam'] ?? '#1A1A1A' }}; text-align:center;">{{ $row['jam_mulai'] }}–{{ $row['jam_selesai'] ?? 'selesai' }}</span>
-                        @endif
-                    </div>
-                    @endforeach
-                </div>
-                @endif
             </div>
 
         </div>

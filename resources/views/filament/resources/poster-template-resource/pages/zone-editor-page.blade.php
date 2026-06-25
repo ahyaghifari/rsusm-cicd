@@ -415,32 +415,6 @@
                                 <input type="number" x-model.number="cardPaddingTop" @input="saveConfig()" min="0" max="30" step="1" class="w-14 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
                             </div>
 
-                    {{-- Executive Clinic Style --}}
-                    <div class="pt-2">
-                        <div class="flex items-center gap-2 mb-3">
-                            <div class="h-px flex-1 bg-gray-200"></div>
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Executive Clinic</span>
-                            <div class="h-px flex-1 bg-gray-200"></div>
-                        </div>
-
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-gray-600">Background</span>
-                                <div class="flex items-center gap-2">
-                                    <input type="color" x-model="ecBg" @input="saveConfig()" class="h-8 w-10 cursor-pointer rounded-lg border border-gray-200 p-0.5 shadow-sm">
-                                    <input type="text" x-model="ecBg" @input="saveConfig()" class="w-24 text-xs text-center border border-gray-200 rounded-lg py-1.5 font-mono shadow-sm focus:ring-2 focus:ring-indigo-500">
-                                </div>
-                            </div>
-
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-gray-600">Warna Teks</span>
-                                <div class="flex items-center gap-2">
-                                    <input type="color" x-model="ecText" @input="saveConfig()" class="h-8 w-10 cursor-pointer rounded-lg border border-gray-200 p-0.5 shadow-sm">
-                                    <input type="text" x-model="ecText" @input="saveConfig()" class="w-24 text-xs text-center border border-gray-200 rounded-lg py-1.5 font-mono shadow-sm focus:ring-2 focus:ring-indigo-500">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                         </div>
                     </div>
 
@@ -476,13 +450,6 @@
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2px;">
                                             <span :style="{ fontSize: sizeNamaDokter + 'px', fontFamily: fontNamaDokter, fontWeight: parseInt(weightNamaDokter), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }">dr. Dokter</span>
                                             <span :style="{ fontSize: sizeJam + 'px', fontFamily: fontJam, color: '#1A1A1A', whiteSpace: 'nowrap', fontWeight: parseInt(weightJam), marginLeft: '4px' }">08:00</span>
-                                        </div>
-                                    </div>
-                                    {{-- EC Column (Menyatu dengan card) --}}
-                                    <div style="width:25%; position:relative;">
-                                        {{-- EC Jadwal (sejajar dengan regular dokter) --}}
-                                        <div style="display:flex; justify-content:center; align-items:center;">
-                                            <span :style="{ fontSize: sizeJam + 'px', color: ecText, textAlign: 'center' }">12:00</span>
                                         </div>
                                     </div>
                                 </div>
@@ -775,8 +742,7 @@
                                 :style="{ display: 'grid', gridTemplateColumns: 'repeat(' + kolom + ', 1fr)', gap: gap * 0.5 + 'px', alignContent: 'start', alignItems: 'start' }">
                                 @foreach ($previewPoli as $p)
                                 @php
-                                    $regularJadwal = array_filter($p['jadwal'], fn ($r) => empty($r['is_executive']));
-                                    $ecJadwal = array_filter($p['jadwal'], fn ($r) => !empty($r['is_executive']));
+                                    $regularJadwal = $p['jadwal'];
                                 @endphp
                                 <div style="position:relative; width:100%;" class="transform transition-all duration-300">
                                     {{-- Header Nama Poli (70% overlap) --}}
@@ -814,19 +780,6 @@
                                             @endforelse
                                         </div>
 
-                                        {{-- EC Column (tampil jika ada EC, menyatu dalam card) --}}
-                                        @if (!empty($ecJadwal))
-                                        <div style="width:25%; position:relative;">
-                                            {{-- EC Jadwal (sejajar) --}}
-                                            <div style="display:flex; flex-direction:column; gap: 1px;">
-                                                @foreach ($ecJadwal as $row)
-                                                <div style="text-align:center;">
-                                                    <span :style="{ fontSize: (sizeJam * 0.5) + 'px', color: ecText, fontWeight: parseInt(weightJam) }">{{ $row['jam_mulai'] }}–{{ $row['jam_selesai'] ?? '' }}</span>
-                                                </div>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                        @endif
                                     </div>
                                 </div>
                                 @endforeach
@@ -907,8 +860,6 @@
             logoOpacity: config.initialLogoOpacity ?? 100,
             logoPadding: config.initialLogoPadding ?? 0,
             logoBg: config.initialLogoBg ?? 'transparent',
-            ecBg: config.initialEcBg ?? '#F0C040',
-            ecText: config.initialEcText ?? '#1a1a2e',
             tanggalSize: config.initialTanggalSize ?? 40,
             tanggalWarna: config.initialTanggalWarna ?? '#1a1a2e',
             tanggalBg: config.initialTanggalBg ?? 'rgba(255,255,255,0.95)',
@@ -951,8 +902,6 @@
                     if (this.state.zona_logo?.opacity !== undefined)     this.logoOpacity = this.state.zona_logo.opacity;
                     if (this.state.zona_logo?.padding !== undefined)     this.logoPadding = this.state.zona_logo.padding;
                     if (this.state.zona_logo?.bg_warna !== undefined)    this.logoBg = this.state.zona_logo.bg_warna;
-                    if (this.state.grid?.ec_bg_warna !== undefined)       this.ecBg = this.state.grid.ec_bg_warna;
-                    if (this.state.grid?.ec_text_warna !== undefined)     this.ecText = this.state.grid.ec_text_warna;
                     if (this.state.zona_tanggal?.size !== undefined)      this.tanggalSize = this.state.zona_tanggal.size;
                     if (this.state.zona_tanggal?.warna !== undefined)     this.tanggalWarna = this.state.zona_tanggal.warna;
                     if (this.state.zona_tanggal?.bg_warna !== undefined)  this.tanggalBg = this.state.zona_tanggal.bg_warna;
@@ -1053,8 +1002,6 @@
                         weight_nama_dokter: this.weightNamaDokter,
                         weight_jam:        this.weightJam,
                         card_padding_top:  parseInt(this.cardPaddingTop) || 0,
-                        ec_bg_warna:       this.ecBg,
-                        ec_text_warna:     this.ecText,
                     },
                 };
             },
