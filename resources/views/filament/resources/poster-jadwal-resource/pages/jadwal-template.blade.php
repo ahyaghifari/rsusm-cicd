@@ -329,7 +329,7 @@ body {
                 {{-- Regular Dokter Column --}}
                 <div class="poli-dokter" style="background:{{ $cardBg }}; justify-content:{{ $dokterValign }}; gap:{{ $dokterRowGap }}px; padding-top:{{ $overlapPx + $cardPaddingTop }}px; flex:1;">
                     @forelse ($jadwalRows as $row)
-                    <div class="dokter-row">
+                    <div style="display:flex; align-items:center; line-height:1.35; justify-content:space-between;">
                         <span style="
                             font-family:{{ $fontNamaDokter }};
                             font-size:{{ $sizeNamaDokter }}px;
@@ -348,10 +348,10 @@ body {
                             color:#ef4444;
                             font-weight:700;
                             white-space:nowrap;
-                            margin-left:4px;
+                            margin-left:8px;
                         ">LIBUR</span>
                         @elseif (!empty($row['sesuai_perjanjian']))
-                        <span class="ec-perjanjian" style="font-size:{{ $sizeJam }}px; white-space:nowrap; margin-left:4px;">Sesuai Perjanjian</span>
+                        <span style="font-size:{{ $sizeJam }}px; white-space:nowrap; margin-left:8px; color:#16a34a; font-style:italic;">Sesuai Perjanjian</span>
                         @else
                         <span style="
                             font-family:{{ $fontJam }};
@@ -359,7 +359,7 @@ body {
                             font-weight:{{ $weightJam }};
                             color:{{ $grid['warna_nama_dokter'] ?? '#1A1A1A' }};
                             white-space:nowrap;
-                            margin-left:4px;
+                            margin-left:8px;
                         ">{{ $row['jam_mulai'] }}–{{ $row['jam_selesai'] ?? 'selesai' }}</span>
                         @endif
                     </div>
