@@ -62,71 +62,47 @@ body {
     align-content: start;
 }
 
-.poli-card { overflow: hidden; display: flex; flex-direction: column; }
+.poli-card { display: flex; flex-direction: column; }
 
 .poli-header {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.poli-header img.shape { width: 100%; display: block; }
-.poli-header .nama-poli {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    text-align: center;
-    width: 100%;
-    font-weight: 700;
+    padding: 5px 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
+.poli-body { display: flex; }
+
 .poli-dokter {
-    padding: 4px 8px;
     flex: 1;
+    padding: 4px 8px;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.poli-dokter-ec {
+    flex: 0 0 36%;
     display: flex;
     flex-direction: column;
 }
 
-.dokter-row {
+.ec-col-header {
+    font-size: 9px;
+    font-weight: 700;
+    text-align: center;
+    padding: 2px 4px;
+}
+
+.dokter-row, .dokter-row-ec {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     line-height: 1.35;
 }
 
-/* Badge "Executive Clinic" di sudut kanan shape header */
-.ec-header-badge {
-    position: absolute;
-    right: 6px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(124,58,237,0.88);
-    color: #fff;
-    font-size: 8px;
-    font-weight: 700;
-    padding: 2px 5px;
-    border-radius: 3px;
-    letter-spacing: 0.4px;
-    white-space: nowrap;
-    z-index: 2;
-}
+.dokter-row { justify-content: space-between; }
+.dokter-row-ec { justify-content: center; padding: 0 4px; }
 
-/* Badge "Executive Clinic" di baris dokter (per-dokter) */
-.ec-row-badge {
-    display: inline-block;
-    background: rgba(124,58,237,0.12);
-    color: #7c3aed;
-    border: 1px solid rgba(124,58,237,0.35);
-    font-size: 8px;
-    font-weight: 700;
-    padding: 1px 5px;
-    border-radius: 3px;
-    letter-spacing: 0.3px;
-    white-space: nowrap;
-    line-height: 1.4;
-}
+.ec-perjanjian { color: #16a34a; font-style: italic; font-weight: 600; }
 </style>
 
 {{-- ── Google Fonts dynamic load ───────────────────────────────── --}}
@@ -200,103 +176,102 @@ body {
         return "'{$fallbackAlias}', sans-serif";
     };
 
-    $fontDate  = $fontFor($cfg['font_tanggal']    ?? [], 'FontTanggal');
-    $fontKet   = $fontFor($cfg['font_keterangan'] ?? [], 'FontKeterangan');
+    $fontDate  = $fontFor(['sumber' => 'google', 'nama' => $zonaDate['font'] ?? 'Montserrat'], 'FontTanggal');
+    $fontKet   = $fontFor(['sumber' => 'google', 'nama' => $zonaKet['font'] ?? 'Poppins'], 'FontKeterangan');
     $fontPoli  = $fontFor($grid['font_nama_poli'] ?? [], 'FontIsi');
     $fontIsi   = $fontFor($grid['font_isi']       ?? [], 'FontIsi');
+    $fontNamaDokter = $fontFor(['sumber' => 'google', 'nama' => $grid['font_nama_dokter'] ?? 'Poppins'], 'FontIsi');
+    $fontJam   = $fontFor(['sumber' => 'google', 'nama' => $grid['font_jam'] ?? 'Poppins'], 'FontIsi');
 @endphp
 <div id="layer-content">
 
-    {{-- Logo Header --}}
+    {{-- Logo Header —— dengan scale, opacity, padding, dan background dari config --}}
     @if ($logoDataUri)
-    <img
-        src="{{ $logoDataUri }}"
-        alt="Logo"
-        style="
-            position:absolute;
-            left:{{ $zonaLogo['x'] }}px; top:{{ $zonaLogo['y'] }}px;
-            width:{{ $zonaLogo['w'] }}px; height:{{ $zonaLogo['h'] }}px;
-            object-fit:contain;
-        "
-    >
+    @php
+        $logoScale = (int) ($zonaLogo['scale'] ?? 100);
+        $logoOpacity = (int) ($zonaLogo['opacity'] ?? 100);
+        $logoPadding = (int) ($zonaLogo['padding'] ?? 0);
+        $logoBg = $zonaLogo['bg_warna'] ?? 'transparent';
+    @endphp
+    <div style="
+        position:absolute;
+        left:{{ $zonaLogo['x'] }}px; top:{{ $zonaLogo['y'] }}px;
+        width:{{ $zonaLogo['w'] }}px; height:{{ $zonaLogo['h'] }}px;
+        background:{{ $logoBg }};
+        padding:{{ $logoPadding }}px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+    ">
+        <img
+            src="{{ $logoDataUri }}"
+            alt="Logo"
+            style="
+                width:100%;
+                height:100%;
+                object-fit:contain;
+                transform:scale({{ $logoScale / 100 }});
+                opacity:{{ $logoOpacity / 100 }};
+                transform-origin:center;
+            "
+        >
+    </div>
     @endif
 
-    {{-- Tanggal — Badge kartu (ikon kalender + hari + tanggal) --}}
+    {{-- Tanggal —— mengikuti config zona_tanggal --}}
     @php
         $dateFontSize = (int) ($zonaDate['size']  ?? 40);
         $dateColor    = $zonaDate['warna']         ?? '#1a1a2e';
-        $dateBg       = $zonaDate['bg_warna']      ?? 'rgba(255,255,255,0.95)';
-        $datePad      = round($dateFontSize * 0.35);
-        $dateRadius   = round($dateFontSize * 0.4);
-        $dateGap      = round($dateFontSize * 0.4);
-        $iconSize     = round($dateFontSize * 0.9);
-        $dateSmall    = round($dateFontSize * 0.68);
+        $dateBg       = $zonaDate['bg_warna']      ?? '';
+        $dateFont     = $fontFor(['sumber' => 'google', 'nama' => $zonaDate['font'] ?? 'Montserrat'], 'FontTanggal');
+        $dateWeight   = $zonaDate['weight']        ?? '400';
+        $dateAlign    = $zonaDate['align'] ?? 'left';
     @endphp
     <div style="
         position:absolute;
         left:{{ $zonaDate['x'] }}px; top:{{ $zonaDate['y'] }}px;
-        background:{{ $dateBg }};
-        border-radius:{{ $dateRadius }}px;
-        padding:{{ $datePad }}px {{ round($datePad * 1.6) }}px {{ $datePad }}px {{ round($datePad * 1.2) }}px;
-        display:inline-flex;
+        width:{{ $zonaDate['w'] }}px;
+        height:{{ $zonaDate['h'] ?? 60 }}px;
+        display:flex;
         align-items:center;
-        gap:{{ $dateGap }}px;
-        box-shadow:0 4px 24px rgba(0,0,0,0.14);
-        max-width:{{ $zonaDate['w'] }}px;
+        justify-content:{{ $dateAlign === 'center' ? 'center' : ($dateAlign === 'right' ? 'flex-end' : 'flex-start') }};
+        @if($dateBg) background:{{ $dateBg }}; @endif
     ">
-        {{-- Ikon kalender SVG --}}
-        <svg width="{{ $iconSize }}" height="{{ $iconSize }}" viewBox="0 0 24 24"
-             fill="none" stroke="#7c3aed" stroke-width="2.2"
-             stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
-            <rect x="3" y="4" width="18" height="18" rx="3" ry="3"/>
-            <line x1="16" y1="2" x2="16" y2="6"/>
-            <line x1="8"  y1="2" x2="8"  y2="6"/>
-            <line x1="3"  y1="10" x2="21" y2="10"/>
-            <text x="12" y="19" text-anchor="middle"
-                  font-size="8" fill="#7c3aed" font-weight="700"
-                  stroke="none">{{ $tanggal->day }}</text>
-        </svg>
-        {{-- Teks hari dan tanggal --}}
-        <div>
-            <div style="
-                font-family:{{ $fontDate }};
-                font-size:{{ $dateFontSize }}px;
-                color:{{ $dateColor }};
-                font-weight:800;
-                line-height:1.05;
-                letter-spacing:-0.5px;
-            ">{{ $tanggal->translatedFormat('l') }},</div>
-            <div style="
-                font-family:{{ $fontDate }};
-                font-size:{{ $dateSmall }}px;
-                color:{{ $dateColor }};
-                font-weight:600;
-                opacity:0.72;
-                line-height:1.2;
-            ">{{ $tanggal->translatedFormat('j F Y') }}</div>
-        </div>
+        <div style="
+            font-family:{{ $dateFont }};
+            font-size:{{ $dateFontSize }}px;
+            font-weight:{{ $dateWeight }};
+            color:{{ $dateColor }};
+            text-align:{{ $dateAlign }};
+            line-height:1.2;
+        ">{{ $tanggal->translatedFormat('l, j F Y') }}</div>
     </div>
 
-    {{-- Keterangan Hero --}}
+    {{-- Keterangan Hero —— mengikuti config zona_keterangan --}}
     @if ($keterangan)
     @php
         $ketBg      = $zonaKet['bg_warna'] ?? '';
-        $ketPadding = (int) ($zonaKet['padding'] ?? 0);
+        $ketFont    = $fontFor(['sumber' => 'google', 'nama' => $zonaKet['font'] ?? 'Poppins'], 'FontKeterangan');
+        $ketSize    = (int) ($zonaKet['size'] ?? 24);
+        $ketColor   = $zonaKet['warna'] ?? '#F0C040';
+        $ketWeight  = $zonaKet['weight']   ?? '600';
+        $ketAlign   = $zonaKet['align'] ?? 'left';
     @endphp
     <div style="
         position:absolute;
         left:{{ $zonaKet['x'] }}px; top:{{ $zonaKet['y'] }}px;
         width:{{ $zonaKet['w'] }}px;
-        font-family:{{ $fontKet }};
-        font-size:{{ $zonaKet['size'] ?? 24 }}px;
-        color:{{ $zonaKet['warna'] ?? '#F0C040' }};
-        text-align:{{ $zonaKet['align'] ?? 'left' }};
-        font-weight:600;
-        white-space:pre-line;
-        @if($ketBg) background:{{ $ketBg }}; @endif
-        @if($ketPadding) padding:{{ $ketPadding }}px; border-radius:8px; @endif
+        height:{{ $zonaKet['h'] ?? 60 }}px;
+        font-family:{{ $ketFont }};
+        font-size:{{ $ketSize }}px;
+        font-weight:{{ $ketWeight }};
+        color:{{ $ketColor }};
+        text-align:{{ $ketAlign }};
+        display:flex;
+        align-items:center;
+        @if($ketBg) background:{{ $ketBg }}; border-radius:6px; padding:8px; @endif
     ">
-        {{ $keterangan }}
+        <div style="width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $keterangan }}</div>
     </div>
     @endif
 
@@ -323,81 +298,110 @@ body {
             $cardMinHeight   = (int) ($grid['card_min_height'] ?? 0);
             $dokterValign    = ($grid['dokter_valign'] ?? 'top') === 'center' ? 'center' : 'flex-start';
             $dokterRowGap    = (int) ($grid['dokter_row_gap'] ?? 2);
-            $cardStyle = "border-radius:{$cardRadius}px; border:{$cardBorderWidth}px solid {$cardBorderWarna}; overflow:hidden;"
+            $bodyStyle = "border-radius:{$cardRadius}px; border:{$cardBorderWidth}px solid {$cardBorderWarna}; overflow:hidden;"
                 . ($cardMinHeight > 0 ? " min-height:{$cardMinHeight}px;" : '');
+
+            $headerBg1    = $grid['header_bg_warna']  ?? '#7c3aed';
+            $headerBg2    = $grid['header_bg_warna2'] ?? '';
+            $headerBg     = $headerBg2 ? "linear-gradient(135deg, {$headerBg1}, {$headerBg2})" : $headerBg1;
+            $headerRadius = (int) ($grid['header_radius'] ?? 8);
+
+            // Font size: gunakan dari config jika tersedia, fallback ke auto-calc
+            $cardWidthPx     = ($kolom > 0) ? (($zonaJadwal['w'] - ($grid['gap'] ?? 16) * ($kolom - 1)) / $kolom) : $zonaJadwal['w'];
+            $headerFontPx    = (int) ($grid['size_nama_poli'] ?? max(8, round($cardWidthPx * 0.045)));
+            $sizeNamaDokter  = (int) ($grid['size_nama_dokter'] ?? max(7, round($cardWidthPx * 0.04)));
+            $sizeJam         = (int) ($grid['size_jam'] ?? max(6, round($cardWidthPx * 0.035)));
+            $weightNamaDokter = $grid['weight_nama_dokter'] ?? '600';
+            $weightJam       = $grid['weight_jam'] ?? '500';
+
+            // EC (Executive Clinic) styling
+            $ecBgWarna   = $grid['ec_bg_warna']   ?? '#F0C040';
+            $ecTextWarna = $grid['ec_text_warna'] ?? '#1a1a2e';
+
+            // Box dokter ditarik ke atas, sebagian "di belakang" header nama poli (overlap = setengah
+            // tinggi header). Tinggi header dihitung dari padding (5px atas+bawah) + tinggi baris teks.
+            $headerHeightPx = 10 + (int) round($headerFontPx * 1.2);
+            $overlapPx      = (int) round($headerHeightPx / 2);
+            $cardPaddingTop = (int) ($grid['card_padding_top'] ?? 8);
         @endphp
         @foreach ($poliList as $item)
         @php
-            $poli       = $item['poli'];
-            $jadwalRows = $item['jadwal'];
+            $poli        = $item['poli'];
+            $jadwalRows  = $item['jadwal'];
+            $regularRows = array_values(array_filter($jadwalRows, fn ($r) => empty($r['is_executive'])));
+            $ecRows      = array_values(array_filter($jadwalRows, fn ($r) => !empty($r['is_executive'])));
         @endphp
-        <div class="poli-card" style="{{ $cardStyle }}">
+        <div class="poli-card">
 
-            {{-- Header Shape + Nama Poli --}}
-            @php
-                $shapeZoom = ($grid['shape_scale'] ?? 100) / 100;
-                $hasExec   = !empty(array_filter($jadwalRows, fn($r) => !empty($r['is_executive'])));
-            @endphp
-            <div class="poli-header" style="overflow:hidden; flex-shrink:0;">
-                @if ($shapeDataUri)
-                <img class="shape" src="{{ $shapeDataUri }}" alt=""
-                     @if ($shapeZoom != 1.0) style="zoom:{{ $shapeZoom }};" @endif>
-                @endif
-                <span class="nama-poli" style="
+            <div class="poli-header" style="background:{{ $headerBg }}; border-radius:{{ $headerRadius }}px; width:70%; position:relative; z-index:2;">
+                <span style="
                     font-family:{{ $fontPoli }};
-                    font-size:{{ $grid['size_nama_poli'] ?? 15 }}px;
+                    font-size:{{ $headerFontPx }}px;
                     color:{{ $grid['warna_nama_poli'] ?? '#ffffff' }};
-                    padding-right:{{ $hasExec ? '70px' : '0' }};
+                    font-weight:700;
                 ">{{ $poli->nama }}</span>
-                @if ($hasExec)
-                <span class="ec-header-badge">Executive Clinic</span>
-                @endif
             </div>
 
-            {{-- Daftar Dokter --}}
-            @php $sizeJam = $grid['size_jam'] ?? 12; @endphp
-            <div class="poli-dokter" style="background:{{ $cardBg }}; justify-content:{{ $dokterValign }}; gap:{{ $dokterRowGap }}px;">
-                @forelse ($jadwalRows as $row)
-                @php $isExec = ! empty($row['is_executive']); @endphp
-                <div class="dokter-row">
-                    {{-- Nama dokter --}}
-                    <span style="
-                        font-family:{{ $fontIsi }};
-                        font-size:{{ $grid['size_nama_dokter'] ?? 13 }}px;
-                        color:{{ $row['libur'] ? '#9ca3af' : ($grid['warna_nama_dokter'] ?? '#1A1A1A') }};
-                        flex:1; min-width:0;
-                        overflow:hidden;
-                        text-overflow:ellipsis;
-                        white-space:nowrap;
-                    ">{{ $row['nama_dokter'] }}</span>
-
-                    {{-- Jam / LIBUR / EC badge --}}
-                    @if ($row['libur'])
-                    <span style="
-                        font-family:{{ $fontIsi }};
-                        font-size:{{ $sizeJam }}px;
-                        color:#ef4444;
-                        font-weight:700;
-                        white-space:nowrap;
-                        margin-left:4px;
-                    ">LIBUR</span>
-                    @else
-                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:1px; margin-left:4px; flex-shrink:0;">
+            <div class="poli-body" style="{{ $bodyStyle }} position:relative; z-index:1; margin-top:-{{ $overlapPx }}px; display:flex;">
+                {{-- Regular Dokter Column --}}
+                <div class="poli-dokter" style="background:{{ $cardBg }}; justify-content:{{ $dokterValign }}; gap:{{ $dokterRowGap }}px; padding-top:{{ $overlapPx + $cardPaddingTop }}px; flex:1; border-right:{{ count($ecRows) ? ($cardBorderWidth.'px solid ' . $cardBorderWarna) : 'none' }};">
+                    @forelse ($regularRows as $row)
+                    <div class="dokter-row">
                         <span style="
-                            font-family:{{ $fontIsi }};
-                            font-size:{{ $sizeJam }}px;
-                            color:{{ $grid['warna_jam'] ?? '#555555' }};
+                            font-family:{{ $fontNamaDokter }};
+                            font-size:{{ $sizeNamaDokter }}px;
+                            font-weight:{{ $weightNamaDokter }};
+                            color:{{ $row['libur'] ? '#9ca3af' : $grid['warna_nama_dokter'] }};
+                            flex:1; min-width:0;
+                            overflow:hidden;
+                            text-overflow:ellipsis;
                             white-space:nowrap;
+                        ">{{ $row['nama_dokter'] }}</span>
+
+                        @if ($row['libur'])
+                        <span style="
+                            font-family:{{ $fontJam }};
+                            font-size:{{ $sizeJam }}px;
+                            color:#ef4444;
+                            font-weight:700;
+                            white-space:nowrap;
+                            margin-left:4px;
+                        ">LIBUR</span>
+                        @elseif (!empty($row['sesuai_perjanjian']))
+                        <span class="ec-perjanjian" style="font-size:{{ $sizeJam }}px; white-space:nowrap; margin-left:4px;">Sesuai Perjanjian</span>
+                        @else
+                        <span style="
+                            font-family:{{ $fontJam }};
+                            font-size:{{ $sizeJam }}px;
+                            font-weight:{{ $weightJam }};
+                            color:{{ $grid['warna_nama_dokter'] ?? '#1A1A1A' }};
+                            white-space:nowrap;
+                            margin-left:4px;
                         ">{{ $row['jam_mulai'] }}–{{ $row['jam_selesai'] ?? 'selesai' }}</span>
-                        @if ($isExec)
-                        <span class="ec-row-badge">Executive Clinic</span>
                         @endif
                     </div>
-                    @endif
+                    @empty
+                    <div style="color:#aaa; font-size:11px; font-style:italic;">Tidak ada jadwal</div>
+                    @endforelse
                 </div>
-                @empty
-                <div style="color:#aaa; font-size:11px; font-style:italic;">Tidak ada jadwal</div>
-                @endforelse
+
+                {{-- Executive Clinic Column --}}
+                @if (count($ecRows))
+                <div style="background:{{ $cardBg }}; display:flex; flex-direction:column; justify-content:{{ $dokterValign }}; gap:{{ $dokterRowGap }}px; padding-top:{{ $overlapPx + $cardPaddingTop }}px; padding-left:4px; padding-right:4px; width:30%; position:relative;">
+                    {{-- EC Jadwal Rows --}}
+                    @foreach ($ecRows as $row)
+                    <div style="display:flex; align-items:center; justify-content:center;">
+                        @if ($row['libur'])
+                        <span style="font-family:{{ $fontIsi }}; font-size:{{ $sizeJam }}px; color:#ef4444; font-weight:700; text-align:center;">LIBUR</span>
+                        @elseif (!empty($row['sesuai_perjanjian']))
+                        <span class="ec-perjanjian" style="font-size:{{ $sizeJam }}px; text-align:center; font-size:{{ (int)($sizeJam * 0.85) }}px;">Sesuai Perjanjian</span>
+                        @else
+                        <span style="font-family:{{ $fontJam }}; font-size:{{ $sizeJam }}px; font-weight:{{ $weightJam }}; color:{{ $grid['warna_jam'] ?? '#1A1A1A' }}; text-align:center;">{{ $row['jam_mulai'] }}–{{ $row['jam_selesai'] ?? 'selesai' }}</span>
+                        @endif
+                    </div>
+                    @endforeach
+                </div>
+                @endif
             </div>
 
         </div>

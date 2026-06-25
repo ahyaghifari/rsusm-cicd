@@ -1,6 +1,6 @@
 <footer class="bg-primary/15 px-10 py-20 md:py-22 lg:py-24 flex flex-col lg:grid lg:grid-cols-5 gap-5">
     <div class="lg:col-span-2">
-        <img src="{{ Storage::url($currentRumahSakit->logo) }}" class="w-full md:w-52 lg:w-64" alt="" loading="lazy">
+        <img src="{{ Storage::url($currentRumahSakit->logo) }}" class="w-10/12 md:w-52 lg:w-64 mx-auto" alt="" loading="lazy">
         <p class="mt-2 text-on-surface text-sm">{{ $currentRumahSakit->alamat }}</p>
 
         {{-- Sosial Media --}}

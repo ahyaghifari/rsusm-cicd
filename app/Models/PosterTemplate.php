@@ -62,7 +62,10 @@ class PosterTemplate extends Model
             'grid' => [
                 'kolom' => 2,
                 'gap' => 16,
-                'shape_scale'       => 100,
+                // Header nama poli: kotak statis (bukan zone/drag), styling via warna/gradasi/radius.
+                'header_bg_warna'   => '#7c3aed',
+                'header_bg_warna2'  => '',        // kosong = solid, isi = gradasi ke warna ini
+                'header_radius'     => 8,         // px
                 'card_bg_warna'     => '#ffffff',
                 'card_radius'       => 8,
                 'card_border_warna' => '#e5e7eb',
@@ -70,14 +73,20 @@ class PosterTemplate extends Model
                 'card_min_height'   => 0,        // px, 0 = tidak dipakai
                 'dokter_valign'     => 'top',    // top | center
                 'dokter_row_gap'    => 2,        // px, jarak antar baris dokter
+                'card_padding_top'  => 8,        // px, padding tambahan di atas box dokter (di luar overlap header)
+                // size_nama_poli / size_nama_dokter / size_jam dihitung otomatis dari lebar card saat render.
                 'font_nama_poli'    => ['sumber' => 'google', 'nama' => 'Montserrat'],
-                'size_nama_poli'    => 15,
                 'warna_nama_poli'   => '#FFFFFF',
                 'font_isi'          => ['sumber' => 'google', 'nama' => 'Poppins'],
-                'size_nama_dokter'  => 13,
                 'warna_nama_dokter' => '#1A1A1A',
-                'size_jam'          => 12,
-                'warna_jam'         => '#555555',
+                'warna_jam'         => '#1A1A1A',
+                'size_nama_poli'    => 8,
+                'size_nama_dokter'  => 9,
+                'size_jam'          => 9,
+                'weight_nama_dokter'=> '600',
+                'weight_jam'        => '500',
+                'ec_bg_warna'       => '#F0C040',
+                'ec_text_warna'     => '#1a1a2e',
             ],
             'font_tanggal'    => ['sumber' => 'google', 'nama' => 'Montserrat'],
             'font_keterangan' => ['sumber' => 'google', 'nama' => 'Poppins'],

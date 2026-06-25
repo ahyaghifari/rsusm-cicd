@@ -263,23 +263,46 @@
 
     <!-- kenapa memilih RSU -->
     @if($rs->tentang_kami)
-    <section class="flex flex-col lg:grid lg:grid-cols-2 lg:mt-24">
-        <div>
-            <img
-                src="{{ $rs->gambar_tentang ? Storage::url($rs->gambar_tentang) : asset('img/syifa-medika.webp') }}"
-                class="w-full h-full object-cover"
-                alt="{{ $rs->nama }}" loading="lazy">
-        </div>
-        <div class="p-6 relative">
-            <img src="{{ asset('img/bg-header.png') }}"
-                class="absolute top-0 left-0 right-0 w-full h-full -z-10 opacity-50 bg-blend-overlay object-cover blur-xs"
-                alt="" loading="lazy">
-            <h2 class="text-on-surface text-2xl lg:text-3xl font-bold leading-tight">Kenapa harus memilih</h2>
-            @if($rs->logo)
-                <img src="{{ Storage::url($rs->logo) }}" class="h-24 lg:h-28 mt-2 object-contain" alt="{{ $rs->nama }}" loading="lazy">
-            @endif
-            <div class="text-sm lg:text-base text-on-surface mt-6 leading-7">
-                {!! str($rs->tentang_kami)->sanitizeHtml() !!}
+    <section class="mt-20 md:mt-40" aria-labelledby="tentang-kami-heading">
+        <div class="w-11/12 lg:w-10/12 mx-auto">
+            <div class="grid lg:grid-cols-[5fr_7fr] bg-surface-container-low overflow-hidden">
+
+                {{-- Foto — sisi kiri di desktop, atas di mobile. Garis tebal warna
+                     primary di tepi yang bersinggungan dengan kolom teks: motif
+                     "spine" yang menjahit foto (bukti) ke teks (klaim) jadi satu
+                     kesatuan, bukan dua blok lepas. --}}
+                <div class="relative h-64 sm:h-80 lg:h-auto lg:min-h-[440px]
+                            border-b-4 lg:border-b-0 lg:border-r-4 border-primary">
+                    <img
+                        src="{{ $rs->gambar_tentang ? Storage::url($rs->gambar_tentang) : asset('img/syifa-medika.webp') }}"
+                        class="absolute inset-0 w-full h-full object-cover"
+                        alt="{{ $rs->nama }}" loading="lazy">
+                </div>
+
+                {{-- Teks --}}
+                <div class="px-6 py-10 sm:px-10 lg:px-14 lg:py-14 flex flex-col justify-center">
+
+                    {{-- Letterhead kecil: logo + label, bukan logo besar berdiri sendiri --}}
+                    <div class="flex items-center gap-2.5 mb-5">
+                        @if($rs->logo)
+                            <img src="{{ Storage::url($rs->logo) }}" class="h-8 w-8 object-contain shrink-0"
+                                alt="" loading="lazy">
+                        @endif
+                        <span class="text-on-surface-variant text-xs uppercase tracking-[0.22em] font-semibold">
+                            Profil Rumah Sakit
+                        </span>
+                    </div>
+
+                    <h2 id="tentang-kami-heading"
+                        class="font-extrabold text-3xl sm:text-4xl lg:text-[2.75rem] leading-[1.1] text-on-surface">
+                        Kenapa memilih
+                        <span class="block text-primary">{{ $rs->nama }}</span>
+                    </h2>
+
+                    <div class="tentang-kami-prose mt-7 max-w-[44ch] text-sm sm:text-base leading-7 text-on-surface-variant">
+                        {!! str($rs->tentang_kami)->sanitizeHtml() !!}
+                    </div>
+                </div>
             </div>
         </div>
     </section>

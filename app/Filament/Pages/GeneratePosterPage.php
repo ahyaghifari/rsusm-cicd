@@ -24,8 +24,9 @@ class GeneratePosterPage extends Page
     protected static ?string $navigationIcon  = 'heroicon-o-sparkles';
     protected static ?string $navigationLabel = 'Generate Poster';
     protected static ?string $title           = 'Generate Poster Jadwal';
-    protected static ?string $navigationGroup = 'Poster Jadwal';
-    protected static bool $shouldRegisterNavigation = false;
+    protected static ?string $navigationGroup = 'Poliklinik / Rawat Jalan';
+    // protected static bool $shouldRegisterNavigation = false;
+    protected static ?int $navigationSort = 4;
     protected static string  $view            = 'filament.resources.poster-jadwal-resource.pages.generate-poster-page';
 
     // ── State ─────────────────────────────────────────────────────────────────
@@ -234,12 +235,30 @@ class GeneratePosterPage extends Page
         $outputPath = storage_path('app/public/poster-output/poster-' . $tanggal->format('Ymd') . '-' . time() . '.png');
         @mkdir(dirname($outputPath), 0755, true);
 
-        Browsershot::html($html)
-            ->windowSize(1080, 1920)
-            ->deviceScaleFactor(1)
-            ->fullPage()
-            ->waitUntilNetworkIdle()
-            ->save($outputPath);
+        try {
+            $chromePath = env('CHROME_PATH');
+            if (! $chromePath) {
+                $chromePath = match (PHP_OS_FAMILY) {
+                    'Windows' => 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+                    default => '/usr/bin/chromium-browser'
+                };
+            }
+
+            Browsershot::html($html)
+                ->setChromePath($chromePath)
+                ->windowSize(1080, 1920)
+                ->deviceScaleFactor(1)
+                ->fullPage()
+                ->waitUntilNetworkIdle()
+                ->save($outputPath);
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Error render poster')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+            return null;
+        }
 
         if ($fotoHero) {
             Storage::disk('public')->delete($fotoHero);
@@ -358,10 +377,11 @@ class GeneratePosterPage extends Page
                         'jam_selesai'  => ($r->waktu_selesai ?? $r->jam_selesai)?->format('H:i'),
                         'libur'        => ($r->status_layanan?->value ?? '') === 'LIBUR',
                         'is_executive' => (bool) ($r->is_executive ?? false),
+                        'sesuai_perjanjian' => (bool) ($r->sesuai_perjanjian ?? false),
                     ])->toArray(),
                 ];
             })
-            ->filter()
+            ->filter(fn ($p) => ! empty($p['jadwal']))
             ->values();
 
         return view('filament.resources.poster-jadwal-resource.pages.jadwal-template', [
@@ -371,9 +391,6 @@ class GeneratePosterPage extends Page
             'templateDataUri' => $this->toDataUri(Storage::disk('public')->path($template->template_png)),
             'logoDataUri'     => $template->logo_header
                                     ? $this->toDataUri(Storage::disk('public')->path($template->logo_header))
-                                    : null,
-            'shapeDataUri'    => $template->shape_poli
-                                    ? $this->toDataUri(Storage::disk('public')->path($template->shape_poli))
                                     : null,
             'uploadFonts'     => $this->resolveUploadFonts($template),
             'keterangan'      => $this->getKeterangan(),

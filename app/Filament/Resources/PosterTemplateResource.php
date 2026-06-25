@@ -21,8 +21,10 @@ class PosterTemplateResource extends BaseRumahSakitResource
 
     protected static ?string $pluralModelLabel = 'Template Poster';
 
-    protected static ?string $navigationGroup = 'Poster Jadwal';
-    protected static bool $shouldRegisterNavigation = false;
+    protected static ?string $navigationGroup = 'Poliklinik / Rawat Jalan';
+
+    protected static ?int $navigationSort = 3;
+    // protected static bool $shouldRegisterNavigation = false;
 
     // ── Form ──────────────────────────────────────────────────────────────────
 
@@ -71,29 +73,9 @@ class PosterTemplateResource extends BaseRumahSakitResource
                         ->maxSize(1024)
                         ->acceptedFileTypes(['image/png', 'image/jpeg'])
                         ->helperText('Logo RS yang ditempatkan di layer atas poster.'),
-
-                    Forms\Components\FileUpload::make('shape_poli')
-                        ->label('Shape Poliklinik (PNG Transparan)')
-                        ->image()
-                        ->required()
-                        ->directory('poster-templates/shape')
-                        ->maxSize(1024)
-                        ->acceptedFileTypes(['image/png'])
-                        ->helperText('Background header nama poli di grid jadwal. Wajib PNG transparan.'),
                     ])
                 ])
                 ->columns(2),
-
-            // ── Zone Editor ──────────────────────────────────────────────────
-            Forms\Components\Section::make('Zone Editor')
-                ->description('Atur posisi setiap elemen pada poster. Drag dan resize kotak zona di atas preview template.')
-                ->schema([
-                    Forms\Components\ViewField::make('config')
-                        ->label('')
-                        ->view('filament.components.poster-zone-editor')
-                        ->default(PosterTemplate::defaultConfig()),
-                ])
-                ->collapsible(),
 
         ]);
     }
@@ -131,6 +113,11 @@ class PosterTemplateResource extends BaseRumahSakitResource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('zone_editor')
+                    ->label('Edit Zone')
+                    ->icon('heroicon-o-paint-brush')
+                    ->color('primary')
+                    ->url(fn (PosterTemplate $record) => static::getUrl('zone-editor', ['record' => $record])),
                 Tables\Actions\ReplicateAction::make()
                     ->label('Duplikat')
                     ->beforeReplicaSaved(function (PosterTemplate $replica): void {
@@ -149,9 +136,10 @@ class PosterTemplateResource extends BaseRumahSakitResource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListPosterTemplates::route('/'),
-            'create' => Pages\CreatePosterTemplate::route('/create'),
-            'edit'   => Pages\EditPosterTemplate::route('/{record}/edit'),
+            'index'       => Pages\ListPosterTemplates::route('/'),
+            'create'      => Pages\CreatePosterTemplate::route('/create'),
+            'edit'        => Pages\EditPosterTemplate::route('/{record}/edit'),
+            'zone-editor' => Pages\ZoneEditorPage::route('/{record}/zone-editor'),
         ];
     }
 }
