@@ -372,6 +372,8 @@ class GeneratePosterPage extends Page
                         '/usr/bin/chromium-browser',
                         '/usr/bin/chromium',
                         '/snap/bin/chromium',
+                        '/home/www/.cache/puppeteer/chrome/linux-149.0.7827.22/chrome-linux64/chrome',
+                        '/root/.cache/puppeteer/chrome/linux-149.0.7827.22/chrome-linux64/chrome',
                     ])->first(fn ($p) => file_exists($p)),
                 };
             }
@@ -397,7 +399,7 @@ class GeneratePosterPage extends Page
         } catch (\Exception $e) {
             Notification::make()
                 ->title('Error render poster')
-                ->body($e->getMessage())
+                ->body('Chrome path: ' . ($chromePath ?? 'null') . ' | ' . $e->getMessage())
                 ->danger()
                 ->send();
             return null;
