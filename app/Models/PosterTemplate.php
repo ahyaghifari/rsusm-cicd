@@ -67,6 +67,8 @@ class PosterTemplate extends Model
                 'header_bg_warna2'  => '',        // kosong = solid, isi = gradasi ke warna ini
                 'header_radius'     => 8,         // px
                 'header_width_pct'   => 70,        // % lebar header nama poli relatif terhadap card
+                'header_offset_x'    => 0,         // px, geser kanan(+) / kiri(-) dari tepi card
+                'header_padding_left'=> 10,        // px, padding kiri teks di dalam header
                 'header_font_weight' => '700',
                 'header_font_style'  => 'normal',  // normal | italic
                 'card_bg_warna'     => '#ffffff',

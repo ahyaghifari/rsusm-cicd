@@ -73,6 +73,16 @@ class PosterTemplateResource extends BaseRumahSakitResource
                         ->maxSize(1024)
                         ->acceptedFileTypes(['image/png', 'image/jpeg'])
                         ->helperText('Logo RS yang ditempatkan di layer atas poster.'),
+                    ]),
+
+                    Forms\Components\Group::make([
+                    Forms\Components\FileUpload::make('shape_poli')
+                        ->label('Shape Nama Poli (opsional)')
+                        ->image()
+                        ->directory('poster-templates/shape')
+                        ->maxSize(1024)
+                        ->acceptedFileTypes(['image/png'])
+                        ->helperText('PNG transparan untuk background header nama poli. Kosongkan untuk pakai warna solid/gradasi.'),
                     ])
                 ])
                 ->columns(2),

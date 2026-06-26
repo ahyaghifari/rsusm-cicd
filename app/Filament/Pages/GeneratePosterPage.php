@@ -550,6 +550,9 @@ class GeneratePosterPage extends Page
             'logoDataUri'     => $template->logo_header
                                     ? $this->toDataUri(Storage::disk('public')->path($template->logo_header))
                                     : null,
+            'shapePoliDataUri' => $template->shape_poli
+                                    ? $this->toDataUri(Storage::disk('public')->path($template->shape_poli))
+                                    : null,
             'uploadFonts'     => $this->resolveUploadFonts($template),
             'keterangan'      => $this->getKeterangan(),
             'poliList'        => $poliList,

@@ -340,7 +340,25 @@ body {
         @endphp
         <div class="poli-card" style="margin-bottom:{{ $grid['gap'] ?? 16 }}px;">
 
-            <div class="poli-header" style="background:{{ $headerBg }}; border-radius:{{ $headerRadius }}px; width:{{ $grid['header_width_pct'] ?? 70 }}%; position:relative; z-index:2;">
+            @php
+                $headerOffsetX    = (int) ($grid['header_offset_x'] ?? 0);
+                $headerPaddingLeft= (int) ($grid['header_padding_left'] ?? 10);
+            @endphp
+            @if (!empty($shapePoliDataUri))
+            <div class="poli-header" style="
+                background-image:url('{{ $shapePoliDataUri }}');
+                background-size:100% 100%;
+                background-repeat:no-repeat;
+                background-color:transparent;
+                border-radius:0;
+                width:{{ $grid['header_width_pct'] ?? 70 }}%;
+                margin-left:{{ $headerOffsetX }}px;
+                padding-left:{{ $headerPaddingLeft }}px;
+                position:relative; z-index:2;
+            ">
+            @else
+            <div class="poli-header" style="background:{{ $headerBg }}; border-radius:{{ $headerRadius }}px; width:{{ $grid['header_width_pct'] ?? 70 }}%; margin-left:{{ $headerOffsetX }}px; position:relative; z-index:2;">
+            @endif
                 <span style="
                     font-family:{{ $fontPoli }};
                     font-size:{{ $headerFontPx }}px;

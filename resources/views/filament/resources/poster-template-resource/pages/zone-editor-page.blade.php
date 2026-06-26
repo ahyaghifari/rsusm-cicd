@@ -83,6 +83,7 @@
 
         $record = $this->record;
         $templatePngUrl = $this->templatePngUrl;
+        $shapePoliUrl   = $this->shapePoliUrl;
 
         $initialKolom = (int) ($savedConfig['grid']['kolom'] ?? 2);
         $initialGap   = (int) ($savedConfig['grid']['gap']   ?? 16);
@@ -90,7 +91,9 @@
 
         $initialHeaderBg1   =         ($savedConfig['grid']['header_bg_warna']         ?? '#7c3aed');
         $initialHeaderBg2   =         ($savedConfig['grid']['header_bg_warna2']        ?? '');
-        $initialHeaderRadius= (int)   ($savedConfig['grid']['header_radius']           ?? 8);
+        $initialHeaderRadius     = (int) ($savedConfig['grid']['header_radius']      ?? 8);
+        $initialHeaderOffsetX    = (int) ($savedConfig['grid']['header_offset_x']   ?? 0);
+        $initialHeaderPaddingLeft= (int) ($savedConfig['grid']['header_padding_left']?? 10);
         $initialHeaderFont  =         ($savedConfig['grid']['font_nama_poli']['nama']  ?? 'Montserrat');
         $initialHeaderWarna =         ($savedConfig['grid']['warna_nama_poli']         ?? '#FFFFFF');
         $initialCardBg          =     ($savedConfig['grid']['card_bg_warna']           ?? '#ffffff');
@@ -176,6 +179,8 @@
             initialHeaderBg1: @js($initialHeaderBg1),
             initialHeaderBg2: @js($initialHeaderBg2),
             initialHeaderRadius: {{ $initialHeaderRadius }},
+            initialHeaderOffsetX: {{ $initialHeaderOffsetX }},
+            initialHeaderPaddingLeft: {{ $initialHeaderPaddingLeft }},
             initialHeaderFont: @js($initialHeaderFont),
             initialHeaderWarna: @js($initialHeaderWarna),
             initialCardBg: @js($initialCardBg),
@@ -194,6 +199,7 @@
             initialCatatanSize: {{ $initialCatatanSize }},
             initialCatatanFont: @js($initialCatatanFont),
             initialCatatanWeight: @js($initialCatatanWeight),
+            shapePoliUrl: @js($shapePoliUrl),
             state: $wire.$entangle('config')
         })"
         x-init="init()"
@@ -278,39 +284,59 @@
                         </div>
                         
                         <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-gray-600">Background</span>
-                                <div class="flex items-center gap-2">
-                                    <input type="color" x-model="headerBg1" @input="saveConfig()" class="h-8 w-10 cursor-pointer rounded-lg border border-gray-200 p-0.5 shadow-sm">
-                                    <input type="text" x-model="headerBg1" @input="saveConfig()" class="w-24 text-xs text-center border border-gray-200 rounded-lg py-1.5 font-mono shadow-sm focus:ring-2 focus:ring-indigo-500">
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-gray-600">Gradasi <span class="text-[10px] text-gray-400 font-normal">(opsional)</span></span>
-                                <div class="flex items-center gap-2">
-                                    <input type="color" x-model="headerBg2" @input="saveConfig()" class="h-8 w-10 cursor-pointer rounded-lg border border-gray-200 p-0.5 shadow-sm">
-                                    <div class="relative">
-                                        <input type="text" x-model="headerBg2" @input="saveConfig()" placeholder="kosong"
-                                            class="w-24 text-xs text-center border border-gray-200 rounded-lg py-1.5 font-mono shadow-sm focus:ring-2 focus:ring-indigo-500 pr-6">
-                                        <button type="button" @click="headerBg2 = ''; saveConfig()"
-                                                class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition" title="Hapus gradasi">
-                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                        </button>
+                            <template x-if="shapePoli">
+                                <p class="text-[10px] text-indigo-500 font-medium bg-indigo-50 rounded-lg px-3 py-2">
+                                    Shape poli aktif — hanya lebar yang dapat dikonfigurasi.
+                                </p>
+                            </template>
+
+                            <div x-show="!shapePoli" class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-gray-600">Background</span>
+                                    <div class="flex items-center gap-2">
+                                        <input type="color" x-model="headerBg1" @input="saveConfig()" class="h-8 w-10 cursor-pointer rounded-lg border border-gray-200 p-0.5 shadow-sm">
+                                        <input type="text" x-model="headerBg1" @input="saveConfig()" class="w-24 text-xs text-center border border-gray-200 rounded-lg py-1.5 font-mono shadow-sm focus:ring-2 focus:ring-indigo-500">
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="flex items-center justify-between gap-4">
-                                <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Radius (px)</span>
-                                <input type="range" x-model="headerRadius" @input="saveConfig()" min="0" max="32" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none accent-indigo-500">
-                                <input type="number" x-model="headerRadius" @input="saveConfig()" min="0" max="32" class="w-14 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-gray-600">Gradasi <span class="text-[10px] text-gray-400 font-normal">(opsional)</span></span>
+                                    <div class="flex items-center gap-2">
+                                        <input type="color" x-model="headerBg2" @input="saveConfig()" class="h-8 w-10 cursor-pointer rounded-lg border border-gray-200 p-0.5 shadow-sm">
+                                        <div class="relative">
+                                            <input type="text" x-model="headerBg2" @input="saveConfig()" placeholder="kosong"
+                                                class="w-24 text-xs text-center border border-gray-200 rounded-lg py-1.5 font-mono shadow-sm focus:ring-2 focus:ring-indigo-500 pr-6">
+                                            <button type="button" @click="headerBg2 = ''; saveConfig()"
+                                                    class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition" title="Hapus gradasi">
+                                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Radius (px)</span>
+                                    <input type="range" x-model="headerRadius" @input="saveConfig()" min="0" max="32" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none accent-indigo-500">
+                                    <input type="number" x-model="headerRadius" @input="saveConfig()" min="0" max="32" class="w-14 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
+                                </div>
                             </div>
 
                             <div class="flex items-center justify-between gap-4">
                                 <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Lebar Header (%)</span>
                                 <input type="range" x-model.number="headerWidthPct" @input="saveConfig()" min="30" max="100" step="5" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none accent-indigo-500">
                                 <input type="number" x-model.number="headerWidthPct" @input="saveConfig()" min="30" max="100" step="5" class="w-14 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
+                            </div>
+
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Geser Kanan/Kiri (px)</span>
+                                <input type="range" x-model.number="headerOffsetX" @input="saveConfig()" min="-80" max="80" step="2" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none accent-indigo-500">
+                                <input type="number" x-model.number="headerOffsetX" @input="saveConfig()" min="-80" max="80" class="w-14 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
+                            </div>
+
+                            <div x-show="shapePoli" class="flex items-center justify-between gap-4">
+                                <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Padding Kiri Teks (px)</span>
+                                <input type="range" x-model.number="headerPaddingLeft" @input="saveConfig()" min="0" max="60" step="2" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none accent-indigo-500">
+                                <input type="number" x-model.number="headerPaddingLeft" @input="saveConfig()" min="0" max="60" class="w-14 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
                             </div>
 
                             <div class="flex items-center justify-between">
@@ -522,11 +548,23 @@
                         <div class="flex justify-center">
                             <div style="width:240px; position:relative; padding-top:16px;" class="transition-all duration-300">
                                 {{-- Header Nama Poli (70% overlap) --}}
-                                <div :style="{
+                                <div :style="shapePoli ? {
+                                    backgroundImage: 'url(' + shapePoli + ')',
+                                    backgroundSize: '100% 100%',
+                                    backgroundRepeat: 'no-repeat',
+                                    backgroundColor: 'transparent',
+                                    borderRadius: '0',
+                                    padding: '8px 14px',
+                                    paddingLeft: headerPaddingLeft + 'px',
+                                    width: headerWidthPct + '%',
+                                    marginLeft: headerOffsetX + 'px',
+                                    position: 'relative', zIndex: 2, lineHeight: 1.2,
+                                } : {
                                     background: headerBg2 ? ('linear-gradient(135deg,' + headerBg1 + ',' + headerBg2 + ')') : headerBg1,
                                     borderRadius: headerRadius + 'px',
                                     padding: '8px 14px',
                                     width: headerWidthPct + '%',
+                                    marginLeft: headerOffsetX + 'px',
                                     position: 'relative', zIndex: 2, lineHeight: 1.2,
                                     boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
                                 }">
@@ -851,11 +889,23 @@
                                 @endphp
                                 <div style="position:relative; width:100%;" class="transform transition-all duration-300">
                                     {{-- Header Nama Poli (70% overlap) --}}
-                                    <div :style="{
+                                    <div :style="shapePoli ? {
+                                        backgroundImage: 'url(' + shapePoli + ')',
+                                        backgroundSize: '100% 100%',
+                                        backgroundRepeat: 'no-repeat',
+                                        backgroundColor: 'transparent',
+                                        borderRadius: '0',
+                                        padding: (4 * 0.5) + 'px ' + (8 * 0.5) + 'px',
+                                        paddingLeft: (headerPaddingLeft * 0.5) + 'px',
+                                        width: headerWidthPct + '%',
+                                        marginLeft: (headerOffsetX * 0.5) + 'px',
+                                        position: 'relative', zIndex: 2, lineHeight: 1.2,
+                                    } : {
                                         background: headerBg2 ? ('linear-gradient(135deg,' + headerBg1 + ',' + headerBg2 + ')') : headerBg1,
                                         borderRadius: (headerRadius * 0.5) + 'px',
                                         padding: (4 * 0.5) + 'px ' + (8 * 0.5) + 'px',
                                         width: headerWidthPct + '%',
+                                        marginLeft: (headerOffsetX * 0.5) + 'px',
                                         position: 'relative', zIndex: 2, lineHeight: 1.2,
                                         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                                     }">
@@ -961,10 +1011,13 @@
             kolom: config.initialKolom ?? 2,
             gap:   config.initialGap   ?? 16,
             heroPercent: config.initialHeroPercent ?? 25,
+            shapePoli: config.shapePoliUrl ?? null,
             headerBg1: config.initialHeaderBg1 ?? '#7c3aed',
             headerBg2: config.initialHeaderBg2 ?? '',
             headerRadius: config.initialHeaderRadius ?? 8,
             headerWidthPct: config.initialHeaderWidthPct ?? 70,
+            headerOffsetX: config.initialHeaderOffsetX ?? 0,
+            headerPaddingLeft: config.initialHeaderPaddingLeft ?? 10,
             headerFontWeight: config.initialHeaderFontWeight ?? '700',
             headerFontStyle: config.initialHeaderFontStyle ?? 'normal',
             headerFont: config.initialHeaderFont ?? 'Montserrat',
@@ -1016,7 +1069,9 @@
                     if (this.state.grid?.header_bg_warna !== undefined)  this.headerBg1 = this.state.grid.header_bg_warna;
                     if (this.state.grid?.header_bg_warna2 !== undefined) this.headerBg2 = this.state.grid.header_bg_warna2;
                     if (this.state.grid?.header_radius !== undefined)     this.headerRadius = this.state.grid.header_radius;
-                    if (this.state.grid?.header_width_pct !== undefined)   this.headerWidthPct = this.state.grid.header_width_pct;
+                    if (this.state.grid?.header_width_pct !== undefined)    this.headerWidthPct = this.state.grid.header_width_pct;
+                    if (this.state.grid?.header_offset_x !== undefined)     this.headerOffsetX = this.state.grid.header_offset_x;
+                    if (this.state.grid?.header_padding_left !== undefined) this.headerPaddingLeft = this.state.grid.header_padding_left;
                     if (this.state.grid?.header_font_weight !== undefined)  this.headerFontWeight = this.state.grid.header_font_weight;
                     if (this.state.grid?.header_font_style !== undefined)   this.headerFontStyle = this.state.grid.header_font_style;
                     if (this.state.grid?.font_nama_poli?.nama !== undefined) this.headerFont = this.state.grid.font_nama_poli.nama;
@@ -1129,7 +1184,9 @@
                         header_bg_warna:  this.headerBg1,
                         header_bg_warna2: this.headerBg2,
                         header_radius:    parseInt(this.headerRadius) || 0,
-                        header_width_pct:   parseInt(this.headerWidthPct) || 70,
+                        header_width_pct:    parseInt(this.headerWidthPct) || 70,
+                        header_offset_x:     parseInt(this.headerOffsetX) || 0,
+                        header_padding_left: parseInt(this.headerPaddingLeft) || 0,
                         header_font_weight: this.headerFontWeight,
                         header_font_style:  this.headerFontStyle,
                         font_nama_poli:   { sumber: 'google', nama: this.headerFont },

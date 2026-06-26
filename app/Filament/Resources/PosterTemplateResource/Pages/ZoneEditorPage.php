@@ -104,6 +104,14 @@ class ZoneEditorPage extends Page
             : null;
     }
 
+    /** URL shape poli (null jika tidak diupload). */
+    public function getShapePoliUrlProperty(): ?string
+    {
+        return $this->record->shape_poli
+            ? Storage::url($this->record->shape_poli)
+            : null;
+    }
+
     /**
      * Bangun string Google Fonts URL query dari $availableFonts.
      * Dipakai oleh blade untuk load font via <link>.
