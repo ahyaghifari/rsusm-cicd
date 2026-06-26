@@ -65,7 +65,7 @@ body {
     display: flex;
     flex-direction: column;
     break-inside: avoid;
-    overflow: hidden;
+    overflow: visible;
     box-sizing: border-box;
 }
 
@@ -73,9 +73,8 @@ body {
     padding: 5px 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    /* Clamp header agar tidak bisa melar keluar card */
     min-width: 0;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .poli-body {
@@ -298,7 +297,7 @@ body {
             top:{{ $zonaJadwal['y'] }}px;
             width:{{ $zonaJadwal['w'] }}px;
             height:{{ $zonaJadwal['h'] }}px;
-            overflow:hidden;
+            overflow:visible;
             column-count:{{ $kolom }};
             column-gap:{{ $grid['gap'] ?? 16 }}px;
         "
@@ -311,7 +310,7 @@ body {
             $cardMinHeight   = (int) ($grid['card_min_height'] ?? 0);
             $dokterValign    = ($grid['dokter_valign'] ?? 'top') === 'center' ? 'center' : 'flex-start';
             $dokterRowGap    = (int) ($grid['dokter_row_gap'] ?? 2);
-            $bodyStyle = "border-radius:{$cardRadius}px; border:{$cardBorderWidth}px solid {$cardBorderWarna}; overflow:hidden;"
+            $bodyStyle = "border-radius:{$cardRadius}px; border:{$cardBorderWidth}px solid {$cardBorderWarna};"
                 . ($cardMinHeight > 0 ? " min-height:{$cardMinHeight}px;" : '');
 
             $headerBg1    = $grid['header_bg_warna']  ?? '#7c3aed';
