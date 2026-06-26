@@ -350,7 +350,8 @@ body {
                     font-family:{{ $fontPoli }};
                     font-size:{{ $headerFontPx }}px;
                     color:{{ $grid['warna_nama_poli'] ?? '#ffffff' }};
-                    font-weight:700;
+                    font-weight:{{ $grid['header_font_weight'] ?? '700' }};
+                    font-style:{{ $grid['header_font_style'] ?? 'normal' }};
                 ">{{ $poli->nama }}</span>
             </div>
 
@@ -396,7 +397,7 @@ body {
                     {{-- Catatan (only when filled) --}}
                     @if (!empty($row['catatan']))
                     <div style="
-                        display:inline-block;
+                        align-self:flex-start;
                         background:{{ $grid['catatan_bg_warna'] ?? '#fef9c3' }};
                         color:{{ $grid['catatan_warna'] ?? '#1a1a2e' }};
                         border:1px solid {{ $grid['catatan_border_warna'] ?? '#fde68a' }};

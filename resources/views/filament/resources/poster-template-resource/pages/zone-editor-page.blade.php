@@ -314,6 +314,27 @@
                             </div>
 
                             <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-gray-600">Font Weight</span>
+                                <select x-model="headerFontWeight" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 appearance-none bg-no-repeat" style="background-image:url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22/%3E%3C/svg%3E');background-position:right .5rem center;background-size:1.25rem;">
+                                    <option value="300">Light (300)</option>
+                                    <option value="400">Normal (400)</option>
+                                    <option value="500">Medium (500)</option>
+                                    <option value="600">Semibold (600)</option>
+                                    <option value="700">Bold (700)</option>
+                                    <option value="800">Extra Bold (800)</option>
+                                    <option value="900">Black (900)</option>
+                                </select>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-gray-600">Font Style</span>
+                                <div class="flex gap-1">
+                                    <button type="button" @click="headerFontStyle='normal'; saveConfig()" :class="headerFontStyle === 'normal' ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-600'" class="px-3 py-1.5 text-xs font-bold rounded-lg transition">Normal</button>
+                                    <button type="button" @click="headerFontStyle='italic'; saveConfig()" :class="headerFontStyle === 'italic' ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-600'" class="px-3 py-1.5 text-xs italic rounded-lg transition">Italic</button>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between">
                                 <span class="text-xs font-semibold text-gray-600">Font Text</span>
                                 <select x-model="headerFont" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-no-repeat bg-right bg-white shadow-sm focus:ring-2 focus:ring-indigo-500" style="background-size: 1.25rem; background-position: right 0.25rem center;">
                                     @foreach ($this::$availableFonts as $f)
@@ -406,12 +427,15 @@
                             </div>
 
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-gray-600">Font Weight Nama Dokter</span>
+                                <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Weight Nama Dokter</span>
                                 <select x-model="weightNamaDokter" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 appearance-none bg-no-repeat" style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22/%3E%3C/svg%3E'); background-position: right 0.5rem center; background-size: 1.25rem;">
                                     @foreach ($this::$availableFontWeights as $val => $label)
                                     <option value="{{ $val }}">{{ $label }}</option>
                                     @endforeach
                                 </select>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Weight Jam</span>
                                 <select x-model="weightJam" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 appearance-none bg-no-repeat" style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22/%3E%3C/svg%3E'); background-position: right 0.5rem center; background-size: 1.25rem;">
                                     @foreach ($this::$availableFontWeights as $val => $label)
                                     <option value="{{ $val }}">{{ $label }}</option>
@@ -506,7 +530,7 @@
                                     position: 'relative', zIndex: 2, lineHeight: 1.2,
                                     boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
                                 }">
-                                    <span :style="{ fontFamily: headerFont, color: headerWarna, fontWeight: 700, fontSize: headerFontSize + 'px', textTransform: 'uppercase', display: 'block', letterSpacing: '0.05em' }">Poli</span>
+                                    <span :style="{ fontFamily: headerFont, color: headerWarna, fontWeight: parseInt(headerFontWeight), fontStyle: headerFontStyle, fontSize: headerFontSize + 'px', textTransform: 'uppercase', display: 'block', letterSpacing: '0.05em' }">Poli</span>
                                 </div>
 
                                 {{-- Body Card (Regular + EC sejajar) --}}
@@ -835,7 +859,7 @@
                                         position: 'relative', zIndex: 2, lineHeight: 1.2,
                                         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                                     }">
-                                        <span :style="{ fontFamily: headerFont, color: headerWarna, fontWeight: 700, fontSize: (headerFontSize * 0.5) + 'px', textTransform: 'uppercase', display: 'block' }">{{ $p['nama'] }}</span>
+                                        <span :style="{ fontFamily: headerFont, color: headerWarna, fontWeight: parseInt(headerFontWeight), fontStyle: headerFontStyle, fontSize: (headerFontSize * 0.5) + 'px', textTransform: 'uppercase', display: 'block' }">{{ $p['nama'] }}</span>
                                     </div>
 
                                     {{-- Body Card dengan Regular + EC sejajar --}}
@@ -941,6 +965,8 @@
             headerBg2: config.initialHeaderBg2 ?? '',
             headerRadius: config.initialHeaderRadius ?? 8,
             headerWidthPct: config.initialHeaderWidthPct ?? 70,
+            headerFontWeight: config.initialHeaderFontWeight ?? '700',
+            headerFontStyle: config.initialHeaderFontStyle ?? 'normal',
             headerFont: config.initialHeaderFont ?? 'Montserrat',
             headerWarna: config.initialHeaderWarna ?? '#FFFFFF',
             cardBg: config.initialCardBg ?? '#ffffff',
@@ -990,7 +1016,9 @@
                     if (this.state.grid?.header_bg_warna !== undefined)  this.headerBg1 = this.state.grid.header_bg_warna;
                     if (this.state.grid?.header_bg_warna2 !== undefined) this.headerBg2 = this.state.grid.header_bg_warna2;
                     if (this.state.grid?.header_radius !== undefined)     this.headerRadius = this.state.grid.header_radius;
-                    if (this.state.grid?.header_width_pct !== undefined)  this.headerWidthPct = this.state.grid.header_width_pct;
+                    if (this.state.grid?.header_width_pct !== undefined)   this.headerWidthPct = this.state.grid.header_width_pct;
+                    if (this.state.grid?.header_font_weight !== undefined)  this.headerFontWeight = this.state.grid.header_font_weight;
+                    if (this.state.grid?.header_font_style !== undefined)   this.headerFontStyle = this.state.grid.header_font_style;
                     if (this.state.grid?.font_nama_poli?.nama !== undefined) this.headerFont = this.state.grid.font_nama_poli.nama;
                     if (this.state.grid?.warna_nama_poli !== undefined)  this.headerWarna = this.state.grid.warna_nama_poli;
                     if (this.state.grid?.card_bg_warna !== undefined)     this.cardBg = this.state.grid.card_bg_warna;
@@ -1101,7 +1129,9 @@
                         header_bg_warna:  this.headerBg1,
                         header_bg_warna2: this.headerBg2,
                         header_radius:    parseInt(this.headerRadius) || 0,
-                        header_width_pct: parseInt(this.headerWidthPct) || 70,
+                        header_width_pct:   parseInt(this.headerWidthPct) || 70,
+                        header_font_weight: this.headerFontWeight,
+                        header_font_style:  this.headerFontStyle,
                         font_nama_poli:   { sumber: 'google', nama: this.headerFont },
                         warna_nama_poli:  this.headerWarna,
                         card_bg_warna:     this.cardBg,
