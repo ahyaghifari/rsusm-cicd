@@ -475,6 +475,12 @@
                                 <input type="number" x-model.number="cardPaddingTop" @input="saveConfig()" min="0" max="30" step="1" class="w-14 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
                             </div>
 
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Jarak Antar Dokter (px)</span>
+                                <input type="range" x-model.number="dokterRowGap" @input="saveConfig()" min="0" max="20" step="1" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none accent-violet-500">
+                                <input type="number" x-model.number="dokterRowGap" @input="saveConfig()" min="0" max="20" step="1" class="w-14 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
+                            </div>
+
                         </div>
                     </div>
 
@@ -921,7 +927,7 @@
                                         padding: (cardPaddingTop * 0.5) + 'px ' + (6 * 0.5) + 'px ' + (4 * 0.5) + 'px',
                                         color: '#1f2937', position: 'relative', zIndex: 1,
                                         boxShadow: '0 2px 4px -1px rgba(0, 0, 0, 0.05)',
-                                        display: 'flex', gap: '3px'
+                                        display: 'flex', gap: (dokterRowGap * 0.5) + 'px'
                                     }">
                                         {{-- Regular Dokter Column --}}
                                         <div style="flex:1;">
@@ -1034,6 +1040,7 @@
             weightNamaDokter: config.initialWeightNamaDokter ?? '600',
             weightJam: config.initialWeightJam ?? '500',
             cardPaddingTop: config.initialCardPaddingTop ?? 8,
+            dokterRowGap: config.initialDokterRowGap ?? 2,
             logoScale: config.initialLogoScale ?? 100,
             logoOpacity: config.initialLogoOpacity ?? 100,
             logoPadding: config.initialLogoPadding ?? 0,
@@ -1088,6 +1095,7 @@
                     if (this.state.grid?.weight_nama_dokter !== undefined) this.weightNamaDokter = this.state.grid.weight_nama_dokter;
                     if (this.state.grid?.weight_jam !== undefined)         this.weightJam = this.state.grid.weight_jam;
                     if (this.state.grid?.card_padding_top !== undefined)  this.cardPaddingTop = this.state.grid.card_padding_top;
+                    if (this.state.grid?.dokter_row_gap !== undefined)    this.dokterRowGap = this.state.grid.dokter_row_gap;
                     if (this.state.grid?.catatan_bg_warna !== undefined)     this.catatanBg = this.state.grid.catatan_bg_warna;
                     if (this.state.grid?.catatan_warna !== undefined)        this.catatanWarna = this.state.grid.catatan_warna;
                     if (this.state.grid?.catatan_border_warna !== undefined) this.catatanBorder = this.state.grid.catatan_border_warna;
@@ -1203,6 +1211,7 @@
                         weight_nama_dokter: this.weightNamaDokter,
                         weight_jam:        this.weightJam,
                         card_padding_top:  parseInt(this.cardPaddingTop) || 0,
+                        dokter_row_gap:    parseInt(this.dokterRowGap) || 0,
                         catatan_bg_warna:     this.catatanBg,
                         catatan_warna:        this.catatanWarna,
                         catatan_border_warna: this.catatanBorder,
