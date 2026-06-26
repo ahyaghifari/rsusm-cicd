@@ -932,14 +932,13 @@
                                 zone.w = Math.round(event.rect.width  / SCALE);
                                 zone.h = Math.round(event.rect.height / SCALE);
 
-                                zone.w = Math.max(50, Math.min(CANVAS_W - zone.x, zone.w));
-                                zone.h = Math.max(20, Math.min(CANVAS_H - zone.y, zone.h));
+                                zone.w = Math.min(CANVAS_W - zone.x, zone.w);
+                                zone.h = Math.min(CANVAS_H - zone.y, zone.h);
 
                                 this.applyPosition(box, zone);
                                 this.saveConfig();
                             },
                         },
-                        modifiers: [interact.modifiers.restrictSize({ min: { width: 50 * SCALE, height: 20 * SCALE } })],
                     });
             },
 

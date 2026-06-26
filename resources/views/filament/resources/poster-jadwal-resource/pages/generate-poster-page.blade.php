@@ -1,6 +1,39 @@
 {{-- resources/views/filament/pages/generate-poster.blade.php --}}
 <x-filament-panels::page>
 
+{{-- SortableJS CDN --}}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
+
+{{-- SortableJS Alpine component (always available) --}}
+<script>
+function sortablePoli() {
+    return {
+        sortableInstance: null,
+        init() {
+            this.$nextTick(() => {
+                const el = document.getElementById('poli-sortable');
+                if (!el) return;
+
+                if (this.sortableInstance) {
+                    this.sortableInstance.destroy();
+                    this.sortableInstance = null;
+                }
+
+                if (typeof Sortable === 'undefined') return;
+
+                this.sortableInstance = Sortable.create(el, {
+                    handle: 'li',
+                    animation: 150,
+                    onEnd: (evt) => {
+                        @this.reorderPoli(evt.oldIndex, evt.newIndex);
+                    },
+                });
+            });
+        },
+    };
+}
+</script>
+
 {{-- Listener: open preview in new tab --}}
 <div x-data x-on:open-preview.window="window.open($event.detail.url, '_blank', 'width=540,height=960,scrollbars=yes,resizable=yes')"></div>
 
@@ -15,6 +48,7 @@
         <div
             x-data="sortablePoli()"
             x-init="init()"
+            wire:key="poli-sortable-{{ count($this->poli_list) }}"
             class="mt-6 fi-section rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"
         >
             <div class="fi-section-header px-6 py-4 border-b border-gray-200 dark:border-white/10">
@@ -68,27 +102,6 @@
                 </ul>
             </div>
         </div>
-
-        <script>
-        function sortablePoli() {
-            return {
-                init() {
-                    this.$nextTick(() => {
-                        const el = document.getElementById('poli-sortable');
-                        if (!el || !window.Sortable) return;
-
-                        Sortable.create(el, {
-                            handle: 'li',
-                            animation: 150,
-                            onEnd: (evt) => {
-                                @this.reorderPoli(evt.oldIndex, evt.newIndex);
-                            },
-                        });
-                    });
-                },
-            };
-        }
-        </script>
         @endif
 
         {{-- ── Action Buttons ──────────────────────────────────────────────── --}}
@@ -115,10 +128,5 @@
     </form>
 
 </div>
-
-{{-- SortableJS CDN --}}
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
-@endpush
 
 </x-filament-panels::page>

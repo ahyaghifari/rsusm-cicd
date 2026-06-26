@@ -116,7 +116,7 @@ class GeneratePosterPage extends Page
 
     private function getExecutiveClinicFilter(): string
     {
-        return $this->data['executive_clinic_filter'] ?? 'reguler_dan_eksekutif';
+        return $this->data['executive_clinic_filter'] ?? 'reguler';
     }
 
     // ── Form ──────────────────────────────────────────────────────────────────
@@ -137,7 +137,7 @@ class GeneratePosterPage extends Page
                             ->dehydrated(false)
                             ->afterStateUpdated(function (Forms\Set $set) {
                                 $set('template_id', null);
-                                $set('executive_clinic_filter', 'reguler_dan_eksekutif');
+                                $set('executive_clinic_filter', 'reguler');
                                 $this->poli_list = [];
                                 $this->hospitalHasExecutiveClinic = false;
                             }),
@@ -173,7 +173,7 @@ class GeneratePosterPage extends Page
                                 'eksekutif'             => 'Eksekutif',
                                 'reguler_dan_eksekutif' => 'Reguler dan Eksekutif',
                             ])
-                            ->default('reguler_dan_eksekutif')
+                            ->default('reguler')
                             ->required()
                             ->visible(fn () => $this->hospitalHasExecutiveClinic)
                             ->live()
@@ -234,7 +234,7 @@ class GeneratePosterPage extends Page
         // Read executive clinic filter value
         $filter = $get ? $get('executive_clinic_filter') : null;
         if (! $filter) $filter = $this->getExecutiveClinicFilter();
-        if (! $filter) $filter = 'reguler_dan_eksekutif';
+        if (! $filter) $filter = 'reguler';
 
         // Ensure tanggal only contains the date part (Y-m-d) in case frontend DatePicker sends a full datetime string
         $parsedTanggal = \Carbon\Carbon::parse($tanggal)->format('Y-m-d');
@@ -287,7 +287,7 @@ class GeneratePosterPage extends Page
         }
         unset($row);
 
-        $this->poli_list = $list;
+        $this->poli_list = array_values($list);
     }
 
     public function previewPoster(): void

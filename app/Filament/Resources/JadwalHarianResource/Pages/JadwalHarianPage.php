@@ -39,7 +39,7 @@ class JadwalHarianPage extends Page
     public array $rowsCache = [];
 
     // Executive clinic filter: 'all' | 'reguler' | 'eksekutif'
-    public string $executiveClinicFilter = 'all';
+    public string $executiveClinicFilter = 'reguler';
 
     // Modal perubahan
     public bool  $showPerubahan  = false;
@@ -92,7 +92,7 @@ class JadwalHarianPage extends Page
                         'reguler'   => 'Reguler',
                         'eksekutif' => 'Eksekutif',
                     ])
-                    ->default('all')
+                    ->default('reguler')
                     ->visible(fn () => $this->hasExecutiveClinic() && $this->hasJadwalHarianData())
                     ->live(),
 
@@ -300,7 +300,7 @@ class JadwalHarianPage extends Page
         $this->rowsCache             = [];
         $this->selectedUnitLayananId = null;
         $this->rows                  = [];
-        $this->executiveClinicFilter = 'all';
+        $this->executiveClinicFilter = 'reguler';
 
         if ($this->selectedRumahSakitId) {
             $this->loadRows();
