@@ -363,8 +363,17 @@ class GeneratePosterPage extends Page
 
         try {
             $chromePath = env('CHROME_PATH');
-            if (! $chromePath && PHP_OS_FAMILY === 'Windows') {
-                $chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+            if (! $chromePath) {
+                $chromePath = match (PHP_OS_FAMILY) {
+                    'Windows' => 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+                    default   => collect([
+                        '/usr/bin/google-chrome-stable',
+                        '/usr/bin/google-chrome',
+                        '/usr/bin/chromium-browser',
+                        '/usr/bin/chromium',
+                        '/snap/bin/chromium',
+                    ])->first(fn ($p) => file_exists($p)),
+                };
             }
 
             $browsershot = Browsershot::html($html)
