@@ -3,9 +3,10 @@
 namespace App\Filament\Pages;
 
 use App\Models\JadwalHarian;
-use App\Models\JadwalPraktek;
 use App\Models\PoliKlinik;
 use App\Models\PosterTemplate;
+use App\Models\RumahSakit;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Form;
@@ -38,11 +39,46 @@ class GeneratePosterPage extends Page
     /** @var array<int, array{id:int, nama:string, visible:bool, order:int}> */
     public array $poli_list = [];
 
+    /** Whether the selected hospital supports executive clinics. */
+    public bool $hospitalHasExecutiveClinic = false;
+
     public function mount(): void
     {
         $this->form->fill([
-            'tanggal' => now()->format('Y-m-d'),
+            'tanggal'        => now()->format('Y-m-d'),
+            'rumah_sakit_id' => $this->currentUserRumahSakitId(),
         ]);
+    }
+
+    // ── Auth helpers ──────────────────────────────────────────────────────────
+
+    private function currentUser(): User
+    {
+        /** @var User $user */
+        $user = filament()->auth()->user();
+        return $user;
+    }
+
+    private function isSuperAdmin(): bool
+    {
+        return $this->currentUser()->isSuperAdmin();
+    }
+
+    private function currentUserRumahSakitId(): ?int
+    {
+        return $this->currentUser()->rumah_sakit_id;
+    }
+
+    /**
+     * Resolve the active rumah_sakit_id:
+     * - superadmin: uses the selected value from the form
+     * - non-superadmin: uses their own rumah_sakit_id
+     */
+    private function resolvedRumahSakitId(): ?int
+    {
+        return $this->isSuperAdmin()
+            ? (int) ($this->data['rumah_sakit_id'] ?? 0) ?: null
+            : $this->currentUserRumahSakitId();
     }
 
     // ── Helpers akses $data ───────────────────────────────────────────────────
@@ -78,6 +114,11 @@ class GeneratePosterPage extends Page
         return $this->data['keterangan'] ?? '';
     }
 
+    private function getExecutiveClinicFilter(): string
+    {
+        return $this->data['executive_clinic_filter'] ?? 'reguler_dan_eksekutif';
+    }
+
     // ── Form ──────────────────────────────────────────────────────────────────
 
     public function form(Form $form): Form
@@ -86,34 +127,70 @@ class GeneratePosterPage extends Page
             ->schema([
                 Forms\Components\Section::make()
                     ->schema([
-                        Forms\Components\Select::make('template_id')
-                            ->label('1. Pilih Template')
-                            ->options(function () {
-                                $user = filament()->auth()->user();
+                        // ── Rumah Sakit — only visible for superadmins ─────────
+                        Forms\Components\Select::make('rumah_sakit_id')
+                            ->label('Rumah Sakit')
+                            ->options(RumahSakit::pluck('nama', 'id'))
+                            ->required()
+                            ->visible(fn () => $this->isSuperAdmin())
+                            ->live()
+                            ->dehydrated(false)
+                            ->afterStateUpdated(function (Forms\Set $set) {
+                                $set('template_id', null);
+                                $set('executive_clinic_filter', 'reguler_dan_eksekutif');
+                                $this->poli_list = [];
+                                $this->hospitalHasExecutiveClinic = false;
+                            }),
 
-                                return PosterTemplate::with('rumahSakit')
-                                    ->when(! $user->isSuperAdmin(), fn ($q) =>
-                                        $q->where('rumah_sakit_id', $user->rumah_sakit_id)
-                                    )
-                                    ->get()
-                                    ->mapWithKeys(fn ($t) =>
-                                        [$t->id => "[{$t->rumahSakit->lokasi}] {$t->nama}"]
-                                    );
+                        Forms\Components\Select::make('template_id')
+                            ->label('Template Poster')
+                            ->options(function (Forms\Get $get) {
+                                $rsId = $this->resolvedRumahSakitId();
+                                if (! $rsId) return [];
+
+                                return PosterTemplate::where('rumah_sakit_id', $rsId)
+                                    ->pluck('nama', 'id');
                             })
+                            ->disabled(fn () => $this->isSuperAdmin() && ! $this->resolvedRumahSakitId())
                             ->searchable()
                             ->required()
                             ->live()
-                            ->afterStateUpdated(fn () => $this->loadPoliList()),
+                            ->afterStateUpdated(function (Forms\Get $get) {
+                                $templateId = (int) $get('template_id') ?: null;
+                                if ($templateId) {
+                                    $rsId = PosterTemplate::where('id', $templateId)->value('rumah_sakit_id');
+                                    $this->hospitalHasExecutiveClinic = (bool) RumahSakit::where('id', $rsId)->value('executive_clinic');
+                                } else {
+                                    $this->hospitalHasExecutiveClinic = false;
+                                }
+                                $this->loadPoliList($get);
+                            }),
+
+                        Forms\Components\Select::make('executive_clinic_filter')
+                            ->label('Filter Klinik')
+                            ->options([
+                                'reguler'               => 'Reguler',
+                                'eksekutif'             => 'Eksekutif',
+                                'reguler_dan_eksekutif' => 'Reguler dan Eksekutif',
+                            ])
+                            ->default('reguler_dan_eksekutif')
+                            ->required()
+                            ->visible(fn () => $this->hospitalHasExecutiveClinic)
+                            ->live()
+                            ->afterStateUpdated(fn (Forms\Get $get) => $this->loadPoliList($get)),
 
                         Forms\Components\DatePicker::make('tanggal')
-                            ->label('2. Pilih Tanggal')
+                            ->label('Pilih Tanggal')
                             ->required()
                             ->native(false)
+                            ->displayFormat('d/m/Y')
+                            ->format('Y-m-d')
+                            ->default(now()->format('Y-m-d'))
                             ->live()
-                            ->afterStateUpdated(fn () => $this->loadPoliList()),
+                            ->afterStateUpdated(fn (Forms\Get $get) => $this->loadPoliList($get)),
 
                         Forms\Components\FileUpload::make('foto_hero')
-                            ->label('4. Upload Foto Hero')
+                            ->label('Upload Foto Hero')
                             ->image()
                             ->directory('poster-tmp')
                             ->disk('public')
@@ -122,7 +199,7 @@ class GeneratePosterPage extends Page
                             ->helperText('Foto yang akan menjadi background layer bawah poster.'),
 
                         Forms\Components\Textarea::make('keterangan')
-                            ->label('5. Keterangan Hero')
+                            ->label('Keterangan Hero')
                             ->placeholder('Contoh: Tindakan EXILIS Aurora EC')
                             ->rows(2),
                     ])
@@ -133,10 +210,13 @@ class GeneratePosterPage extends Page
 
     // ── Load Poli List ────────────────────────────────────────────────────────
 
-    public function loadPoliList(): void
+    public function loadPoliList(?Forms\Get $get = null): void
     {
-        $templateId = $this->getTemplateId();
-        $tanggal    = $this->getTanggal();
+        $templateId = $get ? ((int) $get('template_id') ?: null) : null;
+        if (! $templateId) $templateId = $this->getTemplateId();
+
+        $tanggal = $get ? $get('tanggal') : null;
+        if (! $tanggal) $tanggal = $this->getTanggal();
 
         if (! $templateId || ! $tanggal) {
             $this->poli_list = [];
@@ -148,8 +228,24 @@ class GeneratePosterPage extends Page
 
         $rsId = $template->rumah_sakit_id;
 
+        $rs = RumahSakit::find($rsId);
+        $this->hospitalHasExecutiveClinic = (bool) ($rs?->executive_clinic);
+
+        // Read executive clinic filter value
+        $filter = $get ? $get('executive_clinic_filter') : null;
+        if (! $filter) $filter = $this->getExecutiveClinicFilter();
+        if (! $filter) $filter = 'reguler_dan_eksekutif';
+
+        // Ensure tanggal only contains the date part (Y-m-d) in case frontend DatePicker sends a full datetime string
+        $parsedTanggal = \Carbon\Carbon::parse($tanggal)->format('Y-m-d');
+
         $this->poli_list = PoliKlinik::where('rumah_sakit_id', $rsId)
             ->where('aktif', true)
+            ->whereHas('jadwalHarian', function ($q) use ($parsedTanggal, $filter) {
+                $q->whereDate('tanggal', $parsedTanggal)
+                  ->when($filter === 'reguler',   fn ($q) => $q->where('is_executive', 0))
+                  ->when($filter === 'eksekutif', fn ($q) => $q->where('is_executive', 1));
+            })
             ->orderBy('nama')
             ->get()
             ->map(fn ($poli) => [
@@ -160,6 +256,13 @@ class GeneratePosterPage extends Page
             ])
             ->values()
             ->toArray();
+
+        \Illuminate\Support\Facades\Log::info('loadPoliList execution', [
+            'templateId' => $templateId,
+            'tanggal'    => $tanggal,
+            'filter'     => $filter,
+            'count'      => count($this->poli_list),
+        ]);
     }
 
     // ── Poli List Actions ─────────────────────────────────────────────────────
@@ -195,8 +298,21 @@ class GeneratePosterPage extends Page
         [$template, $tanggal] = $this->resolveTemplateAndTanggal();
         if (! $template) return;
 
+        if (! $this->hasJadwalHarianData($template->rumah_sakit_id, $tanggal)) {
+            Notification::make()
+                ->title('Belum ada Jadwal Harian')
+                ->body('Silakan isi jadwal harian terlebih dahulu untuk tanggal yang dipilih.')
+                ->warning()
+                ->send();
+            return;
+        }
+
         if (empty($this->poli_list)) {
-            Notification::make()->title('Pilih template dan tanggal terlebih dahulu.')->warning()->send();
+            Notification::make()
+                ->title('Tidak ada poliklinik untuk ditampilkan.')
+                ->body('Tidak ada jadwal harian pada tanggal ini.')
+                ->warning()
+                ->send();
             return;
         }
 
@@ -217,17 +333,27 @@ class GeneratePosterPage extends Page
         Storage::disk('public')->makeDirectory('poster-tmp');
         $this->form->getState();
 
-        $visibleCount = collect($this->poli_list)->where('visible', true)->count();
-        if ($visibleCount === 0) {
+        [$template, $tanggal] = $this->resolveTemplateAndTanggal();
+        if (! $template) return null;
+
+        if (! $this->hasJadwalHarianData($template->rumah_sakit_id, $tanggal)) {
             Notification::make()
-                ->title('Minimal 1 poliklinik harus ditampilkan.')
-                ->danger()
+                ->title('Belum ada Jadwal Harian')
+                ->body('Silakan isi jadwal harian terlebih dahulu untuk tanggal yang dipilih.')
+                ->warning()
                 ->send();
             return null;
         }
 
-        [$template, $tanggal] = $this->resolveTemplateAndTanggal();
-        if (! $template) return null;
+        $visibleCount = collect($this->poli_list)->where('visible', true)->count();
+        if ($visibleCount === 0) {
+            Notification::make()
+                ->title('Minimal 1 poliklinik harus ditampilkan.')
+                ->body('Pastikan ada poliklinik yang dicentang pada daftar poli.')
+                ->warning()
+                ->send();
+            return null;
+        }
 
         $html     = $this->buildHtml($template, $tanggal);
         $fotoHero = $this->getFotoHero();
@@ -319,6 +445,14 @@ class GeneratePosterPage extends Page
         return $result;
     }
 
+    /** Check whether jadwal harian exists for a given RS and date. */
+    private function hasJadwalHarianData(int $rsId, Carbon $tanggal): bool
+    {
+        return JadwalHarian::whereDate('tanggal', $tanggal)
+            ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rsId))
+            ->exists();
+    }
+
     /** Validasi & parse template + tanggal. Return [null, null] jika gagal. */
     private function resolveTemplateAndTanggal(): array
     {
@@ -339,32 +473,27 @@ class GeneratePosterPage extends Page
         return [$template, Carbon::parse($tanggalStr)];
     }
 
-    /** Bangun data jadwal per poli dari jadwal harian + praktek, lalu render HTML template. */
+    /** Bangun data jadwal per poli dari jadwal harian, lalu render HTML template. */
     private function buildHtml(PosterTemplate $template, Carbon $tanggal): string
     {
-        $rsId    = $template->rumah_sakit_id;
-        $hariIni = strtoupper($tanggal->locale('id')->dayName);
+        $rsId = $template->rumah_sakit_id;
+
+        $filter = $this->getExecutiveClinicFilter();
 
         $jadwalHarian = JadwalHarian::whereDate('tanggal', $tanggal)
             ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rsId))
+            ->when($filter === 'reguler',   fn ($q) => $q->where('is_executive', 0))
+            ->when($filter === 'eksekutif', fn ($q) => $q->where('is_executive', 1))
             ->with(['poliklinik', 'dokter'])
             ->get()
             ->groupBy('poliklinik_id');
-
-        $jadwalPraktek = JadwalPraktek::where('hari', $hariIni)
-            ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rsId))
-            ->with(['poliklinik', 'dokter'])
-            ->get()
-            ->groupBy('poliklinik_id');
-
-        $merged = $jadwalHarian->union($jadwalPraktek);
 
         $poliList = collect($this->poli_list)
             ->where('visible', true)
             ->sortBy('order')
             ->values()
-            ->map(function ($item) use ($merged, $rsId) {
-                $rows = $merged->get($item['id'], collect());
+            ->map(function ($item) use ($jadwalHarian, $rsId) {
+                $rows = $jadwalHarian->get($item['id'], collect());
                 $poli = $rows->first()?->poliklinik
                     ?? PoliKlinik::where('id', $item['id'])->where('rumah_sakit_id', $rsId)->first();
                 if (! $poli) return null;
@@ -372,11 +501,11 @@ class GeneratePosterPage extends Page
                 return [
                     'poli'   => $poli,
                     'jadwal' => $rows->map(fn ($r) => [
-                        'nama_dokter'  => $r->dokter?->nama ?? $r->nama_dokter ?? '-',
-                        'jam_mulai'    => ($r->waktu_mulai ?? $r->jam_mulai)?->format('H:i'),
-                        'jam_selesai'  => ($r->waktu_selesai ?? $r->jam_selesai)?->format('H:i'),
-                        'libur'        => ($r->status_layanan?->value ?? '') === 'LIBUR',
-                        'is_executive' => (bool) ($r->is_executive ?? false),
+                        'nama_dokter'       => $r->dokter?->nama ?? $r->nama_dokter ?? '-',
+                        'jam_mulai'         => $r->jam_mulai?->format('H:i'),
+                        'jam_selesai'       => $r->jam_selesai?->format('H:i'),
+                        'libur'             => ($r->status_layanan?->value ?? '') === 'LIBUR',
+                        'is_executive'      => (bool) ($r->is_executive ?? false),
                         'sesuai_perjanjian' => (bool) ($r->sesuai_perjanjian ?? false),
                     ])->toArray(),
                 ];

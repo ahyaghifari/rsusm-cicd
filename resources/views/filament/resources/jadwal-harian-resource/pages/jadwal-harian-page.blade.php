@@ -205,6 +205,17 @@
                     <span class="text-gray-800 dark:text-gray-500 font-normal text-sm">
                         — {{ $activeTanggal ? \Carbon\Carbon::parse($activeTanggal)->translatedFormat('d F Y') : '' }}
                     </span>
+                    @if($this->hasExecutiveClinic() && $this->hasJadwalHarianData() && $this->executiveClinicFilter !== 'all')
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold
+                                     {{ $this->executiveClinicFilter === 'eksekutif' ? 'bg-amber-100 text-amber-700 ring-1 ring-amber-300' : 'bg-blue-100 text-blue-700 ring-1 ring-blue-300' }}">
+                            {{ $this->executiveClinicFilter === 'eksekutif' ? 'Eksekutif' : 'Reguler' }}
+                            <button wire:click="$set('executiveClinicFilter', 'all')" class="hover:opacity-70">
+                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </span>
+                    @endif
                 </div>
             </x-slot>
 
@@ -277,11 +288,7 @@
                             <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-48">Poliklinik <span class="text-red-500">*</span></th>
                             <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-48">Dokter</th>
                             <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-40">Nama Dokter</th>
-                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-28">Jam Mulai <span class="text-red-500">*</span></th>
-                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-28">Jam Selesai</th>
-                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-32">Status <span class="text-red-500">*</span></th>
-                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-32">Catatan</th>
-                            @if($this->hasExecutiveClinic())
+                             @if($this->hasExecutiveClinic())
                             <th class="px-3 py-3 text-xs font-semibold text-amber-600 dark:text-amber-400 text-center whitespace-nowrap">
                                 <span class="inline-flex items-center gap-0.5">
                                     <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -289,6 +296,10 @@
                                 </span>
                             </th>
                             @endif
+                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-28">Jam Mulai <span class="text-red-500">*</span></th>
+                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-28">Jam Selesai</th>
+                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-32">Status <span class="text-red-500">*</span></th>
+                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-32">Catatan</th>
                             <th class="px-3 py-3 w-10 text-center"></th>
                         </tr>
                     </thead>
@@ -361,6 +372,14 @@
                                         class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500"/>
                                 </td>
 
+                                 {{-- Executive --}}
+                                @if($this->hasExecutiveClinic())
+                                <td class="px-2 py-1.5 text-center">
+                                    <input type="checkbox" wire:model.boolean="rows.{{ $uuid }}.is_executive"
+                                        class="rounded border-amber-300 text-amber-500 shadow-sm focus:ring-amber-400"/>
+                                </td>
+                                @endif
+
                                 {{-- Jam Mulai --}}
                                 <td class="px-2 py-1.5">
                                     <input type="time" wire:model="rows.{{ $uuid }}.jam_mulai"
@@ -389,14 +408,6 @@
                                     <input type="text" wire:model="rows.{{ $uuid }}.catatan" placeholder="Catatan..."
                                         class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500"/>
                                 </td>
-
-                                {{-- Executive --}}
-                                @if($this->hasExecutiveClinic())
-                                <td class="px-2 py-1.5 text-center">
-                                    <input type="checkbox" wire:model="rows.{{ $uuid }}.is_executive"
-                                        class="rounded border-amber-300 text-amber-500 shadow-sm focus:ring-amber-400"/>
-                                </td>
-                                @endif
 
                                 {{-- Remove --}}
                                 <td class="px-2 py-1.5 text-center">

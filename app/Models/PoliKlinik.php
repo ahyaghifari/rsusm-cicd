@@ -46,4 +46,9 @@ class PoliKlinik extends Model
     {
         return $this->hasMany(JadwalPraktek::class, 'poliklinik_id');
     }
+
+    public function jadwalHarian(): HasMany
+    {
+        return $this->hasMany(JadwalHarian::class, 'poliklinik_id');
+    }
 }

@@ -38,6 +38,9 @@ class JadwalHarianPage extends Page
     public array $rows = [];
     public array $rowsCache = [];
 
+    // Executive clinic filter: 'all' | 'reguler' | 'eksekutif'
+    public string $executiveClinicFilter = 'all';
+
     // Modal perubahan
     public bool  $showPerubahan  = false;
     public array $dataPerubahan  = ['ditambah' => [], 'diubah' => []];
@@ -82,6 +85,17 @@ class JadwalHarianPage extends Page
                     ->visible(fn () => JadwalHarianResource::isSuperAdmin())
                     ->live(),
 
+                Forms\Components\Select::make('executiveClinicFilter')
+                    ->label('Filter Klinik')
+                    ->options([
+                        'all'       => 'Semua',
+                        'reguler'   => 'Reguler',
+                        'eksekutif' => 'Eksekutif',
+                    ])
+                    ->default('all')
+                    ->visible(fn () => $this->hasExecutiveClinic() && $this->hasJadwalHarianData())
+                    ->live(),
+
             ])
             ->statePath('')
             ->columns(2);
@@ -106,6 +120,16 @@ class JadwalHarianPage extends Page
         $rsId = $this->getActiveRumahSakitId();
         if (! $rsId) return false;
         return (bool) RumahSakit::where('id', $rsId)->value('executive_clinic');
+    }
+
+    public function hasJadwalHarianData(): bool
+    {
+        $rsId = $this->getActiveRumahSakitId();
+        if (! $rsId || ! $this->activeTanggal) return false;
+
+        return JadwalHarian::whereDate('tanggal', $this->activeTanggal)
+            ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rsId))
+            ->exists();
     }
 
     public function getNamaHariAktif(): string
@@ -163,6 +187,8 @@ class JadwalHarianPage extends Page
             ->whereHas('poliklinik', function ($q) use ($rsId) {
                 $q->where('rumah_sakit_id', $rsId);
             })
+            ->when($this->executiveClinicFilter === 'reguler',   fn ($q) => $q->where('is_executive', 0))
+            ->when($this->executiveClinicFilter === 'eksekutif', fn ($q) => $q->where('is_executive', 1))
             ->get();
 
         $newRows = [];
@@ -176,7 +202,7 @@ class JadwalHarianPage extends Page
                 'jam_selesai'    => $j->jam_selesai?->format('H:i'),
                 'status_layanan' => $j->status_layanan->value,
                 'catatan'        => $j->catatan,
-                'is_executive'   => $j->is_executive ? '1' : '0',
+                'is_executive'   => (bool) $j->is_executive,
                 'sumber'         => $j->sumber,
             ];
         }
@@ -230,6 +256,8 @@ class JadwalHarianPage extends Page
             ->whereHas('poliklinik', function ($q) use ($rsId) {
                 $q->where('rumah_sakit_id', $rsId);
             })
+            ->when($this->executiveClinicFilter === 'reguler',   fn ($q) => $q->where('is_executive', 0))
+            ->when($this->executiveClinicFilter === 'eksekutif', fn ($q) => $q->where('is_executive', 1))
             ->get();
 
         if ($jadwals->isEmpty()) {
@@ -250,7 +278,7 @@ class JadwalHarianPage extends Page
                 'jam_selesai'    => $j->waktu_selesai?->format('H:i'),
                 'status_layanan' => 'BUKA',
                 'catatan'        => $j->catatan,
-                'is_executive'   => $j->is_executive ? '1' : '0',
+                'is_executive'   => (bool) $j->is_executive,
                 'sumber'         => 'GENERATE',
             ];
         }
@@ -269,11 +297,22 @@ class JadwalHarianPage extends Page
 
     public function updatedSelectedRumahSakitId(): void
     {
-        $this->rowsCache           = [];
+        $this->rowsCache             = [];
         $this->selectedUnitLayananId = null;
-        $this->rows                = [];
+        $this->rows                  = [];
+        $this->executiveClinicFilter = 'all';
 
         if ($this->selectedRumahSakitId) {
+            $this->loadRows();
+        }
+    }
+
+    public function updatedExecutiveClinicFilter(): void
+    {
+        $this->rowsCache = [];
+        $this->rows      = [];
+
+        if ($this->getActiveRumahSakitId() && $this->activeTanggal) {
             $this->loadRows();
         }
     }
@@ -289,6 +328,8 @@ class JadwalHarianPage extends Page
 
     public function addRow(): void
     {
+        $isExecutive = $this->executiveClinicFilter === 'eksekutif';
+
         $this->rows[(string) Str::uuid()] = [
             'id'             => null,
             'poliklinik_id'  => null,
@@ -298,7 +339,7 @@ class JadwalHarianPage extends Page
             'jam_selesai'    => null,
             'status_layanan' => 'BUKA',
             'catatan'        => null,
-            'is_executive'   => '0',
+            'is_executive'   => $isExecutive,
             'sumber'         => 'MANUAL',
         ];
     }
@@ -378,6 +419,8 @@ class JadwalHarianPage extends Page
         DB::transaction(function () use ($poliIds, $existingJadwal) {
             JadwalHarian::whereDate('tanggal', $this->activeTanggal)
                 ->whereIn('poliklinik_id', $poliIds)
+                ->when($this->executiveClinicFilter === 'reguler',   fn ($q) => $q->where('is_executive', 0))
+                ->when($this->executiveClinicFilter === 'eksekutif', fn ($q) => $q->where('is_executive', 1))
                 ->delete();
 
             $userId = Auth::id();
@@ -485,7 +528,9 @@ class JadwalHarianPage extends Page
             $q->whereDate('tanggal', $this->activeTanggal)
               ->whereHas('poliklinik', function ($q2) use ($rsId) {
                   $q2->where('rumah_sakit_id', $rsId);
-              });
+              })
+              ->when($this->executiveClinicFilter === 'reguler',   fn ($q2) => $q2->where('is_executive', 0))
+              ->when($this->executiveClinicFilter === 'eksekutif', fn ($q2) => $q2->where('is_executive', 1));
         };
 
         // DITAMBAH: baris manual dari jadwal_harian langsung
