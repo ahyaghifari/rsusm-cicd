@@ -532,7 +532,6 @@ class GeneratePosterPage extends Page
             'uploadFonts'     => $this->resolveUploadFonts($template),
             'keterangan'      => $this->getKeterangan(),
             'poliList'        => $poliList,
-            'forScreenshot'   => $forScreenshot,
         ])->render();
     }
 }
