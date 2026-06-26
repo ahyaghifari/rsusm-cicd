@@ -66,6 +66,7 @@ class PosterTemplate extends Model
                 'header_bg_warna'   => '#7c3aed',
                 'header_bg_warna2'  => '',        // kosong = solid, isi = gradasi ke warna ini
                 'header_radius'     => 8,         // px
+                'header_width_pct'  => 70,        // % lebar header nama poli relatif terhadap card
                 'card_bg_warna'     => '#ffffff',
                 'card_radius'       => 8,
                 'card_border_warna' => '#e5e7eb',

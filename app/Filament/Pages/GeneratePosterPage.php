@@ -503,7 +503,7 @@ class GeneratePosterPage extends Page
             ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rsId))
             ->when($filter === 'reguler',   fn ($q) => $q->where('is_executive', 0))
             ->when($filter === 'eksekutif', fn ($q) => $q->where('is_executive', 1))
-            ->with(['poliklinik', 'dokter'])
+            ->with(['poliklinik', 'dokter', 'perubahan'])
             ->get()
             ->groupBy('poliklinik_id');
 
@@ -519,14 +519,24 @@ class GeneratePosterPage extends Page
 
                 return [
                     'poli'   => $poli,
-                    'jadwal' => $rows->map(fn ($r) => [
-                        'nama_dokter'       => $r->dokter?->nama ?? $r->nama_dokter ?? '-',
-                        'jam_mulai'         => $r->jam_mulai?->format('H:i'),
-                        'jam_selesai'       => $r->jam_selesai?->format('H:i'),
-                        'libur'             => ($r->status_layanan?->value ?? '') === 'LIBUR',
-                        'is_executive'      => (bool) ($r->is_executive ?? false),
-                        'sesuai_perjanjian' => (bool) ($r->sesuai_perjanjian ?? false),
-                    ])->toArray(),
+                    'jadwal' => $rows->map(function ($r) {
+                        $p = $r->perubahan;
+
+                        // Use perubahan values if available, otherwise base jadwal harian values
+                        $jamMulai    = $p?->jam_mulai    ?? $r->jam_mulai;
+                        $jamSelesai  = $p?->jam_selesai  ?? $r->jam_selesai;
+                        $statusRaw   = $p?->status_layanan ?? ($r->status_layanan?->value ?? 'BUKA');
+
+                        return [
+                            'nama_dokter'       => $r->dokter?->nama ?? $r->nama_dokter ?? '-',
+                            'jam_mulai'         => $jamMulai?->format('H:i'),
+                            'jam_selesai'       => $jamSelesai?->format('H:i'),
+                            'libur'             => $statusRaw === 'LIBUR',
+                            'is_executive'      => (bool) ($r->is_executive ?? false),
+                            'sesuai_perjanjian' => (bool) ($r->sesuai_perjanjian ?? false),
+                            'catatan'           => $p?->catatan ?: ($r->catatan ?? ''),
+                        ];
+                    })->toArray(),
                 ];
             })
             ->filter(fn ($p) => ! empty($p['jadwal']))

@@ -98,6 +98,15 @@
         $initialCardBorderWidth = (int) ($savedConfig['grid']['card_border_width']     ?? 1);
         $initialCardRadius  = (int)   ($savedConfig['grid']['card_radius']             ?? 8);
 
+        // Catatan (note) style
+        $initialCatatanBg     = ($savedConfig['grid']['catatan_bg_warna']     ?? '#fef9c3');
+        $initialCatatanWarna  = ($savedConfig['grid']['catatan_warna']        ?? '#1a1a2e');
+        $initialCatatanBorder = ($savedConfig['grid']['catatan_border_warna'] ?? '#fde68a');
+        $initialCatatanRadius = (int) ($savedConfig['grid']['catatan_radius'] ?? 4);
+        $initialCatatanSize   = (int) ($savedConfig['grid']['catatan_size']   ?? 8);
+        $initialCatatanFont   =         ($savedConfig['grid']['catatan_font']   ?? 'Poppins');
+        $initialCatatanWeight =         ($savedConfig['grid']['catatan_weight'] ?? '400');
+
         // Preview pakai jadwal praktek/harian hari ini (4 poli pertama RS ini)
         $previewCardWidthPx = (($activeZones['zona_jadwal']['w'] ?? 1000) - ($initialGap * ($initialKolom - 1))) / max($initialKolom, 1);
         $previewSizeNamaPoli  = max(8, round($previewCardWidthPx * 0.045));
@@ -178,6 +187,13 @@
             initialSizeJam: {{ (int) ($savedConfig['grid']['size_jam'] ?? $previewSizeJam) }},
             initialEcBg: @js($savedConfig['grid']['ec_bg_warna'] ?? '#F0C040'),
             initialEcText: @js($savedConfig['grid']['ec_text_warna'] ?? '#1a1a2e'),
+            initialCatatanBg: @js($initialCatatanBg),
+            initialCatatanWarna: @js($initialCatatanWarna),
+            initialCatatanBorder: @js($initialCatatanBorder),
+            initialCatatanRadius: {{ $initialCatatanRadius }},
+            initialCatatanSize: {{ $initialCatatanSize }},
+            initialCatatanFont: @js($initialCatatanFont),
+            initialCatatanWeight: @js($initialCatatanWeight),
             state: $wire.$entangle('config')
         })"
         x-init="init()"
@@ -290,7 +306,13 @@
                                 <input type="range" x-model="headerRadius" @input="saveConfig()" min="0" max="32" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none accent-indigo-500">
                                 <input type="number" x-model="headerRadius" @input="saveConfig()" min="0" max="32" class="w-14 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
                             </div>
-                            
+
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Lebar Header (%)</span>
+                                <input type="range" x-model.number="headerWidthPct" @input="saveConfig()" min="30" max="100" step="5" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none accent-indigo-500">
+                                <input type="number" x-model.number="headerWidthPct" @input="saveConfig()" min="30" max="100" step="5" class="w-14 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
+                            </div>
+
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-semibold text-gray-600">Font Text</span>
                                 <select x-model="headerFont" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-no-repeat bg-right bg-white shadow-sm focus:ring-2 focus:ring-indigo-500" style="background-size: 1.25rem; background-position: right 0.25rem center;">
@@ -406,6 +428,71 @@
                         </div>
                     </div>
 
+                    {{-- Catatan Style --}}
+                    <div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="h-px flex-1 bg-gray-200"></div>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Catatan / Note</span>
+                            <div class="h-px flex-1 bg-gray-200"></div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-gray-600">Background</span>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" x-model="catatanBg" @input="saveConfig()" class="h-8 w-10 cursor-pointer rounded-lg border border-gray-200 p-0.5 shadow-sm">
+                                    <input type="text" x-model="catatanBg" @input="saveConfig()" class="w-24 text-xs text-center border border-gray-200 rounded-lg py-1.5 font-mono shadow-sm focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-gray-600">Warna Teks</span>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" x-model="catatanWarna" @input="saveConfig()" class="h-8 w-10 cursor-pointer rounded-lg border border-gray-200 p-0.5 shadow-sm">
+                                    <input type="text" x-model="catatanWarna" @input="saveConfig()" class="w-24 text-xs text-center border border-gray-200 rounded-lg py-1.5 font-mono shadow-sm focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-gray-600">Border</span>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" x-model="catatanBorder" @input="saveConfig()" class="h-8 w-10 cursor-pointer rounded-lg border border-gray-200 p-0.5 shadow-sm">
+                                    <input type="text" x-model="catatanBorder" @input="saveConfig()" class="w-24 text-xs text-center border border-gray-200 rounded-lg py-1.5 font-mono shadow-sm focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Radius (px)</span>
+                                <input type="range" x-model.number="catatanRadius" @input="saveConfig()" min="0" max="20" step="1" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none accent-violet-500">
+                                <input type="number" x-model.number="catatanRadius" @input="saveConfig()" min="0" max="20" step="1" class="w-14 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
+                            </div>
+
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Ukuran Font (px)</span>
+                                <input type="range" x-model.number="catatanSize" @input="saveConfig()" min="5" max="16" step="1" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none accent-violet-500">
+                                <input type="number" x-model.number="catatanSize" @input="saveConfig()" min="5" max="16" step="1" class="w-14 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-gray-600">Font Family</span>
+                                <select x-model="catatanFont" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 appearance-none bg-no-repeat" style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22/%3E%3C/svg%3E'); background-position: right 0.5rem center; background-size: 1.25rem;">
+                                    @foreach ($this::$availableFonts as $f)
+                                    <option value="{{ $f }}">{{ $f }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-gray-600">Font Weight</span>
+                                <select x-model="catatanWeight" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 appearance-none bg-no-repeat" style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22/%3E%3C/svg%3E'); background-position: right 0.5rem center; background-size: 1.25rem;">
+                                    @foreach ($this::$availableFontWeights as $val => $label)
+                                    <option value="{{ $val }}">{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                     {{-- Mini Preview --}}
                     <div class="pt-5 mt-2 border-t border-gray-200">
                         <div class="flex justify-center">
@@ -415,7 +502,7 @@
                                     background: headerBg2 ? ('linear-gradient(135deg,' + headerBg1 + ',' + headerBg2 + ')') : headerBg1,
                                     borderRadius: headerRadius + 'px',
                                     padding: '8px 14px',
-                                    width: '70%',
+                                    width: headerWidthPct + '%',
                                     position: 'relative', zIndex: 2, lineHeight: 1.2,
                                     boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
                                 }">
@@ -439,6 +526,20 @@
                                             <span :style="{ fontSize: sizeNamaDokter + 'px', fontFamily: fontNamaDokter, fontWeight: parseInt(weightNamaDokter), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }">dr. Dokter</span>
                                             <span :style="{ fontSize: sizeJam + 'px', fontFamily: fontJam, color: '#1A1A1A', whiteSpace: 'nowrap', fontWeight: parseInt(weightJam), marginLeft: '4px' }">08:00</span>
                                         </div>
+                                        {{-- Sample catatan --}}
+                                        <div :style="{
+                                            display: 'inline-block',
+                                            background: catatanBg,
+                                            color: catatanWarna,
+                                            border: '1px solid ' + catatanBorder,
+                                            borderRadius: catatanRadius + 'px',
+                                            padding: '3px 6px',
+                                            fontSize: catatanSize + 'px',
+                                            fontFamily: catatanFont,
+                                            fontWeight: parseInt(catatanWeight),
+                                            marginTop: '4px',
+                                            lineHeight: 1.3
+                                        }">Khusus dengan jaminan Umum &amp; Asuransi</div>
                                     </div>
                                 </div>
                             </div>
@@ -730,7 +831,7 @@
                                         background: headerBg2 ? ('linear-gradient(135deg,' + headerBg1 + ',' + headerBg2 + ')') : headerBg1,
                                         borderRadius: (headerRadius * 0.5) + 'px',
                                         padding: (4 * 0.5) + 'px ' + (8 * 0.5) + 'px',
-                                        width: '70%',
+                                        width: headerWidthPct + '%',
                                         position: 'relative', zIndex: 2, lineHeight: 1.2,
                                         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                                     }">
@@ -758,6 +859,23 @@
                                             @empty
                                             <span :style="{ fontSize: (sizeNamaDokter * 0.5) + 'px', color: '#9ca3af', fontStyle: 'italic' }">—</span>
                                             @endforelse
+
+                                            {{-- Sample catatan (first poli only) --}}
+                                            @if ($loop->first)
+                                            <div :style="{
+                                                display: 'inline-block',
+                                                background: catatanBg,
+                                                color: catatanWarna,
+                                                border: '0.5px solid ' + catatanBorder,
+                                                borderRadius: (catatanRadius * 0.5) + 'px',
+                                                padding: '1.5px 3px',
+                                                fontSize: (catatanSize * 0.5) + 'px',
+                                                fontFamily: catatanFont,
+                                                fontWeight: parseInt(catatanWeight),
+                                                marginTop: '2px',
+                                                lineHeight: 1.3
+                                            }">Khusus dengan jaminan Umum &amp; Asuransi</div>
+                                            @endif
                                         </div>
 
                                     </div>
@@ -822,6 +940,7 @@
             headerBg1: config.initialHeaderBg1 ?? '#7c3aed',
             headerBg2: config.initialHeaderBg2 ?? '',
             headerRadius: config.initialHeaderRadius ?? 8,
+            headerWidthPct: config.initialHeaderWidthPct ?? 70,
             headerFont: config.initialHeaderFont ?? 'Montserrat',
             headerWarna: config.initialHeaderWarna ?? '#FFFFFF',
             cardBg: config.initialCardBg ?? '#ffffff',
@@ -852,6 +971,13 @@
             keteranganWeight: config.initialKeteranganWeight ?? '600',
             keteranganBg: config.initialKeteranganBg ?? '',
             keteranganAlign: config.initialKeteranganAlign ?? 'left',
+            catatanBg: config.initialCatatanBg ?? '#fef9c3',
+            catatanWarna: config.initialCatatanWarna ?? '#1a1a2e',
+            catatanBorder: config.initialCatatanBorder ?? '#fde68a',
+            catatanRadius: config.initialCatatanRadius ?? 4,
+            catatanSize: config.initialCatatanSize ?? 8,
+            catatanFont: config.initialCatatanFont ?? 'Poppins',
+            catatanWeight: config.initialCatatanWeight ?? '400',
             state: config.state,
 
             init() {
@@ -863,7 +989,8 @@
                     if (this.state.tinggi_hero !== undefined) this.heroPercent = this.state.tinggi_hero;
                     if (this.state.grid?.header_bg_warna !== undefined)  this.headerBg1 = this.state.grid.header_bg_warna;
                     if (this.state.grid?.header_bg_warna2 !== undefined) this.headerBg2 = this.state.grid.header_bg_warna2;
-                    if (this.state.grid?.header_radius !== undefined)    this.headerRadius = this.state.grid.header_radius;
+                    if (this.state.grid?.header_radius !== undefined)     this.headerRadius = this.state.grid.header_radius;
+                    if (this.state.grid?.header_width_pct !== undefined)  this.headerWidthPct = this.state.grid.header_width_pct;
                     if (this.state.grid?.font_nama_poli?.nama !== undefined) this.headerFont = this.state.grid.font_nama_poli.nama;
                     if (this.state.grid?.warna_nama_poli !== undefined)  this.headerWarna = this.state.grid.warna_nama_poli;
                     if (this.state.grid?.card_bg_warna !== undefined)     this.cardBg = this.state.grid.card_bg_warna;
@@ -878,6 +1005,13 @@
                     if (this.state.grid?.weight_nama_dokter !== undefined) this.weightNamaDokter = this.state.grid.weight_nama_dokter;
                     if (this.state.grid?.weight_jam !== undefined)         this.weightJam = this.state.grid.weight_jam;
                     if (this.state.grid?.card_padding_top !== undefined)  this.cardPaddingTop = this.state.grid.card_padding_top;
+                    if (this.state.grid?.catatan_bg_warna !== undefined)     this.catatanBg = this.state.grid.catatan_bg_warna;
+                    if (this.state.grid?.catatan_warna !== undefined)        this.catatanWarna = this.state.grid.catatan_warna;
+                    if (this.state.grid?.catatan_border_warna !== undefined) this.catatanBorder = this.state.grid.catatan_border_warna;
+                    if (this.state.grid?.catatan_radius !== undefined)       this.catatanRadius = this.state.grid.catatan_radius;
+                    if (this.state.grid?.catatan_size !== undefined)         this.catatanSize = this.state.grid.catatan_size;
+                    if (this.state.grid?.catatan_font !== undefined)         this.catatanFont = this.state.grid.catatan_font;
+                    if (this.state.grid?.catatan_weight !== undefined)       this.catatanWeight = this.state.grid.catatan_weight;
                     if (this.state.zona_logo?.scale !== undefined)       this.logoScale = this.state.zona_logo.scale;
                     if (this.state.zona_logo?.opacity !== undefined)     this.logoOpacity = this.state.zona_logo.opacity;
                     if (this.state.zona_logo?.padding !== undefined)     this.logoPadding = this.state.zona_logo.padding;
@@ -967,6 +1101,7 @@
                         header_bg_warna:  this.headerBg1,
                         header_bg_warna2: this.headerBg2,
                         header_radius:    parseInt(this.headerRadius) || 0,
+                        header_width_pct: parseInt(this.headerWidthPct) || 70,
                         font_nama_poli:   { sumber: 'google', nama: this.headerFont },
                         warna_nama_poli:  this.headerWarna,
                         card_bg_warna:     this.cardBg,
@@ -981,6 +1116,13 @@
                         weight_nama_dokter: this.weightNamaDokter,
                         weight_jam:        this.weightJam,
                         card_padding_top:  parseInt(this.cardPaddingTop) || 0,
+                        catatan_bg_warna:     this.catatanBg,
+                        catatan_warna:        this.catatanWarna,
+                        catatan_border_warna: this.catatanBorder,
+                        catatan_radius:       parseInt(this.catatanRadius) || 0,
+                        catatan_size:         parseInt(this.catatanSize) || 8,
+                        catatan_font:         this.catatanFont,
+                        catatan_weight:       this.catatanWeight,
                     },
                 };
             },

@@ -345,7 +345,7 @@ body {
         @endphp
         <div class="poli-card">
 
-            <div class="poli-header" style="background:{{ $headerBg }}; border-radius:{{ $headerRadius }}px; width:70%; position:relative; z-index:2;">
+            <div class="poli-header" style="background:{{ $headerBg }}; border-radius:{{ $headerRadius }}px; width:{{ $grid['header_width_pct'] ?? 70 }}%; position:relative; z-index:2;">
                 <span style="
                     font-family:{{ $fontPoli }};
                     font-size:{{ $headerFontPx }}px;
@@ -363,7 +363,7 @@ body {
                             font-family:{{ $fontNamaDokter }};
                             font-size:{{ $sizeNamaDokter }}px;
                             font-weight:{{ $weightNamaDokter }};
-                            color:{{ $row['libur'] ? '#9ca3af' : $grid['warna_nama_dokter'] }};
+                            color:{{ $grid['warna_nama_dokter'] }};
                             flex:1; min-width:0;
                             overflow:hidden;
                             text-overflow:ellipsis;
@@ -392,6 +392,23 @@ body {
                         ">{{ $row['jam_mulai'] }}–{{ $row['jam_selesai'] ?? 'selesai' }}</span>
                         @endif
                     </div>
+
+                    {{-- Catatan (only when filled) --}}
+                    @if (!empty($row['catatan']))
+                    <div style="
+                        display:inline-block;
+                        background:{{ $grid['catatan_bg_warna'] ?? '#fef9c3' }};
+                        color:{{ $grid['catatan_warna'] ?? '#1a1a2e' }};
+                        border:1px solid {{ $grid['catatan_border_warna'] ?? '#fde68a' }};
+                        border-radius:{{ $grid['catatan_radius'] ?? 4 }}px;
+                        padding:3px 6px;
+                        font-size:{{ $grid['catatan_size'] ?? 8 }}px;
+                        font-family:{{ $grid['catatan_font'] ?? 'Poppins' }};
+                        font-weight:{{ $grid['catatan_weight'] ?? '400' }};
+                        margin-top:2px;
+                        line-height:1.35;
+                    ">{{ $row['catatan'] }}</div>
+                    @endif
                     @empty
                     <div style="color:#aaa; font-size:11px; font-style:italic;">Tidak ada jadwal</div>
                     @endforelse
