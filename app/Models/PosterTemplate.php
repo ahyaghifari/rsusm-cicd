@@ -61,7 +61,9 @@ class PosterTemplate extends Model
             ],
             'grid' => [
                 'kolom' => 2,
-                'gap' => 16,
+                'gap'   => 16,   // backward-compat fallback
+                'gap_h' => 16,   // horizontal (antar kolom)
+                'gap_v' => 16,   // vertikal (antar baris card)
                 // Header nama poli: kotak statis (bukan zone/drag), styling via warna/gradasi/radius.
                 'header_bg_warna'   => '#7c3aed',
                 'header_bg_warna2'  => '',        // kosong = solid, isi = gradasi ke warna ini

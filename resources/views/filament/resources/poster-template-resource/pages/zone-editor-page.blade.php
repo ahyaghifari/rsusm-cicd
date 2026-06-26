@@ -87,6 +87,8 @@
 
         $initialKolom = (int) ($savedConfig['grid']['kolom'] ?? 2);
         $initialGap   = (int) ($savedConfig['grid']['gap']   ?? 16);
+        $initialGapH  = (int) ($savedConfig['grid']['gap_h'] ?? $savedConfig['grid']['gap'] ?? 16);
+        $initialGapV  = (int) ($savedConfig['grid']['gap_v'] ?? $savedConfig['grid']['gap'] ?? 16);
         $initialHeroPercent = (int) ($savedConfig['tinggi_hero'] ?? 25);
 
         $initialHeaderBg1   =         ($savedConfig['grid']['header_bg_warna']         ?? '#7c3aed');
@@ -111,7 +113,7 @@
         $initialCatatanWeight =         ($savedConfig['grid']['catatan_weight'] ?? '400');
 
         // Preview pakai jadwal praktek/harian hari ini (4 poli pertama RS ini)
-        $previewCardWidthPx = (($activeZones['zona_jadwal']['w'] ?? 1000) - ($initialGap * ($initialKolom - 1))) / max($initialKolom, 1);
+        $previewCardWidthPx = (($activeZones['zona_jadwal']['w'] ?? 1000) - ($initialGapH * ($initialKolom - 1))) / max($initialKolom, 1);
         $previewSizeNamaPoli  = max(8, round($previewCardWidthPx * 0.045));
         $previewSizeNamaDokter = max(7, round($previewCardWidthPx * 0.04));
         $previewSizeJam       = max(6, round($previewCardWidthPx * 0.035));
@@ -175,6 +177,8 @@
             initialZones: @js($activeZones),
             initialKolom: {{ $initialKolom }},
             initialGap:   {{ $initialGap }},
+            initialGapH:  {{ $initialGapH }},
+            initialGapV:  {{ $initialGapV }},
             initialHeroPercent: {{ $initialHeroPercent }},
             initialHeaderBg1: @js($initialHeaderBg1),
             initialHeaderBg2: @js($initialHeaderBg2),
@@ -257,9 +261,17 @@
                             class="w-full text-center text-sm font-bold bg-white border border-gray-200 rounded-xl px-2 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm">
                     </div>
                     <div class="space-y-1.5">
-                        <span class="text-xs font-semibold text-gray-500">Gap Antar Card</span>
+                        <span class="text-xs font-semibold text-gray-500">Gap Horizontal</span>
                         <div class="relative flex items-center">
-                            <input type="number" x-model.number="gap" @input="saveConfig()" min="0" max="60"
+                            <input type="number" x-model.number="gapH" @input="saveConfig()" min="0" max="60"
+                                class="w-full text-center text-sm font-bold bg-white border border-gray-200 rounded-xl pl-2 pr-6 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm">
+                            <span class="absolute right-3 text-xs font-semibold text-gray-400 pointer-events-none">px</span>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <span class="text-xs font-semibold text-gray-500">Gap Vertikal</span>
+                        <div class="relative flex items-center">
+                            <input type="number" x-model.number="gapV" @input="saveConfig()" min="0" max="60"
                                 class="w-full text-center text-sm font-bold bg-white border border-gray-200 rounded-xl pl-2 pr-6 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm">
                             <span class="absolute right-3 text-xs font-semibold text-gray-400 pointer-events-none">px</span>
                         </div>
@@ -888,7 +900,7 @@
 
                             @if ($key === 'zona_jadwal')
                             <div class="absolute" style="left:6px; top:32px; right:6px;"
-                                :style="{ display: 'grid', gridTemplateColumns: 'repeat(' + kolom + ', 1fr)', gap: gap * 0.5 + 'px', alignContent: 'start', alignItems: 'start' }">
+                                :style="{ display: 'grid', gridTemplateColumns: 'repeat(' + kolom + ', 1fr)', columnGap: gapH * 0.5 + 'px', rowGap: gapV * 0.5 + 'px', alignContent: 'start', alignItems: 'start' }">
                                 @foreach ($previewPoli as $p)
                                 @php
                                     $regularJadwal = $p['jadwal'];
@@ -1016,6 +1028,8 @@
             zones: config.initialZones,
             kolom: config.initialKolom ?? 2,
             gap:   config.initialGap   ?? 16,
+            gapH:  config.initialGapH  ?? 16,
+            gapV:  config.initialGapV  ?? 16,
             heroPercent: config.initialHeroPercent ?? 25,
             shapePoli: config.shapePoliUrl ?? null,
             headerBg1: config.initialHeaderBg1 ?? '#7c3aed',
@@ -1072,6 +1086,8 @@
                 } else {
                     if (this.state.grid?.kolom !== undefined) this.kolom = this.state.grid.kolom;
                     if (this.state.grid?.gap   !== undefined) this.gap   = this.state.grid.gap;
+                    if (this.state.grid?.gap_h !== undefined) this.gapH  = this.state.grid.gap_h;
+                    if (this.state.grid?.gap_v !== undefined) this.gapV  = this.state.grid.gap_v;
                     if (this.state.tinggi_hero !== undefined) this.heroPercent = this.state.tinggi_hero;
                     if (this.state.grid?.header_bg_warna !== undefined)  this.headerBg1 = this.state.grid.header_bg_warna;
                     if (this.state.grid?.header_bg_warna2 !== undefined) this.headerBg2 = this.state.grid.header_bg_warna2;
@@ -1188,7 +1204,9 @@
                     grid: {
                         ...(current.grid ?? {}),
                         kolom: parseInt(this.kolom) || 1,
-                        gap:   parseInt(this.gap)   || 0,
+                        gap:   parseInt(this.gapH)  || 0,
+                        gap_h: parseInt(this.gapH)  || 0,
+                        gap_v: parseInt(this.gapV)  || 0,
                         header_bg_warna:  this.headerBg1,
                         header_bg_warna2: this.headerBg2,
                         header_radius:    parseInt(this.headerRadius) || 0,

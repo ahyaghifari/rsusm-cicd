@@ -299,7 +299,7 @@ body {
             height:{{ $zonaJadwal['h'] }}px;
             overflow:visible;
             column-count:{{ $kolom }};
-            column-gap:{{ $grid['gap'] ?? 16 }}px;
+            column-gap:{{ $grid['gap_h'] ?? $grid['gap'] ?? 16 }}px;
         "
     >
         @php
@@ -319,7 +319,9 @@ body {
             $headerRadius = (int) ($grid['header_radius'] ?? 8);
 
             // Font size: gunakan dari config jika tersedia, fallback ke auto-calc
-            $cardWidthPx     = ($kolom > 0) ? (($zonaJadwal['w'] - ($grid['gap'] ?? 16) * ($kolom - 1)) / $kolom) : $zonaJadwal['w'];
+            $gapH        = (int) ($grid['gap_h'] ?? $grid['gap'] ?? 16);
+            $gapV        = (int) ($grid['gap_v'] ?? $grid['gap'] ?? 16);
+            $cardWidthPx = ($kolom > 0) ? (($zonaJadwal['w'] - $gapH * ($kolom - 1)) / $kolom) : $zonaJadwal['w'];
             $headerFontPx    = (int) ($grid['size_nama_poli'] ?? max(8, round($cardWidthPx * 0.045)));
             $sizeNamaDokter  = (int) ($grid['size_nama_dokter'] ?? max(7, round($cardWidthPx * 0.04)));
             $sizeJam         = (int) ($grid['size_jam'] ?? max(6, round($cardWidthPx * 0.035)));
@@ -337,7 +339,7 @@ body {
             $poli        = $item['poli'];
             $jadwalRows  = $item['jadwal'];
         @endphp
-        <div class="poli-card" style="margin-bottom:{{ $grid['gap'] ?? 16 }}px;">
+        <div class="poli-card" style="margin-bottom:{{ $gapV }}px;">
 
             @php
                 $headerOffsetX    = (int) ($grid['header_offset_x'] ?? 0);
