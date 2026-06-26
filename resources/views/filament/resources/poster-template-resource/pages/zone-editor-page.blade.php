@@ -183,10 +183,10 @@
         x-init="init()"
         class="flex h-full bg-gray-100"
     >
-        {{-- Google Fonts --}}
+        {{-- Google Fonts — daftar font dikelola di ZoneEditorPage::$availableFonts --}}
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Poppins:wght@700&family=Roboto:wght@700&family=Open+Sans:wght@700&family=Lato:wght@700&family=Nunito:wght@700&family=Raleway:wght@700&family=Inter:wght@700&family=Oswald:wght@700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+        <link href="{{ $this->googleFontsUrl }}" rel="stylesheet">
 
         {{-- ── LEFT PANEL: Controls ─────────────────────────────────────────── --}}
         <div class="w-[420px] shrink-0 overflow-y-auto bg-white/90 backdrop-blur-xl border-r border-gray-200 p-6 space-y-6 shadow-2xl relative z-10 custom-scrollbar">
@@ -294,7 +294,7 @@
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-semibold text-gray-600">Font Text</span>
                                 <select x-model="headerFont" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-no-repeat bg-right bg-white shadow-sm focus:ring-2 focus:ring-indigo-500" style="background-size: 1.25rem; background-position: right 0.25rem center;">
-                                    @foreach (['Montserrat','Poppins','Roboto','Open Sans','Lato','Nunito','Raleway','Inter','Oswald','Playfair Display'] as $f)
+                                    @foreach ($this::$availableFonts as $f)
                                     <option value="{{ $f }}">{{ $f }}</option>
                                     @endforeach
                                 </select>
@@ -368,7 +368,7 @@
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-semibold text-gray-600">Font Nama Dokter</span>
                                 <select x-model="fontNamaDokter" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 appearance-none bg-no-repeat" style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22/%3E%3C/svg%3E'); background-position: right 0.5rem center; background-size: 1.25rem;">
-                                    @foreach (['Montserrat','Poppins','Roboto','Open Sans','Lato','Nunito','Raleway','Inter','Oswald','Playfair Display'] as $f)
+                                    @foreach ($this::$availableFonts as $f)
                                     <option value="{{ $f }}">{{ $f }}</option>
                                     @endforeach
                                 </select>
@@ -377,7 +377,7 @@
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-semibold text-gray-600">Font Jam</span>
                                 <select x-model="fontJam" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 appearance-none bg-no-repeat" style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22/%3E%3C/svg%3E'); background-position: right 0.5rem center; background-size: 1.25rem;">
-                                    @foreach (['Montserrat','Poppins','Roboto','Open Sans','Lato','Nunito','Raleway','Inter','Oswald','Playfair Display'] as $f)
+                                    @foreach ($this::$availableFonts as $f)
                                     <option value="{{ $f }}">{{ $f }}</option>
                                     @endforeach
                                 </select>
@@ -386,26 +386,14 @@
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-semibold text-gray-600">Font Weight Nama Dokter</span>
                                 <select x-model="weightNamaDokter" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 appearance-none bg-no-repeat" style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22/%3E%3C/svg%3E'); background-position: right 0.5rem center; background-size: 1.25rem;">
-                                    <option value="300">Light (300)</option>
-                                    <option value="400">Normal (400)</option>
-                                    <option value="500">Medium (500)</option>
-                                    <option value="600">Semibold (600)</option>
-                                    <option value="700">Bold (700)</option>
-                                    <option value="800">Extra Bold (800)</option>
-                                    <option value="900">Black (900)</option>
+                                    @foreach ($this::$availableFontWeights as $val => $label)
+                                    <option value="{{ $val }}">{{ $label }}</option>
+                                    @endforeach
                                 </select>
-                            </div>
-
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-gray-600">Font Weight Jam</span>
                                 <select x-model="weightJam" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 appearance-none bg-no-repeat" style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22/%3E%3C/svg%3E'); background-position: right 0.5rem center; background-size: 1.25rem;">
-                                    <option value="300">Light (300)</option>
-                                    <option value="400">Normal (400)</option>
-                                    <option value="500">Medium (500)</option>
-                                    <option value="600">Semibold (600)</option>
-                                    <option value="700">Bold (700)</option>
-                                    <option value="800">Extra Bold (800)</option>
-                                    <option value="900">Black (900)</option>
+                                    @foreach ($this::$availableFontWeights as $val => $label)
+                                    <option value="{{ $val }}">{{ $label }}</option>
+                                    @endforeach
                                 </select>
                             </div>
 
@@ -531,7 +519,7 @@
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-semibold text-gray-600">Font Family</span>
                                 <select x-model="tanggalFont" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 appearance-none bg-no-repeat" style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22/%3E%3C/svg%3E'); background-position: right 0.5rem center; background-size: 1.25rem;">
-                                    @foreach (['Montserrat','Poppins','Roboto','Open Sans','Lato','Nunito','Raleway','Inter','Oswald','Playfair Display'] as $f)
+                                    @foreach ($this::$availableFonts as $f)
                                     <option value="{{ $f }}">{{ $f }}</option>
                                     @endforeach
                                 </select>
@@ -539,13 +527,9 @@
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-semibold text-gray-600">Font Weight</span>
                                 <select x-model="tanggalWeight" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 appearance-none bg-no-repeat" style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22/%3E%3C/svg%3E'); background-position: right 0.5rem center; background-size: 1.25rem;">
-                                    <option value="300">Light (300)</option>
-                                    <option value="400">Normal (400)</option>
-                                    <option value="500">Medium (500)</option>
-                                    <option value="600">Semibold (600)</option>
-                                    <option value="700">Bold (700)</option>
-                                    <option value="800">Extra Bold (800)</option>
-                                    <option value="900">Black (900)</option>
+                                    @foreach ($this::$availableFontWeights as $val => $label)
+                                    <option value="{{ $val }}">{{ $label }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="flex items-center justify-between">
@@ -584,7 +568,7 @@
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-semibold text-gray-600">Font Family</span>
                                 <select x-model="keteranganFont" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 appearance-none bg-no-repeat" style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22/%3E%3C/svg%3E'); background-position: right 0.5rem center; background-size: 1.25rem;">
-                                    @foreach (['Montserrat','Poppins','Roboto','Open Sans','Lato','Nunito','Raleway','Inter','Oswald','Playfair Display'] as $f)
+                                    @foreach ($this::$availableFonts as $f)
                                     <option value="{{ $f }}">{{ $f }}</option>
                                     @endforeach
                                 </select>
@@ -599,13 +583,9 @@
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-semibold text-gray-600">Font Weight</span>
                                 <select x-model="keteranganWeight" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 appearance-none bg-no-repeat" style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22/%3E%3C/svg%3E'); background-position: right 0.5rem center; background-size: 1.25rem;">
-                                    <option value="300">Light (300)</option>
-                                    <option value="400">Normal (400)</option>
-                                    <option value="500">Medium (500)</option>
-                                    <option value="600">Semibold (600)</option>
-                                    <option value="700">Bold (700)</option>
-                                    <option value="800">Extra Bold (800)</option>
-                                    <option value="900">Black (900)</option>
+                                    @foreach ($this::$availableFontWeights as $val => $label)
+                                    <option value="{{ $val }}">{{ $label }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="flex items-center justify-between">

@@ -363,20 +363,28 @@ class GeneratePosterPage extends Page
 
         try {
             $chromePath = env('CHROME_PATH');
-            if (! $chromePath) {
-                $chromePath = match (PHP_OS_FAMILY) {
-                    'Windows' => 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-                    default => '/usr/bin/chromium-browser'
-                };
+            if (! $chromePath && PHP_OS_FAMILY === 'Windows') {
+                $chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
             }
 
-            Browsershot::html($html)
-                ->setChromePath($chromePath)
+            $browsershot = Browsershot::html($html)
                 ->windowSize(1080, 1920)
                 ->deviceScaleFactor(1)
                 ->fullPage()
-                ->waitUntilNetworkIdle()
-                ->save($outputPath);
+                ->timeout(60)
+                ->addChromiumArguments([
+                    'no-sandbox',
+                    'disable-setuid-sandbox',
+                    'disable-dev-shm-usage',
+                    'disable-gpu',
+                ])
+                ->waitUntilNetworkIdle();
+
+            if ($chromePath) {
+                $browsershot->setChromePath($chromePath);
+            }
+
+            $browsershot->save($outputPath);
         } catch (\Exception $e) {
             Notification::make()
                 ->title('Error render poster')
@@ -524,6 +532,7 @@ class GeneratePosterPage extends Page
             'uploadFonts'     => $this->resolveUploadFonts($template),
             'keterangan'      => $this->getKeterangan(),
             'poliList'        => $poliList,
+            'forScreenshot'   => $forScreenshot,
         ])->render();
     }
 }

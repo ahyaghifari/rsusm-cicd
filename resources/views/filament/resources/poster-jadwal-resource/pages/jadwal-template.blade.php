@@ -60,17 +60,35 @@ body {
 .grid-jadwal {
     display: grid;
     align-content: start;
+    /* Pastikan grid tidak bisa melebar melebihi zona yang ditetapkan */
+    box-sizing: border-box;
 }
 
-.poli-card { display: flex; flex-direction: column; }
+.poli-card {
+    display: flex;
+    flex-direction: column;
+    /* KRITIS: tanpa min-width:0, grid item bisa melebar melebihi 1fr
+       karena default CSS Grid adalah min-width:auto */
+    min-width: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+}
 
 .poli-header {
     padding: 5px 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    /* Clamp header agar tidak bisa melar keluar card */
+    min-width: 0;
+    overflow: hidden;
 }
 
-.poli-body { display: flex; }
+.poli-body {
+    display: flex;
+    /* Ikut min-width:0 agar child flex item tidak overflow card */
+    min-width: 0;
+    overflow: hidden;
+}
 
 .poli-dokter {
     flex: 1;
@@ -78,6 +96,7 @@ body {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    overflow: hidden;
 }
 
     font-size: 9px;
@@ -91,6 +110,10 @@ body {
     align-items: center;
     line-height: 1.35;
     justify-content: space-between;
+}
+
+.poli-card-body-inner {
+    overflow: hidden;
 }
 </style>
 
@@ -113,7 +136,13 @@ body {
     $googleFonts = array_unique($googleFonts);
 @endphp
 
-@if (count($googleFonts))
+{{-- ── Google Fonts — hanya dimuat di preview browser, bukan saat Browsershot render.
+     Browsershot menggunakan font system sebagai fallback agar layout konsisten. --}}
+@php
+    // Deteksi apakah sedang di-render oleh Browsershot (tidak ada HTTP_HOST di CLI/Browsershot)
+    $isScreenshot = app()->runningInConsole() || !request()->hasHeader('X-Livewire');
+@endphp
+@if (count($googleFonts) && !$isScreenshot)
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family={{ implode('&family=', $googleFonts) }}&display=swap" rel="stylesheet">
