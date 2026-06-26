@@ -58,18 +58,13 @@ body {
 
 /* ── Grid Jadwal ─────────────────────────────────────────────── */
 .grid-jadwal {
-    display: grid;
-    align-content: start;
-    /* Pastikan grid tidak bisa melebar melebihi zona yang ditetapkan */
     box-sizing: border-box;
 }
 
 .poli-card {
     display: flex;
     flex-direction: column;
-    /* KRITIS: tanpa min-width:0, grid item bisa melebar melebihi 1fr
-       karena default CSS Grid adalah min-width:auto */
-    min-width: 0;
+    break-inside: avoid;
     overflow: hidden;
     box-sizing: border-box;
 }
@@ -304,8 +299,8 @@ body {
             width:{{ $zonaJadwal['w'] }}px;
             height:{{ $zonaJadwal['h'] }}px;
             overflow:hidden;
-            gap:{{ $grid['gap'] ?? 16 }}px;
-            grid-template-columns: repeat({{ $kolom }}, 1fr);
+            column-count:{{ $kolom }};
+            column-gap:{{ $grid['gap'] ?? 16 }}px;
         "
     >
         @php
@@ -343,7 +338,7 @@ body {
             $poli        = $item['poli'];
             $jadwalRows  = $item['jadwal'];
         @endphp
-        <div class="poli-card">
+        <div class="poli-card" style="margin-bottom:{{ $grid['gap'] ?? 16 }}px;">
 
             <div class="poli-header" style="background:{{ $headerBg }}; border-radius:{{ $headerRadius }}px; width:{{ $grid['header_width_pct'] ?? 70 }}%; position:relative; z-index:2;">
                 <span style="
