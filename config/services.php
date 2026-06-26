@@ -51,4 +51,8 @@ return [
         'password' => env('ANTRIAN_API_PASSWORD'),
     ],
 
+    'browsershot' => [
+        'chrome_path' => env('CHROME_PATH'),
+    ],
+
 ];

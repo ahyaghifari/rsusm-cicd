@@ -362,7 +362,7 @@ class GeneratePosterPage extends Page
         @mkdir(dirname($outputPath), 0755, true);
 
         try {
-            $chromePath = env('CHROME_PATH');
+            $chromePath = config('services.browsershot.chrome_path');
             if (! $chromePath) {
                 $chromePath = match (PHP_OS_FAMILY) {
                     'Windows' => 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
