@@ -359,16 +359,14 @@ body {
                 {{-- Regular Dokter Column --}}
                 <div class="poli-dokter" style="background:{{ $cardBg }}; justify-content:{{ $dokterValign }}; gap:{{ $dokterRowGap }}px; padding-top:{{ $overlapPx + $cardPaddingTop }}px; flex:1;">
                     @forelse ($jadwalRows as $row)
-                    <div style="display:flex; align-items:center; line-height:1.35; justify-content:space-between;">
+                    <div style="display:flex; align-items:flex-start; line-height:1.35; justify-content:space-between;">
                         <span style="
                             font-family:{{ $fontNamaDokter }};
                             font-size:{{ $sizeNamaDokter }}px;
                             font-weight:{{ $weightNamaDokter }};
                             color:{{ $grid['warna_nama_dokter'] }};
                             flex:1; min-width:0;
-                            overflow:hidden;
-                            text-overflow:ellipsis;
-                            white-space:nowrap;
+                            word-break:break-word;
                         ">{{ $row['nama_dokter'] }}</span>
 
                         @if ($row['libur'])

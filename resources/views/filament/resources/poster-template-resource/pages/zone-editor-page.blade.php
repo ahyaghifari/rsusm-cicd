@@ -547,7 +547,7 @@
                                     {{-- Regular Dokter Column --}}
                                     <div style="flex:1;">
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2px;">
-                                            <span :style="{ fontSize: sizeNamaDokter + 'px', fontFamily: fontNamaDokter, fontWeight: parseInt(weightNamaDokter), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }">dr. Dokter</span>
+                                            <span :style="{ fontSize: sizeNamaDokter + 'px', fontFamily: fontNamaDokter, fontWeight: parseInt(weightNamaDokter), wordBreak: 'break-word', flex: 1, minWidth: 0 }">dr. Dokter</span>
                                             <span :style="{ fontSize: sizeJam + 'px', fontFamily: fontJam, color: '#1A1A1A', whiteSpace: 'nowrap', fontWeight: parseInt(weightJam), marginLeft: '4px' }">08:00</span>
                                         </div>
                                         {{-- Sample catatan --}}
@@ -876,8 +876,8 @@
                                         {{-- Regular Dokter Column --}}
                                         <div style="flex:1;">
                                             @forelse ($regularJadwal as $row)
-                                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1px;">
-                                                <span :style="{ fontSize: (sizeNamaDokter * 0.5) + 'px', fontFamily: fontNamaDokter, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: parseInt(weightNamaDokter) }">{{ $row['nama_dokter'] }}</span>
+                                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 1px;">
+                                                <span :style="{ fontSize: (sizeNamaDokter * 0.5) + 'px', fontFamily: fontNamaDokter, wordBreak: 'break-word', flex: 1, minWidth: 0, fontWeight: parseInt(weightNamaDokter) }">{{ $row['nama_dokter'] }}</span>
                                                 <span :style="{ fontSize: (sizeJam * 0.5) + 'px', fontFamily: fontJam, color: '#1A1A1A', whiteSpace: 'nowrap', fontWeight: parseInt(weightJam), marginLeft: '3px' }">{{ $row['jam_mulai'] }}–{{ $row['jam_selesai'] ?? '' }}</span>
                                             </div>
                                             @empty
