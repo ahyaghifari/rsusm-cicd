@@ -36,6 +36,14 @@ abstract class BaseZoneEditorPage extends Page
     public function mount(int|string $record): void
     {
         $this->record = $this->resolveRecord($record);
+
+        /** @var \App\Models\User $user */
+        $user = filament()->auth()->user();
+        abort_unless(
+            $user->isSuperAdmin() || (int) $user->rumah_sakit_id === (int) $this->record->rumah_sakit_id,
+            403
+        );
+
         $this->config = $this->record->config
             ?? PosterTemplate::defaultConfig((int) $this->record->rumah_sakit_id);
     }

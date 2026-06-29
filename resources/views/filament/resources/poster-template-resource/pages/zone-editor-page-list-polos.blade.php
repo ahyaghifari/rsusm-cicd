@@ -587,6 +587,37 @@
                             <div class="h-px flex-1 bg-gray-200"></div>
                         </div>
                         <div class="space-y-3">
+                            {{-- Posisi X/Y/W/H --}}
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <span class="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">X</span>
+                                    <input type="number" x-model.number="zones.zona_tanggal.x"
+                                        @input="applyPosition(document.querySelector('[data-zone=zona_tanggal]'), zones.zona_tanggal); saveConfig()"
+                                        min="0" max="1080"
+                                        class="w-full text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm mt-0.5">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Y</span>
+                                    <input type="number" x-model.number="zones.zona_tanggal.y"
+                                        @input="applyPosition(document.querySelector('[data-zone=zona_tanggal]'), zones.zona_tanggal); saveConfig()"
+                                        min="0" max="1920"
+                                        class="w-full text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm mt-0.5">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">W</span>
+                                    <input type="number" x-model.number="zones.zona_tanggal.w"
+                                        @input="applyPosition(document.querySelector('[data-zone=zona_tanggal]'), zones.zona_tanggal); saveConfig()"
+                                        min="50" max="1080"
+                                        class="w-full text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm mt-0.5">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">H</span>
+                                    <input type="number" x-model.number="zones.zona_tanggal.h"
+                                        @input="applyPosition(document.querySelector('[data-zone=zona_tanggal]'), zones.zona_tanggal); saveConfig()"
+                                        min="20" max="1920"
+                                        class="w-full text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm mt-0.5">
+                                </div>
+                            </div>
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-semibold text-gray-600">Font Size (px)</span>
                                 <div class="flex items-center gap-2">
@@ -644,6 +675,45 @@
                                     <input type="color" x-model="tanggalOutlineWarna" @input="saveConfig()" class="h-8 w-10 cursor-pointer rounded-lg border border-gray-200 p-0.5 shadow-sm">
                                     <input type="text" x-model="tanggalOutlineWarna" @input="saveConfig()" class="w-24 text-xs text-center border border-gray-200 rounded-lg py-1.5 font-mono shadow-sm focus:ring-2 focus:ring-blue-500">
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Zona Jadwal --}}
+                    <div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="h-px flex-1 bg-gray-200"></div>
+                            <span class="text-[10px] font-bold text-red-500 uppercase tracking-widest">● Jadwal</span>
+                            <div class="h-px flex-1 bg-gray-200"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <span class="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">X</span>
+                                <input type="number" x-model.number="zones.zona_jadwal.x"
+                                    @input="applyPosition(document.querySelector('[data-zone=zona_jadwal]'), zones.zona_jadwal); saveConfig()"
+                                    min="0" max="1080"
+                                    class="w-full text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm mt-0.5">
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Y</span>
+                                <input type="number" x-model.number="zones.zona_jadwal.y"
+                                    @input="applyPosition(document.querySelector('[data-zone=zona_jadwal]'), zones.zona_jadwal); saveConfig()"
+                                    min="0" max="1920"
+                                    class="w-full text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm mt-0.5">
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">W</span>
+                                <input type="number" x-model.number="zones.zona_jadwal.w"
+                                    @input="applyPosition(document.querySelector('[data-zone=zona_jadwal]'), zones.zona_jadwal); saveConfig()"
+                                    min="50" max="1080"
+                                    class="w-full text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm mt-0.5">
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">H</span>
+                                <input type="number" x-model.number="zones.zona_jadwal.h"
+                                    @input="applyPosition(document.querySelector('[data-zone=zona_jadwal]'), zones.zona_jadwal); saveConfig()"
+                                    min="50" max="1920"
+                                    class="w-full text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm mt-0.5">
                             </div>
                         </div>
                     </div>
