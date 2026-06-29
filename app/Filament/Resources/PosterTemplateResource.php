@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\PosterLayouts\LayoutRegistry;
 use App\Filament\Resources\PosterTemplateResource\Pages;
 use App\Models\PosterTemplate;
 use Filament\Forms;
@@ -127,7 +128,13 @@ class PosterTemplateResource extends BaseRumahSakitResource
                     ->label('Edit Zone')
                     ->icon('heroicon-o-paint-brush')
                     ->color('primary')
-                    ->url(fn (PosterTemplate $record) => static::getUrl('zone-editor', ['record' => $record])),
+                    ->url(function (PosterTemplate $record) {
+                        $layout   = LayoutRegistry::for((int) $record->rumah_sakit_id);
+                        $routeKey = $layout instanceof \App\Filament\PosterLayouts\Layouts\ListPolosLayout
+                            ? 'zone-editor-list-polos'
+                            : 'zone-editor';
+                        return static::getUrl($routeKey, ['record' => $record]);
+                    }),
                 Tables\Actions\ReplicateAction::make()
                     ->label('Duplikat')
                     ->beforeReplicaSaved(function (PosterTemplate $replica): void {
@@ -146,10 +153,11 @@ class PosterTemplateResource extends BaseRumahSakitResource
     public static function getPages(): array
     {
         return [
-            'index'       => Pages\ListPosterTemplates::route('/'),
-            'create'      => Pages\CreatePosterTemplate::route('/create'),
-            'edit'        => Pages\EditPosterTemplate::route('/{record}/edit'),
-            'zone-editor' => Pages\ZoneEditorPage::route('/{record}/zone-editor'),
+            'index'                  => Pages\ListPosterTemplates::route('/'),
+            'create'                 => Pages\CreatePosterTemplate::route('/create'),
+            'edit'                   => Pages\EditPosterTemplate::route('/{record}/edit'),
+            'zone-editor'            => Pages\ZoneEditorPage::route('/{record}/zone-editor'),
+            'zone-editor-list-polos' => Pages\ZoneEditorPageListPolos::route('/{record}/zone-editor-list-polos'),
         ];
     }
 }

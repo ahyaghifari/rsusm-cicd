@@ -25,26 +25,30 @@ class Panel extends Component
     public string $inputMessage = '';
     public string $sessionKey = '';
 
-    public function mount(): void
+    public function mount(?string $rsSlug = null): void
     {
         $saved = session(self::SESSION_KEY, []);
-        if (empty($saved)) return;
+        if (! empty($saved)) {
+            $this->sessionKey       = $saved['sessionKey'] ?? '';
+            $this->activeBranchSlug = $saved['activeBranchSlug'] ?? null;
+            $this->messages         = array_slice($saved['messages'] ?? [], -self::MAX_MESSAGES);
+            $this->branchSelected   = $saved['branchSelected'] ?? false;
 
-        $this->sessionKey      = $saved['sessionKey'] ?? '';
-        $this->activeBranchSlug = $saved['activeBranchSlug'] ?? null;
-        $this->messages        = array_slice($saved['messages'] ?? [], -self::MAX_MESSAGES);
-        $this->branchSelected  = $saved['branchSelected'] ?? false;
+            if ($this->activeBranchSlug) {
+                $this->activeBranch = RumahSakit::where('slug', $this->activeBranchSlug)
+                    ->where('aktif', true)->first();
 
-        if ($this->activeBranchSlug) {
-            $this->activeBranch = RumahSakit::where('slug', $this->activeBranchSlug)
-                ->where('aktif', true)
-                ->first();
-
-            if (! $this->activeBranch) {
-                $this->branchSelected   = false;
-                $this->activeBranchSlug = null;
-                $this->messages         = [];
+                if (! $this->activeBranch) {
+                    $this->branchSelected   = false;
+                    $this->activeBranchSlug = null;
+                    $this->messages         = [];
+                }
             }
+        }
+
+        // Auto-select jika slug RS diberikan dari layout dan berbeda dari sesi aktif
+        if ($rsSlug && $this->activeBranchSlug !== $rsSlug) {
+            $this->selectBranch($rsSlug);
         }
     }
 
@@ -59,7 +63,7 @@ class Panel extends Component
     }
 
     protected function getWelcomeMessage($branch){
-            return "Halo! Selamat datang di <strong>{$branch->nama}</strong>.<br>
+            return "Halo! Selamat datang di RSU Syifa Medika.<br>
             Saya dapat membantu anda untuk memberikan informasi mengenai : <br>
              - 🧑🏻‍⚕️ Dokter Kami, Spesialis, dan Jadwal Prakteknya <br>
              - 🛏️ Rawat Inap kami, fasilitasnya dan ketersediannya saat ini<br>
@@ -68,6 +72,10 @@ class Panel extends Component
              - 📢 Promo<br>
              - 🏥 Profil dan Partner Kami<br>
              - 📞 Kontak Kami <br>
+
+             Jangan lupa sertakan cabang kami untuk memulai<br>
+            1. RSU Syifa Medika Banjarbaru<br>
+            2. RSU Syifa Medika Barabai<br>
             <br>Ada yang bisa saya bantu hari ini?";
     }
 

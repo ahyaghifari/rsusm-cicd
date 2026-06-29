@@ -10,14 +10,14 @@
             </div>
             <div class="flex-1 min-w-0">
                 <div class="text-white text-[15px] font-medium truncate">Tanya Syifa</div>
-                <div class="text-white/80 text-[11.5px] flex items-center gap-1 truncate">
+                {{-- <div class="text-white/80 text-[11.5px] flex items-center gap-1 truncate">
                     <span class="w-[7px] h-[7px] rounded-full bg-[#96f6c8] inline-block flex-shrink-0"></span>
                     @if($this->branchSelected)
-                        {{ $this->activeBranch->nama }}
+                        RSU Syifa Medika
                     @else
                         Pilih cabang untuk memulai
                     @endif
-                </div>
+                </div> --}}
             </div>
             <div class="flex gap-1.5 flex-shrink-0">
                 @if($this->branchSelected)
@@ -32,13 +32,7 @@
                             <span class="material-symbols-outlined text-[18px]" aria-hidden="true">restart_alt</span>
                         </button>
                     @endif
-                    <button
-                        wire:click="changeBranch"
-                        class="bg-white/15 hover:bg-white/28 border-none rounded-lg w-8 h-8 flex items-center justify-center cursor-pointer text-white transition-colors p-1"
-                        title="Ganti cabang" aria-label="Ganti cabang"
-                    >
-                        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">sync_alt</span>
-                    </button>
+                    {{-- ponytail: tombol ganti cabang disembunyikan, cabang auto dari URL portal --}}
                 @endif
                 {{-- Tombol close panel --}}
                 <button

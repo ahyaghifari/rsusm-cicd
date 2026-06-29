@@ -37,7 +37,7 @@ RumahSakit (slug, executive_clinic, ranap_kode_api, link_antrian, google_place_i
 │   └── JadwalPraktek (per poliklinik, per hari, opsional per dokter, is_executive)
 ├── JadwalHarian (override harian per tanggal, is_executive)
 │   └── JadwalHarianPerubahan (1-to-1, tracking perubahan status)
-├── PosterTemplate (background PNG, logo, shape_poli, config zona JSON)
+├── PosterTemplate (background PNG, logo, shape_poli PNG transparan opsional, config zona JSON)
 ├── KelasRawatInap (master kelas, id_kelas_api opsional, is_vip)
 ├── RawatInap → Gedung (kelas_rawat_inap_id FK ke KelasRawatInap)
 │   ├── GambarRawatInap
@@ -252,8 +252,8 @@ Path admin dikonfigurasi via env: `ADMIN_PATH=manage` (default). Akses di `/{ADM
 | Poliklinik | Klinik per RS (SoftDelete + Restore) |
 | **Jadwal Praktek** | Jadwal rawat jalan per poliklinik — 2 mode editable, kolom `is_executive` |
 | **Jadwal Harian** | Override jadwal harian + tracking perubahan status, kolom `is_executive` |
-| **Poster Template** | Upload background PNG, logo, shape; zone editor drag-drop interaktif |
-| **Generate Poster** | Form pilih template + tanggal → generate PNG 1080×1920 via Browsershot |
+| **Poster Template** | Upload background PNG, logo, shape_poli (PNG transparan opsional); zone editor drag-drop + konfigurasi lengkap layout, tipografi, shape, gap |
+| **Generate Poster** | Form pilih template + tanggal → preview HTML di tab baru + download PNG 1080×1920 via Browsershot |
 | Artikel & Berita | CRUD artikel + rich text editor, kategori, gambar cover, toggle unggulan/aktif |
 | Kategori Artikel | CRUD kategori per RS (modal sederhana) |
 | Rawat Inap | Kelas kamar (relasi ke Kelas Rawat Inap), fasilitas, galeri foto |
@@ -442,6 +442,11 @@ php artisan test
 - `sesuai_perjanjian` dan `is_executive` disimpan dengan `(bool)` cast — **bukan** perbandingan `=== '1'`
 - Rows di JadwalPraktekPage dan JadwalHarianPage menggunakan UUID string sebagai array key
 - Poster: asset lokal dikonversi ke data URI base64 sebelum dirender di Browsershot (file:// tidak diizinkan)
+- Poster Zone Editor: canvas preview menggunakan skala 0.5 terhadap ukuran generate (1080×1920 → 540×960) — semua nilai px di canvas preview dikalikan 0.5
+- Poster: zona jadwal dan `.poli-card` menggunakan `overflow:visible` agar header yang digeser (`header_offset_x`) tidak terpotong batas card/zona
+- Poster: layout card menggunakan CSS `column-count` (bukan CSS Grid) untuk efek masonry — tinggi tiap card dinamis mengikuti jumlah dokter, total tinggi kolom otomatis seimbang oleh browser; `break-inside:avoid` pada `.poli-card` mencegah card terpotong antar kolom
+- Poster: `gap_h` (column-gap) dan `gap_v` (margin-bottom per card) disimpan terpisah; nilai `gap` tetap diisi sama dengan `gap_h` sebagai backward-compat untuk template lama
+- Poster: prioritas nama dokter di generate → `$r->nama_dokter ?: ($r->dokter?->nama ?? '-')` — field JadwalHarian diutamakan, relasi dokter sebagai fallback
 - Reverb/Echo: `namespace: ''` **wajib** di konfigurasi `new Echo({...})` (`resources/js/echo.js`) — Echo defaultnya menambahkan prefiks `App.Events` yang tidak cocok dengan `broadcastAs()` nama pendek; nama event di `broadcastAs()` & `#[On('echo:...')]` harus sama persis (lihat [reverb/05](../reverb/05-mismatch-namespace-echo-broadcastas.md))
 - Reverb/Echo: listener Livewire dengan placeholder channel **dinamis** (`#[On('echo:topik.{propertiYangBerubah},Event')]`) punya jendela rawan *race condition* saat propertinya berubah — pertimbangkan `wire:poll.visible.Ns` sebagai jaring pengaman (lihat [reverb/06](../reverb/06-race-condition-subscribe-channel-dinamis.md))
 - Web Push/VAPID: `sesiAktifToken` di `KonsultasiDashboard` harus `string` (bukan `?string`) karena placeholder `#[On('echo:konsultasi.{sesiAktifToken},...')]` tidak bisa di-resolve Livewire jika nilainya null — nilai kosong menghasilkan channel yang tidak pernah dipakai
@@ -581,6 +586,16 @@ ANTRIAN_API_PASSWORD=
 - [x] Tanya Dokter — Panel Filament terpisah untuk Dokter (`/dokter`, `DokterPanelProvider`)
 - [x] Generate Poster — fix bug field `hariIni`, `jam_mulai`/`waktu_mulai`, dan `libur` antar model
 - [x] Generate Poster — implementasi `previewPoster()` (render HTML preview + buka di tab baru)
+- [x] Poster Zone Editor — konfigurasi font weight & style header nama poli
+- [x] Poster Zone Editor — konfigurasi lebar header nama poli (%), geser kanan/kiri (`header_offset_x`), padding kiri teks shape (`header_padding_left`)
+- [x] Poster Zone Editor — gap antar card dipisah: horizontal (`gap_h`, column-gap) dan vertikal (`gap_v`, row margin)
+- [x] Poster Zone Editor — jarak antar dokter dalam card (`dokter_row_gap`) dapat dikonfigurasi
+- [x] Poster Zone Editor — shape poli: preview canvas + mini sidebar menampilkan shape jika diupload; sidebar menyembunyikan kontrol warna/gradasi/radius saat shape aktif
+- [x] Poster card layout — ganti CSS Grid ke CSS `column-count` (masonry: tinggi card dinamis per konten, total tinggi kolom tetap seimbang)
+- [x] Poster — overflow `poli-card` & zona jadwal diubah ke `visible` agar header yang digeser tidak terpotong
+- [x] Poster — nama dokter: `word-break:break-word` + `align-items:flex-start` (tidak lagi terpotong ellipsis)
+- [x] Poster — catatan poli: `align-self:flex-start` (lebar mengikuti teks, bukan full-width card)
+- [x] Poster — prioritas nama dokter: field `nama_dokter` di JadwalHarian diutamakan di atas nama dari relasi dokter
 - [x] Artikel & Berita — CRUD + kategori, halaman publik list (unggulan + grid + pagination) & detail, link di dropdown "Media Informasi"
 - [x] Popup Jadwal Poliklinik — admin upload gambar (mis. hasil Generate Poster) + toggle aktif via widget dashboard, tampil modal di homepage publik
 - [x] Popup Promo — widget dashboard untuk toggle popup promo homepage

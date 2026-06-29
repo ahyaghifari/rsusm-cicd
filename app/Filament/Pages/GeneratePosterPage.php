@@ -542,7 +542,7 @@ class GeneratePosterPage extends Page
             ->filter(fn ($p) => ! empty($p['jadwal']))
             ->values();
 
-        return view('filament.resources.poster-jadwal-resource.pages.jadwal-template', [
+        return view($template->layout()->templateView(), [
             'template'        => $template,
             'tanggal'         => $tanggal,
             'fotoHeroDataUri' => $this->getFotoHeroDataUri(),

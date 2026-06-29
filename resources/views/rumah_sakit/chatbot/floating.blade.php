@@ -26,7 +26,7 @@ document.addEventListener('alpine:init', () => {
            lg:inset-x-auto lg:inset-y-auto lg:bottom-6 lg:right-6"
     style="transform-origin: bottom right;"
 >
-    <livewire:chatbot.panel />
+    <livewire:chatbot.panel :rs-slug="$currentRumahSakit->slug" />
 </div>
 
 {{-- Desktop FAB --}}
