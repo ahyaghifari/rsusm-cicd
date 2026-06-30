@@ -34,6 +34,7 @@ class ListPolosLayout implements PosterLayout
                 'x' => 40, 'y' => 480, 'w' => 1000, 'h' => 1400,
             ],
             'grid' => [
+                'poli_per_halaman' => 5,
                 'gap_v'          => 16,
                 'gap_h'          => 12,
                 'col_nama_persen' => 70,

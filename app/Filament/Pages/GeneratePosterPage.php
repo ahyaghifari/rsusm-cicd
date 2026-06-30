@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\PosterLayouts\Layouts\ListPolosLayout;
 use App\Models\JadwalHarian;
 use App\Models\PoliKlinik;
 use App\Models\PosterTemplate;
@@ -41,6 +42,10 @@ class GeneratePosterPage extends Page
 
     /** Whether the selected hospital supports executive clinics. */
     public bool $hospitalHasExecutiveClinic = false;
+
+    /** Pagination state — only active for ListPolos layout. */
+    public int $activeHalaman  = 1;
+    public int $totalHalaman   = 1;
 
     public function mount(): void
     {
@@ -257,20 +262,37 @@ class GeneratePosterPage extends Page
             ->values()
             ->toArray();
 
-        \Illuminate\Support\Facades\Log::info('loadPoliList execution', [
-            'templateId' => $templateId,
-            'tanggal'    => $tanggal,
-            'filter'     => $filter,
-            'count'      => count($this->poli_list),
-        ]);
+        $this->recalcPagination($template);
+    }
+
+    private function recalcPagination(?PosterTemplate $template): void
+    {
+        if (! $template || ! ($template->layout() instanceof ListPolosLayout)) {
+            $this->totalHalaman  = 1;
+            $this->activeHalaman = 1;
+            return;
+        }
+
+        $perPage = (int) ($template->config['grid']['poli_per_halaman'] ?? 5) ?: 5;
+        $visible = collect($this->poli_list)->where('visible', true)->count();
+
+        $this->totalHalaman  = max(1, (int) ceil($visible / $perPage));
+        $this->activeHalaman = min($this->activeHalaman, $this->totalHalaman);
     }
 
     // ── Poli List Actions ─────────────────────────────────────────────────────
+
+    public function setHalaman(int $halaman): void
+    {
+        $this->activeHalaman = max(1, min($halaman, $this->totalHalaman));
+    }
 
     public function togglePoli(int $index): void
     {
         if (isset($this->poli_list[$index])) {
             $this->poli_list[$index]['visible'] = ! $this->poli_list[$index]['visible'];
+            $templateId = $this->getTemplateId();
+            $this->recalcPagination($templateId ? PosterTemplate::find($templateId) : null);
         }
     }
 
@@ -316,7 +338,7 @@ class GeneratePosterPage extends Page
             return;
         }
 
-        $html = $this->buildHtml($template, $tanggal);
+        $html = $this->buildHtml($template, $tanggal, $this->activeHalaman);
 
         $key  = Str::uuid()->toString();
         $path = storage_path("app/poster-preview/{$key}.html");
@@ -355,7 +377,7 @@ class GeneratePosterPage extends Page
             return null;
         }
 
-        $html     = $this->buildHtml($template, $tanggal);
+        $html     = $this->buildHtml($template, $tanggal, $this->activeHalaman);
         $fotoHero = $this->getFotoHero();
 
         $outputPath = storage_path('app/public/poster-output/poster-' . $tanggal->format('Ymd') . '-' . time() . '.png');
@@ -412,7 +434,8 @@ class GeneratePosterPage extends Page
         return response()->streamDownload(function () use ($outputPath) {
             readfile($outputPath);
             @unlink($outputPath);
-        }, 'poster-jadwal-' . $tanggal->format('d-m-Y') . '.png', [
+        $suffix = $this->totalHalaman > 1 ? "-hal{$this->activeHalaman}" : '';
+        }, 'poster-jadwal-' . $tanggal->format('d-m-Y') . $suffix . '.png', [
             'Content-Type' => 'image/png',
         ]);
     }
@@ -493,7 +516,7 @@ class GeneratePosterPage extends Page
     }
 
     /** Bangun data jadwal per poli dari jadwal harian, lalu render HTML template. */
-    private function buildHtml(PosterTemplate $template, Carbon $tanggal): string
+    private function buildHtml(PosterTemplate $template, Carbon $tanggal, int $halaman = 1): string
     {
         $rsId = $template->rumah_sakit_id;
 
@@ -507,10 +530,16 @@ class GeneratePosterPage extends Page
             ->get()
             ->groupBy('poliklinik_id');
 
+        $isListPolos = $template->layout() instanceof ListPolosLayout;
+        $perPage     = $isListPolos
+            ? ((int) ($template->config['grid']['poli_per_halaman'] ?? 5) ?: 5)
+            : PHP_INT_MAX;
+
         $poliList = collect($this->poli_list)
             ->where('visible', true)
             ->sortBy('order')
             ->values()
+            ->when($isListPolos, fn ($c) => $c->slice(($halaman - 1) * $perPage, $perPage)->values())
             ->map(function ($item) use ($jadwalHarian, $rsId) {
                 $rows = $jadwalHarian->get($item['id'], collect());
                 $poli = $rows->first()?->poliklinik

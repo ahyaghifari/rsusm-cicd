@@ -71,6 +71,7 @@
 
         $g = $savedConfig['grid'] ?? [];
 
+        $initialPoliPerHalaman    = (int)   ($g['poli_per_halaman']    ?? 5);
         $initialGapV              = (int)   ($g['gap_v']               ?? 16);
         $initialGapH              = (int)   ($g['gap_h']               ?? 12);
         $initialColNamaPersen     = (int)   ($g['col_nama_persen']     ?? 70);
@@ -168,6 +169,7 @@
     <div
         x-data="zoneEditorListPolos({
             initialZones: @js($activeZones),
+            initialPoliPerHalaman: {{ $initialPoliPerHalaman }},
             initialGapV: {{ $initialGapV }},
             initialGapH: {{ $initialGapH }},
             initialColNamaPersen: {{ $initialColNamaPersen }},
@@ -240,6 +242,16 @@
                     <span class="text-lg">📏</span> Jarak
                 </label>
                 <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm space-y-3">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-semibold text-gray-600 w-24 shrink-0">Poli / Halaman</span>
+                        <input type="range" x-model.number="poliPerHalaman" @input="saveConfig()" min="1" max="20" step="1"
+                            class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600">
+                        <div class="relative flex items-center">
+                            <input type="number" x-model.number="poliPerHalaman" @input="saveConfig()" min="1" max="20"
+                                class="w-16 text-center text-sm font-bold bg-white border border-gray-200 rounded-xl pl-1 pr-6 py-1.5 focus:ring-2 focus:ring-purple-500 shadow-sm">
+                            <span class="absolute right-2 text-xs font-semibold text-gray-400 pointer-events-none">poli</span>
+                        </div>
+                    </div>
                     <div class="flex items-center gap-3">
                         <span class="text-xs font-semibold text-gray-600 w-24 shrink-0">Antar Poli (V)</span>
                         <input type="range" x-model.number="gapV" @input="saveConfig()" min="0" max="60" step="2"
@@ -803,6 +815,7 @@
     function zoneEditorListPolos(config) {
         return {
             zones: config.initialZones,
+            poliPerHalaman:      config.initialPoliPerHalaman    ?? 5,
             gapV:                config.initialGapV              ?? 16,
             gapH:                config.initialGapH              ?? 12,
             colNamaPersen:       config.initialColNamaPersen     ?? 70,
@@ -854,6 +867,7 @@
                 } else {
                     if (this.state.zona_tanggal?.x     !== undefined) this.zones.zona_tanggal = { ...this.zones.zona_tanggal, x: this.state.zona_tanggal.x, y: this.state.zona_tanggal.y, w: this.state.zona_tanggal.w, h: this.state.zona_tanggal.h };
                     if (this.state.zona_jadwal?.x      !== undefined) this.zones.zona_jadwal  = { ...this.zones.zona_jadwal,  x: this.state.zona_jadwal.x,  y: this.state.zona_jadwal.y,  w: this.state.zona_jadwal.w,  h: this.state.zona_jadwal.h  };
+                    if (this.state.grid?.poli_per_halaman       !== undefined) this.poliPerHalaman      = this.state.grid.poli_per_halaman;
                     if (this.state.grid?.gap_v                  !== undefined) this.gapV               = this.state.grid.gap_v;
                     if (this.state.grid?.gap_h                  !== undefined) this.gapH               = this.state.grid.gap_h;
                     if (this.state.grid?.col_nama_persen        !== undefined) this.colNamaPersen       = this.state.grid.col_nama_persen;
@@ -968,6 +982,7 @@
                     zona_jadwal: { ...this.zones.zona_jadwal },
                     font_tanggal: { sumber: 'google', nama: this.tanggalFont },
                     grid: {
+                        poli_per_halaman:     parseInt(this.poliPerHalaman)    || 5,
                         gap_v:                parseInt(this.gapV)              || 0,
                         gap_h:                parseInt(this.gapH)              || 0,
                         col_nama_persen:      parseInt(this.colNamaPersen)     || 70,
