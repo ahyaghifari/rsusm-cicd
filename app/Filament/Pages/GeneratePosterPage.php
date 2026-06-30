@@ -431,10 +431,11 @@ class GeneratePosterPage extends Page
             Storage::disk('public')->delete($fotoHero);
         }
 
+        $suffix = $this->totalHalaman > 1 ? "-hal{$this->activeHalaman}" : '';
+
         return response()->streamDownload(function () use ($outputPath) {
             readfile($outputPath);
             @unlink($outputPath);
-        $suffix = $this->totalHalaman > 1 ? "-hal{$this->activeHalaman}" : '';
         }, 'poster-jadwal-' . $tanggal->format('d-m-Y') . $suffix . '.png', [
             'Content-Type' => 'image/png',
         ]);
