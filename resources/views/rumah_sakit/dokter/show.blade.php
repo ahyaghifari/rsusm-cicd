@@ -1,3 +1,20 @@
+@push('seo_schema')
+<script type="application/ld+json">{!! json_encode(array_filter([
+    '@context'    => 'https://schema.org',
+    '@type'       => 'Physician',
+    'name'        => $dokter->nama,
+    'url'         => request()->url(),
+    'image'       => $dokter->foto ? asset('storage/' . $dokter->foto) : null,
+    'description' => $dokter->deskripsi ? \Illuminate\Support\Str::limit(strip_tags($dokter->deskripsi), 200) : null,
+    'medicalSpecialty' => $dokter->spesialis?->nama,
+    'worksFor'    => [
+        '@type' => 'MedicalBusiness',
+        'name'  => $rs->nama,
+        '@id'   => url('/' . $rs->slug),
+    ],
+]), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+@endpush
+
 <div class="relative">
     <img src="{{ asset('img/bg-header.png') }}" class="h-full w-full object-cover blur-xs opacity-20 absolute -z-10" alt="">
     <x-page-hero title="Profil Dokter" />
@@ -99,7 +116,12 @@
                         </div>
                         <div class="divide-y divide-outline-variant/15 flex-1">
                             @foreach($sesiHari as $sesi)
-                                @include('rumah_sakit.dokter._jadwal-row', ['sesi' => $sesi, 'warna' => $warna, 'rs' => $rs])
+                                @include('rumah_sakit.dokter._jadwal-row', [
+                                    'sesi'      => $sesi,
+                                    'warna'     => $warna,
+                                    'rs'        => $rs,
+                                    'perubahan' => $isToday ? ($perubahanHariIni[$sesi->poliklinik_id] ?? null) : null,
+                                ])
                             @endforeach
                         </div>
                     </div>

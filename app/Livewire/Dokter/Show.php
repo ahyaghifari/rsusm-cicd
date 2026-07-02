@@ -4,9 +4,9 @@ namespace App\Livewire\Dokter;
 
 use App\Livewire\RsPortalComponent;
 use App\Models\Dokter;
+use App\Models\JadwalHarianPerubahan;
 use App\Models\JadwalPraktek;
 use App\Services\AntrianApiClient;
-use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\SEOMeta;
 use Livewire\Attributes\Locked;
 
@@ -31,12 +31,9 @@ class Show extends RsPortalComponent
 
         SEOMeta::setTitle($fullTitle);
         SEOMeta::setDescription($desc);
-        OpenGraph::setTitle($fullTitle);
-        OpenGraph::setDescription($desc);
-        OpenGraph::setUrl(request()->url());
-        OpenGraph::addProperty('site_name', $rs->nama);
+
         if ($dokter->foto) {
-            OpenGraph::addImage(asset('storage/' . $dokter->foto));
+            $this->seoImage = asset('storage/' . $dokter->foto);
         }
     }
 
@@ -59,11 +56,17 @@ class Show extends RsPortalComponent
             ? app(AntrianApiClient::class)->fetch($rs->link_antrian, $this->dokter->nomor_poli_antrian)
             : null;
 
+        $perubahanHariIni = JadwalHarianPerubahan::whereHas('jadwalHarian', fn ($q) =>
+            $q->whereDate('tanggal', today())->where('dokter_id', $this->dokter->id)
+        )->with('jadwalHarian')->get()
+        ->keyBy(fn ($p) => $p->jadwalHarian->poliklinik_id);
+
         return view('rumah_sakit.dokter.show', [
-            'dokter'  => $this->dokter,
-            'jadwal'  => $jadwal,
-            'rs'      => $rs,
-            'antrian' => $antrian,
+            'dokter'           => $this->dokter,
+            'jadwal'           => $jadwal,
+            'rs'               => $rs,
+            'antrian'          => $antrian,
+            'perubahanHariIni' => $perubahanHariIni,
         ]);
     }
 }

@@ -290,7 +290,7 @@ tr.gap-row td { height: {{ max(0, $gapV - $dokterRaise) }}px; padding: 0; border
                     @elseif($row['libur'] ?? false)
                         LIBUR
                     @else
-                        {{ $row['jam_mulai'] ?? '' }}–{{ !empty($row['jam_selesai']) ? $row['jam_selesai'] : 'Selesai' }}
+                        {{ $row['jam_mulai'] ?? '' }} s.d {{ !empty($row['jam_selesai']) ? $row['jam_selesai'] : 'Selesai' }}
                     @endif
                 </td>
             </tr>

@@ -54,6 +54,38 @@
                 {{ $sesi->catatan }}
             </p>
         @endif
+
+        {{-- Perubahan hari ini --}}
+        @if($perubahan ?? null)
+            @php
+                use App\Enums\StatusLayanan;
+                $isLibur = $perubahan->status_layanan === StatusLayanan::LIBUR;
+            @endphp
+            <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+                @if($isLibur)
+                    <span class="inline-flex items-center gap-1 text-[11px] font-bold
+                                 text-red-700 bg-red-50 border border-red-200
+                                 px-2 py-0.5 rounded-full shrink-0">
+                        <span class="material-symbols-outlined text-[11px]">event_busy</span>
+                        Libur Hari Ini
+                    </span>
+                @else
+                    <span class="inline-flex items-center gap-1 text-[11px] font-bold
+                                 text-amber-700 bg-amber-50 border border-amber-200
+                                 px-2 py-0.5 rounded-full shrink-0">
+                        <span class="material-symbols-outlined text-[11px]">schedule</span>
+                        Jam berubah:
+                        {{ $perubahan->jam_mulai?->format('H:i') ?? '?' }}
+                        @if($perubahan->jam_selesai) &ndash; {{ $perubahan->jam_selesai->format('H:i') }} @endif
+                    </span>
+                @endif
+                @if($perubahan->catatan)
+                    <p class="text-xs text-on-surface-variant/60 italic w-full leading-snug">
+                        {{ $perubahan->catatan }}
+                    </p>
+                @endif
+            </div>
+        @endif
     </div>
 
 </div>

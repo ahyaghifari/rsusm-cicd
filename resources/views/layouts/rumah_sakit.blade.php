@@ -6,6 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {!! SEO::generate() !!}
     <link rel="icon" href="/img/favicon.png" sizes="192x192">
+    @php $__rs = current_rumahsakit(); @endphp
+    @if($__rs)
+    <script type="application/ld+json">{!! json_encode([
+        '@context' => 'https://schema.org',
+        '@type'    => 'MedicalBusiness',
+        'name'     => $__rs->nama,
+        'url'      => url('/' . $__rs->slug),
+        '@id'      => url('/' . $__rs->slug),
+        'address'  => $__rs->alamat ? [
+            '@type'           => 'PostalAddress',
+            'streetAddress'   => $__rs->alamat,
+            'addressCountry'  => 'ID',
+        ] : null,
+        'telephone'       => $__rs->no_hotline ?? $__rs->no_emergency ?? null,
+        'logo'            => $__rs->logo ? asset('storage/' . $__rs->logo) : null,
+        'image'           => $__rs->gambar ? asset('storage/' . $__rs->gambar) : null,
+        'description'     => $__rs->tentang_kami ? Str::limit(strip_tags($__rs->tentang_kami), 200) : null,
+        'medicalSpecialty' => 'http://schema.org/MedicalSpecialty',
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+    @endif
+    @stack('seo_schema')
 
     @livewireStyles
     <!-- Fonts -->

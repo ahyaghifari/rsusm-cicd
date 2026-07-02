@@ -243,10 +243,6 @@ body {
         position:absolute;
         left:{{ $zonaDate['x'] }}px; top:{{ $zonaDate['y'] }}px;
         width:{{ $zonaDate['w'] }}px;
-        height:{{ $zonaDate['h'] ?? 60 }}px;
-        display:flex;
-        align-items:center;
-        justify-content:{{ $dateAlign === 'center' ? 'center' : ($dateAlign === 'right' ? 'flex-end' : 'flex-start') }};
         @if($dateBg) background:{{ $dateBg }}; @endif
     ">
         <div style="
@@ -256,7 +252,7 @@ body {
             color:{{ $dateColor }};
             text-align:{{ $dateAlign }};
             line-height:1.2;
-        ">{{ $tanggal->translatedFormat('l, j F Y') }}</div>
+        ">{!! $tanggal->translatedFormat('l,') . '<br>' . $tanggal->translatedFormat('j F Y') !!}</div>
     </div>
 
     {{-- Keterangan Hero —— mengikuti config zona_keterangan --}}
@@ -273,18 +269,22 @@ body {
         position:absolute;
         left:{{ $zonaKet['x'] }}px; top:{{ $zonaKet['y'] }}px;
         width:{{ $zonaKet['w'] }}px;
-        height:{{ $zonaKet['h'] ?? 60 }}px;
         font-family:{{ $ketFont }};
         font-size:{{ $ketSize }}px;
         font-weight:{{ $ketWeight }};
         color:{{ $ketColor }};
         text-align:{{ $ketAlign }};
-        display:flex;
-        align-items:center;
-        @if($ketBg) background:{{ $ketBg }}; border-radius:6px; padding:8px; @endif
-    ">
-        <div style="width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $keterangan }}</div>
-    </div>
+        line-height:1.35;
+    "><span style="
+        @if($ketBg)
+            display:inline;
+            background:{{ $ketBg }};
+            -webkit-box-decoration-break:clone;
+            box-decoration-break:clone;
+            padding:4px 10px;
+            border-radius:4px;
+        @endif
+    ">{!! nl2br(e($keterangan)) !!}</span></div>
     @endif
 
     {{-- Grid Jadwal --}}
@@ -402,7 +402,7 @@ body {
                             color:{{ $grid['warna_nama_dokter'] ?? '#1A1A1A' }};
                             white-space:nowrap;
                             margin-left:8px;
-                        ">{{ $row['jam_mulai'] }}–{{ $row['jam_selesai'] ?? 'selesai' }}</span>
+                        ">{{ $row['jam_mulai'] }}–{{ $row['jam_selesai'] ?? 'Selesai' }}</span>
                         @endif
                     </div>
 

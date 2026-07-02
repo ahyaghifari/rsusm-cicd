@@ -3,7 +3,6 @@
 namespace App\Livewire;
 
 use App\Models\RumahSakit;
-use Artesaos\SEOTools\Facades\JsonLd;
 use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\SEOMeta;
 use Livewire\Attributes\Locked;
@@ -15,8 +14,9 @@ abstract class RsPortalComponent extends Component
     public ?RumahSakit $rs = null;
 
     // Diisi oleh mount() tiap halaman agar booted() bisa build full title dengan benar
-    protected string $seoTitle       = '';
-    protected string $seoDescription = '';
+    protected string  $seoTitle       = '';
+    protected string  $seoDescription = '';
+    protected ?string $seoImage       = null;
 
     public function boot(): void
     {
@@ -27,12 +27,13 @@ abstract class RsPortalComponent extends Component
 
     /**
      * Panggil ini dari mount() di tiap halaman sebagai pengganti SEOMeta::setTitle().
-     * Contoh: $this->seo('Rawat Jalan', 'Layanan poliklinik di ...');
+     * Contoh: $this->seo('Rawat Jalan', 'Layanan poliklinik di ...', $imageUrl);
      */
-    protected function seo(string $title, string $description = ''): void
+    protected function seo(string $title, string $description = '', ?string $image = null): void
     {
         $this->seoTitle       = $title;
         $this->seoDescription = $description;
+        $this->seoImage       = $image;
 
         $rsName    = $this->rs?->nama ?? '';
         $fullTitle = $title && $rsName ? "$title - $rsName" : ($title ?: $rsName);
@@ -41,7 +42,7 @@ abstract class RsPortalComponent extends Component
         if ($description) SEOMeta::setDescription($description);
     }
 
-    // Runs AFTER mount() — sync OG & JSON-LD dari seoTitle/seoDescription yang sudah di-set
+    // Runs AFTER mount() — sync OG, canonical, & JSON-LD dari seoTitle/seoDescription
     public function booted(): void
     {
         if (! $this->rs) return;
@@ -51,14 +52,20 @@ abstract class RsPortalComponent extends Component
             ? $this->seoTitle . ' - ' . $rsName
             : $rsName;
         $desc = $this->seoDescription;
+        $url  = request()->url();
+
+        // Canonical — cegah duplicate content multi-cabang / query params
+        SEOMeta::setCanonical($url);
 
         OpenGraph::setTitle($fullTitle);
-        OpenGraph::setUrl(request()->url());
+        OpenGraph::setUrl($url);
         OpenGraph::addProperty('site_name', $rsName);
         if ($desc) OpenGraph::setDescription($desc);
 
-        JsonLd::setTitle($fullTitle);
-        if ($desc) JsonLd::setDescription($desc);
-        JsonLd::addValue('url', request()->url());
+        // OG image: custom dari halaman → fallback logo RS
+        $image = $this->seoImage
+            ?? ($this->rs->logo ? asset('storage/' . $this->rs->logo) : null);
+        if ($image) OpenGraph::addImage($image);
+
     }
 }

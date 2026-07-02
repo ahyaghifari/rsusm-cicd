@@ -24,10 +24,12 @@ class JadwalHarianPerubahan extends Model
     protected function casts(): array
     {
         return [
-            'jam_mulai'         => 'datetime:H:i',
-            'jam_selesai'       => 'datetime:H:i',
-            'jam_mulai_asli'    => 'datetime:H:i',
-            'jam_selesai_asli'  => 'datetime:H:i',
+            'jam_mulai'           => 'datetime:H:i',
+            'jam_selesai'         => 'datetime:H:i',
+            'jam_mulai_asli'      => 'datetime:H:i',
+            'jam_selesai_asli'    => 'datetime:H:i',
+            'status_layanan'      => \App\Enums\StatusLayanan::class,
+            'status_layanan_asli' => \App\Enums\StatusLayanan::class,
         ];
     }
 
