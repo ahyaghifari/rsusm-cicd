@@ -15,4 +15,10 @@ interface PosterLayout
 
     /** Blade view name untuk generate/preview poster. */
     public function templateView(): string;
+
+    /**
+     * Field konfigurasi grid yang ditampilkan di panel "Sesuaikan Cepat".
+     * Setiap entry: ['key' => string, 'label' => string, 'quick_setting' => true]
+     */
+    public function quickConfigFields(): array;
 }

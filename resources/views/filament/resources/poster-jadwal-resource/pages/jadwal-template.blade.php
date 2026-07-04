@@ -408,15 +408,24 @@ body {
 
                     {{-- Catatan (only when filled) --}}
                     @if (!empty($row['catatan']))
+                    @php
+                        $isDariPerubahan = $row['catatan_dari_perubahan'] ?? false;
+                        $catatanBg    = $isDariPerubahan
+                            ? ($grid['catatan_perubahan_bg_warna'] ?? '#fff7ed')
+                            : ($grid['catatan_bg_warna']           ?? '#fef9c3');
+                        $catatanWarna = $isDariPerubahan
+                            ? ($grid['catatan_perubahan_warna']    ?? '#92400e')
+                            : ($grid['catatan_warna']              ?? '#1a1a2e');
+                    @endphp
                     <div style="
                         align-self:flex-start;
-                        background:{{ $grid['catatan_bg_warna'] ?? '#fef9c3' }};
-                        color:{{ $grid['catatan_warna'] ?? '#1a1a2e' }};
+                        background:{{ $catatanBg }};
+                        color:{{ $catatanWarna }};
                         border:1px solid {{ $grid['catatan_border_warna'] ?? '#fde68a' }};
                         border-radius:{{ $grid['catatan_radius'] ?? 4 }}px;
                         padding:3px 6px;
                         font-size:{{ $grid['catatan_size'] ?? 8 }}px;
-                        font-family:{{ $grid['catatan_font'] ?? 'Poppins' }};
+                        font-family:{{ $fontIsi }};
                         font-weight:{{ $grid['catatan_weight'] ?? '400' }};
                         margin-top:2px;
                         line-height:1.35;

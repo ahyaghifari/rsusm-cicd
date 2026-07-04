@@ -22,6 +22,20 @@ class GridShapeLayout implements PosterLayout
         return 'filament.resources.poster-jadwal-resource.pages.jadwal-template';
     }
 
+    public function quickConfigFields(): array
+    {
+        return [
+            ['key' => 'kolom',            'label' => 'Jumlah kolom',              'quick_setting' => true],
+            ['key' => 'gap_v',            'label' => 'Jarak vertikal antar kartu', 'quick_setting' => true],
+            ['key' => 'gap_h',            'label' => 'Jarak horizontal antar kartu', 'quick_setting' => true],
+            ['key' => 'size_nama_poli',   'label' => 'Ukuran font nama poli',     'quick_setting' => true],
+            ['key' => 'size_nama_dokter', 'label' => 'Ukuran font nama dokter',   'quick_setting' => true],
+            ['key' => 'size_jam',         'label' => 'Ukuran font jam',           'quick_setting' => true],
+            ['key' => 'card_padding_top', 'label' => 'Padding atas kartu',        'quick_setting' => true],
+            ['key' => 'dokter_row_gap',   'label' => 'Jarak antar baris dokter',  'quick_setting' => true],
+        ];
+    }
+
     public function defaultConfig(): array
     {
         return [
@@ -76,6 +90,14 @@ class GridShapeLayout implements PosterLayout
                 'size_jam'          => 9,
                 'weight_nama_dokter'=> '600',
                 'weight_jam'        => '500',
+                'catatan_size'                => 8,
+                'catatan_weight'              => '400',
+                'catatan_radius'              => 4,
+                'catatan_bg_warna'            => '#fef9c3',
+                'catatan_warna'               => '#1a1a2e',
+                'catatan_border_warna'        => '#fde68a',
+                'catatan_perubahan_bg_warna'  => '#fff7ed',
+                'catatan_perubahan_warna'     => '#92400e',
             ],
             'font_tanggal'    => ['sumber' => 'google', 'nama' => 'Montserrat'],
             'font_keterangan' => ['sumber' => 'google', 'nama' => 'Poppins'],

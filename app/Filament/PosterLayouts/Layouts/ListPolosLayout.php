@@ -22,6 +22,22 @@ class ListPolosLayout implements PosterLayout
         return 'filament.resources.poster-jadwal-resource.pages.jadwal-template-list-polos';
     }
 
+    public function quickConfigFields(): array
+    {
+        return [
+            ['key' => 'poli_per_halaman',     'label' => 'Poli per halaman',               'quick_setting' => true],
+            ['key' => 'gap_v',                'label' => 'Jarak antar poli',                'quick_setting' => true],
+            ['key' => 'gap_header_dokter',    'label' => 'Jarak header ke baris dokter',    'quick_setting' => true],
+            ['key' => 'dokter_raise',         'label' => 'Overlap dokter ke header (px)',   'quick_setting' => true],
+            ['key' => 'size_nama_poli',       'label' => 'Ukuran font nama poli',           'quick_setting' => true],
+            ['key' => 'size_nama_dokter',     'label' => 'Ukuran font nama dokter',         'quick_setting' => true],
+            ['key' => 'size_jam',             'label' => 'Ukuran font jam',                 'quick_setting' => true],
+            ['key' => 'col_nama_persen',      'label' => 'Lebar kolom nama (%)',            'quick_setting' => true],
+            ['key' => 'padding_dokter_top',   'label' => 'Padding atas baris dokter',       'quick_setting' => true],
+            ['key' => 'padding_dokter_bottom','label' => 'Padding bawah baris dokter',      'quick_setting' => true],
+        ];
+    }
+
     public function defaultConfig(): array
     {
         return [

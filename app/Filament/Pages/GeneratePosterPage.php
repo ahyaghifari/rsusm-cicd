@@ -47,6 +47,10 @@ class GeneratePosterPage extends Page
     public int $activeHalaman  = 1;
     public int $totalHalaman   = 1;
 
+    /** Quick config overrides — keyed by grid config key, populated from active template. */
+    public array $quickConfig       = [];
+    public array $quickConfigFields = [];
+
     public function mount(): void
     {
         $this->form->fill([
@@ -162,12 +166,13 @@ class GeneratePosterPage extends Page
                             ->live()
                             ->afterStateUpdated(function (Forms\Get $get) {
                                 $templateId = (int) $get('template_id') ?: null;
-                                if ($templateId) {
-                                    $rsId = PosterTemplate::where('id', $templateId)->value('rumah_sakit_id');
-                                    $this->hospitalHasExecutiveClinic = (bool) RumahSakit::where('id', $rsId)->value('executive_clinic');
+                                $template   = $templateId ? PosterTemplate::find($templateId) : null;
+                                if ($template) {
+                                    $this->hospitalHasExecutiveClinic = (bool) RumahSakit::where('id', $template->rumah_sakit_id)->value('executive_clinic');
                                 } else {
                                     $this->hospitalHasExecutiveClinic = false;
                                 }
+                                $this->loadQuickConfig($template);
                                 $this->loadPoliList($get);
                             }),
 
@@ -263,6 +268,28 @@ class GeneratePosterPage extends Page
             ->toArray();
 
         $this->recalcPagination($template);
+    }
+
+    private function loadQuickConfig(?PosterTemplate $template): void
+    {
+        if (! $template) {
+            $this->quickConfig       = [];
+            $this->quickConfigFields = [];
+            return;
+        }
+
+        $fields = array_filter(
+            $template->layout()->quickConfigFields(),
+            fn ($f) => $f['quick_setting'] ?? false,
+        );
+
+        $this->quickConfigFields = array_values($fields);
+
+        $grid = $template->config['grid'] ?? [];
+        $this->quickConfig = [];
+        foreach ($this->quickConfigFields as $f) {
+            $this->quickConfig[$f['key']] = $grid[$f['key']] ?? null;
+        }
     }
 
     private function recalcPagination(?PosterTemplate $template): void
@@ -564,13 +591,22 @@ class GeneratePosterPage extends Page
                             'libur'             => $statusRaw === 'LIBUR',
                             'is_executive'      => (bool) ($r->is_executive ?? false),
                             'sesuai_perjanjian' => (bool) ($r->sesuai_perjanjian ?? false),
-                            'catatan'           => $p?->catatan ?: ($r->catatan ?? ''),
+                            'catatan'                => $p?->catatan ?: ($r->catatan ?? ''),
+                            'catatan_dari_perubahan' => filled($p?->catatan),
                         ];
                     })->toArray(),
                 ];
             })
             ->filter(fn ($p) => ! empty($p['jadwal']))
             ->values();
+
+        // Apply quick config overrides (in-memory only, no save)
+        $overrides = array_filter($this->quickConfig, fn ($v) => $v !== null && $v !== '');
+        if ($overrides) {
+            $cfg = $template->config ?: \App\Models\PosterTemplate::defaultConfig((int) $template->rumah_sakit_id);
+            $cfg['grid'] = array_merge($cfg['grid'] ?? [], array_map('intval', $overrides));
+            $template->config = $cfg;
+        }
 
         return view($template->layout()->templateView(), [
             'template'        => $template,

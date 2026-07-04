@@ -1,3 +1,4 @@
+<div>
 @once
     @push('styles')
         <link href="https://cdn.jsdelivr.net/npm/tom-select@2/dist/css/tom-select.default.min.css" rel="stylesheet">
@@ -596,3 +597,4 @@
 @endif
 
 </x-filament-panels::page>
+</div>
