@@ -19,10 +19,10 @@ class JadwalHarianController extends Controller
         }
 
         $request->validate([
-            'tanggal' => ['required', 'date_format:Y-m-d'],
+            'tanggal' => ['nullable', 'date_format:Y-m-d'],
         ]);
 
-        $tanggal = $request->input('tanggal');
+        $tanggal = $request->input('tanggal') ?? now()->format('Y-m-d');
 
         $jadwalHarian = JadwalHarian::whereDate('tanggal', $tanggal)
             ->where('is_executive', 0)

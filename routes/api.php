@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\Api\JadwalHarianController;
+use App\Http\Controllers\Api\JadwalPraktekController;
 use Illuminate\Support\Facades\Route;
 
-// Route::get('/{rs}/jadwal-harian', [JadwalHarianController::class, 'index']);
+Route::middleware('throttle:public-api')->group(function () {
+    Route::get('/{rs}/jadwal-harian', [JadwalHarianController::class, 'index']);
+    // Route::get('/{rs}/jadwal-praktek', [JadwalPraktekController::class, 'index']);
+});
