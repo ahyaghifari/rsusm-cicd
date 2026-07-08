@@ -10,6 +10,11 @@ class EditFaq extends EditRecord
 {
     protected static string $resource = FaqResource::class;
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        return FaqResource::mutateFormDataBeforeSave($data);
+    }
+
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');

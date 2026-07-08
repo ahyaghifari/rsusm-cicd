@@ -33,7 +33,7 @@ function promoPopup(rsSlug) {
     x-transition:leave="transition ease-in duration-200"
     x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0"
-    class="fixed inset-0 z-[200] flex items-center justify-center p-4"
+    class="fixed inset-0 z-200 flex items-center justify-center p-4"
     style="display:none;">
 
     {{-- Backdrop --}}
@@ -70,11 +70,6 @@ function promoPopup(rsSlug) {
 
                 {{-- Deskripsi & CTA --}}
                 <div class="p-6 flex flex-col gap-4">
-                    @if($p->deskripsi)
-                        <p class="text-sm text-on-surface-variant leading-relaxed">
-                            {{ strip_tags($p->deskripsi) }}
-                        </p>
-                    @endif
                     <a href="{{ route('rumahsakit.promo_detail', ['rumahsakit' => $currentRumahSakit->slug, 'promo' => $p->slug]) }}"
                        @click="close()"
                        class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl

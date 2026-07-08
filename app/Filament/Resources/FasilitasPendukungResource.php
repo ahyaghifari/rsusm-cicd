@@ -38,15 +38,15 @@ class FasilitasPendukungResource extends BaseRumahSakitResource
                     ->image()
                     ->directory('fasilitas-pendukung')
                     ->maxSize(2048),
-                
-                // Toggle aktif dengan nilai bawaan true
-                Forms\Components\Toggle::make('aktif')
-                    ->default(true)
-                    ->required(),
 
                 // Textarea untuk deskripsi yang mengambil ruang penuh baris
                 Forms\Components\Textarea::make('deskripsi')
                     ->columnSpanFull(),
+
+                // Toggle aktif dengan nilai bawaan true
+                Forms\Components\Toggle::make('aktif')
+                    ->default(true)
+                    ->required(),
             ]);
     }
 

@@ -14,15 +14,13 @@ class ManagePartner extends ManageRecords
     {
         return [
             Actions\CreateAction::make()
-            ->mutateFormDataUsing(function (array $data): array {
-                if (! static::isSuperAdmin()) {
+                ->mutateFormDataUsing(function (array $data): array {
+                    if (! PartnerResource::isSuperAdmin()) {
+                        $data['rumah_sakit_id'] = PartnerResource::rumahSakitId();
+                    }
 
-                    $data['rumah_sakit_id'] = static::rumahSakitId();
-
-                }
-
-                return $data;
-            }),
+                    return $data;
+                }),
         ];
     }
 }

@@ -37,12 +37,12 @@ class PenunjangMedisResource extends BaseRumahSakitResource
                     ->directory('penunjang-medis')
                     ->maxSize(2048),
 
+                Forms\Components\Textarea::make('deskripsi')
+                    ->columnSpanFull(),
+
                 Forms\Components\Toggle::make('aktif')
                     ->default(true)
                     ->required(),
-
-                Forms\Components\Textarea::make('deskripsi')
-                    ->columnSpanFull(),
             ]);
     }
 

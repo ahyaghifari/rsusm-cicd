@@ -17,8 +17,16 @@ abstract class BaseZoneEditorPage extends Page
     protected static string $layout = 'components.layouts.blank';
 
     public static array $availableFonts = [
-        'Montserrat', 'Poppins', 'Roboto', 'Open Sans', 'Lato',
-        'Nunito', 'Raleway', 'Inter', 'Oswald', 'Playfair Display',
+        // Geometric
+        'Figtree', 'Josefin Sans', 'Manrope', 'Montserrat', 'Nunito',
+        'Outfit', 'Plus Jakarta Sans', 'Quicksand', 'Raleway',
+        // Humanist
+        'DM Sans', 'Inter', 'Lato', 'Mulish', 'Poppins', 'Rubik',
+        'Source Sans 3', 'Work Sans',
+        // Grotesque / neutral
+        'Barlow', 'Noto Sans', 'Open Sans', 'Roboto', 'Ubuntu',
+        // Display / bold headers
+        'Bebas Neue', 'Exo 2', 'Kanit', 'Oswald', 'Titillium Web',
     ];
 
     public static array $availableFontWeights = [

@@ -20,6 +20,7 @@ class ManageBanners extends ManageRecords
     {
         return [
             Actions\CreateAction::make()
+                ->mutateFormDataUsing(fn (array $data): array => BannerResource::mutateFormDataBeforeCreate($data)),
         ];
     }
 }

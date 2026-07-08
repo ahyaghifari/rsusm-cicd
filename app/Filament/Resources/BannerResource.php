@@ -97,7 +97,8 @@ class BannerResource extends BaseRumahSakitResource
             ])
 
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->mutateFormDataUsing(fn (array $data): array => static::mutateFormDataBeforeSave($data)),
                 Tables\Actions\DeleteAction::make(),
             ]);
 

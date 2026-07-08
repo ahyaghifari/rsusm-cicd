@@ -10,6 +10,11 @@ class CreateFaq extends CreateRecord
 {
     protected static string $resource = FaqResource::class;
 
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        return FaqResource::mutateFormDataBeforeCreate($data);
+    }
+
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');

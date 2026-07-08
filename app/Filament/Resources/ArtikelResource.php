@@ -129,9 +129,9 @@ class ArtikelResource extends BaseRumahSakitResource
                     ->required()
                     ->columnSpanFull(),
 
-                Toggle::make('unggulan')
-                    ->label('Artikel Unggulan')
-                    ->default(false),
+                // Toggle::make('unggulan')
+                //     ->label('Artikel Unggulan')
+                //     ->default(false),
 
                 Toggle::make('aktif')
                     ->default(true),
@@ -165,9 +165,9 @@ class ArtikelResource extends BaseRumahSakitResource
 
                 static::rsTableColumn(),
 
-                IconColumn::make('unggulan')
-                    ->boolean()
-                    ->sortable(),
+                // IconColumn::make('unggulan')
+                //     ->boolean()
+                //     ->sortable(),
 
                 ToggleColumn::make('aktif'),
 
@@ -181,17 +181,12 @@ class ArtikelResource extends BaseRumahSakitResource
                 SelectFilter::make('kategori_artikel_id')
                     ->label('Kategori')
                     ->relationship('kategori', 'nama'),
-                TernaryFilter::make('aktif')->label('Status Aktif'),
-                TernaryFilter::make('unggulan')->label('Artikel Unggulan'),
+                TernaryFilter::make('aktif')->label('Status Aktif')
+                // TernaryFilter::make('unggulan')->label('Artikel Unggulan'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
     }
 
