@@ -243,10 +243,9 @@
                     @endphp
 
                     @if(! $tanggalTerlalu && $this->canEditJadwal())
-                        {{-- Kosongkan: hanya muncul kalau tanggal ini sudah punya jadwal
-                             tersimpan DAN tampilan tidak sedang dipersempit ke Reguler/Eksekutif
-                             saja (menghindari "kosongkan" yang cuma menghapus sebagian data) --}}
-                        @if($this->hasJadwalHarianData() && ! $this->isJadwalFiltered())
+                        {{-- Kosongkan: muncul kalau tanggal ini sudah punya jadwal tersimpan,
+                             terlepas dari filter Reguler/Eksekutif yang sedang aktif --}}
+                        @if($this->hasJadwalHarianData())
                             <x-filament::button
                                 color="danger"
                                 icon="heroicon-m-trash"

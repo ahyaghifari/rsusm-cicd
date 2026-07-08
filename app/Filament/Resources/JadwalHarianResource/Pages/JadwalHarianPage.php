@@ -142,16 +142,6 @@ class JadwalHarianPage extends Page
             ->exists();
     }
 
-    /**
-     * True kalau tampilan saat ini sedang dipersempit ke Reguler/Eksekutif saja
-     * (bukan "Semua") — dipakai untuk menyembunyikan tombol "Kosongkan" supaya
-     * tidak mengosongkan hanya sebagian data sambil terlihat seperti mengosongkan semua.
-     */
-    public function isJadwalFiltered(): bool
-    {
-        return $this->hasExecutiveClinic() && $this->executiveClinicFilter !== 'all';
-    }
-
     public function getNamaHariAktif(): string
     {
         if (! $this->activeTanggal) return '';
