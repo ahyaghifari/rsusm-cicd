@@ -63,13 +63,18 @@ class GenerateJadwalHarian extends Command
                         ->with('poliklinik')
                         ->get();
 
+                    // Snapshot poliklinik yang SUDAH punya JadwalHarian untuk tanggal ini,
+                    // diambil sekali SEBELUM loop insert — supaya insert baris pertama suatu
+                    // poliklinik (mis. dokter pagi) tidak membuat baris berikutnya (dokter
+                    // siang, poliklinik & hari sama) ikut ter-skip padahal belum pernah dibuat.
+                    $poliklinikSudahAda = JadwalHarian::whereDate('tanggal', $tanggalStr)
+                        ->whereIn('poliklinik_id', $jadwalPrakteks->pluck('poliklinik_id')->unique())
+                        ->pluck('poliklinik_id')
+                        ->flip();
+
                     foreach ($jadwalPrakteks as $jp) {
                         // Cek per (tanggal, poliklinik_id) — granular, bukan per RS
-                        $sudahAda = JadwalHarian::where('tanggal', $tanggalStr)
-                            ->where('poliklinik_id', $jp->poliklinik_id)
-                            ->exists();
-
-                        if ($sudahAda) {
+                        if (isset($poliklinikSudahAda[$jp->poliklinik_id])) {
                             $skipped++;
                             continue;
                         }

@@ -22,7 +22,7 @@ class KategoriArtikelResource extends BaseRumahSakitResource
 
     protected static ?string $navigationGroup = 'Media Informasi';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {

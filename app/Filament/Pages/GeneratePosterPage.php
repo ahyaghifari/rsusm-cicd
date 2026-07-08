@@ -8,6 +8,7 @@ use App\Models\PoliKlinik;
 use App\Models\PosterTemplate;
 use App\Models\RumahSakit;
 use App\Models\User;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Form;
@@ -22,6 +23,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class GeneratePosterPage extends Page
 {
     use InteractsWithForms;
+    use HasPageShield;
 
     protected static ?string $navigationIcon  = 'heroicon-o-sparkles';
     protected static ?string $navigationLabel = 'Generate Poster';

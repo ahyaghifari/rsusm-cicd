@@ -51,9 +51,21 @@ class RolesAndPermissionsSeeder extends Seeder
             fn (Permission $p) => $this->matchesAny($p->name, $humasResources)
         );
 
+        // Humas: Jadwal Harian hanya lihat, tidak boleh ubah
+        $humasPermissions = $humasPermissions->merge(
+            $allPermissions->filter(
+                fn (Permission $p) => in_array($p->name, ['view_any_jadwal::harian', 'view_jadwal::harian'])
+            )
+        );
+
+        // Humas: akses halaman Generate Poster (informasi sengaja tidak dapat ini)
+        $humasPermissions = $humasPermissions->merge(
+            $allPermissions->filter(fn (Permission $p) => $p->name === 'page_GeneratePosterPage')
+        );
+
         // Informasi: clinical information focused
         $informasiResources = [
-            'jadwal::praktek', 'dokter', 'spesialis', 'rawat::inap', 'partner',
+            'jadwal::praktek', 'jadwal::harian', 'dokter', 'spesialis', 'rawat::inap', 'partner',
             'link::layanan', 'faq', 'layanan::unggulan', 'fasilitas::pendukung',
             'penunjang::medis', 'kontak',
         ];

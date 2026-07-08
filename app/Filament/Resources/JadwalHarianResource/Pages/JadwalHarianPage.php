@@ -38,6 +38,11 @@ class JadwalHarianPage extends Page
     public array $rows = [];
     public array $rowsCache = [];
 
+    // Toggle "Layar Penuh" — disimpan di server (bukan variabel Alpine lokal) supaya
+    // tidak ter-reset ke false setiap kali komponen ini re-render (mis. tiap keystroke
+    // di kolom jadwal), yang sebelumnya membuat sidebar "muncul kembali" sendiri.
+    public bool $isFullscreen = false;
+
     // Executive clinic filter: 'all' | 'reguler' | 'eksekutif'
     public string $executiveClinicFilter = 'reguler';
 
@@ -115,6 +120,11 @@ class JadwalHarianPage extends Page
         return false;
     }
 
+    public function canEditJadwal(): bool
+    {
+        return (bool) auth()->user()?->can('update_jadwal::harian');
+    }
+
     public function hasExecutiveClinic(): bool
     {
         $rsId = $this->getActiveRumahSakitId();
@@ -130,6 +140,16 @@ class JadwalHarianPage extends Page
         return JadwalHarian::whereDate('tanggal', $this->activeTanggal)
             ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rsId))
             ->exists();
+    }
+
+    /**
+     * True kalau tampilan saat ini sedang dipersempit ke Reguler/Eksekutif saja
+     * (bukan "Semua") — dipakai untuk menyembunyikan tombol "Kosongkan" supaya
+     * tidak mengosongkan hanya sebagian data sambil terlihat seperti mengosongkan semua.
+     */
+    public function isJadwalFiltered(): bool
+    {
+        return $this->hasExecutiveClinic() && $this->executiveClinicFilter !== 'all';
     }
 
     public function getNamaHariAktif(): string
@@ -246,6 +266,18 @@ class JadwalHarianPage extends Page
 
     public function muatDariJadwalMingguan(): void
     {
+        abort_unless($this->canEditJadwal(), 403);
+
+        // Tombol ini seharusnya sudah disembunyikan di UI kalau data sudah ada —
+        // guard ini cuma jaring pengaman kalau method dipanggil langsung.
+        if ($this->hasJadwalHarianData()) {
+            Notification::make()
+                ->title('Jadwal harian untuk tanggal ini sudah ada')
+                ->body('Kosongkan jadwal yang ada terlebih dahulu sebelum memuat ulang dari jadwal mingguan.')
+                ->warning()->send();
+            return;
+        }
+
         $rsId = $this->getActiveRumahSakitId();
         if (! $rsId) return;
 
@@ -285,9 +317,14 @@ class JadwalHarianPage extends Page
 
         $this->rows = $newRows;
 
+        if (! $this->persistJadwal()) {
+            // Validasi gagal (mis. ada baris tanpa jam mulai) — baris tetap tampil
+            // di tabel supaya bisa diperbaiki lalu disimpan manual lewat tombol Simpan.
+            return;
+        }
+
         Notification::make()
-            ->title("{$jadwals->count()} baris dimuat dari jadwal praktek {$namaHari}")
-            ->body('Silakan review dan edit sebelum menyimpan.')
+            ->title("{$jadwals->count()} baris dimuat & disimpan dari jadwal praktek {$namaHari}")
             ->success()->send();
     }
 
@@ -328,6 +365,8 @@ class JadwalHarianPage extends Page
 
     public function addRow(): void
     {
+        abort_unless($this->canEditJadwal(), 403);
+
         $isExecutive = $this->executiveClinicFilter === 'eksekutif';
 
         $this->rows[(string) Str::uuid()] = [
@@ -346,6 +385,8 @@ class JadwalHarianPage extends Page
 
     public function removeRow(string $key): void
     {
+        abort_unless($this->canEditJadwal(), 403);
+
         unset($this->rows[$key]);
     }
 
@@ -358,6 +399,8 @@ class JadwalHarianPage extends Page
 
     public function resetJadwal(): void
     {
+        abort_unless($this->canEditJadwal(), 403);
+
         $this->rows = [];
         $this->rowsCache[$this->activeTanggal] = [];
 
@@ -373,10 +416,28 @@ class JadwalHarianPage extends Page
 
     public function saveJadwal(): void
     {
+        abort_unless($this->canEditJadwal(), 403);
+
+        if (! $this->persistJadwal()) {
+            return;
+        }
+
+        $tanggalFormatted = Carbon::parse($this->activeTanggal)->translatedFormat('d F Y');
+        Notification::make()
+            ->title("Jadwal {$this->getNamaHariAktif()}, {$tanggalFormatted} berhasil disimpan")
+            ->success()->send();
+    }
+
+    /**
+     * Validasi + simpan $this->rows ke database (replace-all per tanggal + scope filter).
+     * Dipakai oleh saveJadwal() (tombol Simpan) maupun muatDariJadwalMingguan() (auto-save).
+     */
+    private function persistJadwal(): bool
+    {
         $rsId = $this->getActiveRumahSakitId();
         if (! $rsId) {
             Notification::make()->title('Rumah sakit tidak teridentifikasi')->danger()->send();
-            return;
+            return false;
         }
 
         foreach ($this->rows as $i => $row) {
@@ -385,7 +446,7 @@ class JadwalHarianPage extends Page
                     ->title("Baris ke-" . ($i + 1) . " belum lengkap")
                     ->body('Pilih poliklinik atau hapus baris tersebut sebelum menyimpan.')
                     ->warning()->send();
-                return;
+                return false;
             }
         }
 
@@ -394,13 +455,13 @@ class JadwalHarianPage extends Page
                 Notification::make()
                     ->title("Baris ke-" . ($i + 1) . ": Jam Mulai wajib diisi")
                     ->danger()->send();
-                return;
+                return false;
             }
             if (empty($row['status_layanan'])) {
                 Notification::make()
                     ->title("Baris ke-" . ($i + 1) . ": Status Layanan wajib diisi")
                     ->danger()->send();
-                return;
+                return false;
             }
         }
 
@@ -509,10 +570,7 @@ class JadwalHarianPage extends Page
         $this->rowsCache[$this->activeTanggal] = null;
         $this->loadRows();
 
-        $tanggalFormatted = Carbon::parse($this->activeTanggal)->translatedFormat('d F Y');
-        Notification::make()
-            ->title("Jadwal {$this->getNamaHariAktif()}, {$tanggalFormatted} berhasil disimpan")
-            ->success()->send();
+        return true;
     }
 
     // =========================================================================

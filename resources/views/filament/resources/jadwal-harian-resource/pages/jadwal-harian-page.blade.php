@@ -69,7 +69,8 @@
 </style>
 
 <div class="space-y-4"
-    x-data="{ isFs: false }"
+    x-data="{ isFs: $wire.entangle('isFullscreen') }"
+    x-init="document.body.classList.toggle('jp-fullscreen', isFs)"
     x-effect="isFs
         ? document.body.classList.add('jp-fullscreen')
         : document.body.classList.remove('jp-fullscreen')"
@@ -241,40 +242,48 @@
                             : false;
                     @endphp
 
-                    @if(! $tanggalTerlalu)
-                        {{-- Kosongkan: hapus semua baris dari tampilan (belum tersimpan) --}}
-                        <x-filament::button
-                            color="danger"
-                            icon="heroicon-m-trash"
-                            outlined
-                            x-on:click="
-                                const count = Object.keys($wire.rows ?? {}).length;
-                                if (count > 0 &&
-                                    window.confirm('Yakin ingin mengosongkan semua baris? Perubahan yang belum disimpan akan hilang.')) {
-                                    $wire.resetJadwal()
-                                }
-                            "
-                        >
-                            Kosongkan
-                        </x-filament::button>
+                    @if(! $tanggalTerlalu && $this->canEditJadwal())
+                        {{-- Kosongkan: hanya muncul kalau tanggal ini sudah punya jadwal
+                             tersimpan DAN tampilan tidak sedang dipersempit ke Reguler/Eksekutif
+                             saja (menghindari "kosongkan" yang cuma menghapus sebagian data) --}}
+                        @if($this->hasJadwalHarianData() && ! $this->isJadwalFiltered())
+                            <x-filament::button
+                                color="danger"
+                                icon="heroicon-m-trash"
+                                outlined
+                                x-on:click="
+                                    const count = Object.keys($wire.rows ?? {}).length;
+                                    if (count > 0 &&
+                                        window.confirm('Yakin ingin mengosongkan semua baris? Perubahan yang belum disimpan akan hilang.')) {
+                                        $wire.resetJadwal()
+                                    }
+                                "
+                            >
+                                Kosongkan
+                            </x-filament::button>
+                        @endif
 
-                        {{-- Muat dari Jadwal Mingguan: konfirmasi hanya jika baris sudah ada --}}
-                        <x-filament::button
-                            color="gray"
-                            icon="heroicon-m-arrow-down-tray"
-                            x-on:click="
-                                const count = Object.keys($wire.rows ?? {}).length;
-                                if (count > 0) {
-                                    if (window.confirm('Jadwal {{ $this->getNamaHariAktif() }} yang sudah ada akan diganti dengan template dari jadwal mingguan. Lanjutkan?')) {
+                        {{-- Muat dari Jadwal Mingguan: hanya muncul kalau tanggal ini BELUM
+                             punya jadwal tersimpan sama sekali (tidak terpengaruh filter
+                             klinik). Begitu dimuat, langsung tersimpan ke database. --}}
+                        @if(! $this->hasJadwalHarianData())
+                            <x-filament::button
+                                color="gray"
+                                icon="heroicon-m-arrow-down-tray"
+                                x-on:click="
+                                    const count = Object.keys($wire.rows ?? {}).length;
+                                    if (count > 0) {
+                                        if (window.confirm('Baris yang belum disimpan akan diganti dengan template dari jadwal mingguan dan langsung tersimpan. Lanjutkan?')) {
+                                            $wire.muatDariJadwalMingguan()
+                                        }
+                                    } else {
                                         $wire.muatDariJadwalMingguan()
                                     }
-                                } else {
-                                    $wire.muatDariJadwalMingguan()
-                                }
-                            "
-                        >
-                            Muat dari Jadwal Mingguan
-                        </x-filament::button>
+                                "
+                            >
+                                Muat dari Jadwal Mingguan
+                            </x-filament::button>
+                        @endif
                     @endif
 
                 </div>
@@ -332,6 +341,7 @@
                                             this.ts = new TomSelect(this.$refs.sel, { maxOptions: null });
                                             this.ts.setValue('{{ $row['poliklinik_id'] ?? '' }}', true);
                                             this.ts.on('change', (v) => $wire.set('rows.{{ $uuid }}.poliklinik_id', v || null));
+                                            if (! @js($this->canEditJadwal())) this.ts.disable();
                                         },
                                         destroy() { if(this.ts) { this.ts.destroy(); this.ts = null; } }
                                     }">
@@ -355,6 +365,7 @@
                                                 $wire.set('rows.{{ $uuid }}.dokter_id', v || null);
                                                 $wire.set('rows.{{ $uuid }}.nama_dokter', v ? (@js($this->getDokterOptions()))[v] || null : null);
                                             });
+                                            if (! @js($this->canEditJadwal())) this.ts.disable();
                                         },
                                         destroy() { if(this.ts) { this.ts.destroy(); this.ts = null; } }
                                     }">
@@ -370,6 +381,7 @@
                                 {{-- Nama Dokter --}}
                                 <td class="px-2 py-1.5">
                                     <input type="text" wire:model="rows.{{ $uuid }}.nama_dokter" placeholder="Nama dokter..."
+                                        @disabled(! $this->canEditJadwal())
                                         class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500"/>
                                 </td>
 
@@ -377,6 +389,7 @@
                                 @if($this->hasExecutiveClinic())
                                 <td class="px-2 py-1.5 text-center">
                                     <input type="checkbox" wire:model.boolean="rows.{{ $uuid }}.is_executive"
+                                        @disabled(! $this->canEditJadwal())
                                         class="rounded border-amber-300 text-amber-500 shadow-sm focus:ring-amber-400"/>
                                 </td>
                                 @endif
@@ -384,12 +397,14 @@
                                 {{-- Jam Mulai --}}
                                 <td class="px-2 py-1.5">
                                     <input type="time" wire:model="rows.{{ $uuid }}.jam_mulai"
+                                        @disabled(! $this->canEditJadwal())
                                         class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500 font-mono"/>
                                 </td>
 
                                 {{-- Jam Selesai --}}
                                 <td class="px-2 py-1.5">
                                     <input type="time" wire:model="rows.{{ $uuid }}.jam_selesai"
+                                        @disabled(! $this->canEditJadwal())
                                         class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500 font-mono"
                                         placeholder="Opsional"/>
                                 </td>
@@ -397,6 +412,7 @@
                                 {{-- Status --}}
                                 <td class="px-2 py-1.5">
                                     <select wire:model="rows.{{ $uuid }}.status_layanan"
+                                        @disabled(! $this->canEditJadwal())
                                         class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500">
                                         @foreach(\App\Enums\StatusLayanan::cases() as $st)
                                             <option value="{{ $st->value }}">{{ $st->getLabel() }}</option>
@@ -407,17 +423,20 @@
                                 {{-- Catatan --}}
                                 <td class="px-2 py-1.5">
                                     <input type="text" wire:model="rows.{{ $uuid }}.catatan" placeholder="Catatan..."
+                                        @disabled(! $this->canEditJadwal())
                                         class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500"/>
                                 </td>
 
                                 {{-- Remove --}}
                                 <td class="px-2 py-1.5 text-center">
+                                    @if($this->canEditJadwal())
                                     <button wire:click="removeRow('{{ $uuid }}')" wire:confirm="Hapus baris ini?"
                                         class="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
                                     </button>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
@@ -434,7 +453,7 @@
                         @endforelse
                     </tbody>
                 </table>
-                @if(! $tanggalTerlalu)
+                @if(! $tanggalTerlalu && $this->canEditJadwal())
                 <div class="bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-800 px-4 py-3 flex justify-center">
                     <button wire:click="addRow" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-primary-600 bg-primary-50 hover:bg-primary-100 dark:text-primary-400 dark:bg-primary-900/30 dark:hover:bg-primary-900/50 transition border border-primary-200 dark:border-primary-800">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -446,7 +465,11 @@
                 @endif
             </div>
 
-            @if(! $tanggalTerlalu)
+            @if(! $this->canEditJadwal())
+                <p class="text-xs text-gray-400 italic mt-2">
+                    Mode lihat saja — akun Anda tidak memiliki izin mengubah jadwal harian.
+                </p>
+            @elseif(! $tanggalTerlalu)
                 <div class="flex justify-end mt-2">
                     <x-filament::button wire:click="saveJadwal" icon="heroicon-m-cloud-arrow-up">
                         Simpan Jadwal
@@ -499,16 +522,23 @@
     <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
 
         {{-- Header --}}
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between shrink-0">
-            <div>
-                <h3 class="text-base font-bold text-gray-900 dark:text-white">Perubahan Jadwal</h3>
-                <p class="text-xs text-gray-500 mt-0.5">
-                    {{ $activeTanggal ? \Carbon\Carbon::parse($activeTanggal)->translatedFormat('d F Y') : '' }}
-                    — {{ $this->getNamaHariAktif() }}
-                </p>
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between shrink-0 bg-gray-50/60 dark:bg-gray-800/40">
+            <div class="flex items-center gap-3">
+                <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-primary-100 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400 shrink-0">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </span>
+                <div>
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white">Riwayat Perubahan Jadwal</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">
+                        {{ $this->getNamaHariAktif() }},
+                        {{ $activeTanggal ? \Carbon\Carbon::parse($activeTanggal)->translatedFormat('d F Y') : '' }}
+                    </p>
+                </div>
             </div>
             <button wire:click="closePerubahan"
-                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
+                    class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-300 transition">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -516,73 +546,141 @@
         </div>
 
         {{-- Konten --}}
-        <div class="overflow-y-auto flex-1 px-6 py-4 space-y-6">
+        <div class="overflow-y-auto flex-1 px-6 py-5 space-y-6">
 
             {{-- DITAMBAH MANUAL --}}
             <div>
                 <div class="flex items-center gap-2 mb-3">
-                    <span class="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0"></span>
-                    <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
-                        Ditambah Manual ({{ count($dataPerubahan['ditambah']) }})
+                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 shrink-0">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                        </svg>
+                    </span>
+                    <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Ditambah Manual
                     </h4>
+                    <span class="text-xs font-semibold text-gray-400">{{ count($dataPerubahan['ditambah']) }}</span>
                 </div>
+
                 @forelse($dataPerubahan['ditambah'] as $p)
-                    <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl px-4 py-3 mb-2">
-                        <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                            {{ $p['jadwal_harian']['poliklinik']['nama'] ?? '—' }}
-                        </p>
-                        <p class="text-xs text-gray-500 mt-0.5">
-                            Dokter: {{ $p['jadwal_harian']['nama_dokter'] ?? '—' }}
+                    <div class="bg-green-50/70 dark:bg-green-900/10 border border-green-200 dark:border-green-800/60 rounded-xl px-4 py-3 mb-2">
+                        <div class="flex items-start justify-between gap-2">
+                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                                {{ $p['jadwal_harian']['poliklinik']['nama'] ?? '—' }}
+                            </p>
                             @if($p['jadwal_harian']['jam_mulai'])
-                                · {{ \Carbon\Carbon::parse($p['jadwal_harian']['jam_mulai'])->format('H:i') }}
-                                @if($p['jadwal_harian']['jam_selesai'])
-                                    – {{ \Carbon\Carbon::parse($p['jadwal_harian']['jam_selesai'])->format('H:i') }}
-                                @endif
+                                <span class="shrink-0 text-xs font-mono font-medium text-green-700 dark:text-green-400 bg-white dark:bg-gray-900 border border-green-200 dark:border-green-800 rounded-md px-2 py-0.5">
+                                    {{ \Carbon\Carbon::parse($p['jadwal_harian']['jam_mulai'])->format('H:i') }}
+                                    @if($p['jadwal_harian']['jam_selesai'])
+                                        – {{ \Carbon\Carbon::parse($p['jadwal_harian']['jam_selesai'])->format('H:i') }}
+                                    @endif
+                                </span>
                             @endif
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Dokter: {{ $p['jadwal_harian']['nama_dokter'] ?? '—' }}
                         </p>
-                        <p class="text-[11px] text-gray-400 mt-1">
-                            Ditambah oleh: {{ $p['user']['name'] ?? 'Sistem' }}
-                            · {{ \Carbon\Carbon::parse($p['created_at'])->translatedFormat('d M Y, H:i') }}
-                        </p>
+                        <div class="flex items-center gap-1.5 mt-2 pt-2 border-t border-green-200/60 dark:border-green-800/40">
+                            <span class="flex items-center justify-center w-4 h-4 rounded-full bg-green-200 dark:bg-green-800 text-[9px] font-bold text-green-800 dark:text-green-200 shrink-0">
+                                {{ mb_substr($p['user']['name'] ?? 'S', 0, 1) }}
+                            </span>
+                            <p class="text-[11px] text-gray-400">
+                                {{ $p['user']['name'] ?? 'Sistem' }} · {{ \Carbon\Carbon::parse($p['created_at'])->translatedFormat('d M Y, H:i') }}
+                            </p>
+                        </div>
                     </div>
                 @empty
-                    <p class="text-sm text-gray-400 italic">Tidak ada penambahan manual.</p>
+                    <div class="flex items-center gap-2 text-gray-400 dark:text-gray-500 py-3">
+                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <p class="text-sm italic">Tidak ada penambahan manual.</p>
+                    </div>
                 @endforelse
             </div>
 
             {{-- DIUBAH --}}
             <div>
                 <div class="flex items-center gap-2 mb-3">
-                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0"></span>
-                    <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
-                        Diubah ({{ count($dataPerubahan['diubah']) }})
+                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 shrink-0">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                    </span>
+                    <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Diubah
                     </h4>
+                    <span class="text-xs font-semibold text-gray-400">{{ count($dataPerubahan['diubah']) }}</span>
                 </div>
+
                 @forelse($dataPerubahan['diubah'] as $p)
-                    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3 mb-2">
+                    @php
+                        $statusAsli = $p['status_layanan_asli'] ?? null;
+                        $statusBaru = $p['status_layanan'] ?? null;
+                        $jamAsli    = $p['jam_mulai_asli']
+                            ? \Carbon\Carbon::parse($p['jam_mulai_asli'])->format('H:i') . ($p['jam_selesai_asli'] ? '–' . \Carbon\Carbon::parse($p['jam_selesai_asli'])->format('H:i') : '')
+                            : null;
+                        $jamBaru    = $p['jam_mulai']
+                            ? \Carbon\Carbon::parse($p['jam_mulai'])->format('H:i') . ($p['jam_selesai'] ? '–' . \Carbon\Carbon::parse($p['jam_selesai'])->format('H:i') : '')
+                            : null;
+                    @endphp
+                    <div class="bg-amber-50/70 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/60 rounded-xl px-4 py-3 mb-2">
                         <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">
                             {{ $p['jadwal_harian']['poliklinik']['nama'] ?? '—' }}
                         </p>
-                        <div class="flex flex-wrap gap-2 mt-1">
-                            @if($p['status_layanan'] === 'LIBUR')
-                                <span class="inline-flex items-center text-[11px] font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
-                                    Status: LIBUR
-                                </span>
+
+                        <div class="mt-2 space-y-1.5">
+                            @if($statusAsli !== $statusBaru)
+                                <div class="flex items-center gap-2 text-xs">
+                                    <span class="w-14 text-gray-400 shrink-0">Status</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-gray-500 bg-gray-100 dark:bg-gray-800 line-through decoration-gray-400">
+                                        {{ \App\Enums\StatusLayanan::tryFrom($statusAsli)?->getLabel() ?? '—' }}
+                                    </span>
+                                    <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                    </svg>
+                                    <span @class([
+                                        'inline-flex items-center px-2 py-0.5 rounded-full font-bold',
+                                        'text-red-700 bg-red-100 dark:bg-red-900/40 dark:text-red-300' => $statusBaru === 'LIBUR',
+                                        'text-green-700 bg-green-100 dark:bg-green-900/40 dark:text-green-300' => $statusBaru === 'BUKA',
+                                    ])>
+                                        {{ \App\Enums\StatusLayanan::tryFrom($statusBaru)?->getLabel() ?? $statusBaru }}
+                                    </span>
+                                </div>
                             @endif
-                            @if($p['jam_mulai'])
-                                <span class="text-xs text-gray-600 dark:text-gray-400">
-                                    Jam: {{ \Carbon\Carbon::parse($p['jam_mulai'])->format('H:i') }}
-                                    @if($p['jam_selesai'])– {{ \Carbon\Carbon::parse($p['jam_selesai'])->format('H:i') }}@endif
-                                </span>
+
+                            @if($jamAsli !== $jamBaru && $jamBaru)
+                                <div class="flex items-center gap-2 text-xs">
+                                    <span class="w-14 text-gray-400 shrink-0">Jam</span>
+                                    <span class="font-mono text-gray-500 line-through decoration-gray-400">{{ $jamAsli ?? '—' }}</span>
+                                    <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                    </svg>
+                                    <span class="font-mono font-semibold text-gray-700 dark:text-gray-300">{{ $jamBaru }}</span>
+                                </div>
+                            @endif
+
+                            @if($p['catatan'])
+                                <p class="text-xs text-gray-500 dark:text-gray-400 italic">"{{ $p['catatan'] }}"</p>
                             @endif
                         </div>
-                        <p class="text-[11px] text-gray-400 mt-1">
-                            Diubah oleh: {{ $p['user']['name'] ?? 'Sistem' }}
-                            · {{ \Carbon\Carbon::parse($p['updated_at'])->translatedFormat('d M Y, H:i') }}
-                        </p>
+
+                        <div class="flex items-center gap-1.5 mt-2 pt-2 border-t border-amber-200/60 dark:border-amber-800/40">
+                            <span class="flex items-center justify-center w-4 h-4 rounded-full bg-amber-200 dark:bg-amber-800 text-[9px] font-bold text-amber-800 dark:text-amber-200 shrink-0">
+                                {{ mb_substr($p['user']['name'] ?? 'S', 0, 1) }}
+                            </span>
+                            <p class="text-[11px] text-gray-400">
+                                {{ $p['user']['name'] ?? 'Sistem' }} · {{ \Carbon\Carbon::parse($p['updated_at'])->translatedFormat('d M Y, H:i') }}
+                            </p>
+                        </div>
                     </div>
                 @empty
-                    <p class="text-sm text-gray-400 italic">Tidak ada perubahan nilai.</p>
+                    <div class="flex items-center gap-2 text-gray-400 dark:text-gray-500 py-3">
+                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <p class="text-sm italic">Tidak ada perubahan nilai.</p>
+                    </div>
                 @endforelse
             </div>
 
