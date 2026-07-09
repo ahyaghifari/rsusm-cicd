@@ -66,8 +66,10 @@ RumahSakit (slug, executive_clinic, ranap_kode_api, link_antrian, google_place_i
 |---|---|
 | `super_admin` | Semua rumah sakit, semua resource |
 | `admin` | Hanya rumah sakit milik akun tersebut |
-| `humas` | Akses terbatas (konten publik) |
-| `informasi` | Akses terbatas (informasi umum) |
+| `humas` | Akses terbatas (konten publik). Jadwal Harian: **view-only**. Punya akses ke halaman Generate Poster |
+| `informasi` | Akses terbatas (informasi umum). Jadwal Harian: akses penuh (create/update/delete). **Tidak** punya akses ke halaman Generate Poster |
+
+Permission granular per resource/page di-generate via Filament Shield (`shield:generate`) dan disinkron ke role lewat `RolesAndPermissionsSeeder`. Untuk perubahan permission yang perlu diterapkan di production tanpa menjalankan seeder penuh (yang memanggil `shield:generate --all`), dibuat migrasi dedicated (`database/migrations/*_update_jadwal_harian_and_generate_poster_permissions.php`).
 
 ---
 
@@ -298,12 +300,18 @@ Path admin dikonfigurasi via env: `ADMIN_PATH=manage` (default). Akses di `/{ADM
   - Manual tidak membuat record perubahan
   - **Snapshot nilai asli** (`jam_mulai_asli`, `jam_selesai_asli`, `status_layanan_asli`): di-capture sekali saat perubahan pertama kali terjadi, dan tidak ditimpa pada edit berikutnya
   - **Deteksi "kembali ke semula"**: dibandingkan terhadap kolom `*_asli` di `jadwal_harian_perubahan` sendiri — **bukan** dengan query ke `JadwalPraktek` (agar histori tidak bergantung pada perubahan jadwal mingguan di kemudian hari). Jika sama persis, record perubahan dihapus otomatis dan `sumber` kembali ke `GENERATE`
+  - **Modal "Perubahan Jadwal"**: menampilkan diff before→after (status & jam) berdasarkan kolom `*_asli`, badge status berwarna, avatar inisial user, dan empty state — bukan cuma menampilkan nilai baru tanpa konteks nilai lama
 - **Penanda visual Executive**: baris `is_executive = true` di tabel admin diberi highlight background amber + ikon bintang pada kolom No, agar mudah dibedakan dari baris reguler
-- **Cron**: `php artisan jadwal:generate-harian` berjalan otomatis `daily at 00:05`
+- **Role & Permission**: `humas` hanya bisa **melihat** (view-only, tombol edit/simpan disembunyikan + di-guard server-side via `canEditJadwal()`); `informasi`, `admin`, `super_admin` bisa mengubah penuh — lihat [Role](#role)
+- **Tombol "Muat dari Jadwal Mingguan"**: hanya muncul kalau tanggal aktif **belum** punya data JadwalHarian sama sekali (cek tanpa terpengaruh filter Reguler/Eksekutif). Begitu dimuat, langsung **auto-save** ke database (tidak perlu klik Simpan terpisah) — kalau validasi gagal (mis. ada baris tanpa jam mulai), baris tetap tampil di tabel untuk diperbaiki manual
+- **Tombol "Kosongkan"**: muncul kalau tanggal aktif sudah punya data JadwalHarian (terlepas dari filter Reguler/Eksekutif yang aktif)
+- **Cron**: `php artisan jadwal:generate-harian` berjalan otomatis `daily at 03:00`
   - Memuat dari JadwalPraktek sesuai hari
-  - Skip jika jadwal harian untuk tanggal + poliklinik sudah ada
+  - Skip **per poliklinik** kalau tanggal tsb sudah ada JadwalHarian-nya (snapshot diambil sekali sebelum loop insert — bukan query berulang di tengah loop, supaya insert dokter pertama di sebuah poliklinik tidak bikin dokter kedua di poliklinik & hari yang sama ikut ter-skip)
+  - Cek tanggal pakai `whereDate()`, bukan `where()` — konsisten MySQL & SQLite
 - Query tanggal menggunakan `whereDate()` agar kompatibel dengan MySQL dan SQLite
 - Rows menggunakan UUID key
+- **Toggle "Layar Penuh"**: state disimpan di properti Livewire (`$isFullscreen`, di-entangle ke Alpine), bukan variabel Alpine lokal — supaya tidak ter-reset ke `false` sendiri tiap komponen re-render (tiap keystroke di kolom jadwal)
 
 #### Sort Order
 
@@ -478,6 +486,11 @@ php artisan test
   sah jadi satu file — dikelompokkan per fitur, bukan dipaksa per tabel. Detail analisis,
   pemetaan file lama→baru, dan opsi-opsi yang dipertimbangkan:
   [issues/migration-cleanup-plan.md](../issues/migration-cleanup-plan.md)
+- **`mutateFormDataBeforeCreate`/`mutateFormDataBeforeSave` yang didefinisikan sebagai method statis di Resource class TIDAK otomatis dipanggil Filament** — hook itu hanya dieksekusi kalau di-override di Page (`CreateRecord`/`EditRecord`, mode 2-halaman) atau dipanggil eksplisit lewat `->mutateFormDataUsing(fn ($data) => ResourceClass::method($data))` di Action (mode `ManageRecords`/modal, dipakai Banner/Magazine/Promo/KelasRawatInap/KategoriArtikel dkk). Jangan panggil `static::method()` dari closure di dalam Page/Action class lain — `static` di situ resolve ke Page/Action itu sendiri, bukan ke Resource, sehingga method dianggap tidak ada
+- **Livewire component permission-nya cuma efektif kalau ada `Policy` yang di-generate shield** (`view_any_*`, `create_*`, dst) — Resource tanpa Policy class bikin ability-nya tidak terdaftar di Gate, sehingga role selain `super_admin` (yang biasa bypass lewat sinkronisasi permission penuh) tidak bisa akses resource itu sama sekali. Untuk Filament Page biasa (bukan Resource), pakai trait `HasPageShield` dari `bezhansalleh/filament-shield` supaya `canAccess()` & `shouldRegisterNavigation()` otomatis dicek terhadap permission `page_{NamaPageClass}`
+- **Custom Livewire page dengan banyak method pengubah data (bukan Table Action bawaan Filament) tidak otomatis di-guard oleh Policy** — Filament cuma auto-hide/cek Create/Edit/Delete Action berdasarkan Policy untuk Table Action standar. Untuk halaman custom (mis. `JadwalHarianPage`), setiap method yang mengubah data wajib di-guard manual (`abort_unless($this->can(...), 403)`), dan kontrol UI-nya (tombol/`disabled`) disembunyikan terpisah di Blade — dua lapis, karena sembunyikan tombol saja tidak mencegah pemanggilan method Livewire secara langsung
+- **State Alpine lokal (`x-data="{ x: false }"`) di komponen Livewire yang sering re-render bisa ter-reset ke nilai awal sendiri** — kalau state itu harus bertahan lintas re-render (mis. toggle "Layar Penuh"), simpan sebagai public property Livewire lalu `x-data="{ x: $wire.entangle('prop') }"`, bukan variabel Alpine lokal murni
+- **Command cron yang meng-generate data dengan pola "skip kalau sudah ada": jangan query pengecekan "sudah ada?" di dalam loop insert per baris** — insert baris pertama bisa langsung membuat pengecekan baris berikutnya (scope sama, mis. poliklinik+tanggal yang sama) salah mendeteksi "sudah ada" padahal baris itu belum pernah dibuat, sehingga ikut ter-skip. Ambil snapshot data yang sudah ada **sekali di luar loop**, sebelum insert pertama jalan (lihat `GenerateJadwalHarian.php`, `tests/Feature/GenerateJadwalHarianTest.php` untuk regression test kasus 2 dokter di poliklinik & hari yang sama)
 
 ---
 
@@ -542,7 +555,7 @@ ANTRIAN_API_PASSWORD=
 - [x] JadwalPraktek — checkbox `sesuai_perjanjian` dan `is_executive` sync via `$wire.set()`
 - [x] JadwalHarian — override harian + tracking perubahan status (JadwalHarianPerubahan)
 - [x] JadwalHarian — Tom Select untuk poliklinik & dokter, kolom `is_executive`
-- [x] Cron GenerateJadwalHarian (daily 00:05, skip jika sudah ada)
+- [x] Cron GenerateJadwalHarian (daily 03:00, skip per poliklinik jika sudah ada)
 - [x] SoftDelete + Restore: Dokter, Spesialis, PoliKlinik
 - [x] Composite slug uniqueness per RS (Promo, Spesialis, Halaman, PoliKlinik)
 - [x] Halaman jadwal 2 mode (Per Hari + Per Poli)
@@ -621,6 +634,15 @@ ANTRIAN_API_PASSWORD=
 - [x] Kategori Kontak baru `RAWAT INAP` — dedicated untuk disclaimer halaman Ketersediaan Rawat Inap, tidak lagi reuse `PENDAFTARAN`
 - [x] Pembersihan migrasi database: 64 → 47 file, direktori `database/migrations/` sekarang cuma `*_create_*` dan `*_consolidate_*` (tidak ada lagi `add_*`/`fix_*`/`refactor_*`). Migrasi lama yang sudah pernah jalan tidak diubah/dihapus dari riwayat — diganti migrasi baru yang idempotent (`Schema::hasColumn`/`hasIndex`) sehingga aman dijalankan di production tanpa menyentuh tabel `migrations`. Detail & cara verifikasi: [issues/migration-cleanup-plan.md](../issues/migration-cleanup-plan.md)
 - [x] Preview 360° kamar rawat inap — kolom `RawatInap.foto_360`, upload via `RawatInapResource`, badge "360°" di kartu publik (tampil hanya kalau ada foto), viewer Photo Sphere Viewer dalam modal kustom (bukan Preline `hs-overlay`, lihat catatan di bagian Fitur), dilengkapi focus trap & pengembalian fokus (aksesibilitas dialog). Detail: [issues/preview-360-kamar-rawat-inap.md](../issues/preview-360-kamar-rawat-inap.md)
+- [x] Fix bug `mutateFormDataBeforeCreate`/`mutateFormDataBeforeSave` yang didefinisikan sebagai method statis di Resource (Banner, Magazine, Faq, Partner) tapi tidak pernah dipanggil Filament — `rumah_sakit_id` gagal terisi untuk non-superadmin. Diperbaiki dengan wiring yang benar: Page (`CreateRecord`/`EditRecord`) untuk mode 2-halaman, `->mutateFormDataUsing()` di Action untuk mode `ManageRecords` (modal)
+- [x] `KelasRawatInapPolicy` — policy yang sebelumnya belum ada untuk resource `KelasRawatInapResource`
+- [x] Fix bug di `PartnerResource\Pages\ManagePartner` — closure salah pakai `static::isSuperAdmin()` (resolve ke Page, bukan Resource) yang menyebabkan method-not-exist error
+- [x] Jadwal Harian — role `humas` dibatasi view-only (tombol edit/simpan disembunyikan + guard server-side `canEditJadwal()` di semua method pengubah data), `informasi` dapat akses penuh
+- [x] Generate Poster — dibatasi via `HasPageShield` (shield), hanya `super_admin`/`admin`/`humas` yang bisa akses & lihat menunya; `informasi` tidak
+- [x] Fix bug toggle "Layar Penuh" (Jadwal Harian) — state di-entangle ke properti Livewire supaya tidak ter-reset sendiri saat komponen re-render
+- [x] Modal "Perubahan Jadwal" — tampilkan diff before→after (status & jam), bukan cuma nilai baru
+- [x] Jadwal Harian — tombol "Muat dari Jadwal Mingguan" auto-save langsung ke DB & disembunyikan kalau tanggal sudah ada data; tombol "Kosongkan" muncul kalau tanggal sudah ada data (terlepas dari filter klinik)
+- [x] Fix bug kritis `GenerateJadwalHarian` — cek "sudah ada" dijalankan ulang di tengah loop insert, menyebabkan dokter kedua dst di poliklinik yang sama pada hari itu selalu ter-skip (silently) setiap generate otomatis. Diperbaiki dengan snapshot sebelum loop + `whereDate()` (bukan `where()`) untuk konsistensi MySQL/SQLite. Ditambah test regresi di `tests/Feature/GenerateJadwalHarianTest.php`
 
 ### Dalam Pengerjaan
 

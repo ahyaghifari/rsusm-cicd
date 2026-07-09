@@ -58,8 +58,7 @@
         {{-- Perubahan hari ini --}}
         @if($perubahan ?? null)
             @php
-                use App\Enums\StatusLayanan;
-                $isLibur = $perubahan->status_layanan === StatusLayanan::LIBUR;
+                $isLibur = $perubahan->status_layanan === \App\Enums\StatusLayanan::LIBUR;
             @endphp
             <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
                 @if($isLibur)
