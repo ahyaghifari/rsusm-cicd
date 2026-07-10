@@ -25,16 +25,18 @@ class JadwalHarian extends Model
         'catatan',
         'sumber',
         'is_executive',
+        'sesuai_perjanjian',
     ];
 
     protected function casts(): array
     {
         return [
-            'tanggal'        => 'date',
-            'status_layanan' => StatusLayanan::class,
-            'jam_mulai'      => 'datetime:H:i',
-            'jam_selesai'    => 'datetime:H:i',
-            'is_executive'   => 'boolean',
+            'tanggal'           => 'date',
+            'status_layanan'    => StatusLayanan::class,
+            'jam_mulai'         => 'datetime:H:i',
+            'jam_selesai'       => 'datetime:H:i',
+            'is_executive'      => 'boolean',
+            'sesuai_perjanjian' => 'boolean',
         ];
     }
 

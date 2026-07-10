@@ -307,6 +307,7 @@
                             @endif
                             <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-28">Jam Mulai <span class="text-red-500">*</span></th>
                             <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-28">Jam Selesai</th>
+                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 w-20 text-center">Perjanjian</th>
                             <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-32">Status <span class="text-red-500">*</span></th>
                             <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-32">Catatan</th>
                             <th class="px-3 py-3 w-10 text-center"></th>
@@ -408,6 +409,16 @@
                                         placeholder="Opsional"/>
                                 </td>
 
+                                {{-- Sesuai Perjanjian --}}
+                                <td class="px-2 py-1.5 text-center">
+                                    @php $spVal = $row['sesuai_perjanjian'] ?? false; @endphp
+                                    <input type="checkbox"
+                                        {{ $spVal ? 'checked' : '' }}
+                                        @disabled(! $this->canEditJadwal())
+                                        @change="$wire.set('rows.{{ $uuid }}.sesuai_perjanjian', $event.target.checked)"
+                                        class="rounded border-gray-300 text-primary-600 shadow-sm focus:ring-primary-500 cursor-pointer"/>
+                                </td>
+
                                 {{-- Status --}}
                                 <td class="px-2 py-1.5">
                                     <select wire:model="rows.{{ $uuid }}.status_layanan"
@@ -440,7 +451,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ $this->hasExecutiveClinic() ? 10 : 9 }}" class="px-4 py-8 text-center text-gray-400 dark:text-gray-500">
+                                <td colspan="{{ $this->hasExecutiveClinic() ? 11 : 10 }}" class="px-4 py-8 text-center text-gray-400 dark:text-gray-500">
                                     <div class="flex flex-col items-center justify-center gap-2">
                                         <svg class="w-8 h-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>

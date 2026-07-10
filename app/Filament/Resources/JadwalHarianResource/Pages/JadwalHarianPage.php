@@ -213,6 +213,7 @@ class JadwalHarianPage extends Page
                 'status_layanan' => $j->status_layanan->value,
                 'catatan'        => $j->catatan,
                 'is_executive'   => (bool) $j->is_executive,
+                'sesuai_perjanjian' => (bool) $j->sesuai_perjanjian,
                 'sumber'         => $j->sumber,
             ];
         }
@@ -301,6 +302,7 @@ class JadwalHarianPage extends Page
                 'status_layanan' => 'BUKA',
                 'catatan'        => $j->catatan,
                 'is_executive'   => (bool) $j->is_executive,
+                'sesuai_perjanjian' => (bool) $j->sesuai_perjanjian,
                 'sumber'         => 'GENERATE',
             ];
         }
@@ -369,6 +371,7 @@ class JadwalHarianPage extends Page
             'status_layanan' => 'BUKA',
             'catatan'        => null,
             'is_executive'   => $isExecutive,
+            'sesuai_perjanjian' => false,
             'sumber'         => 'MANUAL',
         ];
     }
@@ -441,9 +444,9 @@ class JadwalHarianPage extends Page
         }
 
         foreach (array_values($this->rows) as $i => $row) {
-            if (empty($row['jam_mulai'])) {
+            if (empty($row['jam_mulai']) && empty($row['sesuai_perjanjian'])) {
                 Notification::make()
-                    ->title("Baris ke-" . ($i + 1) . ": Jam Mulai wajib diisi")
+                    ->title("Baris ke-" . ($i + 1) . ": Jam Mulai wajib diisi (kecuali Sesuai Perjanjian dicentang)")
                     ->danger()->send();
                 return false;
             }
@@ -536,6 +539,7 @@ class JadwalHarianPage extends Page
                     'status_layanan' => $row['status_layanan'],
                     'catatan'        => $row['catatan'] ?: null,
                     'is_executive'   => (bool) ($row['is_executive'] ?? false),
+                    'sesuai_perjanjian' => (bool) ($row['sesuai_perjanjian'] ?? false),
                     'sumber'         => $sumber,
                 ]);
 
