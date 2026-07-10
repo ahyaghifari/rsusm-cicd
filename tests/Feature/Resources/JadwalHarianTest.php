@@ -196,6 +196,25 @@ class JadwalHarianTest extends TestCase
         $this->assertDatabaseMissing('jadwal_harian', ['tanggal' => today()->format('Y-m-d')]);
     }
 
+    /**
+     * Regresi: $this->rows di-key pakai UUID string (bukan index numerik) di
+     * pemakaian nyata (addRow/loadRows/muatDariJadwalMingguan). Validasi yang
+     * pakai "$i + 1" untuk pesan "Baris ke-X" harus tetap jalan tanpa TypeError
+     * meskipun key-nya UUID.
+     */
+    public function test_save_gagal_jika_jam_mulai_kosong_dengan_key_uuid(): void
+    {
+        $page = $this->makePage();
+        $page->addRow();
+        $uuidKey = array_key_first($page->rows);
+        $page->rows[$uuidKey]['poliklinik_id'] = $this->poli->id;
+        $page->rows[$uuidKey]['jam_mulai'] = null;
+
+        $page->saveJadwal();
+
+        $this->assertDatabaseMissing('jadwal_harian', ['tanggal' => today()->format('Y-m-d')]);
+    }
+
     public function test_save_berhasil_simpan_baris_manual(): void
     {
         $page = $this->makePage();

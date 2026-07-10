@@ -27,6 +27,7 @@ class PoliKlinik extends Model
         'gambar',
         'deskripsi',
         'aktif',
+        'sort_order',
     ];
 
     /**

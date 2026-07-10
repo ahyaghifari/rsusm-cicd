@@ -258,13 +258,15 @@ class GeneratePosterPage extends Page
                   ->when($filter === 'reguler',   fn ($q) => $q->where('is_executive', 0))
                   ->when($filter === 'eksekutif', fn ($q) => $q->where('is_executive', 1));
             })
+            ->orderBy('sort_order')
             ->orderBy('nama')
             ->get()
-            ->map(fn ($poli) => [
+            ->values()
+            ->map(fn ($poli, $i) => [
                 'id'      => $poli->id,
                 'nama'    => $poli->nama,
                 'visible' => true,
-                'order'   => $poli->urutan ?? 999,
+                'order'   => $i + 1,
             ])
             ->values()
             ->toArray();

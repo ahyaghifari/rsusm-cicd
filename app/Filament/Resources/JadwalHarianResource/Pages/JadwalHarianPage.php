@@ -430,7 +430,7 @@ class JadwalHarianPage extends Page
             return false;
         }
 
-        foreach ($this->rows as $i => $row) {
+        foreach (array_values($this->rows) as $i => $row) {
             if (empty($row['poliklinik_id'])) {
                 Notification::make()
                     ->title("Baris ke-" . ($i + 1) . " belum lengkap")
@@ -440,7 +440,7 @@ class JadwalHarianPage extends Page
             }
         }
 
-        foreach ($this->rows as $i => $row) {
+        foreach (array_values($this->rows) as $i => $row) {
             if (empty($row['jam_mulai'])) {
                 Notification::make()
                     ->title("Baris ke-" . ($i + 1) . ": Jam Mulai wajib diisi")
