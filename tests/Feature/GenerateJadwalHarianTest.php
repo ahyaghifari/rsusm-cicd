@@ -77,4 +77,30 @@ class GenerateJadwalHarianTest extends TestCase
         $this->assertEquals(1, JadwalHarian::whereDate('tanggal', today())->where('poliklinik_id', $poli->id)->count());
         $this->assertDatabaseMissing('jadwal_harian', ['poliklinik_id' => $poli->id, 'nama_dokter' => 'dr. Template']);
     }
+
+    public function test_generate_membawa_sesuai_perjanjian_dari_jadwal_praktek(): void
+    {
+        $rs   = RumahSakit::factory()->create(['aktif' => true]);
+        $poli = PoliKlinik::factory()->create(['rumah_sakit_id' => $rs->id, 'aktif' => true]);
+        $hariValue = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'][today()->dayOfWeek];
+
+        JadwalPraktek::create([
+            'poliklinik_id'     => $poli->id,
+            'hari'              => $hariValue,
+            'nama_dokter'       => 'dr. Perjanjian',
+            'waktu_mulai'       => null,
+            'waktu_selesai'     => null,
+            'sesuai_perjanjian' => true,
+            'is_executive'      => false,
+        ]);
+
+        $this->artisan('jadwal:generate-harian', ['tanggal' => today()->format('Y-m-d')])
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('jadwal_harian', [
+            'poliklinik_id'     => $poli->id,
+            'nama_dokter'       => 'dr. Perjanjian',
+            'sesuai_perjanjian' => true,
+        ]);
+    }
 }

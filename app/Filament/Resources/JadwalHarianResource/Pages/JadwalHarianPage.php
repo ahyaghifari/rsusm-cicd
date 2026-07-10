@@ -585,20 +585,26 @@ class JadwalHarianPage extends Page
               ->when($this->executiveClinicFilter === 'eksekutif', fn ($q2) => $q2->where('is_executive', 1));
         };
 
-        // DITAMBAH: baris manual dari jadwal_harian langsung
+        // DITAMBAH: baris manual dari jadwal_harian langsung, dikelompokkan per poliklinik
         $ditambah = JadwalHarian::where('sumber', 'MANUAL')
             ->where($scope)
             ->with('poliklinik')
-            ->get();
+            ->get()
+            ->groupBy(fn (JadwalHarian $jh) => $jh->poliklinik?->nama ?? '—')
+            ->map(fn ($items) => $items->toArray())
+            ->toArray();
 
-        // DIUBAH: semua record di jadwal_harian_perubahan (semuanya adalah perubahan)
+        // DIUBAH: semua record di jadwal_harian_perubahan, dikelompokkan per poliklinik
         $diubah = JadwalHarianPerubahan::whereHas('jadwalHarian', $scope)
             ->with('jadwalHarian.poliklinik', 'user')
-            ->get();
+            ->get()
+            ->groupBy(fn (JadwalHarianPerubahan $p) => $p->jadwalHarian?->poliklinik?->nama ?? '—')
+            ->map(fn ($items) => $items->toArray())
+            ->toArray();
 
         $this->dataPerubahan = [
-            'ditambah' => $ditambah->toArray(),
-            'diubah'   => $diubah->toArray(),
+            'ditambah' => $ditambah,
+            'diubah'   => $diubah,
         ];
 
         $this->showPerubahan = true;

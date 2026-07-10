@@ -65,6 +65,26 @@
     .ts-portal-wrapper .ts-control > input {
         display: inline-block !important;
     }
+
+    /* Tombol Export PDF — ditulis manual karena bg-green-500 tidak tersedia
+       di CSS bawaan Filament (panel admin belum pakai theme Tailwind custom
+       project ini). Lihat README > Konvensi Kode. */
+    .jp-btn-export {
+        background-color: #22c55e;
+        gap: 0.375rem;
+        padding-left: 0.625rem;
+        padding-right: 0.625rem;
+    }
+    .jp-btn-export:hover {
+        background-color: #16a34a;
+    }
+    .jp-btn-export:disabled {
+        opacity: 0.5;
+    }
+    .jp-btn-export svg {
+        width: 0.875rem;
+        height: 0.875rem;
+    }
 </style>
 
 <div
@@ -99,10 +119,10 @@
                         wire:loading.attr="disabled"
                         wire:target="exportPdf"
                         type="button"
-                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-green-500 hover:green-600 text-white transition disabled:opacity-50"
+                        class="jp-btn-export inline-flex items-center py-1 rounded-lg text-xs font-medium text-white transition"
                         title="Export jadwal ke PDF"
                     >
-                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <svg class="shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                   d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>

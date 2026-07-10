@@ -89,6 +89,7 @@ class GenerateJadwalHarian extends Command
                             'status_layanan' => 'BUKA',
                             'catatan'        => $jp->catatan,
                             'is_executive'   => $jp->is_executive,
+                            'sesuai_perjanjian' => $jp->sesuai_perjanjian,
                             'sumber'         => 'GENERATE',
                         ]);
 

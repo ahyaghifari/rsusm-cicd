@@ -66,6 +66,30 @@
     .ts-portal-wrapper .ts-control > input {
         display: inline-block !important;
     }
+
+    /* ── Modal "Perubahan Jadwal" — properti berikut ditulis manual karena tidak
+       tersedia di CSS bawaan Filament (panel admin belum pakai theme Tailwind
+       custom project ini, lihat catatan di README). ── */
+    .jhp-scroll-list {
+        max-height: 18rem;
+        overflow-y: auto;
+        padding-right: 0.25rem;
+    }
+    .jhp-diff-old {
+        text-decoration: line-through;
+        text-decoration-color: #9ca3af;
+    }
+    .jhp-diff-label {
+        width: 3.5rem;
+    }
+    .jhp-item + .jhp-item {
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--jhp-item-border, rgba(0, 0, 0, 0.06));
+    }
+    .dark .jhp-item + .jhp-item {
+        --jhp-item-border: rgba(255, 255, 255, 0.08);
+    }
 </style>
 
 <div class="space-y-4"
@@ -569,44 +593,47 @@
                     <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Ditambah Manual
                     </h4>
-                    <span class="text-xs font-semibold text-gray-400">{{ count($dataPerubahan['ditambah']) }}</span>
+                    <span class="text-xs font-semibold text-gray-400">{{ collect($dataPerubahan['ditambah'])->sum(fn ($items) => count($items)) }}</span>
                 </div>
 
-                @forelse($dataPerubahan['ditambah'] as $p)
-                    <div class="bg-green-50/70 dark:bg-green-900/10 border border-green-200 dark:border-green-800/60 rounded-xl px-4 py-3 mb-2">
-                        <div class="flex items-start justify-between gap-2">
-                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                                {{ $p['jadwal_harian']['poliklinik']['nama'] ?? '—' }}
+                <div class="jhp-scroll-list space-y-2">
+                    @forelse($dataPerubahan['ditambah'] as $poliNama => $items)
+                        <div class="bg-green-50/70 dark:bg-green-900/10 border border-green-200 dark:border-green-800/60 rounded-xl px-4 py-3">
+                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1.5">
+                                {{ $poliNama }}
                             </p>
-                            @if($p['jadwal_harian']['jam_mulai'])
-                                <span class="shrink-0 text-xs font-mono font-medium text-green-700 dark:text-green-400 bg-white dark:bg-gray-900 border border-green-200 dark:border-green-800 rounded-md px-2 py-0.5">
-                                    {{ \Carbon\Carbon::parse($p['jadwal_harian']['jam_mulai'])->format('H:i') }}
-                                    @if($p['jadwal_harian']['jam_selesai'])
-                                        – {{ \Carbon\Carbon::parse($p['jadwal_harian']['jam_selesai'])->format('H:i') }}
-                                    @endif
-                                </span>
-                            @endif
+                            <div>
+                                @foreach($items as $p)
+                                    <div class="jhp-item">
+                                        <div class="flex items-start justify-between gap-2">
+                                            <p class="text-xs text-gray-600 dark:text-gray-300">
+                                                Dokter: {{ $p['nama_dokter'] ?? '—' }}
+                                            </p>
+                                            @if($p['jam_mulai'])
+                                                <span class="shrink-0 text-xs font-mono font-medium text-green-700 dark:text-green-400 bg-white dark:bg-gray-900 border border-green-200 dark:border-green-800 rounded-md px-2 py-0.5">
+                                                    {{ \Carbon\Carbon::parse($p['jam_mulai'])->format('H:i') }}
+                                                    @if($p['jam_selesai'])
+                                                        – {{ \Carbon\Carbon::parse($p['jam_selesai'])->format('H:i') }}
+                                                    @endif
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <p class="text-[11px] text-gray-400 mt-1">
+                                            Ditambah {{ \Carbon\Carbon::parse($p['created_at'])->translatedFormat('d M Y, H:i') }}
+                                        </p>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            Dokter: {{ $p['jadwal_harian']['nama_dokter'] ?? '—' }}
-                        </p>
-                        <div class="flex items-center gap-1.5 mt-2 pt-2 border-t border-green-200/60 dark:border-green-800/40">
-                            <span class="flex items-center justify-center w-4 h-4 rounded-full bg-green-200 dark:bg-green-800 text-[9px] font-bold text-green-800 dark:text-green-200 shrink-0">
-                                {{ mb_substr($p['user']['name'] ?? 'S', 0, 1) }}
-                            </span>
-                            <p class="text-[11px] text-gray-400">
-                                {{ $p['user']['name'] ?? 'Sistem' }} · {{ \Carbon\Carbon::parse($p['created_at'])->translatedFormat('d M Y, H:i') }}
-                            </p>
+                    @empty
+                        <div class="flex items-center gap-2 text-gray-400 dark:text-gray-500 py-3">
+                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <p class="text-sm italic">Tidak ada penambahan manual.</p>
                         </div>
-                    </div>
-                @empty
-                    <div class="flex items-center gap-2 text-gray-400 dark:text-gray-500 py-3">
-                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        <p class="text-sm italic">Tidak ada penambahan manual.</p>
-                    </div>
-                @endforelse
+                    @endforelse
+                </div>
             </div>
 
             {{-- DIUBAH --}}
@@ -620,68 +647,80 @@
                     <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Diubah
                     </h4>
-                    <span class="text-xs font-semibold text-gray-400">{{ count($dataPerubahan['diubah']) }}</span>
+                    <span class="text-xs font-semibold text-gray-400">{{ collect($dataPerubahan['diubah'])->sum(fn ($items) => count($items)) }}</span>
                 </div>
 
-                @forelse($dataPerubahan['diubah'] as $p)
-                    @php
-                        $statusAsli = $p['status_layanan_asli'] ?? null;
-                        $statusBaru = $p['status_layanan'] ?? null;
-                        $jamAsli    = $p['jam_mulai_asli']
-                            ? \Carbon\Carbon::parse($p['jam_mulai_asli'])->format('H:i') . ($p['jam_selesai_asli'] ? '–' . \Carbon\Carbon::parse($p['jam_selesai_asli'])->format('H:i') : '')
-                            : null;
-                        $jamBaru    = $p['jam_mulai']
-                            ? \Carbon\Carbon::parse($p['jam_mulai'])->format('H:i') . ($p['jam_selesai'] ? '–' . \Carbon\Carbon::parse($p['jam_selesai'])->format('H:i') : '')
-                            : null;
-                    @endphp
-                    <div class="bg-amber-50/70 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/60 rounded-xl px-4 py-3 mb-2">
-                        <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                            {{ $p['jadwal_harian']['poliklinik']['nama'] ?? '—' }}
+                <div class="jhp-scroll-list space-y-2">
+                @forelse($dataPerubahan['diubah'] as $poliNama => $items)
+                    <div class="bg-amber-50/70 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/60 rounded-xl px-4 py-3">
+                        <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1.5">
+                            {{ $poliNama }}
                         </p>
 
-                        <div class="mt-2 space-y-1.5">
-                            @if($statusAsli !== $statusBaru)
-                                <div class="flex items-center gap-2 text-xs">
-                                    <span class="w-14 text-gray-400 shrink-0">Status</span>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-gray-500 bg-gray-100 dark:bg-gray-800 line-through decoration-gray-400">
-                                        {{ \App\Enums\StatusLayanan::tryFrom($statusAsli)?->getLabel() ?? '—' }}
-                                    </span>
-                                    <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                                    </svg>
-                                    <span @class([
-                                        'inline-flex items-center px-2 py-0.5 rounded-full font-bold',
-                                        'text-red-700 bg-red-100 dark:bg-red-900/40 dark:text-red-300' => $statusBaru === 'LIBUR',
-                                        'text-green-700 bg-green-100 dark:bg-green-900/40 dark:text-green-300' => $statusBaru === 'BUKA',
-                                    ])>
-                                        {{ \App\Enums\StatusLayanan::tryFrom($statusBaru)?->getLabel() ?? $statusBaru }}
-                                    </span>
+                        <div>
+                            @foreach($items as $p)
+                                @php
+                                    $statusAsli = $p['status_layanan_asli'] ?? null;
+                                    $statusBaru = $p['status_layanan'] ?? null;
+                                    $jamAsli    = $p['jam_mulai_asli']
+                                        ? \Carbon\Carbon::parse($p['jam_mulai_asli'])->format('H:i') . ($p['jam_selesai_asli'] ? '–' . \Carbon\Carbon::parse($p['jam_selesai_asli'])->format('H:i') : '')
+                                        : null;
+                                    $jamBaru    = $p['jam_mulai']
+                                        ? \Carbon\Carbon::parse($p['jam_mulai'])->format('H:i') . ($p['jam_selesai'] ? '–' . \Carbon\Carbon::parse($p['jam_selesai'])->format('H:i') : '')
+                                        : null;
+                                    $namaDokter = $p['jadwal_harian']['nama_dokter'] ?? null;
+                                @endphp
+                                <div class="jhp-item">
+                                    @if($namaDokter)
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Dokter: {{ $namaDokter }}</p>
+                                    @endif
+
+                                    <div class="space-y-1.5">
+                                        @if($statusAsli !== $statusBaru)
+                                            <div class="flex items-center gap-2 text-xs">
+                                                <span class="jhp-diff-label text-gray-400 shrink-0">Status</span>
+                                                <span class="jhp-diff-old inline-flex items-center px-2 py-0.5 rounded-full text-gray-500 bg-gray-100 dark:bg-gray-800">
+                                                    {{ \App\Enums\StatusLayanan::tryFrom($statusAsli)?->getLabel() ?? '—' }}
+                                                </span>
+                                                <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                                </svg>
+                                                <span @class([
+                                                    'inline-flex items-center px-2 py-0.5 rounded-full font-bold',
+                                                    'text-red-700 bg-red-100 dark:bg-red-900/40 dark:text-red-300' => $statusBaru === 'LIBUR',
+                                                    'text-green-700 bg-green-100 dark:bg-green-900/40 dark:text-green-300' => $statusBaru === 'BUKA',
+                                                ])>
+                                                    {{ \App\Enums\StatusLayanan::tryFrom($statusBaru)?->getLabel() ?? $statusBaru }}
+                                                </span>
+                                            </div>
+                                        @endif
+
+                                        @if($jamAsli !== $jamBaru && $jamBaru)
+                                            <div class="flex items-center gap-2 text-xs">
+                                                <span class="jhp-diff-label text-gray-400 shrink-0">Jam</span>
+                                                <span class="jhp-diff-old font-mono text-gray-500">{{ $jamAsli ?? '—' }}</span>
+                                                <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                                </svg>
+                                                <span class="font-mono font-semibold text-gray-700 dark:text-gray-300">{{ $jamBaru }}</span>
+                                            </div>
+                                        @endif
+
+                                        @if($p['catatan'])
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 italic">"{{ $p['catatan'] }}"</p>
+                                        @endif
+                                    </div>
+
+                                    <div class="flex items-center gap-1.5 mt-1.5">
+                                        <span class="flex items-center justify-center w-4 h-4 rounded-full bg-amber-200 dark:bg-amber-800 text-[9px] font-bold text-amber-800 dark:text-amber-200 shrink-0">
+                                            {{ mb_substr($p['user']['name'] ?? 'S', 0, 1) }}
+                                        </span>
+                                        <p class="text-[11px] text-gray-400">
+                                            {{ $p['user']['name'] ?? 'Sistem' }} · {{ \Carbon\Carbon::parse($p['updated_at'])->translatedFormat('d M Y, H:i') }}
+                                        </p>
+                                    </div>
                                 </div>
-                            @endif
-
-                            @if($jamAsli !== $jamBaru && $jamBaru)
-                                <div class="flex items-center gap-2 text-xs">
-                                    <span class="w-14 text-gray-400 shrink-0">Jam</span>
-                                    <span class="font-mono text-gray-500 line-through decoration-gray-400">{{ $jamAsli ?? '—' }}</span>
-                                    <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                                    </svg>
-                                    <span class="font-mono font-semibold text-gray-700 dark:text-gray-300">{{ $jamBaru }}</span>
-                                </div>
-                            @endif
-
-                            @if($p['catatan'])
-                                <p class="text-xs text-gray-500 dark:text-gray-400 italic">"{{ $p['catatan'] }}"</p>
-                            @endif
-                        </div>
-
-                        <div class="flex items-center gap-1.5 mt-2 pt-2 border-t border-amber-200/60 dark:border-amber-800/40">
-                            <span class="flex items-center justify-center w-4 h-4 rounded-full bg-amber-200 dark:bg-amber-800 text-[9px] font-bold text-amber-800 dark:text-amber-200 shrink-0">
-                                {{ mb_substr($p['user']['name'] ?? 'S', 0, 1) }}
-                            </span>
-                            <p class="text-[11px] text-gray-400">
-                                {{ $p['user']['name'] ?? 'Sistem' }} · {{ \Carbon\Carbon::parse($p['updated_at'])->translatedFormat('d M Y, H:i') }}
-                            </p>
+                            @endforeach
                         </div>
                     </div>
                 @empty
@@ -692,6 +731,7 @@
                         <p class="text-sm italic">Tidak ada perubahan nilai.</p>
                     </div>
                 @endforelse
+                </div>
             </div>
 
         </div>
