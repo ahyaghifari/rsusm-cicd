@@ -44,7 +44,7 @@ class JadwalHarianPage extends Page
     public bool $isFullscreen = false;
 
     // Executive clinic filter: 'all' | 'reguler' | 'eksekutif'
-    public string $executiveClinicFilter = 'reguler';
+    public string $executiveClinicFilter = 'all';
 
     // Modal perubahan
     public bool  $showPerubahan  = false;
