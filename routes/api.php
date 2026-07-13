@@ -6,5 +6,5 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('throttle:public-api')->group(function () {
     Route::get('/{rs}/jadwal-harian', [JadwalHarianController::class, 'index']);
-    // Route::get('/{rs}/jadwal-praktek', [JadwalPraktekController::class, 'index']);
+    Route::get('/{rs}/jadwal-harian-executive', [JadwalHarianController::class, 'executive']);
 });
