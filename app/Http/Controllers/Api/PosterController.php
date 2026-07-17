@@ -25,6 +25,6 @@ class PosterController extends Controller
             return response()->json(['message' => 'Poster jadwal harian belum tersedia untuk rumah sakit ini.'], 404);
         }
 
-        return response()->file(Storage::disk('public')->path($path));
+        return response()->download(Storage::disk('public')->path($path), "poster-jadwal-harian-{$rs}.png");
     }
 }
