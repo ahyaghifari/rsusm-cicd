@@ -581,7 +581,7 @@ class GeneratePosterPage extends Page
                         // Use perubahan values if available, otherwise base jadwal harian values
                         $jamMulai    = $p?->jam_mulai    ?? $r->jam_mulai;
                         $jamSelesai  = $p?->jam_selesai  ?? $r->jam_selesai;
-                        $statusRaw   = $p?->status_layanan ?? ($r->status_layanan?->value ?? 'BUKA');
+                        $statusRaw   = $p?->status_layanan?->value ?? ($r->status_layanan?->value ?? 'BUKA');
 
                         return [
                             'nama_dokter'       => $r->nama_dokter ?: ($r->dokter?->nama ?? '-'),

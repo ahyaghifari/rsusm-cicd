@@ -69,6 +69,7 @@ class JadwalHarianResource extends BaseResource
                             ->required()
                             ->searchable()
                             ->live()
+                            ->afterStateUpdated(fn (Forms\Set $set) => $set('dokter_id', null))
                             ->disabled(fn (Forms\Get $get) => static::isSuperAdmin() && ! $get('rumah_sakit_id')),
                     ])->columns(2),
 
@@ -101,6 +102,14 @@ class JadwalHarianResource extends BaseResource
                         Forms\Components\Select::make('dokter_id')
                             ->label('Dokter (opsional)')
                             ->options(function (Forms\Get $get) {
+                                $poliklinikId = $get('poliklinik_id');
+                                if ($poliklinikId) {
+                                    return PoliKlinik::find($poliklinikId)?->dokter()
+                                        ->where('aktif', true)
+                                        ->orderBy('nama')
+                                        ->pluck('nama', 'id') ?? [];
+                                }
+
                                 $rsId = static::isSuperAdmin()
                                     ? $get('rumah_sakit_id')
                                     : static::rumahSakitId();
@@ -111,6 +120,7 @@ class JadwalHarianResource extends BaseResource
                                     ->where('aktif', true)
                                     ->pluck('nama', 'id');
                             })
+                            ->helperText('Menampilkan dokter yang sudah dikaitkan ke poliklinik ini (dikelola di halaman Poliklinik).')
                             ->nullable()
                             ->searchable()
                             ->live()

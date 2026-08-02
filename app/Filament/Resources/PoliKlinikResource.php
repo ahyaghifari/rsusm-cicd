@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PoliKlinikResource\Pages;
+use App\Models\Dokter;
 use App\Models\PoliKlinik;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -118,6 +119,27 @@ class PoliKlinikResource extends BaseResource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('kelola_dokter')
+                    ->label('Kelola Dokter')
+                    ->icon('heroicon-o-user-group')
+                    ->color('gray')
+                    ->form([
+                        Forms\Components\CheckboxList::make('dokter_ids')
+                            ->label('Dokter di Poliklinik ini')
+                            ->options(fn (PoliKlinik $record) => Dokter::where('rumah_sakit_id', $record->rumah_sakit_id)
+                                ->where('aktif', true)
+                                ->orderBy('nama')
+                                ->pluck('nama', 'id'))
+                            ->searchable()
+                            ->columns(2)
+                            ->bulkToggleable(),
+                    ])
+                    ->fillForm(fn (PoliKlinik $record) => [
+                        'dokter_ids' => $record->dokter()->pluck('dokter.id')->toArray(),
+                    ])
+                    ->action(function (PoliKlinik $record, array $data) {
+                        $record->dokter()->sync($data['dokter_ids'] ?? []);
+                    }),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\RestoreAction::make(),
                 Tables\Actions\ForceDeleteAction::make(),

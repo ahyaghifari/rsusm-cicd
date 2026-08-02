@@ -77,6 +77,14 @@ class Dokter extends Model
     }
 
     /**
+     * Get the poliklinik where this dokter praktek.
+     */
+    public function poliklinik(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(PoliKlinik::class, 'poliklinik_dokter', 'dokter_id', 'poliklinik_id');
+    }
+
+    /**
      * Get the user account linked to this dokter (jika dokter login & balas chat sendiri).
      */
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
