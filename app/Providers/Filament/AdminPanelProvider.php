@@ -47,6 +47,8 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Poliklinik / Rawat Jalan'),
                 NavigationGroup::make()
+                    ->label('Poster Jadwal'),
+                NavigationGroup::make()
                     ->label('Media Informasi'),
                 NavigationGroup::make()
                     ->label('Tentang Kami'),

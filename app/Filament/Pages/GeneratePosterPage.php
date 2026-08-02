@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Filament\PosterLayouts\Layouts\ListPolosLayout;
 use App\Models\JadwalHarian;
 use App\Models\PoliKlinik;
+use App\Models\PosterHero;
 use App\Models\PosterTemplate;
 use App\Models\RumahSakit;
 use App\Models\User;
@@ -28,9 +29,9 @@ class GeneratePosterPage extends Page
     protected static ?string $navigationIcon  = 'heroicon-o-sparkles';
     protected static ?string $navigationLabel = 'Generate Poster';
     protected static ?string $title           = 'Generate Poster Jadwal';
-    protected static ?string $navigationGroup = 'Poliklinik / Rawat Jalan';
+    protected static ?string $navigationGroup = 'Poster Jadwal';
     // protected static bool $shouldRegisterNavigation = false;
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 1;
     protected static string  $view            = 'filament.resources.poster-jadwal-resource.pages.generate-poster-page';
 
     // ── State ─────────────────────────────────────────────────────────────────
@@ -105,24 +106,23 @@ class GeneratePosterPage extends Page
         return $this->data['tanggal'] ?? null;
     }
 
-    private function getFotoHero(): ?string
+    private function getPosterHero(): ?PosterHero
     {
-        $val = $this->data['foto_hero'] ?? null;
-        if (is_array($val)) $val = array_values($val)[0] ?? null;
-        return is_string($val) && $val !== '' ? $val : null;
+        $val = $this->data['poster_hero_id'] ?? null;
+        return $val ? PosterHero::find((int) $val) : null;
     }
 
     private function getFotoHeroDataUri(): ?string
     {
-        $val = $this->getFotoHero();
-        if (! $val) return null;
-        $path = Storage::disk('public')->path($val);
+        $foto = $this->getPosterHero()?->foto;
+        if (! $foto) return null;
+        $path = Storage::disk('public')->path($foto);
         return file_exists($path) ? $this->toDataUri($path) : null;
     }
 
     private function getKeterangan(): string
     {
-        return $this->data['keterangan'] ?? '';
+        return $this->getPosterHero()?->keterangan ?? '';
     }
 
     private function getExecutiveClinicFilter(): string
@@ -149,6 +149,7 @@ class GeneratePosterPage extends Page
                             ->afterStateUpdated(function (Forms\Set $set) {
                                 $set('template_id', null);
                                 $set('executive_clinic_filter', 'reguler');
+                                $set('poster_hero_id', null);
                                 $this->poli_list = [];
                                 $this->hospitalHasExecutiveClinic = false;
                             }),
@@ -201,19 +202,20 @@ class GeneratePosterPage extends Page
                             ->live()
                             ->afterStateUpdated(fn (Forms\Get $get) => $this->loadPoliList($get)),
 
-                        Forms\Components\FileUpload::make('foto_hero')
-                            ->label('Upload Foto Hero')
-                            ->image()
-                            ->directory('poster-tmp')
-                            ->disk('public')
-                            ->maxSize(5120)
-                            ->acceptedFileTypes(['image/jpeg', 'image/png'])
-                            ->helperText('Foto yang akan menjadi background layer bawah poster.'),
+                        Forms\Components\Select::make('poster_hero_id')
+                            ->label('Foto Header')
+                            ->options(function () {
+                                $rsId = $this->resolvedRumahSakitId();
+                                if (! $rsId) return [];
 
-                        Forms\Components\Textarea::make('keterangan')
-                            ->label('Keterangan Hero')
-                            ->placeholder('Contoh: Tindakan EXILIS Aurora EC')
-                            ->rows(2),
+                                return PosterHero::where('rumah_sakit_id', $rsId)
+                                    ->aktif()
+                                    ->ordered()
+                                    ->pluck('nama', 'id');
+                            })
+                            ->disabled(fn () => $this->isSuperAdmin() && ! $this->resolvedRumahSakitId())
+                            ->searchable()
+                            ->helperText('Foto yang akan menjadi background layer bawah poster. Kelola di menu Foto Header.'),
                     ])
                     ->columns(2),
             ])
@@ -345,7 +347,6 @@ class GeneratePosterPage extends Page
 
     public function previewPoster(): void
     {
-        Storage::disk('public')->makeDirectory('poster-tmp');
         $this->form->getState();
 
         [$template, $tanggal] = $this->resolveTemplateAndTanggal();
@@ -383,7 +384,6 @@ class GeneratePosterPage extends Page
 
     public function generate(): StreamedResponse|null
     {
-        Storage::disk('public')->makeDirectory('poster-tmp');
         $this->form->getState();
 
         [$template, $tanggal] = $this->resolveTemplateAndTanggal();
@@ -408,8 +408,7 @@ class GeneratePosterPage extends Page
             return null;
         }
 
-        $html     = $this->buildHtml($template, $tanggal, $this->activeHalaman);
-        $fotoHero = $this->getFotoHero();
+        $html = $this->buildHtml($template, $tanggal, $this->activeHalaman);
 
         $outputPath = storage_path('app/public/poster-output/poster-' . $tanggal->format('Ymd') . '-' . time() . '.png');
         @mkdir(dirname($outputPath), 0755, true);
@@ -456,10 +455,6 @@ class GeneratePosterPage extends Page
                 ->danger()
                 ->send();
             return null;
-        }
-
-        if ($fotoHero) {
-            Storage::disk('public')->delete($fotoHero);
         }
 
         $suffix = $this->totalHalaman > 1 ? "-hal{$this->activeHalaman}" : '';

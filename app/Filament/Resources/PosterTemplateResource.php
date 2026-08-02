@@ -22,9 +22,9 @@ class PosterTemplateResource extends BaseRumahSakitResource
 
     protected static ?string $pluralModelLabel = 'Template Poster';
 
-    protected static ?string $navigationGroup = 'Poliklinik / Rawat Jalan';
+    protected static ?string $navigationGroup = 'Poster Jadwal';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 2;
     // protected static bool $shouldRegisterNavigation = false;
 
     // ── Form ──────────────────────────────────────────────────────────────────
