@@ -28,7 +28,7 @@ class JadwalHarianPage extends Page
 
     protected static ?string $title = 'Jadwal Harian';
 
-    protected static ?string $maxContentWidth = 'full';
+    protected ?string $maxContentWidth = 'full';
 
     // =========================================================================
     // STATE / PROPERTIES
