@@ -383,7 +383,28 @@ body {
                             word-break:break-word;
                         ">{{ $row['nama_dokter'] }}</span>
 
-                        @if ($row['libur'])
+                        @if (!empty($row['jam_list']))
+                        {{-- Dokter dengan beberapa jadwal di hari yang sama — jam ditumpuk --}}
+                        <div style="display:flex; flex-direction:column; align-items:flex-end; margin-left:8px;">
+                            @foreach ($row['jam_list'] as $t)
+                            <span style="
+                                font-family:{{ $fontJam }};
+                                font-size:{{ $sizeJam }}px;
+                                font-weight:{{ $t['libur'] ? 700 : $weightJam }};
+                                color:{{ $t['libur'] ? '#ef4444' : ($grid['warna_nama_dokter'] ?? '#1A1A1A') }};
+                                white-space:nowrap;
+                            ">
+                                @if ($t['libur'])
+                                    LIBUR
+                                @elseif (!empty($t['sesuai_perjanjian']))
+                                    Sesuai Perjanjian
+                                @else
+                                    {{ $t['jam_mulai'] }}–{{ $t['jam_selesai'] ?? 'Selesai' }}
+                                @endif
+                            </span>
+                            @endforeach
+                        </div>
+                        @elseif ($row['libur'])
                         <span style="
                             font-family:{{ $fontJam }};
                             font-size:{{ $sizeJam }}px;

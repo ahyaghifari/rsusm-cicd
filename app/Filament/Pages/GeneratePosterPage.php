@@ -593,7 +593,31 @@ class GeneratePosterPage extends Page
                             'catatan'                => $p?->catatan ?: ($r->catatan ?? ''),
                             'catatan_dari_perubahan' => filled($p?->catatan),
                         ];
-                    })->toArray(),
+                    })
+                        // Dokter dengan 2+ jadwal di hari yang sama dalam kategori yang sama
+                        // (sama-sama reguler atau sama-sama eksekutif) digabung jadi satu
+                        // baris nama dengan jam ditumpuk.
+                        ->groupBy(fn ($x) => $x['nama_dokter'] . '|' . ($x['is_executive'] ? '1' : '0'))
+                        ->flatMap(function ($grp) {
+                            if ($grp->count() < 2) {
+                                return $grp->values()->all();
+                            }
+
+                            return [[
+                                'nama_dokter'            => $grp->first()['nama_dokter'],
+                                'is_executive'           => $grp->first()['is_executive'],
+                                'catatan'                => $grp->pluck('catatan')->filter()->implode(' / '),
+                                'catatan_dari_perubahan' => $grp->contains('catatan_dari_perubahan', true),
+                                'jam_list'               => $grp->map(fn ($x) => [
+                                    'jam_mulai'         => $x['jam_mulai'],
+                                    'jam_selesai'       => $x['jam_selesai'],
+                                    'libur'             => $x['libur'],
+                                    'sesuai_perjanjian' => $x['sesuai_perjanjian'],
+                                ])->values()->all(),
+                            ]];
+                        })
+                        ->values()
+                        ->toArray(),
                 ];
             })
             ->filter(fn ($p) => ! empty($p['jadwal']))
