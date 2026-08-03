@@ -37,7 +37,7 @@ class GeneratePosterPage extends Page
     // ── State ─────────────────────────────────────────────────────────────────
 
     // Semua form field ditampung di $data — standar Filament Page.
-    // FileUpload, Select, DatePicker semua bind ke sini via statePath('data').
+    // FileUpload, Select, DatePicker semua bind ke sini via statePath('data') .
     public array $data = [];
 
     /** @var array<int, array{id:int, nama:string, visible:bool, order:int}> */
