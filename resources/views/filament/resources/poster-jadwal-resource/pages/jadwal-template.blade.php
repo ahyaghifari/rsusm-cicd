@@ -298,8 +298,11 @@ body {
             width:{{ $zonaJadwal['w'] }}px;
             height:{{ $zonaJadwal['h'] }}px;
             overflow:visible;
-            column-count:{{ $kolom }};
+            display:grid;
+            grid-template-columns:repeat({{ $kolom }}, 1fr);
             column-gap:{{ $grid['gap_h'] ?? $grid['gap'] ?? 16 }}px;
+            row-gap:{{ $grid['gap_v'] ?? $grid['gap'] ?? 16 }}px;
+            align-items:start;
         "
     >
         @php
@@ -339,7 +342,7 @@ body {
             $poli        = $item['poli'];
             $jadwalRows  = $item['jadwal'];
         @endphp
-        <div class="poli-card" style="margin-bottom:{{ $gapV }}px;">
+        <div class="poli-card">
 
             @php
                 $headerOffsetX    = (int) ($grid['header_offset_x'] ?? 0);
