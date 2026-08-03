@@ -27,7 +27,9 @@ class PoliKlinikResource extends BaseResource
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery()->withTrashed();
+        // orderBy rumah_sakit_id dulu supaya poli tiap RS ngumpul jadi satu blok —
+        // drag reorder (sort_order) gak nyampur antar rumah sakit waktu superadmin lihat semua.
+        $query = parent::getEloquentQuery()->withTrashed()->orderBy('rumah_sakit_id');
 
         if (static::isSuperAdmin()) {
             return $query;
@@ -106,18 +108,15 @@ class PoliKlinikResource extends BaseResource
             ->defaultSort('sort_order', 'asc')
             ->columns([
                 Tables\Columns\ImageColumn::make('gambar'),
-                Tables\Columns\TextColumn::make('sort_order')
-                    ->label('Urutan')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('nama')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('slug')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('rumahSakit.nama')
                     ->label('Rumah Sakit')
-                    ->sortable()
                     ->visible(fn () => static::isSuperAdmin()),
+                Tables\Columns\TextColumn::make('sort_order')
+                    ->label('Urutan'),
+                Tables\Columns\TextColumn::make('nama')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('slug')
+                    ->searchable(),
                 Tables\Columns\IconColumn::make('aktif')
                     ->boolean(),
                 Tables\Columns\IconColumn::make('prioritas_poster')
