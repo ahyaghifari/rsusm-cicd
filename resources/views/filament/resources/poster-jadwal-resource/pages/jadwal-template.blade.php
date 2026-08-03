@@ -290,7 +290,9 @@ body {
     {{-- Grid Jadwal --}}
     @php
         $kolom = $grid['kolom'] ?? 2;
-        $poliPrioritas = $poliList->filter(fn ($item) => $item['poli']->prioritas_poster ?? false)->values();
+        $poliPrioritas = $poliList->filter(fn ($item) => $item['poli']->prioritas_poster ?? false)
+            ->sortBy(fn ($item) => $item['poli']->posisi_prioritas === 'kanan' ? 1 : 0)
+            ->values();
         $poliBiasa     = $poliList->reject(fn ($item) => $item['poli']->prioritas_poster ?? false)->values();
     @endphp
     <div style="

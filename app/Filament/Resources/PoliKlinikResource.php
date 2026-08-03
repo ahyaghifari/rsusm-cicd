@@ -85,7 +85,17 @@ class PoliKlinikResource extends BaseResource
                 Forms\Components\Toggle::make('prioritas_poster')
                     ->label('Selalu di Atas (Poster)')
                     ->helperText('Poli ini selalu ditampilkan di baris paling atas saat generate poster, tanpa mengubah jarak antar kolom.')
-                    ->default(false),
+                    ->default(false)
+                    ->live(),
+
+                Forms\Components\Select::make('posisi_prioritas')
+                    ->label('Posisi di Baris Atas')
+                    ->options([
+                        'kiri'  => 'Kiri',
+                        'kanan' => 'Kanan',
+                    ])
+                    ->required()
+                    ->visible(fn (Forms\Get $get) => $get('prioritas_poster')),
             ]);
     }
 

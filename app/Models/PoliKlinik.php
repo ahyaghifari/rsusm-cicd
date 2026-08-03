@@ -31,6 +31,7 @@ class PoliKlinik extends Model
         'aktif',
         'sort_order',
         'prioritas_poster',
+        'posisi_prioritas',
     ];
 
     /**
