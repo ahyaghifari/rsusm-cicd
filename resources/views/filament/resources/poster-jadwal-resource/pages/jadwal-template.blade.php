@@ -373,7 +373,7 @@ body {
                 {{-- Regular Dokter Column --}}
                 <div class="poli-dokter" style="background:{{ $cardBg }}; justify-content:{{ $dokterValign }}; gap:{{ $dokterRowGap }}px; padding-top:{{ $overlapPx + $cardPaddingTop }}px; flex:1;">
                     @forelse ($jadwalRows as $row)
-                    <div style="display:flex; align-items:flex-start; line-height:1.35; justify-content:space-between;">
+                    <div style="display:flex; align-items:{{ !empty($row['jam_list']) ? 'center' : 'flex-start' }}; line-height:1.35; justify-content:space-between;">
                         <span style="
                             font-family:{{ $fontNamaDokter }};
                             font-size:{{ $sizeNamaDokter }}px;
@@ -385,7 +385,7 @@ body {
 
                         @if (!empty($row['jam_list']))
                         {{-- Dokter dengan beberapa jadwal di hari yang sama — jam ditumpuk --}}
-                        <div style="display:flex; flex-direction:column; align-items:flex-end; margin-left:8px;">
+                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:{{ $dokterRowGap }}px; margin-left:8px;">
                             @foreach ($row['jam_list'] as $t)
                             <span style="
                                 font-family:{{ $fontJam }};
