@@ -385,7 +385,7 @@ body {
 
                         @if (!empty($row['jam_list']))
                         {{-- Dokter dengan beberapa jadwal di hari yang sama — jam ditumpuk --}}
-                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:{{ $dokterRowGap }}px; margin-left:8px;">
+                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0px; margin-left:8px;">
                             @foreach ($row['jam_list'] as $t)
                             <span style="
                                 font-family:{{ $fontJam }};
