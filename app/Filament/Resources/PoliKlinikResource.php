@@ -81,6 +81,11 @@ class PoliKlinikResource extends BaseResource
                 Forms\Components\Toggle::make('aktif')
                     ->required()
                     ->default(true),
+
+                Forms\Components\Toggle::make('prioritas_poster')
+                    ->label('Selalu di Atas (Poster)')
+                    ->helperText('Poli ini selalu ditampilkan di baris paling atas saat generate poster, tanpa mengubah jarak antar kolom.')
+                    ->default(false),
             ]);
     }
 
@@ -105,6 +110,10 @@ class PoliKlinikResource extends BaseResource
                     ->visible(fn () => static::isSuperAdmin()),
                 Tables\Columns\IconColumn::make('aktif')
                     ->boolean(),
+                Tables\Columns\IconColumn::make('prioritas_poster')
+                    ->label('Prioritas Poster')
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

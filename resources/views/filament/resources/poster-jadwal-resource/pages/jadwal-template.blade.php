@@ -288,178 +288,75 @@ body {
     @endif
 
     {{-- Grid Jadwal --}}
-    @php $kolom = $grid['kolom'] ?? 2; @endphp
+    @php
+        $kolom = $grid['kolom'] ?? 2;
+        $poliPrioritas = $poliList->filter(fn ($item) => $item['poli']->prioritas_poster ?? false)->values();
+        $poliBiasa     = $poliList->reject(fn ($item) => $item['poli']->prioritas_poster ?? false)->values();
+    @endphp
+    <div style="
+        position:absolute;
+        left:{{ $zonaJadwal['x'] }}px;
+        top:{{ $zonaJadwal['y'] }}px;
+        width:{{ $zonaJadwal['w'] }}px;
+        height:{{ $zonaJadwal['h'] }}px;
+        overflow:visible;
+    ">
+    @php
+        $gapH        = (int) ($grid['gap_h'] ?? $grid['gap'] ?? 16);
+        $gapV        = (int) ($grid['gap_v'] ?? $grid['gap'] ?? 16);
+        $cardWidthPx = ($kolom > 0) ? (($zonaJadwal['w'] - $gapH * ($kolom - 1)) / $kolom) : $zonaJadwal['w'];
+
+        $cardBg          = $grid['card_bg_warna']    ?? '#ffffff';
+        $cardRadius      = (int) ($grid['card_radius']       ?? 8);
+        $cardBorderWarna = $grid['card_border_warna'] ?? '#e5e7eb';
+        $cardBorderWidth = (int) ($grid['card_border_width'] ?? 1);
+        $cardMinHeight   = (int) ($grid['card_min_height'] ?? 0);
+        $dokterValign    = ($grid['dokter_valign'] ?? 'top') === 'center' ? 'center' : 'flex-start';
+        $dokterRowGap    = (int) ($grid['dokter_row_gap'] ?? 2);
+        $bodyStyle = "border-radius:{$cardRadius}px; border:{$cardBorderWidth}px solid {$cardBorderWarna};"
+            . ($cardMinHeight > 0 ? " min-height:{$cardMinHeight}px;" : '');
+
+        $headerBg1    = $grid['header_bg_warna']  ?? '#7c3aed';
+        $headerBg2    = $grid['header_bg_warna2'] ?? '';
+        $headerBg     = $headerBg2 ? "linear-gradient(135deg, {$headerBg1}, {$headerBg2})" : $headerBg1;
+        $headerRadius = (int) ($grid['header_radius'] ?? 8);
+
+        // Font size: gunakan dari config jika tersedia, fallback ke auto-calc
+        $headerFontPx    = (int) ($grid['size_nama_poli'] ?? max(8, round($cardWidthPx * 0.045)));
+        $sizeNamaDokter  = (int) ($grid['size_nama_dokter'] ?? max(7, round($cardWidthPx * 0.04)));
+        $sizeJam         = (int) ($grid['size_jam'] ?? max(6, round($cardWidthPx * 0.035)));
+        $weightNamaDokter = $grid['weight_nama_dokter'] ?? '600';
+        $weightJam       = $grid['weight_jam'] ?? '500';
+
+        // Box dokter ditarik ke atas, sebagian "di belakang" header nama poli (overlap = setengah
+        // tinggi header). Tinggi header dihitung dari padding (5px atas+bawah) + tinggi baris teks.
+        $headerHeightPx = 10 + (int) round($headerFontPx * 1.2);
+        $overlapPx      = (int) round($headerHeightPx / 2);
+        $cardPaddingTop = (int) ($grid['card_padding_top'] ?? 8);
+    @endphp
+    @if ($poliPrioritas->isNotEmpty())
+    {{-- Baris Prioritas: poli yang ditandai "Selalu di Atas (Poster)" — jarak antar kartu
+         sama persis dengan grid di bawahnya ($gapH), supaya kelurusan kolom tetap konsisten. --}}
+    <div style="display:flex; gap:{{ $gapH }}px; margin-bottom:{{ $gapV }}px;">
+        @foreach ($poliPrioritas as $item)
+        <div style="width:{{ $cardWidthPx }}px; flex:0 0 auto;">
+            @include('filament.resources.poster-jadwal-resource.pages.partials._poli-card', ['item' => $item])
+        </div>
+        @endforeach
+    </div>
+    @endif
     <div
         class="grid-jadwal"
         style="
-            position:absolute;
-            left:{{ $zonaJadwal['x'] }}px;
-            top:{{ $zonaJadwal['y'] }}px;
-            width:{{ $zonaJadwal['w'] }}px;
-            height:{{ $zonaJadwal['h'] }}px;
-            overflow:visible;
             column-count:{{ $kolom }};
-            column-gap:{{ $grid['gap_h'] ?? $grid['gap'] ?? 16 }}px;
+            column-gap:{{ $gapH }}px;
         "
     >
-        @php
-            $cardBg          = $grid['card_bg_warna']    ?? '#ffffff';
-            $cardRadius      = (int) ($grid['card_radius']       ?? 8);
-            $cardBorderWarna = $grid['card_border_warna'] ?? '#e5e7eb';
-            $cardBorderWidth = (int) ($grid['card_border_width'] ?? 1);
-            $cardMinHeight   = (int) ($grid['card_min_height'] ?? 0);
-            $dokterValign    = ($grid['dokter_valign'] ?? 'top') === 'center' ? 'center' : 'flex-start';
-            $dokterRowGap    = (int) ($grid['dokter_row_gap'] ?? 2);
-            $bodyStyle = "border-radius:{$cardRadius}px; border:{$cardBorderWidth}px solid {$cardBorderWarna};"
-                . ($cardMinHeight > 0 ? " min-height:{$cardMinHeight}px;" : '');
-
-            $headerBg1    = $grid['header_bg_warna']  ?? '#7c3aed';
-            $headerBg2    = $grid['header_bg_warna2'] ?? '';
-            $headerBg     = $headerBg2 ? "linear-gradient(135deg, {$headerBg1}, {$headerBg2})" : $headerBg1;
-            $headerRadius = (int) ($grid['header_radius'] ?? 8);
-
-            // Font size: gunakan dari config jika tersedia, fallback ke auto-calc
-            $gapH        = (int) ($grid['gap_h'] ?? $grid['gap'] ?? 16);
-            $gapV        = (int) ($grid['gap_v'] ?? $grid['gap'] ?? 16);
-            $cardWidthPx = ($kolom > 0) ? (($zonaJadwal['w'] - $gapH * ($kolom - 1)) / $kolom) : $zonaJadwal['w'];
-            $headerFontPx    = (int) ($grid['size_nama_poli'] ?? max(8, round($cardWidthPx * 0.045)));
-            $sizeNamaDokter  = (int) ($grid['size_nama_dokter'] ?? max(7, round($cardWidthPx * 0.04)));
-            $sizeJam         = (int) ($grid['size_jam'] ?? max(6, round($cardWidthPx * 0.035)));
-            $weightNamaDokter = $grid['weight_nama_dokter'] ?? '600';
-            $weightJam       = $grid['weight_jam'] ?? '500';
-
-            // Box dokter ditarik ke atas, sebagian "di belakang" header nama poli (overlap = setengah
-            // tinggi header). Tinggi header dihitung dari padding (5px atas+bawah) + tinggi baris teks.
-            $headerHeightPx = 10 + (int) round($headerFontPx * 1.2);
-            $overlapPx      = (int) round($headerHeightPx / 2);
-            $cardPaddingTop = (int) ($grid['card_padding_top'] ?? 8);
-        @endphp
-        @foreach ($poliList as $item)
-        @php
-            $poli        = $item['poli'];
-            $jadwalRows  = $item['jadwal'];
-        @endphp
-        <div class="poli-card" style="margin-bottom:{{ $gapV }}px;">
-
-            @php
-                $headerOffsetX    = (int) ($grid['header_offset_x'] ?? 0);
-                $headerPaddingLeft= (int) ($grid['header_padding_left'] ?? 10);
-            @endphp
-            @if (!empty($shapePoliDataUri))
-            <div class="poli-header" style="
-                background-image:url('{{ $shapePoliDataUri }}');
-                background-size:100% 100%;
-                background-repeat:no-repeat;
-                background-color:transparent;
-                border-radius:0;
-                width:{{ $grid['header_width_pct'] ?? 70 }}%;
-                margin-left:{{ $headerOffsetX }}px;
-                padding-left:{{ $headerPaddingLeft }}px;
-                position:relative; z-index:2;
-            ">
-            @else
-            <div class="poli-header" style="background:{{ $headerBg }}; border-radius:{{ $headerRadius }}px; width:{{ $grid['header_width_pct'] ?? 70 }}%; margin-left:{{ $headerOffsetX }}px; position:relative; z-index:2;">
-            @endif
-                <span style="
-                    font-family:{{ $fontPoli }};
-                    font-size:{{ $headerFontPx }}px;
-                    color:{{ $grid['warna_nama_poli'] ?? '#ffffff' }};
-                    font-weight:{{ $grid['header_font_weight'] ?? '700' }};
-                    font-style:{{ $grid['header_font_style'] ?? 'normal' }};
-                ">{{ $poli->nama }}</span>
-            </div>
-
-            <div class="poli-body" style="{{ $bodyStyle }} position:relative; z-index:1; margin-top:-{{ $overlapPx }}px; display:flex;">
-                {{-- Regular Dokter Column --}}
-                <div class="poli-dokter" style="background:{{ $cardBg }}; justify-content:{{ $dokterValign }}; gap:{{ $dokterRowGap }}px; padding-top:{{ $overlapPx + $cardPaddingTop }}px; flex:1;">
-                    @forelse ($jadwalRows as $row)
-                    <div style="display:flex; align-items:{{ !empty($row['jam_list']) ? 'center' : 'flex-start' }}; line-height:1.35; justify-content:space-between;">
-                        <span style="
-                            font-family:{{ $fontNamaDokter }};
-                            font-size:{{ $sizeNamaDokter }}px;
-                            font-weight:{{ $weightNamaDokter }};
-                            color:{{ $grid['warna_nama_dokter'] }};
-                            flex:1; min-width:0;
-                            word-break:break-word;
-                        ">{{ $row['nama_dokter'] }}</span>
-
-                        @if (!empty($row['jam_list']))
-                        {{-- Dokter dengan beberapa jadwal di hari yang sama — jam ditumpuk --}}
-                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0px; margin-left:8px;">
-                            @foreach ($row['jam_list'] as $t)
-                            <span style="
-                                font-family:{{ $fontJam }};
-                                font-size:{{ $sizeJam }}px;
-                                font-weight:{{ $t['libur'] ? 700 : $weightJam }};
-                                color:{{ $t['libur'] ? '#ef4444' : ($grid['warna_nama_dokter'] ?? '#1A1A1A') }};
-                                white-space:nowrap;
-                            ">
-                                @if ($t['libur'])
-                                    LIBUR
-                                @elseif (!empty($t['sesuai_perjanjian']))
-                                    Sesuai Perjanjian
-                                @else
-                                    {{ $t['jam_mulai'] }}–{{ $t['jam_selesai'] ?? 'Selesai' }}
-                                @endif
-                            </span>
-                            @endforeach
-                        </div>
-                        @elseif ($row['libur'])
-                        <span style="
-                            font-family:{{ $fontJam }};
-                            font-size:{{ $sizeJam }}px;
-                            color:#ef4444;
-                            font-weight:700;
-                            white-space:nowrap;
-                            margin-left:8px;
-                        ">LIBUR</span>
-                        @elseif (!empty($row['sesuai_perjanjian']))
-                        <span style="font-size:{{ $sizeJam }}px; white-space:nowrap; margin-left:8px; color:#16a34a; font-style:italic;">Sesuai Perjanjian</span>
-                        @else
-                        <span style="
-                            font-family:{{ $fontJam }};
-                            font-size:{{ $sizeJam }}px;
-                            font-weight:{{ $weightJam }};
-                            color:{{ $grid['warna_nama_dokter'] ?? '#1A1A1A' }};
-                            white-space:nowrap;
-                            margin-left:8px;
-                        ">{{ $row['jam_mulai'] }}–{{ $row['jam_selesai'] ?? 'Selesai' }}</span>
-                        @endif
-                    </div>
-
-                    {{-- Catatan (only when filled) --}}
-                    @if (!empty($row['catatan']))
-                    @php
-                        $isDariPerubahan = $row['catatan_dari_perubahan'] ?? false;
-                        $catatanBg    = $isDariPerubahan
-                            ? ($grid['catatan_perubahan_bg_warna'] ?? '#fff7ed')
-                            : ($grid['catatan_bg_warna']           ?? '#fef9c3');
-                        $catatanWarna = $isDariPerubahan
-                            ? ($grid['catatan_perubahan_warna']    ?? '#92400e')
-                            : ($grid['catatan_warna']              ?? '#1a1a2e');
-                    @endphp
-                    <div style="
-                        align-self:flex-start;
-                        background:{{ $catatanBg }};
-                        color:{{ $catatanWarna }};
-                        border:1px solid {{ $grid['catatan_border_warna'] ?? '#fde68a' }};
-                        border-radius:{{ $grid['catatan_radius'] ?? 4 }}px;
-                        padding:3px 6px;
-                        font-size:{{ $grid['catatan_size'] ?? 8 }}px;
-                        font-family:{{ $fontIsi }};
-                        font-weight:{{ $grid['catatan_weight'] ?? '400' }};
-                        margin-top:2px;
-                        line-height:1.35;
-                    ">{{ $row['catatan'] }}</div>
-                    @endif
-                    @empty
-                    <div style="color:#aaa; font-size:11px; font-style:italic;">Tidak ada jadwal</div>
-                    @endforelse
-                </div>
-            </div>
-
-        </div>
+        @foreach ($poliBiasa as $item)
+            @include('filament.resources.poster-jadwal-resource.pages.partials._poli-card', ['item' => $item])
         @endforeach
+    </div>
+
     </div>
 
 </div>
