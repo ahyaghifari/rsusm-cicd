@@ -73,6 +73,7 @@
 
         $g = $savedConfig['grid'] ?? [];
 
+        $initialMaxDokterPerHalaman = (int)  ($g['max_dokter_per_halaman'] ?? 4);
         $initialGapV               = (int)   ($g['gap_v']               ?? 24);
         $initialJudulWarna         =         ($g['judul_warna']         ?? '#c0392b');
         $initialJudulSize          = (int)   ($g['judul_size']          ?? 56);
@@ -98,11 +99,14 @@
         $initialBadgeLiburBg       =         ($g['badge_libur_bg_warna']?? '#dc2626');
         $initialBadgeLiburC        =         ($g['badge_libur_warna']   ?? '#ffffff');
 
-        $initialTanggalFont  =         ($savedConfig['zona_tanggal']['font']    ?? 'Montserrat');
-        $initialTanggalSize  = (int)   ($savedConfig['zona_tanggal']['size']    ?? 30);
-        $initialTanggalWarna =         ($savedConfig['zona_tanggal']['warna']   ?? '#ffffff');
-        $initialTanggalBg    =         ($savedConfig['zona_tanggal']['bg_warna']?? '#c0392b');
-        $initialTanggalAlign =         ($savedConfig['zona_tanggal']['align']   ?? 'center');
+        $initialTanggalFont     =         ($savedConfig['zona_tanggal']['font']      ?? 'Montserrat');
+        $initialTanggalSize     = (int)   ($savedConfig['zona_tanggal']['size']      ?? 30);
+        $initialTanggalWarna    =         ($savedConfig['zona_tanggal']['warna']     ?? '#ffffff');
+        $initialTanggalBg       =         ($savedConfig['zona_tanggal']['bg_warna']  ?? '#c0392b');
+        $initialTanggalAlign    =         ($savedConfig['zona_tanggal']['align']     ?? 'center');
+        $initialTanggalPaddingX = (int)   ($savedConfig['zona_tanggal']['padding_x'] ?? 28);
+        $initialTanggalPaddingY = (int)   ($savedConfig['zona_tanggal']['padding_y'] ?? 10);
+        $initialTanggalRadius   = (int)   ($savedConfig['zona_tanggal']['radius']    ?? 999);
 
         $templatePngUrl = $this->templatePngUrl;
     @endphp
@@ -110,6 +114,7 @@
     <div
         x-data="zoneEditorPerubahanJadwal({
             initialZones: @js($activeZones),
+            initialMaxDokterPerHalaman: {{ $initialMaxDokterPerHalaman }},
             initialGapV: {{ $initialGapV }},
             initialJudulWarna: @js($initialJudulWarna),
             initialJudulSize: {{ $initialJudulSize }},
@@ -139,6 +144,9 @@
             initialTanggalWarna: @js($initialTanggalWarna),
             initialTanggalBg: @js($initialTanggalBg),
             initialTanggalAlign: @js($initialTanggalAlign),
+            initialTanggalPaddingX: {{ $initialTanggalPaddingX }},
+            initialTanggalPaddingY: {{ $initialTanggalPaddingY }},
+            initialTanggalRadius: {{ $initialTanggalRadius }},
             state: $wire.$entangle('config')
         })"
         x-init="init()"
@@ -168,6 +176,12 @@
                     <span class="text-lg">🏷️</span> Judul &amp; Label
                 </label>
                 <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between gap-4">
+                        <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Maks. Dokter / Halaman</span>
+                        <input type="number" x-model.number="maxDokterPerHalaman" @input="saveConfig()" min="1" max="30"
+                            class="w-16 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
+                    </div>
+                    <p class="text-[10px] text-gray-400 -mt-2">Kalau Executive atau Reguler punya lebih banyak dokter berubah dari batas ini, poster otomatis lanjut ke halaman/foto berikutnya.</p>
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-semibold text-gray-600">Warna Judul</span>
                         <div class="flex items-center gap-2">
@@ -332,6 +346,21 @@
                         <span class="text-xs font-semibold text-gray-600">Warna Background</span>
                         <input type="color" x-model="tanggalBg" @input="saveConfig()" class="h-8 w-10 cursor-pointer rounded-lg border border-gray-200 p-0.5 shadow-sm">
                     </div>
+                    <div class="flex items-center justify-between gap-4">
+                        <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Padding Horizontal</span>
+                        <input type="range" x-model.number="tanggalPaddingX" @input="saveConfig()" min="0" max="80" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none accent-green-500">
+                        <input type="number" x-model.number="tanggalPaddingX" @input="saveConfig()" min="0" max="80" class="w-14 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
+                    </div>
+                    <div class="flex items-center justify-between gap-4">
+                        <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Padding Vertikal</span>
+                        <input type="range" x-model.number="tanggalPaddingY" @input="saveConfig()" min="0" max="60" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none accent-green-500">
+                        <input type="number" x-model.number="tanggalPaddingY" @input="saveConfig()" min="0" max="60" class="w-14 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
+                    </div>
+                    <div class="flex items-center justify-between gap-4">
+                        <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Corner Radius</span>
+                        <input type="range" x-model.number="tanggalRadius" @input="saveConfig()" min="0" max="999" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none accent-green-500">
+                        <input type="number" x-model.number="tanggalRadius" @input="saveConfig()" min="0" max="999" class="w-14 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
+                    </div>
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-semibold text-gray-600">Alignment</span>
                         <div class="flex gap-1">
@@ -442,7 +471,7 @@
                             </div>
                             @elseif ($key === 'zona_tanggal')
                             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <span :style="{ fontFamily: tanggalFont, fontWeight: 700, fontSize: (tanggalSize * 0.5) + 'px', color: tanggalWarna, background: tanggalBg, borderRadius: '999px', padding: '4px 14px' }">Sabtu, 07 Juni 2026</span>
+                                <span :style="{ fontFamily: tanggalFont, fontWeight: 700, fontSize: (tanggalSize * 0.5) + 'px', color: tanggalWarna, background: tanggalBg, borderRadius: (tanggalRadius * 0.5) + 'px', padding: (tanggalPaddingY * 0.5) + 'px ' + (tanggalPaddingX * 0.5) + 'px' }">Sabtu, 07 Juni 2026</span>
                             </div>
                             @elseif ($key === 'zona_konten')
                             <div class="absolute pointer-events-none" style="left:4px; top:4px; right:4px; bottom:4px; overflow:hidden;">
@@ -480,6 +509,7 @@
     function zoneEditorPerubahanJadwal(config) {
         return {
             zones: config.initialZones,
+            maxDokterPerHalaman: config.initialMaxDokterPerHalaman ?? 4,
             gapV:               config.initialGapV               ?? 24,
             judulWarna:          config.initialJudulWarna          ?? '#c0392b',
             judulSize:           config.initialJudulSize           ?? 56,
@@ -509,6 +539,9 @@
             tanggalWarna:        config.initialTanggalWarna        ?? '#ffffff',
             tanggalBg:           config.initialTanggalBg           ?? '#c0392b',
             tanggalAlign:        config.initialTanggalAlign        ?? 'center',
+            tanggalPaddingX:     config.initialTanggalPaddingX     ?? 28,
+            tanggalPaddingY:     config.initialTanggalPaddingY     ?? 10,
+            tanggalRadius:       config.initialTanggalRadius       ?? 999,
             state: config.state,
 
             init() {
@@ -521,6 +554,7 @@
                         }
                     }
                     const g = this.state.grid ?? {};
+                    if (g.max_dokter_per_halaman !== undefined) this.maxDokterPerHalaman = g.max_dokter_per_halaman;
                     if (g.gap_v               !== undefined) this.gapV             = g.gap_v;
                     if (g.judul_warna         !== undefined) this.judulWarna       = g.judul_warna;
                     if (g.judul_size          !== undefined) this.judulSize        = g.judul_size;
@@ -550,6 +584,9 @@
                     if (this.state.zona_tanggal?.warna   !== undefined) this.tanggalWarna = this.state.zona_tanggal.warna;
                     if (this.state.zona_tanggal?.bg_warna!== undefined) this.tanggalBg    = this.state.zona_tanggal.bg_warna;
                     if (this.state.zona_tanggal?.align   !== undefined) this.tanggalAlign = this.state.zona_tanggal.align;
+                    if (this.state.zona_tanggal?.padding_x !== undefined) this.tanggalPaddingX = this.state.zona_tanggal.padding_x;
+                    if (this.state.zona_tanggal?.padding_y !== undefined) this.tanggalPaddingY = this.state.zona_tanggal.padding_y;
+                    if (this.state.zona_tanggal?.radius    !== undefined) this.tanggalRadius   = this.state.zona_tanggal.radius;
                 }
                 this.$nextTick(() => this.setupInteract());
             },
@@ -616,10 +653,14 @@
                         warna: this.tanggalWarna,
                         bg_warna: this.tanggalBg,
                         align: this.tanggalAlign,
+                        padding_x: parseInt(this.tanggalPaddingX) || 0,
+                        padding_y: parseInt(this.tanggalPaddingY) || 0,
+                        radius: parseInt(this.tanggalRadius) || 0,
                     },
                     zona_konten: { ...this.zones.zona_konten },
                     font_tanggal: { sumber: 'google', nama: this.tanggalFont },
                     grid: {
+                        max_dokter_per_halaman: parseInt(this.maxDokterPerHalaman) || 4,
                         gap_v:                parseInt(this.gapV) || 0,
                         judul_warna:          this.judulWarna,
                         judul_size:           parseInt(this.judulSize) || 56,

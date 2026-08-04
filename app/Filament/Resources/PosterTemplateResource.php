@@ -24,7 +24,7 @@ class PosterTemplateResource extends BaseRumahSakitResource
 
     protected static ?string $navigationGroup = 'Poster Jadwal';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 4;
     // protected static bool $shouldRegisterNavigation = false;
 
     // ── Form ──────────────────────────────────────────────────────────────────
@@ -42,7 +42,8 @@ class PosterTemplateResource extends BaseRumahSakitResource
                         ->label('Jenis Poster')
                         ->options(JenisPosterTemplate::class)
                         ->default(JenisPosterTemplate::JADWAL_HARIAN)
-                        ->required(),
+                        ->required()
+                        ->live(),
 
                     Forms\Components\TextInput::make('nama')
                         ->label('Nama Template')
@@ -79,7 +80,8 @@ class PosterTemplateResource extends BaseRumahSakitResource
                         ->directory('poster-templates/logo')
                         ->maxSize(1024)
                         ->acceptedFileTypes(['image/png', 'image/jpeg'])
-                        ->helperText('Logo RS yang ditempatkan di layer atas poster.'),
+                        ->helperText('Logo RS yang ditempatkan di layer atas poster.')
+                        ->visible(fn (Forms\Get $get) => $get('jenis') !== JenisPosterTemplate::PERUBAHAN_JADWAL->value),
                     ]),
 
                     Forms\Components\Group::make([
@@ -89,7 +91,8 @@ class PosterTemplateResource extends BaseRumahSakitResource
                         ->directory('poster-templates/shape')
                         ->maxSize(1024)
                         ->acceptedFileTypes(['image/png'])
-                        ->helperText('PNG transparan untuk background header nama poli. Kosongkan untuk pakai warna solid/gradasi.'),
+                        ->helperText('PNG transparan untuk background header nama poli. Kosongkan untuk pakai warna solid/gradasi.')
+                        ->visible(fn (Forms\Get $get) => $get('jenis') !== JenisPosterTemplate::PERUBAHAN_JADWAL->value),
                     ])
                 ])
                 ->columns(2),

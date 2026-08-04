@@ -42,11 +42,13 @@ class PerubahanJadwalLayout implements PosterLayout
                 'x' => 60, 'y' => 300, 'w' => 400, 'h' => 60,
                 'font' => 'Montserrat', 'size' => 30,
                 'warna' => '#ffffff', 'bg_warna' => '#c0392b', 'align' => 'center',
+                'padding_x' => 28, 'padding_y' => 10, 'radius' => 999,
             ],
             'zona_konten' => [
                 'x' => 60, 'y' => 400, 'w' => 960, 'h' => 1300,
             ],
             'grid' => [
+                'max_dokter_per_halaman' => 4,
                 'gap_v'                  => 24,
                 'judul_warna'            => '#c0392b',
                 'judul_size'             => 56,

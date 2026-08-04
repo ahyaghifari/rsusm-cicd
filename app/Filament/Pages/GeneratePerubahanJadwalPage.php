@@ -27,7 +27,7 @@ class GeneratePerubahanJadwalPage extends Page
     protected static ?string $navigationLabel = 'Generate Perubahan Jadwal';
     protected static ?string $title           = 'Generate Poster Perubahan Jadwal';
     protected static ?string $navigationGroup = 'Poster Jadwal';
-    protected static ?int    $navigationSort  = 3;
+    protected static ?int    $navigationSort  = 2;
     protected static string  $view            = 'filament.resources.poster-jadwal-resource.pages.generate-perubahan-jadwal-page';
 
     // ── State ─────────────────────────────────────────────────────────────────
@@ -36,6 +36,10 @@ class GeneratePerubahanJadwalPage extends Page
 
     /** @var array<int, array{id:int, poliklinik_nama:string, dokter_nama:string, is_executive:bool, jam_awal:?string, jam_baru:?string, libur:bool, visible:bool}> */
     public array $perubahan_list = [];
+
+    /** Pagination — 1 halaman = 1 file PNG terpisah. Section (Executive/Reguler) yang lebih panjang menentukan total halaman. */
+    public int $activeHalaman = 1;
+    public int $totalHalaman  = 1;
 
     public function mount(): void
     {
@@ -194,6 +198,8 @@ class GeneratePerubahanJadwalPage extends Page
             })
             ->values()
             ->toArray();
+
+        $this->recalcPagination($template);
     }
 
     private function formatRentang(?Carbon $mulai, ?Carbon $selesai): ?string
@@ -206,7 +212,33 @@ class GeneratePerubahanJadwalPage extends Page
     {
         if (isset($this->perubahan_list[$index])) {
             $this->perubahan_list[$index]['visible'] = ! $this->perubahan_list[$index]['visible'];
+            $this->recalcPagination($this->findTemplateForCurrentUser($this->getTemplateId()));
         }
+    }
+
+    /**
+     * Executive dan Reguler dipaginasi independen (berapa pun jumlah dokter yang berubah
+     * di tiap section, batasnya sendiri-sendiri via config `max_dokter_per_halaman`).
+     * Section yang lebih panjang menentukan total halaman poster.
+     */
+    private function recalcPagination(?PosterTemplate $template): void
+    {
+        $limit = (int) ($template?->config['grid']['max_dokter_per_halaman'] ?? 4) ?: 4;
+
+        $visible          = collect($this->perubahan_list)->where('visible', true);
+        $countExecutive   = $visible->where('is_executive', true)->count();
+        $countReguler     = $visible->where('is_executive', false)->count();
+
+        $halamanExecutive = (int) ceil($countExecutive / $limit);
+        $halamanReguler   = (int) ceil($countReguler / $limit);
+
+        $this->totalHalaman  = max(1, $halamanExecutive, $halamanReguler);
+        $this->activeHalaman = min($this->activeHalaman, $this->totalHalaman);
+    }
+
+    public function setHalaman(int $halaman): void
+    {
+        $this->activeHalaman = max(1, min($halaman, $this->totalHalaman));
     }
 
     // ── Preview / Generate ───────────────────────────────────────────────────
@@ -223,7 +255,7 @@ class GeneratePerubahanJadwalPage extends Page
             return;
         }
 
-        $html = $this->buildHtml($template, $tanggal);
+        $html = $this->buildHtml($template, $tanggal, $this->activeHalaman);
 
         $key  = Str::uuid()->toString();
         $path = storage_path("app/poster-preview/{$key}.html");
@@ -245,7 +277,7 @@ class GeneratePerubahanJadwalPage extends Page
             return null;
         }
 
-        $html = $this->buildHtml($template, $tanggal);
+        $html = $this->buildHtml($template, $tanggal, $this->activeHalaman);
 
         $outputPath = storage_path('app/public/poster-output/perubahan-' . $tanggal->format('Ymd') . '-' . time() . '.png');
         @mkdir(dirname($outputPath), 0755, true);
@@ -294,10 +326,12 @@ class GeneratePerubahanJadwalPage extends Page
             return null;
         }
 
+        $suffix = $this->totalHalaman > 1 ? "-hal{$this->activeHalaman}" : '';
+
         return response()->streamDownload(function () use ($outputPath) {
             readfile($outputPath);
             @unlink($outputPath);
-        }, 'perubahan-jadwal-' . $tanggal->format('d-m-Y') . '.png', [
+        }, 'perubahan-jadwal-' . $tanggal->format('d-m-Y') . $suffix . '.png', [
             'Content-Type' => 'image/png',
         ]);
     }
@@ -360,16 +394,25 @@ class GeneratePerubahanJadwalPage extends Page
         return $result;
     }
 
-    /** Bangun data section (Executive/Reguler → poliklinik → items) lalu render HTML template. */
-    private function buildHtml(PosterTemplate $template, Carbon $tanggal): string
+    /** Bangun data section (Executive/Reguler → poliklinik → items) untuk 1 halaman, lalu render HTML template. */
+    private function buildHtml(PosterTemplate $template, Carbon $tanggal, int $halaman = 1): string
     {
         $g              = $template->config['grid'] ?? [];
         $labelExecutive = $g['label_executive'] ?? 'Klinik Executive';
         $labelReguler   = $g['label_reguler']   ?? 'Poliklinik Reguler';
+        $limit          = (int) ($g['max_dokter_per_halaman'] ?? 4) ?: 4;
 
         $visible = collect($this->perubahan_list)->where('visible', true);
 
+        // Slice per baris dokter (bukan per kartu poliklinik) supaya batas
+        // "max_dokter_per_halaman" akurat, lalu regroup jadi kartu poliklinik.
+        // ponytail: kalau 1 poliklinik punya dokter yang kepotong pas di batas
+        // halaman, kartunya lanjut ke halaman berikutnya dengan judul diulang —
+        // cukup untuk kasus wajar, upgrade ke "jangan potong tengah kartu" kalau
+        // nanti dirasa perlu.
         $buildGroups = fn ($items) => $items
+            ->values()
+            ->slice(($halaman - 1) * $limit, $limit)
             ->groupBy('poliklinik_nama')
             ->map(fn ($rows, $poliklinikNama) => [
                 'poliklinik_nama' => $poliklinikNama,
@@ -400,9 +443,6 @@ class GeneratePerubahanJadwalPage extends Page
             'template'        => $template,
             'tanggal'         => $tanggal,
             'templateDataUri' => $this->toDataUri(Storage::disk('public')->path($template->template_png)),
-            'logoDataUri'     => $template->logo_header
-                                    ? $this->toDataUri(Storage::disk('public')->path($template->logo_header))
-                                    : null,
             'uploadFonts'     => $this->resolveUploadFonts($template),
             'sections'        => $sections,
         ])->render();

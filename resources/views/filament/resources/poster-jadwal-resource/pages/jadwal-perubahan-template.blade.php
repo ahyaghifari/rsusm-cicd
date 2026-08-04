@@ -1,7 +1,8 @@
 {{--
     Template poster Perubahan Jadwal Praktik Dokter Spesialis.
     Dirender oleh Browsershot → PNG 1080×1920.
-    Variabel: $template, $tanggal, $templateDataUri, $logoDataUri, $uploadFonts, $sections
+    Tidak pakai foto hero / logo header — cuma tanggal + daftar perubahan.
+    Variabel: $template, $tanggal, $templateDataUri, $uploadFonts, $sections
 
     $sections: [
         ['key' => 'executive', 'label' => string, 'groups' => [
@@ -58,10 +59,13 @@
     $badgeLiburBg = $g['badge_libur_bg_warna'] ?? '#dc2626';
     $badgeLiburC  = $g['badge_libur_warna']    ?? '#ffffff';
 
-    $tanggalFont   = $zonaTanggal['font']  ?? 'Montserrat';
-    $tanggalSize   = (int) ($zonaTanggal['size'] ?? 30);
-    $tanggalWarna  = $zonaTanggal['warna']    ?? '#ffffff';
-    $tanggalBg     = $zonaTanggal['bg_warna'] ?? '#c0392b';
+    $tanggalFont     = $zonaTanggal['font']      ?? 'Montserrat';
+    $tanggalSize     = (int) ($zonaTanggal['size'] ?? 30);
+    $tanggalWarna    = $zonaTanggal['warna']     ?? '#ffffff';
+    $tanggalBg       = $zonaTanggal['bg_warna']  ?? '#c0392b';
+    $tanggalPaddingX = (int) ($zonaTanggal['padding_x'] ?? 28);
+    $tanggalPaddingY = (int) ($zonaTanggal['padding_y'] ?? 10);
+    $tanggalRadius   = (int) ($zonaTanggal['radius']    ?? 999);
 
     $googleFonts = array_unique(array_filter([
         str_replace(' ', '+', $fontNamaKlinik) . ':wght@400;600;700;800',
@@ -119,8 +123,8 @@ body {
     font-weight: 700;
     color: {{ $tanggalWarna }};
     background: {{ $tanggalBg }};
-    border-radius: 999px;
-    padding: 10px 28px;
+    border-radius: {{ $tanggalRadius }}px;
+    padding: {{ $tanggalPaddingY }}px {{ $tanggalPaddingX }}px;
 }
 
 .section-title {

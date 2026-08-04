@@ -54,6 +54,56 @@
         </div>
         @endif
 
+        {{-- ── Page Navigator (muncul kalau salah satu section melebihi batas per halaman) ──── --}}
+        @if ($this->totalHalaman > 1)
+        <div class="mt-6 fi-section rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10">
+            <div class="fi-section-content px-6 py-4 flex items-center justify-between gap-4">
+                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Halaman
+                    <span class="text-primary-600 font-bold">{{ $this->activeHalaman }}</span>
+                    dari
+                    <span class="font-bold">{{ $this->totalHalaman }}</span>
+                    <span class="block text-xs font-normal text-gray-400 mt-0.5">Executive dan Reguler dipaginasi terpisah — tiap halaman jadi 1 file PNG.</span>
+                </span>
+                <div class="flex items-center gap-2">
+                    <x-filament::button
+                        type="button"
+                        color="gray"
+                        size="sm"
+                        wire:click="setHalaman({{ $this->activeHalaman - 1 }})"
+                        :disabled="$this->activeHalaman <= 1"
+                        icon="heroicon-m-chevron-left"
+                    >
+                        Sebelumnya
+                    </x-filament::button>
+
+                    @for ($h = 1; $h <= $this->totalHalaman; $h++)
+                    <x-filament::button
+                        type="button"
+                        size="sm"
+                        :color="$this->activeHalaman === $h ? 'primary' : 'gray'"
+                        wire:click="setHalaman({{ $h }})"
+                    >
+                        {{ $h }}
+                    </x-filament::button>
+                    @endfor
+
+                    <x-filament::button
+                        type="button"
+                        color="gray"
+                        size="sm"
+                        wire:click="setHalaman({{ $this->activeHalaman + 1 }})"
+                        :disabled="$this->activeHalaman >= $this->totalHalaman"
+                        icon="heroicon-m-chevron-right"
+                        icon-position="after"
+                    >
+                        Berikutnya
+                    </x-filament::button>
+                </div>
+            </div>
+        </div>
+        @endif
+
         {{-- ── Action Buttons ──────────────────────────────────────────────── --}}
         <div class="mt-6 flex gap-3">
             <x-filament::button
