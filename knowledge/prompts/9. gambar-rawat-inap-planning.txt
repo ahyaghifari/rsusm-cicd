@@ -1,0 +1,19 @@
+buatkan aku file issue gambar-rawat-inap.md di dalam folder issues untuk planning data GambarRawatInap yang nantinya akan dimplementasikan oleh programmer atau AI Model yang murah atau gratis :
+
+Buatkan aku tabel dari migrasi gambar_rawat_inap dengan kolom sebagai berikut : 
+
+id integer auto increment primary key
+rawat_inap integer foreign key ke tabel rawat_inap
+gambar varchar 255
+deskripsi TEXT nullable
+sort_order INT
+aktif BOOLEAN default true 
+timestamp (created_at, updated_at)
+
+buatkan model nya dengan nama GambarRawatInap dan allowed fields semua kolom kecuali kolom id
+
+selanjutnya buatkan Resource filament untuk Resource dari model yang sudah dibuat nama GambarRawatInapResource dengan flag --generate
+
+lakukan relations filament antara RawatInap dengan GambarRawatInap
+
+buatkan juga untuk halaman khusus sort order gambar rawat inap agar lebih mudah, dengan teknik drag and drop, ketika disubmit ubah saja sort ordernya

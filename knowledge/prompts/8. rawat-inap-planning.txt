@@ -1,0 +1,290 @@
+buatkan aku file issue rawat-inap.md di dalam folder issues untuk planning data RawatInap yang nantinya akan dimplementasikan oleh programmer atau AI Model yang murah atau gratis :
+
+Buatkan aku tabel dari migrasi rawat_inap dengan kolom sebagai berikut : 
+
+id integer auto increment primary key
+rumah_sakit_id integer foreign key ke tabel rumah_sakit
+gedung_id integer foreign key ke tabel gedung
+nama varchar 255
+kelas varchar 255
+harga decimal 10,2
+kapasitas SMALLINT
+fasilitas TEXT
+thumbnail varchar 255
+sort_order INT 
+aktif BOOLEAN default true 
+timestamp (created_at, updated_at)
+
+buatkan model nya dengan nama RawatInap dan allowed fields semua kolom kecuali kolom id
+
+selanjutnya buatkan Resource filament untuk Resource dari model yang sudah dibuat nama RawatInapResource dengan flag --generate, untuk fasilitas gunakan Rich Text Editor filament
+
+buatkan juga untuk halaman khusus sort order rawat inap agar lebih mudah, dengan teknik drag and drop, ketika disubmit ubah saja sort ordernya
+
+buatkan juga seeder dengan nama RawatInapSeeder, dengan data sebagai berikut
+
+GEDUNG: Marwah
+
+ROOM:
+Paviliun Firdaus - VVIP Ar-Raudhah
+
+CLASS:
+VVIP
+
+PRICE:
+1199619
+
+FACILITIES_HTML:
+<ul>
+    <li>1 Bed Pasien Elektrik</li>
+    <li>1 Sofa Bed Penunggu</li>
+    <li>AC</li>
+    <li>Smart TV</li>
+    <li>Kulkas</li>
+    <li>Dispender</li>
+    <li>Wifi</li>
+    <li>Kamar Mandi Dalam</li>
+    <li>Water Heater</li>
+    <li>Lemari Penyimpanan</li>
+    <li>Meja Makan Pasien</li>
+</ul>
+
+SORT_ORDER:
+1
+
+
+ROOM:
+Paviliun Firdaus - VIP Al-Karim
+
+CLASS:
+VIP
+
+PRICE:
+863999
+
+FACILITIES_HTML:
+<ul>
+    <li>1 Bed Pasien</li>
+    <li>Sofa Penunggu</li>
+    <li>AC</li>
+    <li>TV</li>
+    <li>Kulkas</li>
+    <li>Wifi</li>
+    <li>Kamar Mandi Dalam</li>
+    <li>Lemari Penyimpanan</li>
+</ul>
+
+SORT_ORDER:
+2
+
+
+
+GEDUNG: Marwah
+
+ROOM:
+VIP Al-Hakim
+
+CLASS:
+VIP
+
+PRICE:
+949817
+
+FACILITIES_HTML:
+<ul>
+    <li>1 Bed Pasien</li>
+    <li>AC</li>
+    <li>TV</li>
+    <li>Kulkas</li>
+    <li>Sofa Penunggu</li>
+    <li>Wifi</li>
+    <li>Kamar Mandi Dalam</li>
+</ul>
+
+SORT_ORDER:
+1
+
+
+ROOM:
+Kelas I As-Salam
+
+CLASS:
+Kelas I
+
+PRICE:
+713076
+
+FACILITIES_HTML:
+<ul>
+    <li>2 Bed Pasien</li>
+    <li>AC</li>
+    <li>TV</li>
+    <li>Kamar Mandi Dalam</li>
+    <li>Lemari Penyimpanan</li>
+</ul>
+
+SORT_ORDER:
+2
+
+
+
+GEDUNG: Muzdalifah
+
+ROOM:
+Kelas I An-Nur
+
+CLASS:
+Kelas I
+
+PRICE:
+713076
+
+FACILITIES_HTML:
+<ul>
+    <li>2 Bed Pasien</li>
+    <li>AC</li>
+    <li>TV</li>
+    <li>Kamar Mandi Dalam</li>
+</ul>
+
+SORT_ORDER:
+1
+
+
+ROOM:
+Kelas I An-Nur (204, 210-215)
+
+CLASS:
+Kelas I
+
+PRICE:
+692307
+
+FACILITIES_HTML:
+<ul>
+    <li>2 Bed Pasien</li>
+    <li>AC</li>
+    <li>Kamar Mandi Dalam</li>
+</ul>
+
+SORT_ORDER:
+2
+
+
+
+GEDUNG: Shofa
+
+ROOM:
+VIP Plus An-Nisa (OBGYN)
+
+CLASS:
+VIP Plus
+
+PRICE:
+949817
+
+FACILITIES_HTML:
+<ul>
+    <li>1 Bed Pasien</li>
+    <li>Sofa Penunggu</li>
+    <li>AC</li>
+    <li>TV</li>
+    <li>Kulkas</li>
+    <li>Wifi</li>
+    <li>Kamar Mandi Dalam</li>
+    <li>Area Khusus OBGYN</li>
+</ul>
+
+SORT_ORDER:
+1
+
+
+ROOM:
+VIP Ar-Rahman
+
+CLASS:
+VIP
+
+PRICE:
+830768
+
+FACILITIES_HTML:
+<ul>
+    <li>1 Bed Pasien</li>
+    <li>AC</li>
+    <li>TV</li>
+    <li>Sofa Penunggu</li>
+    <li>Kamar Mandi Dalam</li>
+</ul>
+
+SORT_ORDER:
+2
+
+
+ROOM:
+Kelas I Al-Kautsar
+
+CLASS:
+Kelas I
+
+PRICE:
+692307
+
+FACILITIES_HTML:
+<ul>
+    <li>1 Bed Pasien</li>
+    <li>AC</li>
+    <li>TV</li>
+    <li>Kamar Mandi Dalam</li>
+</ul>
+
+SORT_ORDER:
+3
+
+
+ROOM:
+Kelas II Al-Furqon
+
+CLASS:
+Kelas II
+
+PRICE:
+415384
+
+FACILITIES_HTML:
+<ul>
+    <li>2 Bed Pasien</li>
+    <li>Kipas Angin</li>
+    <li>Kamar Mandi Dalam</li>
+</ul>
+
+SORT_ORDER:
+4
+
+
+ROOM:
+Kelas III Al-Fath
+
+CLASS:
+Kelas III
+
+PRICE:
+242307
+
+FACILITIES_HTML:
+<ul>
+    <li>3 Bed Pasien</li>
+    <li>Kipas Angin</li>
+    <li>Kamar Mandi Bersama</li>
+</ul>
+
+SORT_ORDER:
+5
+
+
+untuk kapasitas ambil saja dari berapa bed pasien, 
+semua rumah_sakit_id adalah 1
+untuk gedung, 
+gedung shofa gedung_id nya 1
+gedung marwah gedung_id nya 2
+gedung muzdalifah gedung_id nya 3

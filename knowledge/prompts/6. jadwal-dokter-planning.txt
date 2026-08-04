@@ -1,0 +1,18 @@
+buatkan aku file issue jadwal-dokter.md di dalam folder issues untuk planning data JadwalPraktek yang nantinya akan dimplementasikan oleh programmer atau AI Model yang murah atau gratis :
+
+Buatkan aku tabel dari migrasi jadwal_praktek dengan kolom sebagai berikut : 
+
+id integer auto increment primary key
+dokter_id integer foreign key ke tabel dokter
+hari enum (SENIN, SELASA, RABU, KAMIS, JUMAT, SABTU, MINGGU)
+waktu_mulai time
+waktu_selesai time nullable
+sesuai_perjanjian boolean default false
+libur boolean default false
+timestamp (created_at, updated_at)
+
+buatkan model nya dengan nama JadwalPraktek dan allowed fields semua kolom kecuali kolom id
+
+selanjutnya buatkan Resource filament untuk Resource dari model yang sudah dibuat nama JadwalPraktekResource dengan flag --generate, dan ketika selesai create atau update kembali ke halaman index nya, untuk update aku mau data jadwal dengan dokter yang sama itu dihapus saja, lalu ganti dengan data yang baru
+
+buatkan juga seeder dengan nama JadwalPraktekSeeder, berikan jadwal ke seluruh dokter di tabel dokter yang ada dari hari senin sampai dengan minggu secara berurutan, random saja, misalkan dia bisa libur atau sesuai perjanjian

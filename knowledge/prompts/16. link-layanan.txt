@@ -1,0 +1,35 @@
+buatkan aku file issue link-layanan.md didalam folder issues seperti sumber rumah-sakit.md yang aku berikan yang nantinya akan dikerjakan oleh Junior Programmer atau model AI yang lebih murah atau gratis:
+
+Buatkan aku tabel dari migrasi link_layanan dengan kolom sebagai berikut : 
+
+id integer auto increment primary key
+rumah_sakit_id integer foreign key ke tabel rawat_inap
+label varchar 255 
+value varchar 255
+gambar varchar nullable
+deskripsi_singkat nullable
+link longtext
+aktif BOOLEAN default true 
+timestamp (created_at, updated_at)
+
+buatkan model nya dengan nama LinkLayanan dan allowed fields semua kolom kecuali kolom id
+
+selanjutnya buatkan code untuk Resource filament untuk Resource dari model yang sudah dibuat nama LinkLayananResource dengan flag --simple
+
+untuk gambar gunakan media upload image pada code agar bisa mengupload
+
+buatkan data seeder LinkLayananSeeder dan datanya diambil dari https://rsusyifamedika.co.id dibawah hero yaitu pada bagian Ketersediaan Ruang Rawat, Jadwal Praktek Dokter, Pantauan Antrian,  sesuaikan isinya dengan struktur tabel yang dibuat, untuk gambar isi null saja
+
+
+<form action=""
+                    >
+                    <select id="promo-hospital-filter" onchange="window.location.href='/' + this.value"
+                        class="w-full text-xs px-3 py-1 bg-white/10 border border-primary rounded-xl font-body-md text-primary focus:ring-2 focus:ring-white/20 outline-none appearance-none cursor-pointer transition-all shadow-sm hover:bg-white/15 uppercase">
+                        @foreach ($daftarRS as $rs)
+                        <option class="text-slate-900 bg-white uppercase" value="{{$rs->slug}}" 
+                            @if($rs->id == current_rumahsakit()->id) selected @endif>
+                            RSUSM <span class="uppercase"> {{$rs->lokasi}}</span>
+                        </option>
+                        @endforeach
+                    </select>
+                </form>

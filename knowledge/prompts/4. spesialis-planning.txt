@@ -1,0 +1,46 @@
+buatkan aku file issue.md spesialis.md di dalam folder issues untuk planning data Spesialis yang nantinya akan dimplementasikan oleh programmer atau AI Model yang murah atau gratis :
+
+Buatkan aku tabel dari migrasi spesialis dengan kolom sebagai berikut : 
+
+id integer auto increment primary key
+nama varchar 100 unique
+slug varchar 100 unique
+logo varchar 255 nullable
+aktif boolean default true
+rumah_sakit_id integer foreign key ke tabel rumah_sakit
+timestamp (created_at, updated_at)
+
+buatkan model nya dengan nama Spesialis dan allowed fields semua kolom kecuali kolom id
+
+selanjutnya buatkan Resource filament untuk Resource dari model yang sudah dibuat nama SpesialisResource dengan flag --simple
+
+kolom yang akan menerima upload filenya yaitu logo dalam bentuk gambar
+
+untuk routemodelbinding atur model berdasarkan slug bukan berdasarkan id
+
+buatkan juga seeder dengan nama SpesialisSeeder dengan data nama sebagai berikut : 
+Spesialis Anak
+Spesialis Penyakit Dalam
+Spesialis Bedah
+Spesialis Orthopaedi & Traumatologi
+Spesialis Kebidanan & Kandungan
+Spesialis Saraf
+Spesialis Paru
+Spesialis THT
+Spesialis Jantung
+Spesialis Kulit & Kelamin
+Spesialis Urologi
+Spesialis Mata
+Spesialis Kejiwaan (Psikiater)
+Spesialis Bedah Saraf
+Spesialis Rehabilitasi Medik / Fisik & Rehabilitasi
+Spesialis Gizi Klinik
+Layanan Konsultasi Psikologi
+Dokter Gigi Umum
+Spesialis Dokter Gigi Anak
+Spesialis Konservasi Gigi
+Spesialis Gigi Prostodonsi
+Spesialis Gigi Ortodonsi
+Spesialis Gigi Bedah Mulut & Maksilofasial
+
+buatkan slugnya otomatis

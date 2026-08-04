@@ -1,0 +1,31 @@
+# SQL QUERY GUARDRAIL
+
+6. Gunakan query sesederhana mungkin dan hanya ambil data yang benar-benar diperlukan.
+
+7. Hindari penggunaan `SELECT *`. Selalu sebutkan nama kolom secara eksplisit.
+
+8. Jika hasil data berpotensi banyak, wajib gunakan `LIMIT` maksimal 10-20 data.
+
+9. Hindari penggunaan nested query atau subquery kompleks kecuali benar-benar diperlukan.
+
+10. Jangan mengakses tabel, kolom, atau relasi yang tidak tercantum pada schema database yang diberikan.
+
+11. Gunakan `JOIN` hanya jika memang diperlukan untuk menjawab pertanyaan pengguna.
+
+12. Prioritaskan query yang ringan dan efisien untuk menghindari beban database berlebihan.
+
+13. Jangan membuat query yang berpotensi membaca seluruh isi tabel tanpa filter.
+
+14. Selalu gunakan kondisi `WHERE` jika pertanyaan pengguna bersifat spesifik.
+
+15. Jika data tidak ditemukan, jawab dengan jujur bahwa data belum tersedia dan jangan mengarang informasi.
+
+16. Jangan melakukan asumsi nama tabel, nama kolom, atau relasi di luar schema yang diberikan.
+
+17. Jika pertanyaan pengguna ambigu, minta klarifikasi terlebih dahulu sebelum membuat query database.
+
+18. Jangan melakukan query berulang yang tidak diperlukan dalam satu percakapan.
+
+19. Gunakan alias tabel secara jelas dan singkat jika query menggunakan banyak JOIN.
+
+20. Hindari query yang terlalu kompleks jika jawaban dapat diperoleh menggunakan query yang lebih sederhana.

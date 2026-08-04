@@ -1,0 +1,22 @@
+buatkan aku file issue kontak.md didalam folder issues seperti sumber rumah-sakit.md yang aku berikan yang nantinya akan dikerjakan oleh Junior Programmer atau model AI yang lebih murah atau gratis:
+
+Buatkan aku tabel dari migrasi penunjang_medis dengan kolom sebagai berikut : 
+
+id integer auto increment primary key
+rumah_sakit_id integer foreign key ke tabel rawat_inap
+label varchar 255 
+value varchar 255
+gambar varchar nullable
+logo svg longtext nullable
+link longtext nullable
+kategori enum SOSIAL MEDIA atau OPERASIONAL
+aktif BOOLEAN default true 
+timestamp (created_at, updated_at)
+
+buatkan model nya dengan nama Kontak dan allowed fields semua kolom kecuali kolom id
+
+selanjutnya buatkan code untuk Resource filament untuk Resource dari model yang sudah dibuat nama KontakResource dengan flag --simple
+
+untuk logo gunakan media upload image pada code agar bisa mengupload
+
+buatkan data seeder KontakSeeder dan datanya diambil dari https://rsusyifamedika.co.id/hubungi-kami/ atau bagian bawah halaman yang tergabung dengan google maps sesuaikan isinya dengan struktur tabel yang dibuat, untuk logo dan gambar isi null saja

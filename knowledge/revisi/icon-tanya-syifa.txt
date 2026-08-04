@@ -1,0 +1,100 @@
+PROMPT: Generate Icon Maskot "Tanya Syifa" (Robot Perempuan Berhijab)
+========================================================================
+(Siap dipakai di tool image generation seperti "Nano Banana"/Gemini image gen. Prompt
+utamanya ditulis dalam Bahasa Inggris karena model image generation umumnya merespons lebih
+akurat & konsisten dengan prompt Inggris yang deskriptif — catatan penggunaan tetap Bahasa
+Indonesia di bawah.)
+
+---
+
+KONTEKS & TUJUAN PENGGUNAAN
+------------------------------
+Icon ini akan menggantikan icon chat generik (Material Symbols "chat") yang dipakai fitur
+"Tanya Syifa" di 3 tempat berbeda di website:
+
+1. **FAB (floating action button)** — `resources/views/rumah_sakit/chatbot/floating.blade.php`.
+   Tombol bulat warna solid (`bg-tertiary`, kira-kira warna biru-indigo `#4D51B2`), icon
+   ditaruh di tengah, ukuran kecil (~24-28px dalam tombol bulat ~56px).
+2. **Mobile bottom bar** — `resources/views/rumah_sakit/partials/mobile-bottom-bar.blade.php`,
+   label "Tanya Syifa", icon kecil di atas teks label.
+3. **Logo/header panel chatbot** — saat panel chat terbuka, dipakai sebagai avatar/identitas
+   asisten "Syifa" di header panel.
+
+Karena dipakai di 3 ukuran & background berbeda (tombol bulat warna gelap, bottom bar warna
+terang, header panel), icon HARUS:
+- Background **transparan** (PNG transparan), supaya cocok ditaruh di background apa pun.
+- Tetap jelas terbaca di ukuran sangat kecil (24-32px) — desain harus simpel, kontras jelas,
+  TIDAK terlalu detail/ramai.
+- Cuma bagian **kepala saja** (kepala + sedikit bahu/leher kalau perlu untuk komposisi), bukan
+  full body — sesuai kebutuhan, supaya proporsinya pas dipakai sebagai icon/avatar bulat.
+
+---
+
+PROMPT UTAMA (COPY-PASTE KE IMAGE GENERATOR)
+-----------------------------------------------
+
+A cute **puffy sticker-style cartoon mascot icon** of a friendly female robot head, designed
+as a chat avatar for a hospital assistant. Head and shoulders only (bust crop), no body, no
+hands, no other elements — just the head, centered in frame, facing forward, with a **big,
+warm, cheerful smile** suggesting a happy, welcoming personality. Simple and clean overall,
+but with a soft sense of **volume and depth** — like a glossy die-cut sticker or a soft
+inflated vinyl toy, NOT a paper-flat vector icon. Rounded, slightly puffy/3D-ish shapes with
+soft shading, not hard flat color blocks.
+
+She wears a simple, modest hijab (headscarf) in one main color, drawn as a soft rounded puffy
+shape with a few simple folds, fully covering her hair and ears, no patterns or prints. Add a
+soft highlight (lighter tone) on the top/front of the hijab and a soft shadow tone underneath,
+like rounded fabric catching gentle light — not flat, but still simple (no detailed texture).
+
+Her face/head surface is a **solid yellow** (cartoon robot face, not realistic skin), rendered
+with the same soft puffy/rounded shading — a gentle highlight near the top and soft shadow
+near the edges/chin to give it dimension, like a smooth glossy plastic ball. Her eyes are
+**simple — two small curved line/dash shapes** (like a happy closed-eye smile shape, e.g.
+"^ ^"), not detailed round eyes with pupils, but they can have a tiny soft highlight/shine for
+a cute glossy look. Her mouth is a simple thick curved smile line. Optionally one tiny simple
+dot or short line near the temple/cheek as a minimal robot detail.
+
+Color palette: simple, only 2-3 main colors, but rendered with soft shading/gradient (not flat
+blocks) for a glossy sticker feel. The **hijab is a vivid magenta-pink, close to hex #D606B0**,
+the face is yellow, with a thin dark outline for definition. Add a soft drop shadow beneath
+the whole head/bust for extra depth and "pop" against the background. Overall mood: cheerful,
+friendly, soft, bouncy, charming — like a cute puffy sticker or soft vinyl toy character.
+
+Composition: centered, symmetrical, plenty of even padding/margin around the head so it can
+be cropped into a circle without cutting off important details. Plain transparent background
+(no scene, no studio backdrop) except for the subject's own soft drop shadow — isolated
+subject only, must read clearly even at very small sizes (24-32px).
+
+Style reference: think glossy sticker-pack mascot style (like Telegram/WhatsApp sticker
+characters, or a soft inflated vinyl toy figure) — simple shapes with soft rounded shading and
+a touch of shine/highlight for depth — NOT photorealistic, NOT anime, NOT a hard flat vector
+icon with zero shading, and NOT a highly detailed realistic 3D render either — something
+charming and dimensional in between.
+
+Output: square 1:1 aspect ratio, transparent PNG background, no text, no watermark, no logo
+overlays, no border/frame.
+
+---
+
+VARIASI TAMBAHAN (OPSIONAL, KALAU MAU GENERATE BEBERAPA PILIHAN)
+-------------------------------------------------------------------
+Setelah hasil pertama keluar, bisa coba variasi prompt tambahan ini (ditambahkan di akhir
+prompt utama) untuk dapat beberapa pilihan pose/ekspresi:
+- "...slight 3/4 angle instead of straight-on, looking slightly to one side"
+- "...with a small subtle medical cross or heart icon as a tiny emblem on the hijab pin"
+- "...with simple round dot eyes instead of line eyes, still very minimal and flat"
+
+---
+
+CATATAN PENGGUNAAN SETELAH HASIL JADI
+-----------------------------------------
+- Setelah dapat hasil yang pas, export PNG transparan resolusi besar (minimal 512x512px),
+  baru di-resize/compress untuk dipakai di web (taruh di `public/img/` mengikuti konvensi
+  asset gambar lain di project, sesuaikan nama file deskriptif misal `maskot-tanya-syifa.png`).
+- Cek tampilannya di 3 lokasi pemakaian (FAB, mobile bottom bar, header panel chatbot) di
+  ukuran kecil sebelum dianggap final — pastikan tetap jelas terbaca, tidak buram/pecah di
+  ukuran 24-32px.
+- Kalau hasil generate masih kurang pas (terlalu detail, warna kurang sesuai, ekspresi kurang
+  ramah, dst), ulangi generate dengan menambah catatan spesifik di akhir prompt utama
+  (misal: "make the smile slightly bigger and warmer", "simplify the hijab folds, less
+  texture detail", dst) — jangan ganti seluruh prompt dari awal, cukup tambah catatan revisi.

@@ -1,0 +1,19 @@
+buatkan aku file issue gedung.md di dalam folder issues untuk planning data Gedung yang nantinya akan dimplementasikan oleh programmer atau AI Model yang murah atau gratis :
+
+Buatkan aku tabel dari migrasi gedung dengan kolom sebagai berikut : 
+
+id integer auto increment primary key
+rumah_sakit_id integer foreign key ke tabel rumah_sakit
+nama varchar 255
+alias varchar 255 nullable
+timestamp (created_at, updated_at)
+
+buatkan model nya dengan nama Gedung dan allowed fields semua kolom kecuali kolom id
+
+selanjutnya buatkan Resource filament untuk Resource dari model yang sudah dibuat nama GedungResource dengan flag --simple
+
+buatkan juga seeder dengan nama GedungSeeder, dengan sebagai berikut
+
+1. rumah sakit id 1, nama Gedung Shofa, alias Gedung A
+2. rumah sakit id 1, nama Gedung Marwah, alias Gedung B
+3. rumah sakit id 1, nama Gedung Muzdalifah, alias Gedung C

@@ -1,0 +1,22 @@
+buatkan aku file issue promo.md didalam folder issues seperti sumber rumah-sakit.md yang aku berikan yang nantinya akan dikerjakan oleh Junior Programmer atau model AI yang lebih murah atau gratis:
+
+Buatkan aku tabel dari migrasi promo dengan kolom sebagai berikut : 
+
+id integer auto increment primary key
+rumah_sakit_id integer foreign key ke tabel rawat_inap
+judul varchar 255 
+deskripsi long-text nullable
+gambar varchar nullable
+popup BOOLEAN false
+aktif BOOLEAN default true 
+timestamp (created_at, updated_at)
+
+buatkan model nya dengan nama Promo dan allowed fields semua kolom kecuali kolom id
+
+selanjutnya buatkan code untuk Resource filament untuk Resource dari model yang sudah dibuat nama PromoResource dengan flag --simple
+
+untuk deskripsi, gunakan Rich Editor filament
+
+untuk gambar gunakan media upload image pada code agar bisa mengupload
+
+bisakah buatkan semacam form memilih promo yang popup secara cepat?, jadi misalkan promo ini promonya popup, maka promo lain yang promonya true itu difalsekan otomatis

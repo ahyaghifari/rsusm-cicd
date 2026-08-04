@@ -1,0 +1,421 @@
+==================================================
+PORTAL RUMAH SAKIT
+FINAL DATABASE STRUCTURE
+RAWAT JALAN / EXECUTIVE CLINIC
+==================================================
+
+STACK:
+- Laravel 12
+- Livewire
+- Filament
+- TailwindCSS
+- Preline UI
+
+KONSEP:
+- Multi rumah sakit
+- 1 aplikasi Laravel
+- URL prefix:
+    domain.com/banjarbaru
+    domain.com/barabai
+
+FOKUS:
+- Public website / portal RS
+- Bukan HIS / EMR
+
+==================================================
+ARSITEKTUR DOMAIN
+==================================================
+
+- homepage/menu website != struktur database
+- executive clinic adalah business/unit berbeda
+- tetapi masih bisa tampil dalam website RS utama
+- chatbot membutuhkan data jadwal terstruktur
+- humas generate poster dari data jadwal
+- poster hanyalah presentation layer
+
+==================================================
+TABLE: rumah_sakit
+==================================================
+
+Digunakan untuk:
+- tenant rumah sakit
+
+FIELDS:
+
+- id
+
+- nama
+- slug
+
+- logo nullable
+
+- aktif
+
+- timestamps
+
+
+==================================================
+TABLE: unit_layanan
+==================================================
+
+Digunakan untuk:
+- pemisah business unit / layanan utama
+
+Contoh:
+- Rawat Jalan
+- Executive Clinic
+
+Catatan:
+- tidak semua RS wajib punya Executive Clinic
+- RS baru bisa hanya memiliki Rawat Jalan
+
+FIELDS:
+
+- id
+
+- rumah_sakit_id
+
+- nama
+    contoh:
+    Rawat Jalan
+    Executive Clinic
+
+- slug
+
+- tipe
+    contoh:
+    rawat_jalan
+    executive_clinic
+
+- deskripsi nullable
+
+- aktif
+
+- timestamps
+
+
+==================================================
+TABLE: spesialis
+==================================================
+
+Master spesialis dokter.
+
+FIELDS:
+
+- id
+
+- kode nullable
+
+- nama
+- slug
+
+- timestamps
+
+
+==================================================
+TABLE: dokter
+==================================================
+
+MASTER dokter website.
+
+Digunakan untuk:
+- halaman dokter
+- SEO dokter
+- find doctor
+- chatbot
+- relasi poliklinik
+
+Catatan:
+- tidak semua jadwal wajib memiliki dokter_id
+- dokter tamu tetap bisa muncul di jadwal
+
+FIELDS:
+
+- id
+
+- rumah_sakit_id
+
+- spesialis_id nullable
+
+- nama
+- slug
+
+- foto nullable
+
+- deskripsi nullable
+
+- aktif
+
+- timestamps
+
+
+==================================================
+TABLE: poliklinik
+==================================================
+
+Semua layanan outpatient.
+
+Contoh:
+- Poli Anak
+- Poli Jantung
+- MCU
+- Vaksin
+- Executive Consultation
+
+Dibedakan berdasarkan:
+unit_layanan_id
+
+FIELDS:
+
+- id
+
+- rumah_sakit_id
+
+- unit_layanan_id
+
+- kode nullable
+
+- nama
+- slug
+
+- deskripsi_singkat nullable
+- deskripsi nullable
+
+- thumbnail nullable
+- banner nullable
+
+- aktif
+
+- timestamps
+
+
+==================================================
+CONTOH DATA POLIKLINIK
+==================================================
+
+| nama                     | unit_layanan      |
+|--------------------------|-------------------|
+| Poli Anak                | Rawat Jalan       |
+| Poli Saraf               | Rawat Jalan       |
+| MCU                      | Executive Clinic  |
+| Vaksin                   | Executive Clinic  |
+
+
+==================================================
+TABLE: dokter_poliklinik
+==================================================
+
+Relasi many-to-many.
+
+Karena:
+- 1 dokter bisa banyak poli
+- 1 poli bisa banyak dokter
+
+FIELDS:
+
+- id
+
+- dokter_id
+- poliklinik_id
+
+- timestamps
+
+
+==================================================
+TABLE: jadwal_layanan_harian
+==================================================
+
+SUMBER KEBENARAN PUBLIK.
+
+Digunakan untuk:
+- website
+- chatbot
+- popup
+- poster
+- API
+- mobile app
+
+Catatan:
+- jadwal bersifat harian
+- tidak menggunakan recurring/template dulu
+- lebih realistis untuk operasional RS
+
+FIELDS:
+
+- id
+
+- rumah_sakit_id
+
+- unit_layanan_id
+
+- poliklinik_id nullable
+
+- tanggal
+
+- dokter_id nullable
+
+- doctor_name nullable
+    fallback jika tidak ada di master dokter
+
+- doctor_specialist nullable
+
+- jam_mulai nullable
+- jam_selesai nullable
+
+- status
+    contoh:
+    buka
+    libur
+    cuti
+    by_appointment
+
+- catatan nullable
+
+- timestamps
+
+
+==================================================
+RELASI FINAL
+==================================================
+
+RumahSakit
+-----------
+hasMany:
+- unit_layanan
+- dokter
+- poliklinik
+- jadwal_layanan_harian
+
+
+UnitLayanan
+------------
+belongsTo:
+- rumah_sakit
+
+hasMany:
+- poliklinik
+- jadwal_layanan_harian
+
+
+Poliklinik
+-----------
+belongsTo:
+- rumah_sakit
+- unit_layanan
+
+belongsToMany:
+- dokter
+
+hasMany:
+- jadwal_layanan_harian
+
+
+Dokter
+-------
+belongsTo:
+- rumah_sakit
+- spesialis
+
+belongsToMany:
+- poliklinik
+
+hasMany:
+- jadwal_layanan_harian
+
+
+JadwalLayananHarian
+--------------------
+belongsTo:
+- rumah_sakit
+- unit_layanan
+- poliklinik nullable
+- dokter nullable
+
+
+==================================================
+FLOW WEBSITE
+==================================================
+
+RAWAT JALAN
+------------
+URL:
+    /banjarbaru/rawat-jalan
+
+Menampilkan:
+- daftar poliklinik milik unit Rawat Jalan
+
+
+EXECUTIVE CLINIC
+----------------
+URL:
+    /banjarbaru/executive-clinic
+
+Menampilkan:
+- daftar poliklinik milik Executive Clinic
+
+
+DETAIL POLIKLINIK
+------------------
+Contoh:
+    /banjarbaru/rawat-jalan/poli-anak
+
+Isi:
+- deskripsi
+- dokter terkait
+- jadwal hari ini
+
+
+==================================================
+LOGIKA JADWAL DOKTER
+==================================================
+
+Jika:
+- dokter_id != null
+
+Maka:
+- tampil link ke halaman dokter
+
+
+Jika:
+- dokter_id == null
+
+Maka:
+- tampil text biasa saja
+
+Contoh:
+- dr. Visiting MCU
+
+
+==================================================
+FLOW HUMAS
+==================================================
+
+Admin input:
+- jadwal_layanan_harian
+
+Saat generate poster:
+- gunakan form sementara
+- pilih warna
+- background
+- header
+- footer
+
+Tanpa tabel tambahan dulu.
+
+Karena:
+- poster hanyalah presentation layer
+
+
+==================================================
+KESIMPULAN ARSITEKTUR
+==================================================
+
+- executive clinic dipisah menggunakan unit_layanan
+- tetapi tetap bisa tampil di website RS utama
+- poliklinik digunakan global untuk semua outpatient service
+- chatbot menggunakan jadwal_layanan_harian
+- dokter tetap shared/global
+- jadwal harian menjadi sumber kebenaran publik
+- struktur fleksibel untuk multi rumah sakit
+- future proof jika executive clinic punya website sendiri
+- tidak over-engineering

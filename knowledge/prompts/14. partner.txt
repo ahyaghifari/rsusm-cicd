@@ -1,0 +1,18 @@
+buatkan aku file issue partner.md didalam folder issues seperti sumber rumah-sakit.md yang aku berikan yang nantinya akan dikerjakan oleh Junior Programmer atau model AI yang lebih murah atau gratis:
+
+Buatkan aku tabel dari migrasi penunjang_medis dengan kolom sebagai berikut : 
+
+id integer auto increment primary key
+rumah_sakit_id integer foreign key ke tabel rawat_inap
+nama varchar 255
+logo varchar 255
+aktif BOOLEAN default true 
+timestamp (created_at, updated_at)
+
+buatkan model nya dengan nama Partner dan allowed fields semua kolom kecuali kolom id
+
+selanjutnya buatkan code untuk Resource filament untuk Resource dari model yang sudah dibuat nama PartnerResource dengan flag --simple
+
+untuk logo gunakan media upload image pada code agar bisa mengupload
+
+buatkan data seeder PartnerSeeder dan datanya diambil dari https://rsusyifamedika.co.id/partner-kami/ sesuaikan isinya dengan struktur tabel yang dibuat, untuk logo isi null saja

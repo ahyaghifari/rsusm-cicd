@@ -1,0 +1,16 @@
+buatkan aku isi file issue jadwal-layanan.md seperti sumber rumah-sakit.md yang aku berikan yang nantinya akan dikerjakan oleh Junior Programmer atau model AI yang lebih murah atau gratis:
+
+Buatkan aku tabel dari migrasi jadwal_layanan dengan kolom sebagai berikut : 
+
+id integer auto increment primary key
+poliklinik_id integer foreign key ke tabel poliklinik
+hari date
+dokter_id integer nullable foreign key nullable
+nama_dokter nullable
+jam_mulai nullable
+jam_selesai nullable
+status_layanan enum (BUKA, LIBUR)
+catatan text nullable
+timestamp (created_at, updated_at)
+
+buatkan modelnya dengan nama JadwalLayanan, buat semua kolom dapat diisi kecuali id dan tambahkan relasinya

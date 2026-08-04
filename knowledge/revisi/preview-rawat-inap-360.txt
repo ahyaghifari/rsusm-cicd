@@ -1,0 +1,156 @@
+PROMPT: Implementasi Viewer 360 Kamar Rawat Inap
+==================================================
+(Siap dipakai sebagai prompt ke model AI lain / sesi baru. Tulis dalam Bahasa Indonesia
+karena seluruh dokumentasi & komunikasi tim proyek ini pakai Bahasa Indonesia.)
+
+---
+
+KONTEKS PROJECT
+----------------
+Saya mengerjakan website multi-tenant portal rumah sakit (RSU Syifa Medika) di Laravel.
+Repo ada di folder `rsu-syifamedika/`. Beberapa cabang RS (Banjarbaru, Barabai) berbagi
+satu codebase, semua data RS-scoped lewat kolom `rumah_sakit_id`.
+
+Stack teknis (versi aktual, cek composer.json/package.json kalau perlu verifikasi):
+- Backend: Laravel 12, PHP ^8.2
+- Admin panel: Filament 3.3 (resource pattern: Resource + Pages + RelationManager)
+- Frontend interaktif: Livewire 3.8 (Alpine.js sudah ikut terbundle di Livewire, tidak perlu
+  install terpisah)
+- Auth/permission: spatie/laravel-permission 6.x + bezhansalleh/filament-shield
+- Build tool: Vite 6, Tailwind CSS v4 (lewat @tailwindcss/vite, bukan config file klasik)
+- UI kit: Preline 4.2 (dropdown, carousel, collapse, dll — class `hs-*`)
+- Sudah terpasang di package.json: Swiper 12 (dipakai untuk slider partner/asuransi),
+  GLightbox (dipakai untuk lightbox galeri foto kamar rawat inap yang sudah ada)
+- **Belum ada library viewer 360/panorama apa pun di project ini** — perlu ditambahkan baru
+  (lihat bagian "Pilihan Library" di bawah).
+- Storage file: disk `public` Laravel, semua gambar diakses lewat helper `Storage::url($path)`,
+  konvensi direktori per-fitur (`dokter/foto`, `rawat-inap/thumbnail`, `gambar-rawat-inap`, dst).
+
+TUGAS
+-----
+Tambahkan fitur **preview 360 derajat** untuk kamar rawat inap, supaya pasien bisa
+"berkeliling" lihat kondisi kamar dari berbagai sudut di halaman publik website, bukan cuma
+foto datar 1 sisi seperti sekarang.
+
+SCOPE — INI TERMASUK
+---------------------
+- Skema database baru untuk menyimpan foto 360 (panorama equirectangular) per kamar
+  rawat inap.
+- Field upload foto 360 di Filament admin (humas/admin RS upload file panorama).
+- Komponen viewer 360 interaktif di halaman publik (drag untuk melihat sekeliling, di
+  desktop maupun mobile).
+- Mengikuti SEMUA konvensi codebase yang sudah ada (lihat bagian "Kondisi Saat Ini" &
+  "Konvensi" di bawah) — JANGAN bikin pola baru kalau pola yang sudah ada bisa dipakai.
+
+SCOPE — INI **TIDAK** TERMASUK (jangan dikerjakan)
+----------------------------------------------------
+- Pengambilan foto 360 fisik di lapangan — itu task fotografi (kamera 360/insta360,
+  tripod, dst), dikerjakan tim non-IT secara terpisah, di luar scope coding ini.
+- Untuk development/testing, boleh pakai contoh foto equirectangular 360 gratis dari
+  internet (banyak tersedia royalty-free untuk uji viewer), tidak perlu foto asli kamar.
+
+KONDISI SAAT INI (CODEBASE EXISTING — WAJIB DIBACA DULU)
+----------------------------------------------------------
+Struktur foto kamar rawat inap SAAT INI (sebelum fitur 360 ditambahkan):
+
+1. Model `App\Models\RawatInap` (tabel `rawat_inap`) — kolom `thumbnail` (string, nullable,
+   1 foto cover/sampul kamar). Relasi `gambar()` → HasMany ke `GambarRawatInap` (galeri foto
+   tambahan, foto datar biasa).
+
+2. Model `App\Models\GambarRawatInap` (tabel `gambar_rawat_inap`) — ini tabel GALERI terpisah
+   dari `rawat_inap`, bukan kolom JSON. Tiap baris = 1 foto. Kolom: `rawat_inap_id` (FK,
+   cascade delete), `gambar` (string 255, path foto), `deskripsi` (nullable), `sort_order`,
+   `aktif`, timestamps.
+
+3. Filament:
+   - `app/Filament/Resources/RawatInapResource.php` — field thumbnail:
+     `FileUpload::make('thumbnail')->image()->directory('rawat-inap/thumbnail')->disk('public')`
+   - `app/Filament/Resources/RawatInapResource/RelationManagers/GambarRelationManager.php` —
+     tabel relasi untuk kelola galeri `gambar_rawat_inap`, tiap baris 1
+     `FileUpload::make('gambar')->image()->directory('gambar-rawat-inap')->disk('public')`.
+     (Multi-foto dicapai dengan banyak BARIS di relation manager, bukan multiple() di 1 field.)
+
+4. Frontend publik:
+   - Livewire page: `app/Livewire/Pages/RawatInap.php` — eager-load `gambar` (filter
+     `aktif=true`, order `sort_order`) + `fasilitasRawatInap`, render ke
+     `resources/views/rumah_sakit/pages/rawat-inap.blade.php`.
+   - Komponen kartu: `app/View/Components/RawatInap.php` →
+     `resources/views/components/rawat-inap.blade.php`. Foto utama pakai
+     `<img src="{{ Storage::url($kamarInap->thumbnail) }}">` dibungkus anchor GLightbox
+     (`class="glightbox" data-gallery="rawat-inap-{id}"`). Galeri ditampilkan sebagai carousel
+     thumbnail Preline (`data-hs-carousel`) yang masing-masing juga trigger GLightbox.
+
+5. Tidak ada kolom/field/metadata apa pun terkait "360" atau "panorama" di mana pun saat ini.
+
+KONVENSI YANG WAJIB DIIKUTI
+-----------------------------
+- RS-scoping: resource Filament untuk data milik RS pakai pola `extends BaseRumahSakitResource`
+  (helper `rsFormField()`, `rsTableColumn()`, `rsTableFilter()`, `isSuperAdmin()`,
+  `rumahSakitId()`). Tapi karena foto kamar di-scope lewat `rawat_inap_id` (bukan langsung
+  `rumah_sakit_id`), RelationManager di bawah `RawatInapResource` otomatis ter-scope lewat induk
+  resource-nya — TIDAK perlu menambah kolom `rumah_sakit_id` baru di tabel galeri/360.
+- Storage: selalu disk `public`, akses lewat `Storage::url($path)`, nama direktori deskriptif
+  per fitur (ikuti pola `gambar-rawat-inap` yang sudah ada, bukan nested folder berlebihan).
+- Migration: migrasi baru terpisah untuk tabel baru, JANGAN edit migration lama yang sudah
+  pernah di-`migrate`.
+- Penamaan: Bahasa Indonesia untuk semua nama kolom, label Filament, dan teks UI publik
+  (konsisten dengan seluruh codebase — field lain juga full Bahasa Indonesia: `gambar`,
+  `deskripsi`, `aktif`, dst, bukan `image`/`description`/`active`).
+- Test: kalau menambahkan model baru, ikuti pola `tests/Unit/Models/*Test.php` yang sudah ada
+  (extends `Tests\TestCase`, pakai `RefreshDatabase`, test table name, relasi, RS-scoping, cast).
+
+RENCANA SKEMA (REKOMENDASI, BOLEH DISESUAIKAN)
+-------------------------------------------------
+Mengikuti pola `gambar_rawat_inap` yang sudah ada (tabel galeri terpisah, bukan kolom JSON di
+`rawat_inap`), bikin tabel baru `gambar_rawat_inap_360`:
+
+| Kolom | Tipe | Catatan |
+|---|---|---|
+| `rawat_inap_id` | FK → rawat_inap, cascade delete | |
+| `gambar` | string(255) | Path file foto panorama equirectangular |
+| `deskripsi` | text, nullable | Mis. "Sudut kamar tidur", kalau 1 kamar punya >1 foto 360 |
+| `sort_order` | integer | Urutan tampil kalau lebih dari 1 |
+| `aktif` | boolean, default true | |
+| timestamps | | |
+
+Kenapa tabel terpisah, bukan 1 kolom `gambar_360` di `rawat_inap`: supaya 1 kamar bisa punya
+lebih dari 1 foto 360 (misal kamar mandi terpisah dari kamar tidur), konsisten dengan alasan
+yang sama kenapa galeri foto datar juga dipisah dari `thumbnail`.
+
+PILIHAN LIBRARY VIEWER 360
+-----------------------------
+Belum ada library 360/panorama terpasang di project ini — perlu riset & pilih salah satu,
+lalu install lewat npm (masuk ke pipeline Vite yang sudah ada). Pertimbangkan:
+
+- **Photo Sphere Viewer** (photo-sphere-viewer) — modern, aktif maintained, dukungan mobile
+  touch bagus, API sederhana, lisensi MIT. Kandidat kuat.
+- **Pannellum** — ringan, sudah lama dipakai luas, tapi maintenance lebih lambat.
+- **Marzipano** — dari Google, fitur lengkap (hotspot, multi-scene) tapi lebih berat untuk
+  kebutuhan sederhana "1 kamar = 1-2 foto panorama".
+
+Untuk kebutuhan ini (cuma preview drag-to-look-around per kamar, tanpa hotspot/multi-scene
+kompleks), **Photo Sphere Viewer** kemungkinan paling pas — tapi tetap cek versi terbaru &
+kompatibilitasnya dengan Vite 6 sebelum memutuskan final.
+
+YANG PERLU DIBANGUN (RINGKASAN LANGKAH)
+------------------------------------------
+1. Migrasi tabel `gambar_rawat_inap_360` (atau skema lain kalau ada alasan kuat berbeda).
+2. Model `GambarRawatInap360` (atau nama lain yang konsisten) + relasi di `RawatInap`.
+3. RelationManager baru di `RawatInapResource` (mirip `GambarRelationManager` yang sudah ada)
+   untuk admin upload foto 360 per kamar.
+4. Install & integrasikan library viewer 360 terpilih lewat Vite.
+5. Komponen Blade/Livewire baru untuk render viewer 360 di halaman detail kamar — taruh di
+   `resources/views/components/rawat-inap.blade.php` (kartu yang sudah ada) atau bikin
+   modal/halaman detail terpisah kalau viewer 360 butuh ruang lebih besar dari kartu list.
+6. Pastikan viewer cuma muncul kalau kamar punya minimal 1 foto 360 — kamar yang belum
+   difoto ulang (masih banyak, karena ini task fotografi yang belum selesai) tetap tampil
+   normal pakai thumbnail/galeri datar seperti sekarang, TANPA error atau elemen kosong.
+7. Test model baru sesuai pola test yang sudah ada.
+
+CATATAN PENTING
+-----------------
+- Jangan ubah/hapus struktur `thumbnail` atau `gambar_rawat_inap` (galeri datar) yang sudah
+  ada — foto 360 ini fitur TAMBAHAN, bukan pengganti, karena tidak semua kamar akan langsung
+  punya foto 360 (tergantung progres foto ulang fisik yang masih berjalan terpisah).
+- Kalau ragu soal detail apa pun di luar yang tercantum di sini, cek dulu kode existing yang
+  disebutkan di atas sebagai referensi pola, jangan menebak/membuat konvensi baru.

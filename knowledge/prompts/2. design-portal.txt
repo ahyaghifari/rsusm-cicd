@@ -1,0 +1,27 @@
+buat halaman welcome pada file welcome.blade.php menjadi halaman portal rumah sakit
+
+untuk gaya desain kamu bisa liat pada file DESIGN.md pada folder design/portal,
+
+terapkan halaman portal dari html yang dibuat ke dalam format blade, yang ada pada file portal.html pada folder design/portal,
+
+pecah halaman portal menjadi bagian bagian
+
+header.blade.php
+
+footer.blade.php
+
+layout.blade.php
+
+dan isinya ditaruh ke dalam file view welcome.blade.php di dalam folder resources/views
+
+untuk header, dan footer taruh ke dalam folder resources/views/components
+
+sementara layout taruh ke dalam folder resources/views/layouts/ dengan nama portal-layout.blade.php
+
+untuk data rumah sakit akan menyusul setelah ini, untuk itu ikuti saja konten pada file portal.html
+
+untuk tailwind, gunakan libraru tailwind yang sudah terinstall sebelumnya berbarengan dengan diinstalnya filament,
+
+
+
+pada halaman welcome (resources/views) bisakah kamu tambahkan section PROMO, namun promo ini dapat berbeda di setiap rumah sakit, dan isinya nanti akan ada poster atau gambar gambar yang akan diisi oleh admin, bisakah kamu buatkan section ini, sediakan filter rumah sakit sama seperti bagian search dan filter section, diatasnya

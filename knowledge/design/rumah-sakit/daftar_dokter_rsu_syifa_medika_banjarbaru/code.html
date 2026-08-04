@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Daftar Dokter - RSU Syifa Medika Banjarbaru</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#605a60",
+                    "surface-bright": "#f8f9ff",
+                    "primary-container": "#b649a9",
+                    "on-primary-fixed-variant": "#7e1277",
+                    "surface-container-highest": "#d9e3f4",
+                    "primary-fixed-dim": "#ffabee",
+                    "secondary-fixed-dim": "#7ad9ad",
+                    "surface": "#f8f9ff",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#96f6c8",
+                    "tertiary-fixed": "#e9e0e7",
+                    "tertiary-container": "#797379",
+                    "on-secondary-fixed-variant": "#005137",
+                    "inverse-surface": "#27313e",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed": "#390036",
+                    "surface-container": "#e5eeff",
+                    "on-error-container": "#93000a",
+                    "surface-container-low": "#eef4ff",
+                    "on-tertiary-container": "#fffbff",
+                    "on-surface": "#121c28",
+                    "on-secondary-fixed": "#002114",
+                    "primary-fixed": "#ffd7f3",
+                    "surface-container-high": "#dfe9fa",
+                    "surface-variant": "#d9e3f4",
+                    "on-primary-container": "#fffbff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "error": "#ba1a1a",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-secondary-container": "#00734f",
+                    "on-background": "#121c28",
+                    "inverse-primary": "#ffabee",
+                    "secondary-container": "#96f6c8",
+                    "secondary": "#006c4b",
+                    "background": "#f8f9ff",
+                    "on-tertiary-fixed": "#1e1a1f",
+                    "on-primary": "#ffffff",
+                    "outline": "#84727e",
+                    "tertiary-fixed-dim": "#ccc4cb",
+                    "outline-variant": "#d6c0ce",
+                    "surface-dim": "#d1dbec",
+                    "on-surface-variant": "#52424d",
+                    "surface-tint": "#9b3191",
+                    "primary": "#982e8e",
+                    "on-tertiary-fixed-variant": "#4a454b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-padding-mobile": "64px",
+                    "gutter": "24px",
+                    "base": "8px",
+                    "section-padding-desktop": "120px",
+                    "container-max": "1280px"
+            },
+            "fontFamily": {
+                    "label-sm": ["Plus Jakarta Sans"],
+                    "display-mobile": ["Manrope"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Manrope"],
+                    "display": ["Manrope"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "headline-md": ["Manrope"]
+            },
+            "fontSize": {
+                    "label-sm": ["14px", {"lineHeight": "1.4", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "display-mobile": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "display": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "1.4", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .doctor-card:hover {
+            box-shadow: 0px 12px 30px rgba(152, 46, 142, 0.1);
+            transform: translateY(-4px);
+        }
+        .backdrop-blur-md {
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md overflow-x-hidden">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 flex justify-between items-center px-gutter max-w-container-max mx-auto h-20 bg-surface dark:bg-on-surface shadow-sm">
+<div class="flex items-center gap-2">
+<span class="font-display text-headline-md font-bold text-primary dark:text-primary-fixed">RSU Syifa Medika</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors duration-300" href="#">Home</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors duration-300" href="#">About Us</a>
+<a class="font-body-md text-body-md text-primary dark:text-primary-fixed border-b-2 border-primary font-bold pb-1" href="#">Our Doctors</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors duration-300" href="#">Our Services</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors duration-300" href="#">Contact Us</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-primary text-on-primary rounded-full font-label-sm text-label-sm scale-95 active:scale-90 transition-transform">
+                Online Registration
+            </button>
+<button class="md:hidden p-2 text-on-surface">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</nav>
+<main class="pt-20">
+<!-- Hero & Search Section -->
+<section class="relative bg-surface-container-low py-16 md:py-24 overflow-hidden">
+<div class="absolute top-0 right-0 w-1/3 h-full opacity-10 pointer-events-none">
+<div class="w-full h-full bg-primary-container rounded-full blur-[120px] -mr-32 -mt-32"></div>
+</div>
+<div class="relative max-w-container-max mx-auto px-gutter text-center">
+<h1 class="font-display text-display-mobile md:text-display text-on-surface mb-6">
+                    Temukan <span class="text-primary">Dokter Spesialis</span> Anda
+                </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto mb-12">
+                    Kami menghadirkan tenaga medis profesional yang berkomitmen untuk memberikan pelayanan kesehatan terbaik dengan kehangatan keluarga.
+                </p>
+<!-- Search Bar Container -->
+<div class="bg-surface-container-lowest p-4 md:p-6 rounded-xl shadow-lg max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+<div class="md:col-span-5 text-left">
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2 ml-1">Nama Dokter</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-12 pr-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all outline-none" placeholder="Cari nama dokter..." type="text"/>
+</div>
+</div>
+<div class="md:col-span-4 text-left">
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2 ml-1">Pilihan Spesialis</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">clinical_notes</span>
+<select class="w-full pl-12 pr-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-secondary/20 focus:border-secondary appearance-none transition-all outline-none bg-white">
+<option value="">Semua Spesialis</option>
+<option value="pd">Penyakit Dalam</option>
+<option value="anak">Anak</option>
+<option value="obgyn">Kandungan &amp; Kebidanan</option>
+<option value="bedah">Bedah Umum</option>
+<option value="syaraf">Saraf</option>
+</select>
+</div>
+</div>
+<div class="md:col-span-3">
+<button class="w-full py-3.5 bg-secondary text-on-secondary rounded-lg font-label-sm text-label-sm flex items-center justify-center gap-2 hover:bg-on-secondary-container transition-colors shadow-md">
+<span class="material-symbols-outlined">search</span>
+                            Cari Sekarang
+                        </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Doctor Grid Section -->
+<section class="py-section-padding-desktop px-gutter max-w-container-max mx-auto">
+<div class="flex justify-between items-center mb-12">
+<div class="flex items-center gap-4">
+<div class="h-12 w-2 bg-primary rounded-full"></div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Daftar Tenaga Medis</h2>
+</div>
+<div class="hidden md:flex items-center gap-2 text-on-surface-variant font-label-sm text-label-sm">
+<span>Urutkan:</span>
+<select class="bg-transparent border-none focus:ring-0 cursor-pointer text-primary font-bold">
+<option>Abjad A-Z</option>
+<option>Populer</option>
+</select>
+</div>
+</div>
+<!-- Bento Grid Layout for Doctors -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+<!-- Doctor Card 1 -->
+<div class="doctor-card bg-surface-container-lowest rounded-xl p-4 transition-all duration-300 border border-outline-variant/30 flex flex-col h-full">
+<div class="relative overflow-hidden rounded-lg mb-6 group aspect-square">
+<img alt="dr. Ahmad Syarif" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A professional portrait of a male doctor in his 40s wearing a clean white medical coat and a stethoscope. He has a warm, confident smile, representing the professional warmth of RSU Syifa Medika. The lighting is bright and airy, typical of a modern healthcare facility, with a soft-focus clinic background in shades of light blue and white." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7lvz2NKvO80VHUUAdcJ7NOt7BDAx8cpvoQNLKL0c1CiY6cONtDvAPgh0XOY-z06n5B4Cy293Ffp0rsVZ_p-kTNDAQAKBID-dppVomin99Gi0FtepMcfFR7ivaS88E94p8oxV3RelQKhhZQrIHPUVfjHsZ0k7BCnmoTQCzVW_Z-d5vtZGpondkuReBnbwmtZr4bbk59N9yHK5uUKEmhEQWwDhv-5Tepm0JgUcfSrdfUDc7OsHUHdBW6wY7I8QxWBNJnNR2XR-_EbBH"/>
+<div class="absolute top-3 right-3 bg-secondary/90 text-on-secondary px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md">Tersedia Hari Ini</div>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline-md text-[1.1rem] text-on-surface mb-1">dr. Ahmad Syarif, Sp.PD</h3>
+<p class="font-label-sm text-label-sm text-primary mb-3">Spesialis Penyakit Dalam</p>
+<p class="font-body-md text-on-surface-variant text-sm mb-6 line-clamp-2">
+                            Berpengalaman lebih dari 10 tahun dalam menangani berbagai kasus penyakit dalam...
+                        </p>
+</div>
+<button class="w-full py-3 border-2 border-secondary text-secondary hover:bg-secondary hover:text-on-secondary rounded-lg font-label-sm text-label-sm transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">calendar_month</span>
+                        Lihat Jadwal
+                    </button>
+</div>
+<!-- Doctor Card 2 -->
+<div class="doctor-card bg-surface-container-lowest rounded-xl p-4 transition-all duration-300 border border-outline-variant/30 flex flex-col h-full">
+<div class="relative overflow-hidden rounded-lg mb-6 group aspect-square">
+<img alt="dr. Sarah Anindita" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A friendly female pediatrician smiling warmly, wearing a white coat and a stethoscope with a playful character attachment. She represents the compassionate care of RSU Syifa Medika. The background is a brightly lit, modern medical environment with soft magenta and green color accents that match the corporate brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnYycQP0jWeeKms1STzMlahC2bmoQiaY5O6WKv6DjAJltkRpk5DVtbFPWJxeZcBnuFHFNBWxCyS2kfzNvE-k00GUo7U46dH-usBMnEAHry3riSJMhcRlk4sEQAvK5luIwKSjjXq3Kpfvm89mxyT1QEL9gYFWQESKt6cc4buecoi7xkPZcCmirmKrxLjzZPLQdbXiqVZzGLlzrIw-AP4hJ9iHVRJEHLqf1v8-bexqu5vVI-0718Wue4FzWdtamqryHR5_fnUB-0AaUn"/>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline-md text-[1.1rem] text-on-surface mb-1">dr. Sarah Anindita, Sp.A</h3>
+<p class="font-label-sm text-label-sm text-primary mb-3">Spesialis Anak</p>
+<p class="font-body-md text-on-surface-variant text-sm mb-6 line-clamp-2">
+                            Pakar kesehatan anak dengan pendekatan ramah yang membuat pasien merasa nyaman...
+                        </p>
+</div>
+<button class="w-full py-3 border-2 border-secondary text-secondary hover:bg-secondary hover:text-on-secondary rounded-lg font-label-sm text-label-sm transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">calendar_month</span>
+                        Lihat Jadwal
+                    </button>
+</div>
+<!-- Doctor Card 3 -->
+<div class="doctor-card bg-surface-container-lowest rounded-xl p-4 transition-all duration-300 border border-outline-variant/30 flex flex-col h-full">
+<div class="relative overflow-hidden rounded-lg mb-6 group aspect-square">
+<img alt="dr. Bambang Irawan" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A middle-aged male surgeon in professional scrubs and a white coat, looking approachable and highly skilled. He stands in a clean, high-tech hospital corridor with soft lighting. The visual style is professional and corporate, emphasizing trust and medical excellence in line with RSU Syifa Medika standards." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyUVFmj9QKFgDYrbdfHgWqwvUWcUFVoghIjLzk50_2rItn3S-vSaPajwd8tCywcr9d902meK96FtevV4zZ8343ylXPgU86GEPTqbDyod31wgXVEULVMnzBdLUsMNf0mT3RyMS2Sdiu4SV6Mn8iJp9cvHNfGtvX7NNiq2Z3EdjixfZJBH0cfMrockjUE0C5eeqoixqltk9cm6VG1Sy1BvFzLGZok4ESl5K4VIJep5A0V1HX3EPzDu3cPvYBoXPf8Yos1dwwoHYQAa1X"/>
+<div class="absolute top-3 right-3 bg-secondary/90 text-on-secondary px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md">Senior Consultant</div>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline-md text-[1.1rem] text-on-surface mb-1">dr. Bambang Irawan, Sp.B</h3>
+<p class="font-label-sm text-label-sm text-primary mb-3">Spesialis Bedah Umum</p>
+<p class="font-body-md text-on-surface-variant text-sm mb-6 line-clamp-2">
+                            Ahli bedah senior yang mengedepankan presisi dan keselamatan pasien dalam setiap tindakan...
+                        </p>
+</div>
+<button class="w-full py-3 border-2 border-secondary text-secondary hover:bg-secondary hover:text-on-secondary rounded-lg font-label-sm text-label-sm transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">calendar_month</span>
+                        Lihat Jadwal
+                    </button>
+</div>
+<!-- Doctor Card 4 -->
+<div class="doctor-card bg-surface-container-lowest rounded-xl p-4 transition-all duration-300 border border-outline-variant/30 flex flex-col h-full">
+<div class="relative overflow-hidden rounded-lg mb-6 group aspect-square">
+<img alt="dr. Rina Puspita" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A professional female doctor in a white coat posing with arms crossed, conveying expertise and leadership. She has a serene expression. The setting is a bright, modern hospital room with glass walls and professional decor. The color scheme is dominated by clean whites and deep hospital greens, mirroring a high-end medical clinic aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaR92JSIivbGtHzCMw7WRN0oqu-bTi8V0dZdwyGt-4h5dlRvXn2xuJ1_M-xIr5iWX24y9lWC5NNjCAkP-AuoiKBu79KxDrWiMNQlQnvzm-5Bd_RH6QhvDaSW1SaiwHYdAA4EULRC-H7RRyw8d-gRHqGTvZyr_Z-X0X0ZlYTKvaCphxnrrGRbF9SHbiLHiUHO_uUSKCmH8jvK9eBKCbiJA4piYmF0jk7coC2LH_ykFUnp_qfLmjapMrbz0rvmaROD163-Mm9audspjq"/>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline-md text-[1.1rem] text-on-surface mb-1">dr. Rina Puspita, Sp.OG</h3>
+<p class="font-label-sm text-label-sm text-primary mb-3">Spesialis Kandungan</p>
+<p class="font-body-md text-on-surface-variant text-sm mb-6 line-clamp-2">
+                            Mendampingi perjalanan kehamilan ibu dengan penuh dedikasi dan perhatian medis modern...
+                        </p>
+</div>
+<button class="w-full py-3 border-2 border-secondary text-secondary hover:bg-secondary hover:text-on-secondary rounded-lg font-label-sm text-label-sm transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">calendar_month</span>
+                        Lihat Jadwal
+                    </button>
+</div>
+<!-- Doctor Card 5 -->
+<div class="doctor-card bg-surface-container-lowest rounded-xl p-4 transition-all duration-300 border border-outline-variant/30 flex flex-col h-full">
+<div class="relative overflow-hidden rounded-lg mb-6 group aspect-square">
+<img alt="dr. Hendra Wijaya" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A portrait of a male specialist doctor in a dark stethoscope and white medical attire. He projects calm authority and care. The background is a minimalist medical office with soft natural lighting coming from a large window. The aesthetic is clean, corporate, and trustworthy, utilizing a palette of soft blues and professional whites." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxDrHlQXZEKkLSwZnAFjzV5nmK3xRM0m7bOlHnA-bZK_pMFpBBxgRioG7RRiqkiHtiJPoelS07uhRQBnrLSOOPoTUgy5Kf1LIH54LeuhLbXOY_IexE8rCtlBf09FZKvLHIpC9MyJF1fzPI7G89RQaRWPJ8Gsd0I29zL6yYwmBZf3hXexX9-Lm0JFoiNQNOJLFTrmDqFbePdrwCIzt8XWQx0k0vfxBKgRiDpZQsxQR1fMZG9pzCTx7ngkYAf2HDSmHGiDlrV0IVdJXv"/>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline-md text-[1.1rem] text-on-surface mb-1">dr. Hendra Wijaya, Sp.S</h3>
+<p class="font-label-sm text-label-sm text-primary mb-3">Spesialis Saraf</p>
+<p class="font-body-md text-on-surface-variant text-sm mb-6 line-clamp-2">
+                            Fokus pada diagnosa dan terapi gangguan neurologis dengan teknologi medis terbaru...
+                        </p>
+</div>
+<button class="w-full py-3 border-2 border-secondary text-secondary hover:bg-secondary hover:text-on-secondary rounded-lg font-label-sm text-label-sm transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">calendar_month</span>
+                        Lihat Jadwal
+                    </button>
+</div>
+<!-- Doctor Card 6 -->
+<div class="doctor-card bg-surface-container-lowest rounded-xl p-4 transition-all duration-300 border border-outline-variant/30 flex flex-col h-full">
+<div class="relative overflow-hidden rounded-lg mb-6 group aspect-square">
+<img alt="dr. Maya Lestari" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A professional medical professional, a female doctor, smiling confidently at the camera. She is in a high-end medical clinic with modern lighting and high-quality finishes. The image should feel warm yet highly institutional and professional, matching the brand colors of magenta and dark green subtly in the background details." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJRkuCRg2aWfcwvSKx50UopXGiAgsHOjBFYvUX8UCZW6IZ2YRiZJgaWxrlvVjSEneIG5Ze2oZnB929ykdRAS5aebBXz-JliSdGVpXHYKDDNHHkoT3xHLyMgL55hbIqHayOFeweNtl5C2iZy8238YZyeCJRpv3UlLYD5mKModrEfi9GUKy3UxVLZVTxD9LXzEexzbxROrmFhxGRcn-wVVhtgZePdCITD0_vjDPBdHWlDYmGPE5WzEcsqwHnpUsrjmUYIdHS-4P4o1AI"/>
+<div class="absolute top-3 right-3 bg-secondary/90 text-on-secondary px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md">Tersedia Hari Ini</div>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline-md text-[1.1rem] text-on-surface mb-1">dr. Maya Lestari, Sp.KK</h3>
+<p class="font-label-sm text-label-sm text-primary mb-3">Spesialis Kulit &amp; Kelamin</p>
+<p class="font-body-md text-on-surface-variant text-sm mb-6 line-clamp-2">
+                            Memberikan solusi kesehatan kulit secara menyeluruh dengan pendekatan medis terpercaya...
+                        </p>
+</div>
+<button class="w-full py-3 border-2 border-secondary text-secondary hover:bg-secondary hover:text-on-secondary rounded-lg font-label-sm text-label-sm transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">calendar_month</span>
+                        Lihat Jadwal
+                    </button>
+</div>
+<!-- Doctor Card 7 -->
+<div class="doctor-card bg-surface-container-lowest rounded-xl p-4 transition-all duration-300 border border-outline-variant/30 flex flex-col h-full">
+<div class="relative overflow-hidden rounded-lg mb-6 group aspect-square">
+<img alt="dr. Faisal Rahman" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A male doctor in a white coat looking at a medical chart with a gentle, reassuring expression. He is in a clean, modern consulting room with soft ambient light. The scene emphasizes professional warmth and meticulous care. The color palette is bright and fresh, reflecting a high-quality healthcare brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAED2a7ghYEAimEqBEND7AvgC_FgJPDamu152iJehRgwft6EaZhnL6OTMasaC86ruauJ-ZRwM4wKI-u6umQgrhw_ckYaNfLPrfcmLgalGJaNphRVvLKj_x-MIzEp4HcZFa3Rcl0QS6Iy5qxQ326yhQUrtTuxj1UgUm9om5guxIu6N7BZBwRcuQXQbEM6GJNVBhvrSH08Fc3uQEFk2LP1sgsSf13z0hhZabpURotl2Kfd2bucg6uP9GyB1ddQvUPb2Bm5_ijR6I-hTFe"/>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline-md text-[1.1rem] text-on-surface mb-1">dr. Faisal Rahman, Sp.JP</h3>
+<p class="font-label-sm text-label-sm text-primary mb-3">Spesialis Jantung</p>
+<p class="font-body-md text-on-surface-variant text-sm mb-6 line-clamp-2">
+                            Dedikasi tinggi dalam menangani kesehatan jantung dan pembuluh darah anda...
+                        </p>
+</div>
+<button class="w-full py-3 border-2 border-secondary text-secondary hover:bg-secondary hover:text-on-secondary rounded-lg font-label-sm text-label-sm transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">calendar_month</span>
+                        Lihat Jadwal
+                    </button>
+</div>
+<!-- Doctor Card 8 -->
+<div class="doctor-card bg-surface-container-lowest rounded-xl p-4 transition-all duration-300 border border-outline-variant/30 flex flex-col h-full">
+<div class="relative overflow-hidden rounded-lg mb-6 group aspect-square">
+<img alt="dr. Anita Sari" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Portrait of a professional female medical doctor in her 30s, smiling warmly at the camera. She wears a crisp white coat and a navy blue stethoscope. Behind her is a soft-blurred hospital lobby filled with natural light. The aesthetic is modern, human-centric, and professional, aligning with corporate medical branding." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIdyyPrtA0m5mHCghSjlMiPo84XqaZkfvPjWdCNakyYgB6i9E4mXYzjcbre1WrNdbw-5R8GXGL28LDIB34YEoelRxgfNp_5JX_2Hrh8u5vgIt-Q2Upt6lkv5QUB6OZbWa88PcbaDS8TcaDgWf-2pwe-8obPoumGC_zJJC2PWF_rrMORHszTaWK2nEmmdArJvUS_xMoeQihBrg1KI9VHSVO_3YnwOJkyA9SeUI8aPn99cbyfWa4AFeTvCfWON4X3_2OJH3l0Z7cl_Nb"/>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline-md text-[1.1rem] text-on-surface mb-1">dr. Anita Sari, Sp.M</h3>
+<p class="font-label-sm text-label-sm text-primary mb-3">Spesialis Mata</p>
+<p class="font-body-md text-on-surface-variant text-sm mb-6 line-clamp-2">
+                            Membantu menjaga kejernihan penglihatan anda dengan prosedur medis teruji...
+                        </p>
+</div>
+<button class="w-full py-3 border-2 border-secondary text-secondary hover:bg-secondary hover:text-on-secondary rounded-lg font-label-sm text-label-sm transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">calendar_month</span>
+                        Lihat Jadwal
+                    </button>
+</div>
+</div>
+<!-- Pagination -->
+<div class="mt-20 flex justify-center items-center gap-2">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant border border-outline-variant hover:border-primary hover:text-primary transition-all">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center bg-primary text-on-primary font-bold">1</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-primary-container/10 transition-all">2</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-primary-container/10 transition-all">3</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant border border-outline-variant hover:border-primary hover:text-primary transition-all">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="bg-primary text-on-primary py-16">
+<div class="max-w-container-max mx-auto px-gutter flex flex-col md:flex-row justify-between items-center gap-8">
+<div>
+<h2 class="font-headline-lg text-headline-lg mb-4">Butuh Konsultasi Mendesak?</h2>
+<p class="font-body-lg text-body-lg opacity-90">Layanan Gawat Darurat kami siaga 24 jam untuk melayani Anda.</p>
+</div>
+<div class="flex gap-4">
+<a class="px-8 py-4 bg-on-primary text-primary rounded-full font-bold shadow-lg hover:scale-105 transition-transform flex items-center gap-3" href="tel:0511123456">
+<span class="material-symbols-outlined">phone_in_talk</span>
+                        (0511) 123456
+                    </a>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-section-padding-desktop px-gutter flex flex-col md:flex-row justify-between items-start bg-on-surface dark:bg-surface-container-lowest text-surface-variant">
+<div class="mb-12 md:mb-0 max-w-sm">
+<span class="font-display text-headline-md text-primary-fixed block mb-6">RSU Syifa Medika</span>
+<p class="mb-8 opacity-80 leading-relaxed">
+                Rumah Sakit Umum Syifa Medika Banjarbaru berkomitmen memberikan pelayanan kesehatan bermutu dan terjangkau bagi masyarakat Kalimantan Selatan.
+            </p>
+<div class="flex gap-4">
+<a class="w-10 h-10 rounded-full bg-surface-container-highest/10 flex items-center justify-center hover:bg-primary transition-colors" href="#">
+<img alt="Facebook" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcLu74oAq-rjQ15vB62QunTq2Eyf0sp_0mRpvb3gCtvC_poV404wCMBfbAAKBBROV2FyfNHN9x_HYbMLUTr44m_zLPI7ufG2VC7qGfbZr-edmTnXvPRdqLPrCc-aSJCp8DBI21Z4E3zVhFPd361miqi_sH_DqmeSA77uM2i4HK9zlQeanmk-nvfM_D1iAlnKTzp4kpeOPcjAuBDV-EX0yGEUv5RUmLScEyV8aMGJ6oZGTdAoRYzix9dsg25qZFUkeEnJog6oRcwUb9"/>
+</a>
+<a class="w-10 h-10 rounded-full bg-surface-container-highest/10 flex items-center justify-center hover:bg-primary transition-colors" href="#">
+<img alt="Instagram" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_4Zq_4bUTEd_OJqpNygI_W6ddLP855ohi3iwW1Lf-GvMUAYgZjNGpaazHZuDRSNwC7EUd78JaTFTJu9_U061dHGugx1I546K_rPeSsf4RaPZFVD_1FHV6NMPgM5hufnb65goxWrx-A0DOXY7vdULyXzI1vbyr_AqpmTbYtsxoaobmCHcQ7akDY1YdmoagYGuymFDsNEbplU1ZWfea6zYdrTV-CYMTS1TAdPS0xfgraJrXxTOgaPPJdQ7VV0dEu1LtDEdp9lYrGu5c"/>
+</a>
+<a class="w-10 h-10 rounded-full bg-surface-container-highest/10 flex items-center justify-center hover:bg-primary transition-colors" href="#">
+<img alt="Twitter" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZTMZIORU47ndmspNxGL6XPc7Vb1FzFGDDI0iHayHlUVj8XrcQK5ANICcGlLS-6tlM1DhZ8S94uU3X5pvylPo9v-FUq0645anM-A0SlHcuZOlKJ4Y9fwEJfnD8smTjgyc4_WVqoR90rMdiRLNc1lTsa_lZAb9Mbzl7z0-SbXx-w8UzKd3pZ8N8OM_6vMOy0sG0Lx1IvXTRUUXCCfEFFegPuQazPW2R-ohOqF_fHGZGwi4bmyMN8MWCYbCVr_L8jG3OfLb3cvomOwyJ"/>
+</a>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-16">
+<div>
+<h4 class="text-primary-fixed font-bold mb-6 text-lg">Hubungi Kami</h4>
+<ul class="space-y-4 font-body-md text-body-md">
+<li>
+<a class="text-surface-variant opacity-80 hover:opacity-100 underline transition-opacity" href="tel:0511123456">Ambulance: (0511) 123456</a>
+</li>
+<li>
+<a class="text-surface-variant opacity-80 hover:opacity-100 underline transition-opacity" href="https://wa.me/628123456789">WhatsApp: +628123456789</a>
+</li>
+<li>
+<a class="text-surface-variant opacity-80 hover:opacity-100 underline transition-opacity" href="mailto:info@syifamedika.com">Email: info@syifamedika.com</a>
+</li>
+</ul>
+</div>
+<div>
+<h4 class="text-primary-fixed font-bold mb-6 text-lg">Menu Cepat</h4>
+<ul class="space-y-4 font-body-md text-body-md">
+<li><a class="opacity-80 hover:opacity-100 transition-opacity" href="#">Cek Jadwal Dokter</a></li>
+<li><a class="opacity-80 hover:opacity-100 transition-opacity" href="#">Fasilitas &amp; Layanan</a></li>
+<li><a class="opacity-80 hover:opacity-100 transition-opacity" href="#">Artikel Kesehatan</a></li>
+<li><a class="opacity-80 hover:opacity-100 transition-opacity" href="#">Karir Tenaga Medis</a></li>
+</ul>
+</div>
+</div>
+<div class="w-full mt-20 pt-8 border-t border-surface-variant/10 text-center md:text-left">
+<p class="opacity-60 text-sm">© 2024 RSU Syifa Medika Banjarbaru. All rights reserved.</p>
+</div>
+</footer>
+<script>
+        // Micro-interactions and effects
+        document.querySelectorAll('.doctor-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                const img = card.querySelector('img');
+                img.style.transform = 'scale(1.1)';
+            });
+            card.addEventListener('mouseleave', () => {
+                const img = card.querySelector('img');
+                img.style.transform = 'scale(1)';
+            });
+        });
+
+        // Sticky Navbar shadow on scroll
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 20) {
+                nav.classList.add('shadow-md');
+                nav.classList.add('backdrop-blur-md');
+                nav.style.backgroundColor = 'rgba(248, 249, 255, 0.9)';
+            } else {
+                nav.classList.remove('shadow-md');
+                nav.classList.remove('backdrop-blur-md');
+                nav.style.backgroundColor = 'var(--surface)';
+            }
+        });
+    </script>
+</body></html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>MediGroup Health - Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#d3e4fe",
+                        "primary-fixed-dim": "#ffabee",
+                        "secondary-fixed-dim": "#7ad9ad",
+                        "on-error": "#ffffff",
+                        "tertiary": "#4d51b2",
+                        "surface-variant": "#d3e4fe",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-error-container": "#93000a",
+                        "secondary": "#006c4b",
+                        "surface": "#f8f9ff",
+                        "inverse-surface": "#213145",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary-fixed": "#04006d",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "tertiary-fixed-dim": "#c0c1ff",
+                        "secondary-container": "#96f6c8",
+                        "tertiary-container": "#666acc",
+                        "outline-variant": "#d6c0ce",
+                        "on-tertiary-container": "#fffbff",
+                        "error-container": "#ffdad6",
+                        "inverse-primary": "#ffabee",
+                        "on-primary-fixed-variant": "#7e1277",
+                        "on-secondary-fixed-variant": "#005137",
+                        "on-secondary-container": "#00734f",
+                        "tertiary-fixed": "#e1e0ff",
+                        "secondary-fixed": "#96f6c8",
+                        "surface-container-low": "#eff4ff",
+                        "primary": "#982e8e",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#dce9ff",
+                        "primary-container": "#b649a9",
+                        "on-surface-variant": "#52424d",
+                        "on-primary-fixed": "#390036",
+                        "on-primary-container": "#fffbff",
+                        "background": "#f8f9ff",
+                        "on-primary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-background": "#0b1c30",
+                        "surface-tint": "#9b3191",
+                        "on-tertiary-fixed-variant": "#373a9b",
+                        "outline": "#84727e",
+                        "primary-fixed": "#ffd7f3",
+                        "surface-container": "#e5eeff",
+                        "on-surface": "#0b1c30",
+                        "on-secondary-fixed": "#002114"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "8px",
+                        "margin-desktop": "40px",
+                        "margin-mobile": "16px",
+                        "section-gap": "80px",
+                        "container-max": "1280px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "body-sm": ["Plus Jakarta Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "headline-xl-mobile": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "headline-xl": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "1.25", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-xl-mobile": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-xl": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-sans antialiased min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-surface-container-lowest dark:bg-inverse-surface shadow-sm docked full-width top-0 z-50">
+<div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto py-4">
+<div class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed-dim">
+                MediGroup Health
+            </div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-primary dark:text-primary-fixed-dim border-b-2 border-primary dark:border-primary-fixed-dim pb-1 font-bold text-label-md font-label-md" href="#">Hospitals</a>
+<a class="text-on-surface-variant dark:text-surface-variant font-medium hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200 text-label-md font-label-md" href="#">Specialists</a>
+<a class="text-on-surface-variant dark:text-surface-variant font-medium hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200 text-label-md font-label-md" href="#">Appointments</a>
+<a class="text-on-surface-variant dark:text-surface-variant font-medium hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200 text-label-md font-label-md" href="#">Patient Portal</a>
+<a class="text-on-surface-variant dark:text-surface-variant font-medium hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200 text-label-md font-label-md" href="#">About Us</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="hidden md:block text-primary dark:text-primary-fixed-dim text-label-md font-label-md hover:opacity-80 transition-opacity">Login</button>
+<button class="bg-error text-on-error px-4 py-2 rounded-full text-label-md font-label-md hover:bg-error-container hover:text-on-error-container transition-colors">Emergency</button>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-section-gap">
+<!-- Search & Filter Section -->
+<section class="mb-section-gap text-center max-w-3xl mx-auto">
+
+
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)] border border-outline-variant/30 flex flex-col md:flex-row gap-4 items-end">
+<div class="w-full md:w-2/5 flex flex-col items-start">
+<label class="text-label-md font-label-md text-on-surface-variant mb-2">Location / Facility</label>
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">location_on</span>
+<select class="w-full pl-10 pr-4 py-3 bg-surface border border-outline-variant rounded-lg text-body-md font-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none appearance-none cursor-pointer">
+<option>All Hospitals (Rumah Sakit)</option>
+<option>MediGroup Pusat</option>
+<option>MediGroup Spesialis</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="w-full md:w-2/5 flex flex-col items-start">
+<label class="text-label-md font-label-md text-on-surface-variant mb-2">Specialty</label>
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">stethoscope</span>
+<select class="w-full pl-10 pr-4 py-3 bg-surface border border-outline-variant rounded-lg text-body-md font-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none appearance-none cursor-pointer">
+<option>All Specialists</option>
+<option>Cardiology</option>
+<option>Neurology</option>
+<option>Orthopedics</option>
+<option>Pediatrics</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="w-full md:w-1/5">
+<button class="w-full bg-primary text-on-primary py-3 rounded-lg text-label-md font-label-md hover:bg-primary-container transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">search</span>
+                        Search
+                    </button>
+</div>
+</div>
+</section>
+<!-- Hospital Cards Section -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<!-- Card 1: MediGroup Pusat -->
+<div class="group bg-surface-container-lowest rounded-2xl overflow-hidden shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] transition-all duration-300 hover:-translate-y-1 flex flex-col border border-outline-variant/20">
+<div class="h-64 overflow-hidden relative">
+<img alt="MediGroup Pusat Building" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjWO_N9PV7UM5Br06Jy_x2DW_Xlq4425uNYslUK4czkqgvlQcFjoowPSPSxZBSKTXVTo9BsfUjLR9P0V4zHVlb-Ti5WOAE0EhCbUT6Y4flB9TFXswlm3MwoK5vH32BtqULsIhwWTstp2Or5jS60wnA_Bxr0ts4HwS1XXIrxYlq2J1_YXYsbIEc_IQ9ivUqNgLrDZRlg0Byu5SojqF-zIlXiMFiW_5mPWhACff_tUDln4hAMkUfdlh_5fjKdjkuJY3rFeVQ8Wgq4K0">
+<div class="absolute top-4 left-4 bg-surface-container-lowest/90 backdrop-blur-sm px-3 py-1 rounded-full text-label-md font-label-md text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">local_hospital</span>
+                        Main Facility
+                    </div>
+</div>
+<div class="p-8 flex flex-col flex-grow">
+<h2 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg text-on-surface mb-3">Rumah Sakit MediGroup Pusat</h2>
+<p class="text-body-md font-body-md text-on-surface-variant mb-6 flex-grow">
+                        Our flagship general hospital providing comprehensive care across all major medical disciplines. Equipped with state-of-the-art emergency services, modern surgical suites, and dedicated inpatient wards designed for patient comfort and optimal recovery.
+                    </p>
+<div class="flex items-center gap-4 text-body-sm font-body-sm text-on-surface-variant mb-8 border-t border-outline-variant/30 pt-4">
+<div class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">bed</span> 500+ Beds</div>
+<div class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">emergency</span> 24/7 ER</div>
+</div>
+<button class="w-full sm:w-auto self-start border-2 border-secondary text-secondary hover:bg-secondary hover:text-on-secondary px-6 py-3 rounded-lg text-label-md font-label-md transition-colors flex items-center gap-2">
+                        Lihat Detail
+                        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Card 2: MediGroup Spesialis -->
+<div class="group bg-surface-container-lowest rounded-2xl overflow-hidden shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] transition-all duration-300 hover:-translate-y-1 flex flex-col border border-outline-variant/20">
+<div class="h-64 overflow-hidden relative">
+<img alt="MediGroup Spesialis Interior" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5c_lWqUWGaTZuKxzGCpS-m37oN36UV1e66YJUdiZNEDJnFIfj5pIlaEtIvQc8i_DPbVrwvRHpbeNtPfU9Tkm0BcbwnR_u_MVtLsbr3Ox8BEPrSj8_jftoHud-b-E5-LWUjD8KyQ48rD_MtyQ40rTCA6UEvtVBtyu6pwE2nYhzxucmYHbmrr-1jrQfxIzPnrvLMzefVB_kRBAtfiLh6KUBz3uMMIdL0OBafhpSSnmdyne5V52Vz7mFo4tui1EFCYeD76zbH6eMYoo">
+<div class="absolute top-4 left-4 bg-surface-container-lowest/90 backdrop-blur-sm px-3 py-1 rounded-full text-label-md font-label-md text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">biotech</span>
+                        Specialized Care
+                    </div>
+</div>
+<div class="p-8 flex flex-col flex-grow">
+<h2 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg text-on-surface mb-3">Rumah Sakit MediGroup Spesialis</h2>
+<p class="text-body-md font-body-md text-on-surface-variant mb-6 flex-grow">
+                        A dedicated center of excellence for advanced medical treatments and complex procedures. Featuring renowned specialists in oncology, cardiology, and neurology, utilizing cutting-edge diagnostic technology in a serene, healing environment.
+                    </p>
+<div class="flex items-center gap-4 text-body-sm font-body-sm text-on-surface-variant mb-8 border-t border-outline-variant/30 pt-4">
+<div class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">science</span> Advanced Labs</div>
+<div class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">psychology</span> Expert Teams</div>
+</div>
+<button class="w-full sm:w-auto self-start border-2 border-secondary text-secondary hover:bg-secondary hover:text-on-secondary px-6 py-3 rounded-lg text-label-md font-label-md transition-colors flex items-center gap-2">
+                        Kunjungi Situs
+                        <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low dark:bg-inverse-surface border-t border-outline-variant full-width mt-auto">
+<div class="w-full px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto py-12 flex flex-col md:flex-row justify-between items-center gap-gutter">
+<div class="text-headline-sm font-headline-sm font-bold text-primary dark:text-primary-fixed-dim">
+                MediGroup Health
+            </div>
+<div class="flex flex-wrap justify-center gap-6 text-body-sm font-body-sm text-on-surface-variant dark:text-surface-variant">
+<a class="hover:text-primary dark:hover:text-primary-fixed-dim underline transition-all focus:ring-2 focus:ring-primary dark:focus:ring-primary-fixed-dim outline-none rounded" href="#">Privacy Policy</a>
+<a class="hover:text-primary dark:hover:text-primary-fixed-dim underline transition-all focus:ring-2 focus:ring-primary dark:focus:ring-primary-fixed-dim outline-none rounded" href="#">Terms of Service</a>
+<a class="hover:text-primary dark:hover:text-primary-fixed-dim underline transition-all focus:ring-2 focus:ring-primary dark:focus:ring-primary-fixed-dim outline-none rounded" href="#">Accessibility</a>
+<a class="hover:text-primary dark:hover:text-primary-fixed-dim underline transition-all focus:ring-2 focus:ring-primary dark:focus:ring-primary-fixed-dim outline-none rounded" href="#">Contact Us</a>
+<a class="hover:text-primary dark:hover:text-primary-fixed-dim underline transition-all focus:ring-2 focus:ring-primary dark:focus:ring-primary-fixed-dim outline-none rounded" href="#">Sitemap</a>
+</div>
+<div class="text-body-sm font-body-sm text-on-surface-variant dark:text-surface-variant text-center md:text-right">
+                © 2024 MediGroup Healthcare Systems. All rights reserved.
+            </div>
+</div>
+</footer>
+
+
+</body></html>

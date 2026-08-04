@@ -1,0 +1,34 @@
+buatkan aku file issue.md rumah-sakit.md di dalam folder issues untuk planning data Rumah Sakit yang nantinya akan dimplementasikan oleh programmer atau AI Model yang murah atau gratis :
+
+Buatkan aku tabel dari migrasi rumah_sakit dengan kolom sebagai berikut : 
+
+id integer auto increment primary key
+nama varchar 100 unique
+slug varchar 100 unique
+lokasi varchar 100
+alamat text
+no_emergency varchar 20
+no_hotline varchar 20
+gambar varchar 255
+link_pendaftaran_online TEXT nullable
+lokasi_google_map LONGTEXT
+logo varchar 255
+aktif boolean default true
+timestamp (created_at, updated_at)
+
+buatkan model nya dengan nama RumahSakit dan allowed fields semua kolom kecuali kolom id
+
+selanjutnya buatkan Resource filament untuk Resource dari model yang sudah dibuat nama RumahSakitResource dengan flag --generate, untuk setiap setelah berhasil menyimpan (create, atau update) kembali ke halaman daftar rumah sakit
+
+kolom yang akan menerima upload filenya yaitu gambar dan logo dalam bentuk gambar
+
+untuk routemodelbinding atur model berdasarkan slug bukan berdasarkan id
+
+buatkan juga seeder dengan nama RumahSakitSeeder dengan data sebagai berikut : 
+
+1. Nama : RSU Syifa Medika Banjarbaru, slug : banjarbaru, lokasi : Banjarbaru, alamat : Jl. RO Ulin No.93, Loktabat Selatan, Kec. Banjarbaru Selatan, Kota Banjar Baru, Kalimantan Selatan 70712, no_emergency : 0811 504 2424, no_hotline : 0511 5910 889,
+
+2. Nama : RSU Syifa Medika Barabai, slug : barabai, lokasi : Barabai, alamat :Jl Lingkar Walangsi Kapar KM. 5.2, Barabai, Kalimantan Selatan, Indonesia, no_emergency : -, no_hotline : -,
+
+untuk gambar dan logo gunakan gambar/foto yang ada di folder public/assets/gambar dan public/assets/logo, tapi gambarnya belum ada, jadi kosongkan dulu saat insert data dari seeder
+

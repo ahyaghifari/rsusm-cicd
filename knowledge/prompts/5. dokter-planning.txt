@@ -1,0 +1,25 @@
+buatkan aku file issue dokter.md di dalam folder issues untuk planning data Dokter yang nantinya akan dimplementasikan oleh programmer atau AI Model yang murah atau gratis :
+
+Buatkan aku tabel dari migrasi dokter dengan kolom sebagai berikut : 
+
+id integer auto increment primary key
+nama varchar 255
+slug text unique
+foto varchar 255 nullable
+deskripsi TEXT nullable
+aktif boolean default true
+pendidikan TEXT nullable
+pelatihan TEXT nullable
+rumah_sakit_id integer foreign key ke tabel rumah_sakit
+spesialis_id integer foreign key ke tabel spesialis
+timestamp (created_at, updated_at)
+
+buatkan model nya dengan nama Dokter dan allowed fields semua kolom kecuali kolom id
+
+selanjutnya buatkan Resource filament untuk Resource dari model yang sudah dibuat nama DokterResource dengan flag --generate, dan ketika selesai create atau update kembali ke halaman index nya, untuk field pendidikan dan pelatihan gunakan Rich Text Editor dari filament
+
+kolom yang akan menerima upload filenya yaitu foto
+
+untuk routemodelbinding atur model berdasarkan slug bukan berdasarkan id
+
+buatkan juga seeder dengan nama DokterSeeder dengan data nama rumah sakit, dokter, gambar dan spesialis sesuai dengan rumah sakit dan spesialis yang sudah ada, berikut data sebagai berikut, gunakan faker bahasa indonesia, untuk gambar bisa ambil online dulu sebagai seeder sementara, di tabel rumah sakit terdapat 2 data, maka dari itu untuk seeder rumah sakit pilih antara id 1 atau 2 saja, untuk spesialis pilih id yang sesuai dengan rumah sakitnya, untuk nama tabel rumah sakit adalah rumah_sakit dan tabel spesialis nama tabelnya adalah spesialis, buatkan slugnya otomatis, buatkan 5 dokter untuk masing masing rumah sakit

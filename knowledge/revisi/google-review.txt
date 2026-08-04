@@ -1,0 +1,264 @@
+# Implementasi Google Review pada Website RS Syifa Medika
+
+## Tujuan
+
+Menambahkan fitur Google Review pada website RS Syifa Medika untuk:
+
+1. Menampilkan rating Google Business Profile setiap cabang.
+2. Menampilkan jumlah ulasan Google.
+3. Mengarahkan pengguna untuk memberikan ulasan langsung ke Google Review.
+4. Meningkatkan kepercayaan pengunjung melalui social proof.
+5. Meningkatkan jumlah ulasan pada Google Business Profile masing-masing cabang.
+
+---
+
+# Ruang Lingkup
+
+Implementasi ini hanya mencakup integrasi resmi Google Review tanpa membuat sistem review internal.
+
+Review tetap dibuat dan disimpan langsung di Google oleh pengguna melalui akun Google mereka.
+
+Website hanya berfungsi sebagai media informasi dan pengarah menuju halaman review Google.
+
+---
+
+# Fitur yang Akan Dibangun
+
+## 1. Menampilkan Rating Google
+
+Contoh tampilan:
+
+⭐ 4.8
+
+Berdasarkan 1.247 ulasan Google
+
+Data diambil dari Google Places API dan disimpan ke database lokal.
+
+---
+
+## 2. Tombol Lihat Semua Review
+
+Contoh:
+
+[Lihat Semua Review]
+
+Saat diklik pengguna akan diarahkan ke halaman Google Maps atau Google Business Profile cabang terkait.
+
+---
+
+## 3. Tombol Tulis Review
+
+Contoh:
+
+[Tulis Review]
+
+Saat diklik pengguna akan diarahkan ke halaman review resmi Google menggunakan URL:
+
+https://search.google.com/local/writereview?placeid={PLACE_ID}
+
+Pengguna kemudian dapat:
+
+* Login ke akun Google
+* Memberikan rating
+* Menulis ulasan
+* Mengirim ulasan langsung ke Google
+
+---
+
+# Arsitektur Sistem
+
+Google Places API
+↓
+Laravel Scheduler
+↓
+Database Lokal
+↓
+Frontend Website
+
+Website tidak melakukan request langsung ke Google setiap kali halaman dibuka.
+
+Website hanya membaca data yang telah tersimpan di database lokal.
+
+Pendekatan ini bertujuan untuk:
+
+* Mengurangi penggunaan kuota API
+* Mempercepat loading website
+* Meningkatkan stabilitas sistem
+
+---
+
+# Struktur Database
+
+Tabel: branches
+
+Kolom tambahan:
+
+google_place_id
+google_review_url
+google_rating
+google_review_count
+google_last_sync_at
+
+Contoh:
+
+id : 1
+
+name : RS Syifa Medika Banjarbaru
+
+google_place_id : ChIJxxxxxxxxxxxxxxxx
+
+google_review_url : https://search.google.com/local/writereview?placeid=ChIJxxxxxxxxxxxxxxxx
+
+google_rating : 4.8
+
+google_review_count : 1247
+
+google_last_sync_at : 2026-06-19 02:00:00
+
+---
+
+# Sinkronisasi Data
+
+Sinkronisasi dilakukan menggunakan Laravel Scheduler.
+
+Frekuensi:
+
+1 kali setiap hari.
+
+Waktu rekomendasi:
+
+02:00 dini hari.
+
+Proses:
+
+1. Scheduler berjalan.
+2. Mengambil data Google Places API.
+3. Mengupdate rating.
+4. Mengupdate jumlah ulasan.
+5. Menyimpan waktu sinkronisasi terakhir.
+
+---
+
+# Data yang Diambil dari Google
+
+Data minimum yang diperlukan:
+
+* Nama tempat
+* Rating
+* Jumlah ulasan
+
+Contoh hasil:
+
+Nama Tempat:
+RS Syifa Medika Banjarbaru
+
+Rating:
+4.8
+
+Jumlah Ulasan:
+1247
+
+---
+
+# Alur Pengguna
+
+## Melihat Rating
+
+Pengguna membuka halaman website.
+
+↓
+
+Website menampilkan rating Google yang tersimpan di database.
+
+↓
+
+Pengguna melihat reputasi cabang rumah sakit.
+
+---
+
+## Menulis Review
+
+Pengguna menekan tombol "Tulis Review".
+
+↓
+
+Website membuka halaman review Google.
+
+↓
+
+Pengguna login ke akun Google.
+
+↓
+
+Pengguna memberikan rating dan ulasan.
+
+↓
+
+Review tersimpan langsung di Google Business Profile.
+
+---
+
+# Tampilan yang Direkomendasikan
+
+Google Review
+
+⭐ 4.8
+
+Berdasarkan 1.247 ulasan Google
+
+[Lihat Semua Review]
+
+[Tulis Review]
+
+---
+
+# Keunggulan Pendekatan Ini
+
+1. Sesuai kebijakan Google.
+2. Tidak memerlukan sistem moderasi internal.
+3. Review tersimpan langsung pada Google Business Profile.
+4. Meningkatkan kredibilitas rumah sakit.
+5. Membantu SEO lokal Google Maps.
+6. Biaya API sangat rendah karena sinkronisasi hanya dilakukan sekali per hari.
+7. Dapat diterapkan pada banyak cabang dengan struktur yang sama.
+
+---
+
+# Batasan Sistem
+
+1. Website tidak dapat membuat review langsung ke Google.
+2. Website tidak dapat mengirim review atas nama pengguna.
+3. Pengguna wajib menggunakan akun Google untuk memberikan review.
+4. Review hanya dapat dibuat melalui halaman resmi Google Review.
+
+Hal ini merupakan batasan resmi dari Google dan tidak dapat diubah melalui API.
+
+---
+
+# Tahap Implementasi
+
+Tahap 1
+
+* Menambahkan kolom Google pada tabel cabang.
+* Menyimpan Place ID setiap cabang.
+
+Tahap 2
+
+* Integrasi Google Places API.
+* Pembuatan service sinkronisasi rating.
+
+Tahap 3
+
+* Pembuatan Laravel Scheduler harian.
+
+Tahap 4
+
+* Pembuatan komponen frontend Google Review.
+
+Tahap 5
+
+* Pengujian pada seluruh cabang.
+
+Tahap 6
+
+* Deploy ke production.

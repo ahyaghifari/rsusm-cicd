@@ -1,0 +1,300 @@
+# CACHE LAYER ARCHITECTURE
+
+Chatbot Rumah Sakit Multi Cabang
+
+==================================================
+
+1. FAQ CACHE
+   ==================================================
+
+TUJUAN:
+Menyimpan jawaban FAQ yang sering ditanyakan agar tidak perlu:
+
+* query database
+* memanggil AI
+* memproses ulang response
+
+CONTOH DATA:
+
+* jam besuk
+* BPJS
+* alamat RS
+* hotline
+* IGD 24 jam
+* parkir
+* cara pendaftaran
+
+FLOW:
+User Message
+↓
+FAQ Detection
+↓
+Redis GET
+↓
+Jika HIT → langsung jawab
+↓
+Jika MISS → fallback ke flow lain
+
+KEY FORMAT:
+chatbot:{branch}:faq:{topic}
+
+CONTOH:
+chatbot:banjarbaru:faq:bpjs
+chatbot:samarinda:faq:jam_besuk
+
+TTL REKOMENDASI:
+24 jam – 7 hari
+
+CATATAN:
+
+* Jangan gunakan AI untuk FAQ sederhana
+* Gunakan keyword matching / synonym
+* Cocok untuk response tercepat
+
+==================================================
+2. STRUCTURED QUERY CACHE
+=========================
+
+TUJUAN:
+Menyimpan hasil query database yang sering digunakan.
+
+CONTOH DATA:
+
+* jadwal dokter
+* daftar spesialis
+* layanan rumah sakit
+* rawat inap
+* daftar poli
+* kontak rumah sakit
+
+FLOW:
+User Message
+↓
+Intent Detection
+↓
+Generate Cache Key
+↓
+Redis GET
+
+Jika HIT:
+→ return response
+
+Jika MISS:
+→ query MySQL
+→ save cache
+→ return response
+
+KEY FORMAT:
+chatbot:{branch}:{feature}:{identifier}
+
+CONTOH:
+chatbot:banjarbaru:jadwal_dokter:anak_senin
+chatbot:samarinda:spesialis
+chatbot:aulia:layanan_unggulan
+
+TTL REKOMENDASI:
+
+* jadwal dokter → 10–30 menit
+* spesialis → 1 hari
+* layanan → 1 hari
+* profil → 7 hari
+
+CATATAN:
+
+* Gunakan query template
+* Hindari AI generate SQL untuk flow umum
+* Sangat penting untuk mengurangi load database
+
+==================================================
+3. AI RESPONSE CACHE
+====================
+
+TUJUAN:
+Menyimpan hasil jawaban AI untuk pertanyaan yang pernah dijawab sebelumnya.
+
+CONTOH:
+
+* "apa itu medical checkup"
+* "apa perbedaan VIP dan VVIP"
+* "apa itu MCU"
+
+FLOW:
+User Message
+↓
+Normalize Message
+↓
+Generate Hash / Cache Key
+↓
+Redis GET
+
+Jika HIT:
+→ return jawaban AI sebelumnya
+
+Jika MISS:
+→ panggil AI
+→ simpan response
+→ return
+
+KEY FORMAT:
+chatbot:ai:{hash}
+
+CONTOH:
+chatbot:ai:a82jd92j
+chatbot:ai:medical_checkup
+
+TTL REKOMENDASI:
+1 – 7 hari
+
+CATATAN:
+
+* Jangan cache data pribadi
+* Jangan cache data pasien
+* Sangat efektif mengurangi token AI
+
+==================================================
+4. GOOGLE DOCS CACHE
+====================
+
+TUJUAN:
+Menyimpan hasil sinkronisasi Google Docs agar chatbot tidak membaca Docs secara realtime.
+
+CONTOH DATA:
+
+* profil perusahaan
+* sejarah rumah sakit
+* SOP layanan
+* deskripsi layanan
+* artikel edukasi
+
+FLOW:
+Google Docs
+↓
+Scheduled Sync
+↓
+Chunking
+↓
+Save to Redis / MySQL
+↓
+AI Retrieval
+
+KEY FORMAT:
+chatbot:docs:{doc_id}:{chunk}
+
+CONTOH:
+chatbot:docs:bpjs_policy:1
+chatbot:docs:profil_rs:3
+
+TTL REKOMENDASI:
+15 menit – 1 jam
+
+CATATAN:
+
+* Jangan retrieval langsung ke Google Docs setiap request
+* Google Docs sebaiknya menjadi CMS knowledge
+* Retrieval menggunakan local cache/chunk
+
+==================================================
+5. SESSION / CONVERSATION CACHE
+===============================
+
+TUJUAN:
+Menyimpan context percakapan ringan agar tidak perlu mengirim full history ke AI.
+
+CONTOH DATA:
+
+* cabang terakhir
+* topik terakhir
+* spesialis terakhir
+* intent terakhir
+
+FLOW:
+User Message
+↓
+Load Session
+↓
+Ambil Context Ringan
+↓
+Lanjutkan Conversation
+
+KEY FORMAT:
+session:{user_id}
+
+CONTOH:
+session:628123456789
+session:web_user_001
+
+CONTOH VALUE:
+{
+"branch": "banjarbaru",
+"last_topic": "jadwal_dokter",
+"spesialis": "anak"
+}
+
+TTL REKOMENDASI:
+30 menit – 2 jam
+
+CATATAN:
+
+* Jangan simpan full chat history
+* Simpan hanya context penting
+* Sangat membantu penghematan token AI
+
+==================================================
+REKOMENDASI STACK
+=================
+
+CACHE ENGINE:
+
+* Redis
+
+DATABASE:
+
+* MySQL
+
+ORCHESTRATION:
+
+* n8n
+
+AI:
+
+* Gemini
+
+==================================================
+PRINSIP PENTING
+===============
+
+1. CACHE SEBELUM AI
+   Selalu cek cache sebelum memanggil AI.
+
+2. AI HANYA FALLBACK
+   AI bukan jalur utama.
+
+3. NORMALIZATION PENTING
+   Normalize text sebelum generate cache key.
+
+4. MULTI CABANG WAJIB DIPISAH
+   Selalu gunakan branch pada cache key.
+
+5. CACHE BUKAN SOURCE OF TRUTH
+   MySQL tetap sumber data utama.
+
+6. INVALIDATION HARUS JELAS
+   Saat data berubah, cache terkait harus dihapus.
+
+==================================================
+TARGET AKHIR
+============
+
+Mayoritas request:
+
+* dijawab cache
+* atau query template
+
+Bukan AI reasoning penuh.
+
+Tujuan:
+
+* response cepat
+* hemat token
+* scalable multi rumah sakit
+* mudah dirawat tim internal

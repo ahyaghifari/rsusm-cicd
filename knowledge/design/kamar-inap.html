@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+
+<html class="light" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Halaman Rawat Inap - RSU Syifa Medika</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .hero-gradient {
+            background: radial-gradient(circle at top right, #ffd7f3 0%, transparent 40%),
+                        radial-gradient(circle at bottom left, #e1e0ff 0%, transparent 40%);
+        }
+        .floating-effect {
+            animation: floating 6s ease-in-out infinite;
+        }
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#e1e0ff",
+                    "primary": "#982e8e",
+                    "on-surface-variant": "#52424d",
+                    "on-tertiary-container": "#fffbff",
+                    "background": "#faf8ff",
+                    "on-tertiary-fixed": "#07006c",
+                    "outline-variant": "#d6c0ce",
+                    "on-secondary": "#ffffff",
+                    "tertiary-container": "#6063ee",
+                    "surface-container": "#eaedff",
+                    "inverse-on-surface": "#eef0ff",
+                    "surface-container-lowest": "#ffffff",
+                    "outline": "#84727e",
+                    "on-secondary-container": "#00734f",
+                    "on-primary-fixed-variant": "#7e1277",
+                    "primary-fixed-dim": "#ffabee",
+                    "on-error-container": "#93000a",
+                    "secondary-container": "#96f6c8",
+                    "primary-fixed": "#ffd7f3",
+                    "surface-container-high": "#e2e7ff",
+                    "surface": "#faf8ff",
+                    "secondary": "#006c4b",
+                    "error": "#ba1a1a",
+                    "inverse-surface": "#283044",
+                    "on-secondary-fixed-variant": "#005137",
+                    "surface-container-low": "#f2f3ff",
+                    "on-tertiary": "#ffffff",
+                    "surface-bright": "#faf8ff",
+                    "on-primary-fixed": "#390036",
+                    "on-primary-container": "#fffbff",
+                    "surface-tint": "#9b3191",
+                    "inverse-primary": "#ffabee",
+                    "on-surface": "#131b2e",
+                    "tertiary": "#4648d4",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed": "#96f6c8",
+                    "on-secondary-fixed": "#002114",
+                    "on-primary": "#ffffff",
+                    "surface-dim": "#d2d9f4",
+                    "secondary-fixed-dim": "#7ad9ad",
+                    "primary-container": "#b649a9"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "4px",
+                    "container-max": "1280px",
+                    "md": "16px",
+                    "xl": "48px",
+                    "lg": "24px",
+                    "xs": "4px",
+                    "gutter": "24px",
+                    "sm": "8px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Manrope"],
+                    "body-lg": ["Inter"],
+                    "display-lg": ["Manrope"],
+                    "headline-lg": ["Manrope"],
+                    "label-sm": ["JetBrains Mono"],
+                    "button": ["Inter"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary/20">
+<!-- Top Navigation Bar -->
+<nav class="bg-surface/80 backdrop-blur-xl docked full-width top-0 sticky z-50 border-b border-outline-variant/30 shadow-[0px_10px_30px_rgba(0,0,0,0.04)]">
+<div class="flex justify-between items-center max-w-container-max mx-auto px-lg py-md w-full">
+<div class="font-headline-md text-headline-md font-bold text-primary tracking-tight">
+                RSU Syifa Medika
+            </div>
+<div class="hidden md:flex items-center gap-lg">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Medical Services</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Find a Doctor</a>
+<a class="text-primary font-bold border-b-2 border-primary pb-1 font-body-md text-body-md" href="#">Patient Portal</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Health Packages</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Contact</a>
+</div>
+<div class="flex items-center gap-md">
+<button class="hidden lg:block text-secondary font-button text-button px-lg py-sm border border-secondary rounded-xl hover:bg-secondary/5 transition-all">Emergency</button>
+<button class="bg-primary text-on-primary font-button text-button px-lg py-sm rounded-xl hover:shadow-[0px_4px_16px_rgba(152,46,142,0.3)] hover:-translate-y-1 transition-all active:scale-95">Register Now</button>
+</div>
+</div>
+</nav>
+<!-- Hero Section -->
+<header class="relative overflow-hidden hero-gradient pt-xl pb-24">
+<div class="max-w-container-max mx-auto px-lg flex flex-col md:flex-row items-center gap-xl relative z-10">
+<div class="flex-1 text-center md:text-left">
+<div class="inline-flex items-center gap-sm bg-primary/10 text-primary px-md py-xs rounded-full mb-lg">
+<span class="material-symbols-outlined text-[18px]">bed</span>
+<span class="font-label-sm text-label-sm">LAYANAN RAWAT INAP</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-background mb-md leading-tight">
+                    Kenyamanan Anda, <br/><span class="text-primary">Prioritas Utama Kami.</span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl mb-xl">
+                    Kami menghadirkan standar pelayanan medis tinggi dengan sentuhan kehangatan keluarga, memastikan proses pemulihan Anda berjalan dengan tenang dan optimal.
+                </p>
+<div class="flex flex-wrap justify-center md:justify-start gap-md">
+<button class="bg-primary text-on-primary px-xl py-md rounded-xl font-button text-button flex items-center gap-sm group">
+                        Cek Ketersediaan Kamar
+                        <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<button class="bg-surface/50 backdrop-blur-md border border-outline-variant text-on-surface px-xl py-md rounded-xl font-button text-button flex items-center gap-sm hover:bg-white transition-all">
+                        Konsultasi Fasilitas
+                    </button>
+</div>
+</div>
+<div class="flex-1 relative w-full max-w-[500px] md:max-w-none">
+<div class="relative z-10 rounded-3xl overflow-hidden shadow-2xl floating-effect border-4 border-white/50">
+<img alt="Luxury Hospital Suite" class="w-full h-[400px] object-cover" data-alt="A modern and luxurious VIP hospital room at RSU Syifa Medika featuring a soft, ergonomic bed, warm ambient lighting from sleek wall fixtures, and a large window overlooking a serene garden. The interior design uses a soft palette of whites, muted orchids, and emerald greens to create a calming, high-end medical environment. The room is spacious, clean, and feels more like a premium hotel suite than a clinical facility." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFzUeIGALczr6D8a4x5Ea_0Q7ayG64827fipJWPMf82PC8fXXWXZUxDigwRBYYSB6tJ2sYTvnZFReHBmvg0rRJDwefVWHV4pM-ssq9hC496lUQ2OEG7zfac9IYccZ8Jzn396KUGx0xkAjxwJ3Nbk7pbuOZx8S5lDVjJTyTNZNSJwN51kQNlMA5j3cac8vA_U_8ncv45bD51hF0Igum5nkhV4SO_3RrD49Sia-eYldQh-JatGgZGWPY5hKxqCUXmG0xn4Tyxx6xIYO_"/>
+</div>
+<!-- Glassmorphic Stats Overlay -->
+<div class="absolute -bottom-6 -left-6 z-20 glass-card p-lg rounded-2xl shadow-xl max-w-[200px]">
+<p class="font-headline-md text-headline-md text-primary font-extrabold">24/7</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Medical Care</p>
+</div>
+<div class="absolute -top-6 -right-6 z-20 glass-card p-lg rounded-2xl shadow-xl max-w-[200px]">
+<div class="flex items-center gap-xs text-secondary mb-xs">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm font-bold">Akreditasi</span>
+</div>
+<p class="font-body-md text-body-md font-bold text-on-surface">Paripurna KARS</p>
+</div>
+</div>
+</div>
+</header>
+<!-- Room Selection Grid -->
+<main class="max-w-container-max mx-auto px-lg py-xl">
+<div class="text-center mb-xl">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-xs">Pilihan Kamar Rawat Inap</h2>
+<div class="w-24 h-1 bg-primary/20 mx-auto rounded-full overflow-hidden">
+<div class="w-12 h-full bg-primary"></div>
+</div>
+</div>
+<!-- Room Grid: Asymmetrical/Alternating Layout -->
+<div class="space-y-xl">
+<!-- VVIP / VIP - Highlight -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-lg items-center">
+<div class="lg:col-span-7 rounded-3xl overflow-hidden h-[450px] shadow-xl relative group">
+<img alt="VVIP Room" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="A spacious VVIP hospital suite at RSU Syifa Medika with high ceilings and large panoramic windows that fill the room with soft natural light. The room features a private lounge area with leather seating, a dedicated dining table, and advanced medical monitoring integrated discreetly into the minimalist decor. The color scheme is a sophisticated blend of pristine white, soft orchids, and polished wood textures, creating an atmosphere of ultimate comfort and elite care." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAf3ZS37_S7eDYyic6KOcMxZZ7SMDB6gg9RvZEf2HmSbheSK_NVNsrHgyuGlzGLbUsx6ZAFuLEDNnLF9IsSd1GgmXRghHy-eOwAoogefEMwpw1JF6JI3axdDysW2-V4T9grgtR4WpK_keVETWHhWuS9h-ZOBcPuaWRxF-dQE6pDvCilHxEHrspjdJgj9CXt8SEkUqY8DB4lXceeFxY9WpSjLeW0cfGPPQuDxUJWi0oS2JyiCink6XMwCBl38AYycin6RbvRzf9fpuxC"/>
+<div class="absolute top-md right-md glass-card px-md py-sm rounded-full text-primary font-bold">
+                        Best Experience
+                    </div>
+</div>
+<div class="lg:col-span-5 lg:pl-lg">
+<div class="font-label-sm text-label-sm text-primary tracking-widest mb-xs">EXCLUSIVE CARE</div>
+<h3 class="font-headline-lg text-headline-lg mb-md">VVIP &amp; VIP Suite</h3>
+<p class="text-on-surface-variant font-body-md mb-lg leading-relaxed">
+                        Nikmati privasi maksimal dengan fasilitas setara hotel berbintang. Dilengkapi dengan ruang tunggu keluarga yang nyaman, pantry pribadi, dan akses layanan concierge 24 jam.
+                    </p>
+<div class="grid grid-cols-2 gap-md mb-xl">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary">family_restroom</span>
+<span class="font-body-md">Sofa Bed Keluarga</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary">coffee_maker</span>
+<span class="font-body-md">Kitchenette</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary">tv</span>
+<span class="font-body-md">Smart TV 50"</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary">ac_unit</span>
+<span class="font-body-md">Individual AC Control</span>
+</div>
+</div>
+<div class="flex items-center justify-between border-t border-outline-variant/30 pt-lg">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Mulai Dari</span>
+<div class="font-headline-md text-headline-md font-extrabold text-primary">Rp 1.850.000 <span class="text-body-md font-normal text-on-surface-variant">/hari</span></div>
+</div>
+<button class="bg-secondary text-on-secondary px-lg py-sm rounded-xl font-button text-button hover:bg-on-secondary-fixed-variant transition-colors">Detail Kamar</button>
+</div>
+</div>
+</section>
+<!-- Class 1 & 2 - Grid Side by Side -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+<!-- Class 1 -->
+<article class="glass-card rounded-[32px] overflow-hidden flex flex-col group hover:shadow-2xl transition-all duration-500 border-none shadow-[0px_10px_40px_rgba(0,0,0,0.02)]">
+<div class="h-64 overflow-hidden relative">
+<img alt="Kelas 1" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A clean and bright Class 1 inpatient room at RSU Syifa Medika featuring a single patient bed, a bedside cabinet, and a comfortable armchair for visitors. The design is modern and efficient, utilizing soft green accents and neutral tones. Large windows provide ample natural light, and the overall mood is clinical yet reassuringly professional and welcoming." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRSEcvpZhv8IDy0jJxg-oJPZxK7BE7sGvYy6jrKfv3gfX_9rg-hoEpAFOYXAq2Xy_KvxZe8Q5TYnaqmZPbYbpQ0juVY309qSYcFBzAOHecsWro4Mm35j1MjavqPEMLotyTnaKOAuivcfoPP1v4o7g02gewbTtXZPqeCY7csaqv7WLVRjtuqFYuXuoTar2xiPWi9pwKB-BEPRj9mbeFjinDyrjDVGAZMbUedRUGPQIsTUyFqZKc9Tzci9lh6HHWnUP_-w2cwXAGqY76"/>
+</div>
+<div class="p-lg flex flex-col flex-1">
+<div class="flex justify-between items-start mb-md">
+<div>
+<h4 class="font-headline-md text-headline-md text-on-surface">Kelas 1</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">1 Pasien Per Kamar</p>
+</div>
+<span class="bg-secondary-container text-on-secondary-container px-sm py-xs rounded-lg font-label-sm text-label-sm font-bold">Populer</span>
+</div>
+<ul class="space-y-sm mb-xl flex-1">
+<li class="flex items-center gap-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px] text-primary/60">check_circle</span>
+<span class="font-body-md">Kamar Mandi Dalam</span>
+</li>
+<li class="flex items-center gap-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px] text-primary/60">check_circle</span>
+<span class="font-body-md">Telepon &amp; Nurse Call</span>
+</li>
+<li class="flex items-center gap-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px] text-primary/60">check_circle</span>
+<span class="font-body-md">Oksigen Central</span>
+</li>
+</ul>
+<div class="flex items-end justify-between">
+<div class="font-headline-md text-headline-md font-bold text-on-surface">Rp 850.000</div>
+<button class="text-primary font-button text-button flex items-center gap-xs hover:gap-sm transition-all">
+                                Selengkapnya
+                                <span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Class 2 -->
+<article class="glass-card rounded-[32px] overflow-hidden flex flex-col group hover:shadow-2xl transition-all duration-500 border-none shadow-[0px_10px_40px_rgba(0,0,0,0.02)]">
+<div class="h-64 overflow-hidden relative">
+<img alt="Kelas 2" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A tidy and spacious Class 2 hospital room at RSU Syifa Medika containing two patient beds separated by a medical-grade privacy curtain. The room is decorated in calming neutral tones with high-quality flooring and ergonomic bedside furniture. The lighting is soft and distributed evenly, creating a focused yet peaceful healing environment for shared occupancy." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvP_PaK2HcW3c1vy6lhw9YF1vddmhP4vWzu7t9v1JI2EPfJbB0bsfn672BRIvazrkI8ueH96kpBrvQ6TaNTZZNPYWLqtJ38bz_MtRfx-oyYlpH6ZXWLGcMWQ6qNBt9cWTja8jfocK6GCwVNqS8sMBg-4Cjk6lg3ARmyXx6ig-dg36yRtEdOl1_bKtsC0BrwWHdpk969YojQAzkXNrBzUH-PRB2rk7JaIvowLytozN3XFNy6CExiSV6Yb2cSYa5AgnVIBeDnBuFeAki"/>
+</div>
+<div class="p-lg flex flex-col flex-1">
+<div class="flex justify-between items-start mb-md">
+<div>
+<h4 class="font-headline-md text-headline-md text-on-surface">Kelas 2</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">2 Pasien Per Kamar</p>
+</div>
+</div>
+<ul class="space-y-sm mb-xl flex-1">
+<li class="flex items-center gap-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px] text-primary/60">check_circle</span>
+<span class="font-body-md">Kamar Mandi Dalam</span>
+</li>
+<li class="flex items-center gap-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px] text-primary/60">check_circle</span>
+<span class="font-body-md">AC &amp; TV Bersama</span>
+</li>
+<li class="flex items-center gap-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px] text-primary/60">check_circle</span>
+<span class="font-body-md">Nurse Call System</span>
+</li>
+</ul>
+<div class="flex items-end justify-between">
+<div class="font-headline-md text-headline-md font-bold text-on-surface">Rp 550.000</div>
+<button class="text-primary font-button text-button flex items-center gap-xs hover:gap-sm transition-all">
+                                Selengkapnya
+                                <span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</article>
+</div>
+<!-- Class 3 - Wide Alternating -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-lg items-center">
+<div class="lg:col-span-5 order-2 lg:order-1">
+<div class="font-label-sm text-label-sm text-on-surface-variant tracking-widest mb-xs uppercase">Shared Care</div>
+<h3 class="font-headline-lg text-headline-lg mb-md">Kelas 3</h3>
+<p class="text-on-surface-variant font-body-md mb-lg leading-relaxed">
+                        Layanan rawat inap ekonomis yang tetap mengedepankan standar medis dan kenyamanan pasien. Ideal untuk perawatan jangka panjang dengan fasilitas lengkap.
+                    </p>
+<div class="space-y-sm mb-xl">
+<div class="flex items-center gap-md p-md rounded-2xl bg-surface-container-low border border-outline-variant/30">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">groups</span>
+</div>
+<div>
+<div class="font-bold text-on-surface">6 Pasien / Kamar</div>
+<div class="text-label-sm text-on-surface-variant">Optimal privacy curtain</div>
+</div>
+</div>
+<div class="flex items-center gap-md p-md rounded-2xl bg-surface-container-low border border-outline-variant/30">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">medical_services</span>
+</div>
+<div>
+<div class="font-bold text-on-surface">24/7 Medical Monitoring</div>
+<div class="text-label-sm text-on-surface-variant">Standby nurse station nearby</div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between border-t border-outline-variant/30 pt-lg">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Mulai Dari</span>
+<div class="font-headline-md text-headline-md font-extrabold text-primary">Rp 250.000 <span class="text-body-md font-normal text-on-surface-variant">/hari</span></div>
+</div>
+<button class="bg-primary text-on-primary px-lg py-sm rounded-xl font-button text-button">Pesan Kamar</button>
+</div>
+</div>
+<div class="lg:col-span-7 order-1 lg:order-2 rounded-3xl overflow-hidden h-[400px] shadow-xl group">
+<img alt="Kelas 3" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="A clean and spacious Class 3 ward at RSU Syifa Medika featuring multiple beds arranged with professional spacing and high-quality privacy curtains. The ward is bright and well-ventilated, with a centralized nurse call station and essential medical monitoring tools nearby. The color palette uses crisp whites and light blue accents to maintain a professional, airy, and sanitary environment that feels comforting for shared patient recovery." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMdKw2-8i8w36AY5ocUcS2QpZegtIVPJvENvCeqjQ3eEwY0FJQebe4uAlInwBNJzCsEl9K2fXD0_Rf95yfd6xMN8k6VJZE5Gvjkzwb6dKGCGpOrRBYD4CsQJEC1jBao9ZXZlWitSj21XKtC6P6dBXo5mmaqopkh9Skam1s86AN7sVLUuXSfvxlrW4T7rBjypulFPMEeAQvSVPc2iHjwtqk1L9LFEq6DddMw_kM1-5q2ugXMaVVkAUzDDwn3CxwM1Uwrzoe_Xw7DPqH"/>
+</div>
+</section>
+</div>
+</main>
+<!-- Comparison Section -->
+<section class="bg-surface-container-low py-xl">
+<div class="max-w-container-max mx-auto px-lg">
+<div class="text-center mb-xl">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Perbandingan Fasilitas</h2>
+<p class="font-body-md text-on-surface-variant mt-sm">Pilih yang paling sesuai dengan kebutuhan perawatan Anda</p>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full border-collapse bg-white rounded-3xl overflow-hidden shadow-sm">
+<thead>
+<tr class="bg-primary text-on-primary">
+<th class="p-lg text-left font-headline-md">Fitur Utama</th>
+<th class="p-lg text-center font-headline-md">VVIP</th>
+<th class="p-lg text-center font-headline-md">Kelas 1</th>
+<th class="p-lg text-center font-headline-md">Kelas 2</th>
+<th class="p-lg text-center font-headline-md">Kelas 3</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/20">
+<tr>
+<td class="p-lg font-bold text-on-surface">Kapasitas Pasien</td>
+<td class="p-lg text-center">1 Pasien</td>
+<td class="p-lg text-center">1 Pasien</td>
+<td class="p-lg text-center">2 Pasien</td>
+<td class="p-lg text-center">6 Pasien</td>
+</tr>
+<tr>
+<td class="p-lg font-bold text-on-surface">Kamar Mandi</td>
+<td class="p-lg text-center text-secondary"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span></td>
+<td class="p-lg text-center text-secondary"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span></td>
+<td class="p-lg text-center text-secondary"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span></td>
+<td class="p-lg text-center text-on-surface-variant/40"><span class="material-symbols-outlined">radio_button_unchecked</span></td>
+</tr>
+<tr>
+<td class="p-lg font-bold text-on-surface">Sofa Penunggu</td>
+<td class="p-lg text-center">Sofa Bed Premium</td>
+<td class="p-lg text-center">Kursi Lipat</td>
+<td class="p-lg text-center">Kursi Standar</td>
+<td class="p-lg text-center">-</td>
+</tr>
+<tr>
+<td class="p-lg font-bold text-on-surface">Smart TV &amp; WiFi</td>
+<td class="p-lg text-center text-secondary"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span></td>
+<td class="p-lg text-center text-secondary"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span></td>
+<td class="p-lg text-center text-on-surface-variant/40"><span class="material-symbols-outlined">radio_button_unchecked</span></td>
+<td class="p-lg text-center text-on-surface-variant/40"><span class="material-symbols-outlined">radio_button_unchecked</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<!-- Recommendation CTA -->
+<section class="max-w-container-max mx-auto px-lg py-24">
+<div class="relative rounded-[48px] bg-inverse-surface p-xl md:p-24 overflow-hidden text-center">
+<!-- Background Decoration -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[80px]"></div>
+<div class="absolute bottom-0 left-0 w-64 h-64 bg-secondary/20 rounded-full blur-[80px]"></div>
+<div class="relative z-10">
+<h2 class="font-display-lg text-display-lg text-inverse-on-surface mb-md">Bingung Memilih Kamar?</h2>
+<p class="font-body-lg text-on-surface-variant text-inverse-on-surface/80 max-w-2xl mx-auto mb-xl">
+                    Tim administrasi kami siap membantu Anda mencocokkan fasilitas dengan cakupan asuransi atau kebutuhan spesifik pemulihan Anda.
+                </p>
+<div class="flex flex-col sm:flex-row justify-center items-center gap-md">
+<button class="w-full sm:w-auto bg-primary text-on-primary px-xl py-lg rounded-2xl font-button text-button flex items-center justify-center gap-sm">
+<span class="material-symbols-outlined">phone_in_talk</span>
+                        Hubungi Admin Sekarang
+                    </button>
+<button class="w-full sm:w-auto border border-outline-variant text-inverse-on-surface px-xl py-lg rounded-2xl font-button text-button hover:bg-white/10 transition-colors">
+                        Tanya via WhatsApp
+                    </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-surface-container-low border-t border-outline-variant/20">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-xl max-w-container-max mx-auto px-lg py-xl">
+<div class="space-y-md">
+<div class="font-headline-md text-headline-md font-bold text-on-surface">RSU Syifa Medika</div>
+<p class="font-body-md text-on-surface-variant">Compassionate Clinical Excellence. Memberikan pelayanan kesehatan terbaik untuk seluruh masyarakat.</p>
+<div class="flex gap-md">
+<a class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary shadow-sm hover:scale-110 transition-transform" href="#">
+<span class="material-symbols-outlined">public</span>
+</a>
+<a class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary shadow-sm hover:scale-110 transition-transform" href="#">
+<span class="material-symbols-outlined">mail</span>
+</a>
+</div>
+</div>
+<div>
+<h5 class="font-headline-md text-on-surface mb-lg">Layanan</h5>
+<ul class="space-y-sm">
+<li><a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Rawat Jalan</a></li>
+<li><a class="text-primary font-bold border-b-2 border-primary/30" href="#">Rawat Inap</a></li>
+<li><a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Unit Gawat Darurat</a></li>
+<li><a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Laboratorium</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-headline-md text-on-surface mb-lg">Informasi</h5>
+<ul class="space-y-sm">
+<li><a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Career</a></li>
+<li><a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Accreditation</a></li>
+<li><a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Patient Rights</a></li>
+<li><a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Contact Us</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-headline-md text-on-surface mb-lg">Alamat</h5>
+<p class="font-body-md text-on-surface-variant leading-relaxed">
+                    Jl. Raya Utama No. 123<br/>
+                    Kota Sehat, Indonesia 54321<br/>
+<span class="block mt-md font-bold">IGD 24 Jam: (021) 1234-5678</span>
+</p>
+</div>
+</div>
+<div class="border-t border-outline-variant/10 py-lg">
+<div class="max-w-container-max mx-auto px-lg flex flex-col md:flex-row justify-between items-center gap-md">
+<p class="font-label-sm text-label-sm text-on-surface-variant">© 2024 RSU Syifa Medika. Compassionate Clinical Excellence.</p>
+<div class="flex gap-lg">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary" href="#">Privacy Policy</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary" href="#">Terms of Service</a>
+</div>
+</div>
+</div>
+</footer>
+<!-- Interactive Scripts -->
+<script>
+        // Subtle scroll reveal effect for cards
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                    entry.target.classList.remove('opacity-0', 'translate-y-10');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('article, section').forEach(el => {
+            el.classList.add('transition-all', 'duration-1000', 'opacity-0', 'translate-y-10');
+            observer.observe(el);
+        });
+    </script>
+</body></html>

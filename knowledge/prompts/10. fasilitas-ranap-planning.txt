@@ -1,0 +1,19 @@
+buatkan aku file issue fasilitas-rawat-inap.md di dalam folder issues untuk perubahan data pada tabel rawat inap untuk kolom fasilitas yang akan diganti dengan tabel baru yaitu fasilitas_rawat_inap yang nantinya akan dikerjakan oleh Junior Programmer atau model AI yang lebih murah atau gratis:
+
+Buatkan aku tabel dari migrasi fasilitas_rawat_inap dengan kolom sebagai berikut : 
+
+id integer auto increment primary key
+rawat_inap_id integer foreign key ke tabel rawat_inap
+nama varchar 255
+aktif BOOLEAN default true 
+timestamp (created_at, updated_at)
+
+buatkan model nya dengan nama FasilitasRawatInap dan allowed fields semua kolom kecuali kolom id
+
+Buatkan seeder FasilitasRawatInapSeeder dengan isinya sesuai dengan yang ada di kolom fasilitas pada tabel rawat inap, pecah menjadi inputan sesuai dengan nama rawat inapnya
+
+ubah migrasi pada tabel rawat inap hapus kolom fasilitas karena akan menggunakan relasi pada tabel yang baru dibuat
+
+selanjutnya buatkan Resource filament untuk Resource dari model yang sudah dibuat nama FasilitasRawatInapResource dengan flag --simple
+
+lakukan relations filament antara RawatInap dengan FasilitasRawatInap

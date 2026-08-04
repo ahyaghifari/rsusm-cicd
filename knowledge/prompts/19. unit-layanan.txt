@@ -1,0 +1,23 @@
+buatkan aku isi file issue unit-layanan.md seperti sumber rumah-sakit.md yang aku berikan yang nantinya akan dikerjakan oleh Junior Programmer atau model AI yang lebih murah atau gratis:
+
+Buatkan aku tabel dari migrasi unit_layanan dengan kolom sebagai berikut : 
+
+id integer auto increment primary key
+rumah_sakit_id integer foreign key ke tabel rumah_sakit
+nama varchar 255 
+deskripsi text nullable
+gambar varchar nullable
+aktif BOOLEAN default true 
+timestamp (created_at, updated_at)
+
+buatkan model nya dengan nama UnitLayanan dan allowed fields semua kolom kecuali kolom id
+
+selanjutnya buatkan code untuk Resource filament untuk Resource dari model yang sudah dibuat nama UnitLayananResource dengan flag --simple
+
+
+untuk gambar gunakan media upload image pada code agar bisa mengupload
+
+Buatkan file seeder UnitLayananSeeder dengan struktur tabel yang sudah diberikan dengan isi seperti berikut
+1. id rumah sakit : 1, nama : Rawat Jalan, deskripsi null, gambar null, aktif true
+2. id rumah sakit : 1, nama : Aurora Executive Clinic, deskripsi null, gambar null, aktif true
+1. id rumah sakit : 2, nama : Rawat Jalan, deskripsi null, gambar null, aktif true

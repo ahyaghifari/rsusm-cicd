@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dokumentasi — Tanya Dokter: Chat Konsultasi Real-Time</title>
+<style>
+  :root {
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+    --primary: #4f46e5;
+    --primary-light: #eef2ff;
+    --green: #16a34a;
+    --green-light: #ecfdf5;
+    --amber: #d97706;
+    --amber-light: #fffbeb;
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --code-bg: #0f172a;
+    --code-text: #e2e8f0;
+    --radius: 14px;
+    --sidebar-w: 280px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+  }
+
+  /* ── Layout ─────────────────────────────────────────────── */
+  .layout {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  nav.sidebar {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    background: #111827;
+    color: #cbd5e1;
+    padding: 1.75rem 1.25rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  nav.sidebar .brand {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    font-weight: 700;
+    color: #fff;
+    font-size: 1.05rem;
+    margin-bottom: .35rem;
+  }
+
+  nav.sidebar .brand span.dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: linear-gradient(135deg, #818cf8, #4f46e5);
+    display: inline-block;
+    box-shadow: 0 0 0 4px rgba(129,140,248,.2);
+  }
+
+  nav.sidebar .subtitle {
+    font-size: .75rem;
+    color: #94a3b8;
+    margin-bottom: 1.5rem;
+  }
+
+  nav.sidebar h4 {
+    font-size: .68rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #64748b;
+    margin: 1.4rem 0 .5rem;
+    font-weight: 700;
+  }
+
+  nav.sidebar h4:first-of-type { margin-top: 0; }
+
+  nav.sidebar a {
+    display: block;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: .85rem;
+    padding: .35rem .6rem;
+    border-radius: 8px;
+    margin-bottom: 2px;
+    transition: background .15s, color .15s;
+  }
+
+  nav.sidebar a:hover {
+    background: rgba(255,255,255,.06);
+    color: #fff;
+  }
+
+  main {
+    flex: 1;
+    min-width: 0;
+    padding: 2.5rem clamp(1.25rem, 4vw, 4rem);
+    max-width: 1000px;
+  }
+
+  /* ── Header ─────────────────────────────────────────────── */
+  header.page-header {
+    margin-bottom: 2.5rem;
+  }
+
+  header.page-header h1 {
+    font-size: 2rem;
+    margin: 0 0 .5rem;
+    background: linear-gradient(90deg, #4338ca, #6d28d9);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  header.page-header p.lead {
+    color: var(--muted);
+    font-size: 1rem;
+    max-width: 70ch;
+  }
+
+  .meta-pills {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+
+  .pill {
+    font-size: .72rem;
+    font-weight: 600;
+    padding: .3rem .7rem;
+    border-radius: 999px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border: 1px solid #e0e7ff;
+  }
+
+  /* ── Sections ───────────────────────────────────────────── */
+  section {
+    margin-bottom: 3.5rem;
+    scroll-margin-top: 1.5rem;
+  }
+
+  section > h2 {
+    font-size: 1.45rem;
+    margin: 0 0 .25rem;
+    padding-bottom: .6rem;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }
+
+  section > h2 .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    background: var(--primary);
+    color: #fff;
+    font-size: .85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  section > .section-intro {
+    color: var(--muted);
+    margin: .9rem 0 1.5rem;
+    max-width: 75ch;
+  }
+
+  h3 {
+    font-size: 1.08rem;
+    margin: 1.75rem 0 .6rem;
+    color: #1e1b4b;
+  }
+
+  h4 {
+    font-size: .95rem;
+    margin: 1.25rem 0 .5rem;
+  }
+
+  p { margin: .6rem 0; }
+  ul, ol { padding-left: 1.4rem; }
+  li { margin: .3rem 0; }
+
+  a { color: var(--primary); }
+
+  /* ── Cards / Boxes ──────────────────────────────────────── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.3rem;
+    margin: 1rem 0;
+  }
+
+  .callout {
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin: 1.1rem 0;
+    border: 1px solid;
+    font-size: .92rem;
+  }
+  .callout strong { display: block; margin-bottom: .25rem; font-size: .85rem; text-transform: uppercase; letter-spacing: .04em; }
+
+  .callout.info    { background: var(--primary-light); border-color: #e0e7ff; }
+  .callout.info strong { color: var(--primary); }
+
+  .callout.success { background: var(--green-light); border-color: #d1fae5; }
+  .callout.success strong { color: var(--green); }
+
+  .callout.warning { background: var(--amber-light); border-color: #fde68a; }
+  .callout.warning strong { color: var(--amber); }
+
+  .callout.danger  { background: var(--red-light); border-color: #fecaca; }
+  .callout.danger strong { color: var(--red); }
+
+  /* ── Code ───────────────────────────────────────────────── */
+  pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 1rem 1.2rem;
+    border-radius: 10px;
+    overflow-x: auto;
+    font-size: .82rem;
+    line-height: 1.55;
+    margin: .9rem 0;
+  }
+  code {
+    font-family: "Cascadia Code", Consolas, "SF Mono", monospace;
+  }
+  :not(pre) > code {
+    background: #eef0f5;
+    color: #4338ca;
+    padding: .12em .4em;
+    border-radius: 5px;
+    font-size: .85em;
+  }
+  pre .cm { color: #64748b; font-style: italic; }
+  pre .kw { color: #c084fc; }
+  pre .str { color: #86efac; }
+  pre .fn { color: #93c5fd; }
+
+  /* ── Tables ─────────────────────────────────────────────── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: .88rem;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: .55rem .75rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #f8fafc;
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--muted);
+  }
+  tr:nth-child(even) td { background: #fafbfd; }
+
+  /* ── Badges ─────────────────────────────────────────────── */
+  .badge {
+    display: inline-block;
+    font-size: .7rem;
+    font-weight: 700;
+    padding: .15rem .5rem;
+    border-radius: 6px;
+    font-family: "Cascadia Code", Consolas, monospace;
+  }
+  .badge.public  { background: #dcfce7; color: #15803d; }
+  .badge.private { background: #fee2e2; color: #b91c1c; }
+  .badge.event   { background: #e0e7ff; color: #4338ca; }
+  .badge.layer1  { background: #e0e7ff; color: #4338ca; }
+  .badge.layer2  { background: #fef3c7; color: #b45309; }
+  .badge.layer3  { background: #dbeafe; color: #1d4ed8; }
+
+  /* ── Diagram: generic boxes/arrows ──────────────────────── */
+  .diagram {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin: 1.25rem 0;
+    overflow-x: auto;
+  }
+  .d-row {
+    display: flex;
+    gap: 1.25rem;
+    justify-content: center;
+    flex-wrap: nowrap;
+    align-items: stretch;
+  }
+  .d-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .4rem;
+    flex: 1;
+    min-width: 150px;
+  }
+  .node {
+    border: 2px solid var(--primary);
+    background: var(--primary-light);
+    border-radius: 12px;
+    padding: .7rem .9rem;
+    text-align: center;
+    font-size: .8rem;
+    width: 100%;
+  }
+  .node.green  { border-color: var(--green); background: var(--green-light); }
+  .node.amber  { border-color: var(--amber); background: var(--amber-light); }
+  .node.red    { border-color: var(--red); background: var(--red-light); }
+  .node.dark   { border-color: #475569; background: #f1f5f9; }
+  .node strong { display: block; font-size: .88rem; margin-bottom: .15rem; }
+  .node small  { color: var(--muted); font-size: .72rem; }
+
+  .h-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: var(--muted);
+    font-size: .7rem;
+    text-align: center;
+    min-width: 70px;
+    padding-top: 1.3rem;
+  }
+  .h-arrow .arrow-line { font-size: 1.4rem; line-height: 1; color: var(--primary); }
+
+  .v-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--muted);
+    font-size: .72rem;
+    margin: .25rem 0;
+  }
+  .v-arrow .arrow-line { font-size: 1.4rem; line-height: 1; color: var(--primary); }
+
+  /* ── Step flow ──────────────────────────────────────────── */
+  .steps {
+    counter-reset: step;
+    margin: 1.25rem 0;
+    position: relative;
+  }
+  .step {
+    position: relative;
+    padding-left: 3rem;
+    padding-bottom: 1.6rem;
+  }
+  .step:last-child { padding-bottom: 0; }
+  .step::before {
+    counter-increment: step;
+    content: counter(step);
+    position: absolute;
+    left: 0; top: 0;
+    width: 2rem; height: 2rem;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 700;
+    font-size: .85rem;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1;
+  }
+  .step:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: 1rem; top: 2rem;
+    width: 2px;
+    bottom: -0.4rem;
+    background: var(--border);
+  }
+  .step .step-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: .85rem 1.1rem;
+  }
+  .step .step-card h4 { margin: 0 0 .3rem; font-size: .95rem; }
+  .step .step-card p { margin: .25rem 0; font-size: .9rem; color: var(--text); }
+  .step .step-card .file-tag {
+    display: inline-block;
+    font-family: "Cascadia Code", Consolas, monospace;
+    font-size: .72rem;
+    background: #f1f5f9;
+    color: #475569;
+    padding: .12rem .45rem;
+    border-radius: 5px;
+    margin-top: .35rem;
+  }
+
+  /* ── Branch diagram (3 lapisan) ─────────────────────────── */
+  .branch-root {
+    text-align: center;
+    margin-bottom: .5rem;
+  }
+  .branches {
+    display: flex;
+    gap: 1.1rem;
+    margin-top: .5rem;
+  }
+  .branch {
+    flex: 1;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    background: var(--card);
+    display: flex;
+    flex-direction: column;
+  }
+  .branch .branch-head {
+    padding: .55rem .8rem;
+    font-weight: 700;
+    font-size: .8rem;
+    color: #fff;
+  }
+  .branch.l1 .branch-head { background: #4f46e5; }
+  .branch.l2 .branch-head { background: #d97706; }
+  .branch.l3 .branch-head { background: #1d4ed8; }
+  .branch .branch-body {
+    padding: .8rem;
+    font-size: .82rem;
+    flex: 1;
+  }
+  .branch .branch-body ol { padding-left: 1.1rem; margin: .4rem 0; }
+  .branch .branch-body li { margin: .35rem 0; }
+  .branch .cond {
+    font-size: .72rem;
+    color: var(--muted);
+    font-style: italic;
+    border-top: 1px dashed var(--border);
+    margin-top: .6rem;
+    padding-top: .5rem;
+  }
+
+  /* ── Glossary ───────────────────────────────────────────── */
+  dl.glossary dt {
+    font-weight: 700;
+    margin-top: 1rem;
+    font-family: "Cascadia Code", Consolas, monospace;
+    font-size: .9rem;
+    color: var(--primary);
+  }
+  dl.glossary dd {
+    margin: .2rem 0 0;
+    color: var(--text);
+  }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: .82rem;
+  }
+
+  @media (max-width: 900px) {
+    nav.sidebar { display: none; }
+    main { max-width: 100%; }
+    .branches, .d-row { flex-direction: column; }
+    .h-arrow { flex-direction: row; min-width: 0; padding-top: 0; }
+    .h-arrow .arrow-line { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <nav class="sidebar">
+    <div class="brand"><span class="dot"></span> Tanya Dokter</div>
+    <div class="subtitle">Dokumentasi Realtime Chat &amp; Notifikasi</div>
+
+    <h4>Konsep Dasar</h4>
+    <a href="#pendahuluan">Pendahuluan</a>
+    <a href="#http-vs-websocket">HTTP vs WebSocket</a>
+    <a href="#reverb">Apa itu Reverb?</a>
+    <a href="#pusher-protocol">Protokol Pusher</a>
+    <a href="#echo">Laravel Echo</a>
+
+    <h4>Broadcasting</h4>
+    <a href="#channel">Channel: Public &amp; Private</a>
+    <a href="#event">Event Broadcast</a>
+    <a href="#listener">Listener di Livewire</a>
+
+    <h4>Notifikasi</h4>
+    <a href="#push-notification">3 Lapisan Notifikasi</a>
+    <a href="#vapid-sw">VAPID &amp; Service Worker</a>
+    <a href="#queue-worker">Job Queue &amp; Worker</a>
+
+    <h4>Arsitektur &amp; Alur</h4>
+    <a href="#arsitektur">Arsitektur Sistem</a>
+    <a href="#alur-sesi-baru">Alur 1: Sesi Baru Masuk</a>
+    <a href="#alur-terima">Alur 2: Dokter Terima Sesi</a>
+    <a href="#alur-pesan">Alur 3: Dokter Kirim Pesan</a>
+    <a href="#alur-berakhir">Alur 4: Sesi Berakhir</a>
+
+    <h4>Referensi</h4>
+    <a href="#glosarium">Glosarium</a>
+    <a href="README.md">↩ Kembali ke README.md</a>
+  </nav>
+
+  <main>
+    <header class="page-header">
+      <h1>Tanya Dokter — Chat Konsultasi Real-Time</h1>
+      <p class="lead">
+        Dokumentasi ini menjelaskan <strong>konsep dasar</strong> di balik fitur "Tanya Dokter"
+        (Reverb, Echo, protokol Pusher, broadcasting, push notification, job queue) dan
+        <strong>alur kerja end-to-end</strong> — mulai dari pasien membuat sesi konsultasi,
+        dokter menerima &amp; membalas, sampai notifikasi sampai ke pasien meski browser
+        sudah ditutup.
+      </p>
+      <div class="meta-pills">
+        <span class="pill">Laravel Reverb</span>
+        <span class="pill">Laravel Echo</span>
+        <span class="pill">Livewire 3</span>
+        <span class="pill">Alpine.js</span>
+        <span class="pill">Web Push (VAPID)</span>
+        <span class="pill">Service Worker</span>
+        <span class="pill">Queue Worker</span>
+      </div>
+    </header>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <section id="pendahuluan">
+      <h2><span class="num">1</span> Pendahuluan</h2>
+      <p class="section-intro">
+        Fitur "Tanya Dokter" memungkinkan pasien berbicara langsung dengan dokter lewat
+        chat — <strong>tanpa perlu membuat akun</strong>. Pasien diberi tautan unik
+        (<code>/{rumahsakit}/konsultasi/{token}</code>) yang menjadi "ruang chat" pribadinya.
+      </p>
+      <p>
+        Tantangan utamanya: chat harus terasa <strong>instan</strong> di kedua sisi
+        (pasien ↔ dokter), dan pasien harus tetap diberi tahu ada balasan baru meskipun
+        dia sedang membuka halaman lain, tab lain, atau bahkan sudah menutup browser-nya.
+      </p>
+      <p>Untuk itu dipakai tiga blok bangunan utama:</p>
+      <div class="diagram">
+        <div class="d-row">
+          <div class="d-col">
+            <div class="node">
+              <strong>🔌 Reverb</strong>
+              <small>Server WebSocket — jalur komunikasi instan dua arah</small>
+            </div>
+          </div>
+          <div class="h-arrow"><span class="arrow-line">→</span>terhubung lewat</div>
+          <div class="d-col">
+            <div class="node">
+              <strong>📡 Echo</strong>
+              <small>Library JS di browser yang "mendengarkan" event dari Reverb</small>
+            </div>
+          </div>
+          <div class="h-arrow"><span class="arrow-line">→</span>jika browser tertutup</div>
+          <div class="d-col">
+            <div class="node green">
+              <strong>🔔 Web Push</strong>
+              <small>Notifikasi sistem operasi via Service Worker, tanpa browser aktif</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <section id="http-vs-websocket">
+      <h2><span class="num">2</span> HTTP vs WebSocket</h2>
+      <p class="section-intro">
+        Sebelum membahas Reverb, penting memahami kenapa cara kerja web "biasa" tidak
+        cukup untuk chat real-time.
+      </p>
+
+      <div class="diagram">
+        <div class="d-row">
+          <div class="d-col" style="flex:1.2">
+            <div class="node dark"><strong>HTTP — "Kirim Surat"</strong></div>
+            <div class="node">Browser bertanya → Server menjawab → koneksi <em>ditutup</em></div>
+            <div class="node">Untuk tahu pesan baru, browser harus bertanya ulang berkali-kali (polling)</div>
+            <div class="node red"><small>❌ Boros &amp; terasa lambat untuk chat</small></div>
+          </div>
+          <div class="d-col" style="flex:1.2">
+            <div class="node dark"><strong>WebSocket — "Telepon"</strong></div>
+            <div class="node">Koneksi dibuka <strong>sekali</strong> dan tetap terbuka selama dibutuhkan</div>
+            <div class="node">Server bisa <strong>mendorong</strong> data ke browser kapan saja — tanpa diminta</div>
+            <div class="node green"><small>✅ Pesan baru langsung sampai, instan</small></div>
+          </div>
+        </div>
+      </div>
+
+      <p>
+        <strong>Broadcasting</strong> adalah pola di Laravel yang memanfaatkan WebSocket:
+        server "memancarkan" sebuah <em>event</em> begitu sesuatu terjadi (mis. pesan baru
+        terkirim), lalu semua browser yang sedang "berlangganan" topik terkait langsung
+        menerimanya — tanpa refresh halaman.
+      </p>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <section id="reverb">
+      <h2><span class="num">3</span> Apa itu Laravel Reverb?</h2>
+      <p class="section-intro">
+        <strong>Reverb</strong> adalah server WebSocket buatan tim Laravel sendiri
+        (terintegrasi penuh sejak Laravel 11/12). Tugasnya: menerima koneksi WebSocket
+        dari banyak browser sekaligus, lalu meneruskan <em>event</em> dari aplikasi
+        Laravel ke browser-browser yang relevan.
+      </p>
+      <div class="callout success">
+        <strong>Kenapa penting</strong>
+        Sebelum Reverb, developer Laravel umumnya memakai layanan pihak ketiga berbayar
+        seperti <strong>Pusher</strong> (di-hosting orang lain). Reverb membuat kita bisa
+        <strong>self-host</strong> sendiri — gratis, tanpa biaya bulanan, dan data tetap
+        di server kita sendiri (penting untuk data layanan kesehatan yang sensitif).
+      </div>
+      <p>Dijalankan sebagai proses long-running terpisah:</p>
+      <pre><code><span class="cm"># development</span>
+php artisan reverb:start
+
+<span class="cm"># production — dijalankan sebagai daemon via Supervisor (lihat 08-production-reverb-queue-setup.md)</span>
+php artisan reverb:start --host=0.0.0.0 --port=8080</code></pre>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <section id="pusher-protocol">
+      <h2><span class="num">4</span> Lho, Kenapa Kata "Pusher" Masih Muncul?</h2>
+      <p class="section-intro">
+        Ini bagian yang sering membingungkan di awal — kita <strong>tidak</strong> memakai
+        atau membayar layanan Pusher.
+      </p>
+      <p>
+        Reverb <strong>sengaja dibuat kompatibel dengan protokol Pusher</strong> — artinya
+        Reverb "berbicara" dalam format pesan yang <em>identik</em> dengan layanan Pusher.
+      </p>
+      <div class="callout info">
+        <strong>Analogi</strong>
+        Pusher itu seperti "bahasa Inggris" yang sudah dipakai banyak orang, dan banyak
+        "alat penerjemah" (<code>pusher-js</code> untuk browser, <code>pusher/pusher-php-server</code>
+        untuk PHP) sudah dibuat untuk bahasa ini. Daripada membuat bahasa baru, Reverb
+        memilih "berbicara bahasa yang sama" — sehingga semua alat yang sudah ada bisa
+        langsung dipakai, cukup diarahkan ke server kita sendiri.
+      </div>
+      <p>
+        Jadi: <strong>"Pusher" di sini adalah nama protokol/format komunikasi</strong>,
+        bukan layanan yang kita pakai. Konfigurasi <code>BROADCAST_CONNECTION=reverb</code>
+        di <code>.env</code> memastikan semuanya 100% self-hosted.
+      </p>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <section id="echo">
+      <h2><span class="num">5</span> Laravel Echo</h2>
+      <p class="section-intro">
+        <strong>Echo</strong> adalah library JavaScript di sisi browser yang membungkus
+        <code>pusher-js</code> agar mudah dipakai dari konteks Laravel. Berkat Echo, kode
+        untuk "mendengarkan" event jadi sangat sederhana:
+      </p>
+      <pre><code><span class="kw">Echo</span>.channel(<span class="str">'konsultasi.&lt;token&gt;'</span>)
+    .listen(<span class="str">'PesanDikirim'</span>, (payload) => {
+        <span class="cm">// payload = data dari broadcastWith() di Laravel</span>
+        console.log(<span class="str">'Pesan baru:'</span>, payload);
+    });</code></pre>
+
+      <h3>Konfigurasi (<code>resources/js/echo.js</code>)</h3>
+      <pre><code><span class="kw">import</span> Echo <span class="kw">from</span> <span class="str">'laravel-echo'</span>;
+<span class="kw">import</span> Pusher <span class="kw">from</span> <span class="str">'pusher-js'</span>;
+
+window.Pusher = Pusher;
+
+window.Echo = <span class="kw">new</span> Echo({
+    broadcaster: <span class="str">'reverb'</span>,
+    key: import.meta.env.VITE_REVERB_APP_KEY,
+    wsHost: import.meta.env.VITE_REVERB_HOST,
+    wsPort: import.meta.env.VITE_REVERB_PORT ?? 80,
+    wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
+    forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? <span class="str">'https'</span>) === <span class="str">'https'</span>,
+    enabledTransports: [<span class="str">'ws'</span>, <span class="str">'wss'</span>],
+    namespace: <span class="str">''</span>,  <span class="cm">// PENTING — lihat catatan di bawah</span>
+});</code></pre>
+
+      <div class="callout warning">
+        <strong>Jebakan: <code>namespace: ''</code></strong>
+        Secara default, Echo menambahkan prefiks <code>App.Events.</code> ke setiap nama
+        event yang didengarkan. Tapi setiap event di project ini mendefinisikan
+        <code>broadcastAs()</code> dengan nama pendek tanpa namespace
+        (<code>"SesiStatusBerubah"</code>, <code>"PesanDikirim"</code>) — sehingga nama
+        yang disiarkan server <strong>tidak pernah cocok</strong> dengan yang didengarkan
+        Echo, dan listener Livewire diam selamanya <em>tanpa error apa pun</em>.
+        Mengosongkan <code>namespace</code> membuat Echo mendengarkan nama event
+        apa adanya. Detail lengkap penelusuran bug ini ada di
+        <a href="05-mismatch-namespace-echo-broadcastas.md">05-mismatch-namespace-echo-broadcastas.md</a>.
+      </div>
+
+      <p>
+        <code>window.Echo</code> hanya tersedia di halaman yang me-load
+        <code>resources/js/app.js</code> (yang meng-import <code>./echo</code>) lewat
+        <code>@vite(...)</code>. Panel Filament dokter (<code>/dokter</code>) butuh
+        render hook tambahan agar asetnya ikut dimuat — lihat
+        <a href="04-window-echo-hilang-di-panel-filament.md">04-window-echo-hilang-di-panel-filament.md</a>.
+      </p>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <section id="channel">
+      <h2><span class="num">6</span> Channel: Public vs Private</h2>
+      <p class="section-intro">
+        <strong>Channel</strong> adalah "saluran" topik tertentu yang bisa
+        di-<em>subscribe</em> oleh browser. Laravel punya tiga jenis:
+      </p>
+
+      <table>
+        <tr><th>Jenis</th><th>Siapa boleh subscribe?</th><th>Perlu otorisasi di <code>routes/channels.php</code>?</th><th>Dipakai untuk</th></tr>
+        <tr>
+          <td><span class="badge public">Channel</span> (publik)</td>
+          <td>Siapa saja yang tahu nama channel-nya</td>
+          <td>Tidak</td>
+          <td><code>konsultasi.{token}</code> — pasien (token UUID = "kunci"-nya)</td>
+        </tr>
+        <tr>
+          <td><span class="badge private">PrivateChannel</span></td>
+          <td>Hanya user <strong>terautentikasi</strong> yang lolos otorisasi</td>
+          <td>Ya — closure</td>
+          <td><code>konsultasi.dokter.{dokterId}</code> — dashboard dokter</td>
+        </tr>
+        <tr>
+          <td>PresenceChannel</td>
+          <td>Sama seperti private + daftar siapa saja yang online</td>
+          <td>Ya</td>
+          <td><em>(tidak dipakai di fitur ini)</em></td>
+        </tr>
+      </table>
+
+      <h3>Channel publik <code>konsultasi.{token}</code></h3>
+      <p>
+        Pasien tidak punya akun, jadi <code>PrivateChannel</code> (yang mensyaratkan login)
+        tidak bisa dipakai. Keamanannya bersandar pada <strong>nama channel itu sendiri</strong>:
+        <code>token</code> adalah UUID v4 (122-bit acak, praktis mustahil ditebak — sama
+        seperti link undangan Zoom/Google Meet). Siapa pun yang memegang token bisa
+        subscribe, tapi untuk <em>mendapatkan</em> token, pasien harus melalui alur resmi
+        (membuat sesi via halaman "Tanya Dokter").
+      </p>
+
+      <h3>Private channel <code>konsultasi.dokter.{dokterId}</code></h3>
+      <p>
+        Channel ini menyiarkan "ada sesi baru / status berubah" untuk seorang dokter.
+        Karena ID dokter berupa angka kecil yang <strong>mudah ditebak</strong> (1, 2, 3, ...),
+        channel ini <strong>wajib</strong> diotorisasi — kalau publik, siapa pun bisa
+        mengintip kapan ada pasien baru meminta konsultasi ke dokter tertentu.
+      </p>
+      <pre><code><span class="cm">// routes/channels.php</span>
+Broadcast::channel(<span class="str">'konsultasi.dokter.{dokterId}'</span>, <span class="kw">function</span> ($user, $dokterId) {
+    <span class="kw">return</span> $user->bisaMenanganiDokter((int) $dokterId);
+});</code></pre>
+      <p>
+        <code>$user</code> otomatis terisi dari sesi login Filament. Closure ini berjalan
+        di server — kalau hasilnya <code>false</code> atau melempar exception, Reverb
+        menolak permintaan subscribe dengan <code>403 Forbidden</code>.
+      </p>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <section id="event">
+      <h2><span class="num">7</span> Event Broadcast</h2>
+      <p class="section-intro">
+        Event broadcast adalah event Laravel biasa yang juga "dipancarkan" ke Reverb
+        agar diteruskan ke browser. Project ini punya dua event:
+        <span class="badge event">PesanDikirim</span> dan
+        <span class="badge event">SesiStatusBerubah</span>.
+      </p>
+
+      <h3><code>ShouldBroadcastNow</code> vs <code>ShouldBroadcast</code></h3>
+      <table>
+        <tr><th>Interface</th><th>Perilaku</th><th>Cocok untuk</th></tr>
+        <tr>
+          <td><code>ShouldBroadcast</code></td>
+          <td>Masuk antrean (queue) dulu, baru dipancarkan</td>
+          <td>Hal yang tidak mendesak (mis. notifikasi non-realtime)</td>
+        </tr>
+        <tr>
+          <td><code>ShouldBroadcastNow</code> ✅ <em>(dipakai di sini)</em></td>
+          <td>Dipancarkan <strong>seketika</strong>, tanpa antrean</td>
+          <td>Chat — harus terasa instan</td>
+        </tr>
+      </table>
+
+      <h3>Anatomi event: <code>PesanDikirim</code></h3>
+      <pre><code><span class="kw">class</span> PesanDikirim <span class="kw">implements</span> ShouldBroadcastNow
+{
+    <span class="kw">use</span> Dispatchable, InteractsWithSockets;
+
+    <span class="kw">public function</span> __construct(
+        <span class="kw">public</span> SesiKonsultasi $sesi,
+        <span class="kw">public</span> KonsultasiPesan $pesan,
+    ) {}
+
+    <span class="cm">// ① Ke channel mana event ini dikirim?</span>
+    <span class="kw">public function</span> broadcastOn(): array
+    {
+        <span class="kw">return</span> [<span class="kw">new</span> Channel(<span class="str">'konsultasi.'</span> . $this->sesi->token)];
+    }
+
+    <span class="cm">// ② Nama event di sisi browser (tanpa ini → "App\Events\PesanDikirim")</span>
+    <span class="kw">public function</span> broadcastAs(): string
+    {
+        <span class="kw">return</span> <span class="str">'PesanDikirim'</span>;
+    }
+
+    <span class="cm">// ③ Apa isi "suratnya"? Tanpa ini, SELURUH model (+ relasi) ikut terkirim</span>
+    <span class="kw">public function</span> broadcastWith(): array
+    {
+        <span class="kw">return</span> [
+            <span class="str">'id'</span>         => $this->pesan->id,
+            <span class="str">'pengirim'</span>   => $this->pesan->pengirim->value,
+            <span class="str">'isi'</span>        => $this->pesan->isi,
+            <span class="str">'created_at'</span> => $this->pesan->created_at->toIso8601String(),
+        ];
+    }
+}</code></pre>
+
+      <h3>Satu event, dua channel: <code>SesiStatusBerubah</code></h3>
+      <p>
+        Event ini menyiarkan "status sesi berubah" (mis. <code>MENUNGGU → BERLANGSUNG</code>)
+        dan dikirim ke <strong>dua channel sekaligus</strong> — satu untuk pasien, satu
+        untuk dashboard dokter:
+      </p>
+      <pre><code><span class="kw">public function</span> broadcastOn(): array
+{
+    <span class="kw">return</span> [
+        <span class="kw">new</span> Channel(<span class="str">'konsultasi.'</span> . $this->sesi->token),                  <span class="cm">// ① halaman pasien (publik)</span>
+        <span class="kw">new</span> PrivateChannel(<span class="str">'konsultasi.dokter.'</span> . $this->sesi->dokter_id), <span class="cm">// ② dashboard dokter (privat)</span>
+    ];
+}
+
+<span class="kw">public function</span> broadcastAs(): string { <span class="kw">return</span> <span class="str">'SesiStatusBerubah'</span>; }
+
+<span class="kw">public function</span> broadcastWith(): array
+{
+    <span class="kw">return</span> [
+        <span class="str">'sesi_id'</span>     => $this->sesi->id,
+        <span class="str">'token'</span>       => $this->sesi->token,
+        <span class="str">'status'</span>      => $this->sesi->status->value,
+        <span class="str">'mulai_at'</span>    => $this->sesi->mulai_at?->toIso8601String(),
+        <span class="str">'berakhir_at'</span> => $this->sesi->berakhir_at?->toIso8601String(),
+    ];
+}</code></pre>
+
+      <h3>Mengirim event: <code>broadcast(...)</code> &amp; <code>-&gt;toOthers()</code></h3>
+      <pre><code>broadcast(<span class="kw">new</span> PesanDikirim($this->sesi, $pesan))->toOthers();</code></pre>
+      <div class="callout info">
+        <strong>Kenapa <code>-&gt;toOthers()</code>?</strong>
+        Tanpa ini, broadcast juga dikirim balik ke browser pengirim sendiri — pesannya
+        akan <strong>muncul dua kali</strong> (sekali dari hasil aksi Livewire langsung,
+        sekali lagi dari WebSocket). <code>-&gt;toOthers()</code> memberi tahu Reverb:
+        "kirim ke semua subscriber, <em>kecuali</em> koneksi yang memicu aksi ini".
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <section id="listener">
+      <h2><span class="num">8</span> Mendengarkan Event di Livewire</h2>
+      <p class="section-intro">
+        Bagian paling "ajaib": komponen Livewire bisa mendengarkan event broadcast
+        langsung dari PHP, tanpa menulis JavaScript sama sekali — lewat atribut
+        <code>#[On('echo:...')]</code>.
+      </p>
+
+      <h3>Sisi pasien — <code>KonsultasiChat</code> (channel publik)</h3>
+      <pre><code><span class="cm">#[On('echo:konsultasi.{sesi.token},PesanDikirim')]</span>
+<span class="kw">public function</span> pesanMasuk(array $payload): void
+{
+    $this->riwayat[] = $payload; <span class="cm">// → bubble chat baru muncul, tanpa reload</span>
+}
+
+<span class="cm">#[On('echo:konsultasi.{sesi.token},SesiStatusBerubah')]</span>
+<span class="kw">public function</span> statusBerubah(): void
+{
+    $this->sesi->refresh();
+
+    <span class="kw">if</span> (in_array($this->sesi->status, [StatusSesiKonsultasi::SELESAI, StatusSesiKonsultasi::KEDALUWARSA])) {
+        $this->dispatch(<span class="str">'sesi-berakhir'</span>); <span class="cm">// → trigger cleanup di JS (lepas Echo channel, dll)</span>
+    }
+}</code></pre>
+
+      <h3>Sisi dokter — <code>KonsultasiDashboard</code> (publik + privat sekaligus)</h3>
+      <pre><code><span class="cm">// ① Notifikasi real-time untuk SEMUA perubahan terkait dokter ini — private channel</span>
+<span class="cm">#[On('echo-private:konsultasi.dokter.{dokter.id},SesiStatusBerubah')]</span>
+<span class="kw">public function</span> antreanBerubah(): void { <span class="cm">/* re-render antrean */</span> }
+
+<span class="cm">// ② Pesan masuk untuk SESI YANG SEDANG DIBUKA — channel publik per-token, sama seperti pasien</span>
+<span class="cm">#[On('echo:konsultasi.{sesiAktifToken},PesanDikirim')]</span>
+<span class="kw">public function</span> pesanMasuk(): void { <span class="cm">/* ... */</span> }
+
+<span class="cm">#[On('echo:konsultasi.{sesiAktifToken},SesiStatusBerubah')]</span>
+<span class="kw">public function</span> sesiAktifBerubah(): void { <span class="cm">/* ... */</span> }</code></pre>
+
+      <p>
+        Perhatikan awalan <code>echo-private:</code> — ini memberi tahu Echo "lakukan
+        otorisasi dulu sebelum subscribe". Tanpa awalan ini, Echo akan mencoba subscribe
+        sebagai channel publik dan <strong>gagal diam-diam</strong> (Reverb menolak di
+        belakang layar, tanpa error yang terlihat).
+      </p>
+
+      <h3>Placeholder dinamis: <code>{sesi.token}</code> &amp; <code>{sesiAktifToken}</code></h3>
+      <p>
+        Livewire mengganti <code>{nama.properti}</code> di dalam string listener dengan
+        nilai properti komponen yang sebenarnya — <strong>sebelum</strong> listener
+        didaftarkan ke Echo. Hasilnya bisa dilihat langsung di "memo" Livewire saat
+        halaman dimuat:
+      </p>
+      <pre><code><span class="cm">// {sesi.token} sudah berubah jadi UUID asli sebelum dikirim ke browser:</span>
+<span class="str">"echo:konsultasi.b8b061f5-4792-4d6e-9412-d630da8470ab,PesanDikirim"</span></code></pre>
+      <div class="callout danger">
+        <strong>Jebakan: placeholder tidak boleh <code>null</code></strong>
+        Properti yang dipakai sebagai placeholder dinamis (mis. <code>$sesiAktifToken</code>)
+        <strong>harus selalu bertipe <code>string</code></strong> dengan default
+        <code>''</code> — bukan <code>?string $sesiAktifToken = null</code>. Livewire
+        memakai <code>data_get()</code> untuk mengisi placeholder, dan
+        <code>data_get()</code> menganggap <code>null</code> sebagai "tidak ditemukan",
+        lalu melempar:
+        <pre style="margin-top:.5rem"><code>Unable to evaluate dynamic event name placeholder: {sesiAktifToken}</code></pre>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <section id="push-notification">
+      <h2><span class="num">9</span> Tiga Lapisan Notifikasi Pasien</h2>
+      <p class="section-intro">
+        WebSocket (Reverb/Echo) hanya bekerja <strong>selama tab chat terbuka dan
+        terhubung</strong>. Untuk menutup celah ini, dibangun tiga lapisan notifikasi
+        yang saling melengkapi:
+      </p>
+
+      <table>
+        <tr><th>Lapisan</th><th>Skenario pasien</th><th>Mekanisme</th><th>Butuh infrastruktur baru?</th></tr>
+        <tr>
+          <td><span class="badge layer1">Lapisan 1</span><br>In-app Toast</td>
+          <td>Membuka halaman lain di website yang sama</td>
+          <td>Alpine subscribe Echo channel via token di <code>localStorage</code> → toast pojok kanan bawah</td>
+          <td>Tidak — pakai Echo yang sudah ada</td>
+        </tr>
+        <tr>
+          <td><span class="badge layer2">Lapisan 2</span><br>Browser Notification</td>
+          <td>Melihat tab lain (<code>document.hidden === true</code>)</td>
+          <td><code>new Notification(...)</code> — Notifications API browser</td>
+          <td>Tidak — pakai Echo yang sudah ada</td>
+        </tr>
+        <tr>
+          <td><span class="badge layer3">Lapisan 3</span><br>Web Push</td>
+          <td>Browser ditutup sepenuhnya</td>
+          <td>Service Worker + Web Push API + VAPID</td>
+          <td><strong>Ya</strong> — VAPID keys, Service Worker, Job Queue</td>
+        </tr>
+      </table>
+
+      <p>
+        Sound effect juga ditambahkan agar pasien <strong>mendengar</strong> pesan masuk
+        di mana pun — diputar oleh <code>public/js/konsultasi-notifikasi.js</code>
+        (<code>playNotificationSound()</code> → <code>/audio/newmessage.mp3</code>),
+        dipanggil dari listener Echo yang sama yang menangani Lapisan 1 &amp; 2 (jadi
+        berbunyi baik di halaman chat itu sendiri, halaman lain, maupun saat tab tidak aktif).
+      </p>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <section id="vapid-sw">
+      <h2><span class="num">10</span> VAPID, Push Subscription &amp; Service Worker</h2>
+      <p class="section-intro">
+        Lapisan 3 (Web Push) bekerja sangat berbeda dari WebSocket — server
+        <strong>tidak</strong> menghubungi browser pasien secara langsung.
+      </p>
+
+      <div class="diagram">
+        <div class="d-row">
+          <div class="d-col">
+            <div class="node"><strong>🌐 Browser Pasien</strong><small>Service Worker (<code>sw.js</code>)</small></div>
+          </div>
+          <div class="h-arrow"><span class="arrow-line">→</span>① subscribe()</div>
+          <div class="d-col">
+            <div class="node amber"><strong>☁️ Push Service</strong><small>milik Google/Mozilla/dst, BUKAN server kita</small></div>
+          </div>
+          <div class="h-arrow"><span class="arrow-line">←</span>④ kirim push</div>
+          <div class="d-col">
+            <div class="node green"><strong>🖥️ Server Laravel</strong><small>queue worker + minishlink/web-push</small></div>
+          </div>
+        </div>
+        <div style="text-align:center; margin-top:.75rem; font-size:.8rem; color:var(--muted)">
+          ② endpoint dikirim &amp; disimpan ke <code>sesi_konsultasi.push_subscription</code> &nbsp;→&nbsp;
+          ③ saat dokter membalas, server POST ke endpoint tsb &nbsp;→&nbsp;
+          ⑤ Push Service teruskan ke Service Worker → <code>showNotification()</code>
+        </div>
+      </div>
+
+      <h3>VAPID Keys — "surat kuasa" server ke Push Service</h3>
+      <p>
+        VAPID (<em>Voluntary Application Server Identification</em>) adalah sepasang kunci
+        kriptografi (EC P-256) yang membuktikan push benar-benar berasal dari server kita:
+      </p>
+      <pre><code>VAPID_PUBLIC_KEY   <span class="cm"># dibagikan ke browser saat subscribe()</span>
+VAPID_PRIVATE_KEY  <span class="cm"># rahasia di server, untuk menandatangani push — JANGAN commit ke git</span>
+VAPID_SUBJECT      <span class="cm"># mailto: atau URL identitas pemilik server</span></code></pre>
+
+      <h3>Push Subscription</h3>
+      <p>
+        Hasil <code>pushManager.subscribe()</code> berupa objek JSON yang disimpan di
+        kolom <code>sesi_konsultasi.push_subscription</code>:
+      </p>
+      <pre><code>{
+  <span class="str">"endpoint"</span>: <span class="str">"https://fcm.googleapis.com/fcm/send/APA91bHPRgkFLJu..."</span>,
+  <span class="str">"keys"</span>: {
+    <span class="str">"p256dh"</span>: <span class="str">"BEn7LbISGdbkc..."</span>,  <span class="cm">// kunci publik enkripsi payload</span>
+    <span class="str">"auth"</span>:   <span class="str">"tBHItJI5svbpez7..."</span> <span class="cm">// secret autentikasi</span>
+  }
+}</code></pre>
+
+      <h3>Service Worker (<code>public/sw.js</code>)</h3>
+      <p>
+        Service Worker adalah skrip JS yang berjalan <strong>terpisah dari halaman web</strong>
+        — tetap aktif meski tab/browser ditutup. Dua event pentingnya:
+      </p>
+      <pre><code><span class="cm">// Event "push" — Push Service mengirimkan data ke browser</span>
+self.addEventListener(<span class="str">'push'</span>, (event) => {
+    <span class="kw">const</span> data = event.data?.json() ?? {};
+    event.waitUntil(
+        self.registration.showNotification(data.title, {
+            body:     data.body,
+            icon:     <span class="str">'/img/favicon.png'</span>,
+            tag:      <span class="str">'konsultasi-'</span> + data.token,  <span class="cm">// cegah notifikasi duplikat</span>
+            renotify: <span class="kw">true</span>,
+            vibrate:  [200, 100, 200],
+            data:     { url: data.url },
+        })
+    );
+});
+
+<span class="cm">// Event "notificationclick" — pengguna klik notifikasi</span>
+self.addEventListener(<span class="str">'notificationclick'</span>, (event) => {
+    event.notification.close();
+    <span class="kw">const</span> targetUrl = event.notification.data?.url ?? <span class="str">'/'</span>;
+    event.waitUntil(
+        clients.matchAll({ type: <span class="str">'window'</span>, includeUncontrolled: <span class="kw">true</span> })
+            .then((windowClients) => {
+                <span class="cm">// Fokuskan tab chat jika sudah terbuka, kalau belum buka tab baru</span>
+                <span class="kw">for</span> (<span class="kw">const</span> client <span class="kw">of</span> windowClients) {
+                    <span class="kw">if</span> (client.url === targetUrl && <span class="str">'focus'</span> <span class="kw">in</span> client) <span class="kw">return</span> client.focus();
+                }
+                <span class="kw">return</span> clients.openWindow(targetUrl);
+            })
+    );
+});</code></pre>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <section id="queue-worker">
+      <h2><span class="num">11</span> Job Queue &amp; Worker</h2>
+      <p class="section-intro">
+        Mengirim Web Push butuh HTTP request ke Push Service yang bisa <strong>lambat
+        (100–500ms) atau timeout</strong>. Kalau dilakukan langsung di
+        <code>kirimBalasan()</code>, dokter harus menunggu setiap kali kirim pesan —
+        pengalaman buruk. Solusinya: <strong>Job Queue</strong>.
+      </p>
+
+      <div class="diagram">
+        <div class="d-row">
+          <div class="d-col">
+            <div class="node"><strong>1. kirimBalasan()</strong><small>Dokter klik "Kirim"</small></div>
+          </div>
+          <div class="h-arrow"><span class="arrow-line">→</span></div>
+          <div class="d-col">
+            <div class="node green"><strong>2. Response langsung</strong><small>Dokter tidak menunggu</small></div>
+          </div>
+          <div class="h-arrow"><span class="arrow-line">⇣</span>dispatch()</div>
+          <div class="d-col">
+            <div class="node amber"><strong>3. Job masuk antrean</strong><small><code>SendWebPushNotification</code></small></div>
+          </div>
+          <div class="h-arrow"><span class="arrow-line">→</span><code>queue:work</code></div>
+          <div class="d-col">
+            <div class="node"><strong>4. Worker proses di background</strong><small>HTTP POST ke Push Service</small></div>
+          </div>
+        </div>
+      </div>
+
+      <pre><code><span class="cm">// app/Jobs/SendWebPushNotification.php</span>
+<span class="kw">class</span> SendWebPushNotification <span class="kw">implements</span> ShouldQueue
+{
+    <span class="kw">use</span> Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    <span class="kw">public int</span> $tries = 2;
+
+    <span class="kw">public function</span> __construct(
+        <span class="kw">private readonly int</span>    $sesiId,
+        <span class="kw">private readonly string</span> $title,
+        <span class="kw">private readonly string</span> $body,
+        <span class="kw">private readonly string</span> $url,
+        <span class="kw">private readonly string</span> $token,
+    ) {}
+
+    <span class="kw">public function</span> handle(): void
+    {
+        $sesi = SesiKonsultasi::find($this->sesiId);
+        <span class="kw">if</span> (! $sesi?->push_subscription) <span class="kw">return</span>;
+
+        $webPush      = <span class="kw">new</span> WebPush([<span class="str">'VAPID'</span> => [
+            <span class="str">'subject'</span>    => config(<span class="str">'webpush.vapid.subject'</span>),
+            <span class="str">'publicKey'</span>  => config(<span class="str">'webpush.vapid.public_key'</span>),
+            <span class="str">'privateKey'</span> => config(<span class="str">'webpush.vapid.private_key'</span>),
+        ]]);
+        $subscription = Subscription::create(json_decode($sesi->push_subscription, true));
+
+        $webPush->queueNotification($subscription, json_encode([
+            <span class="str">'title'</span> => $this->title, <span class="str">'body'</span> => $this->body,
+            <span class="str">'url'</span>   => $this->url,   <span class="str">'token'</span> => $this->token,
+        ]));
+
+        <span class="kw">foreach</span> ($webPush->flush() <span class="kw">as</span> $report) {
+            <span class="cm">// Subscription kadaluwarsa? bersihkan agar tidak dicoba lagi</span>
+            <span class="kw">if</span> ($report->isSubscriptionExpired()) {
+                $sesi->update([<span class="str">'push_subscription'</span> => <span class="kw">null</span>]);
+            }
+        }
+    }
+}</code></pre>
+
+      <p>Dipanggil dari <code>KonsultasiDashboard::kirimBalasan()</code> setelah broadcast:</p>
+      <pre><code>broadcast(<span class="kw">new</span> PesanDikirim($sesi, $pesan))->toOthers();
+
+<span class="kw">if</span> ($sesi->push_subscription) {
+    SendWebPushNotification::dispatch(
+        $sesi->id,
+        <span class="str">'Pesan dari '</span> . $this->dokter->nama,
+        $pesan->isi,
+        $chatUrl,
+        $sesi->token,
+    );
+}</code></pre>
+
+      <div class="callout warning">
+        <strong>Wajib berjalan</strong>
+        Tanpa <code>php artisan queue:work</code> berjalan, Lapisan 3 (Web Push) tidak
+        akan pernah terkirim — job hanya akan menumpuk di antrean. Lapisan 1 &amp; 2
+        tidak terpengaruh karena keduanya bekerja lewat WebSocket yang sudah tersambung,
+        bukan lewat queue.
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <section id="arsitektur">
+      <h2><span class="num">12</span> Arsitektur Sistem</h2>
+      <p class="section-intro">
+        Gambaran besar bagaimana semua komponen di atas saling terhubung:
+      </p>
+
+      <div class="diagram">
+        <div class="d-row">
+          <div class="d-col">
+            <div class="node">
+              <strong>👤 Browser Pasien</strong>
+              <small>
+                Livewire (<code>KonsultasiChat</code>)<br>
+                Echo client + Alpine<br>
+                Service Worker (<code>sw.js</code>)<br>
+                <code>localStorage.konsultasi_sesi</code>
+              </small>
+            </div>
+          </div>
+          <div class="d-col">
+            <div class="node">
+              <strong>🩺 Browser Dokter</strong>
+              <small>
+                Filament <code>/dokter</code><br>
+                (<code>KonsultasiDashboard</code>)<br>
+                Echo client (publik + privat)
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <div class="v-arrow"><span class="arrow-line">↕</span>WebSocket (ws/wss)</div>
+
+        <div class="d-row">
+          <div class="d-col" style="flex:2">
+            <div class="node green">
+              <strong>🔌 Reverb Server</strong>
+              <small><code>php artisan reverb:start</code> — meneruskan event ke channel <code>konsultasi.{token}</code> &amp; <code>konsultasi.dokter.{id}</code></small>
+            </div>
+          </div>
+        </div>
+
+        <div class="v-arrow"><span class="arrow-line">↕</span>broadcast() via HTTP (protokol Pusher)</div>
+
+        <div class="d-row">
+          <div class="d-col" style="flex:2">
+            <div class="node">
+              <strong>🖥️ Laravel App</strong>
+              <small>
+                Livewire components, <code>app/Events/*</code> (<code>PesanDikirim</code>, <code>SesiStatusBerubah</code>),
+                <code>routes/channels.php</code>
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <div class="v-arrow"><span class="arrow-line">↓</span>dispatch(Job)</div>
+
+        <div class="d-row">
+          <div class="d-col">
+            <div class="node amber">
+              <strong>⚙️ Queue Worker</strong>
+              <small><code>php artisan queue:work</code><br><code>SendWebPushNotification</code></small>
+            </div>
+          </div>
+          <div class="h-arrow"><span class="arrow-line">→</span>HTTP POST</div>
+          <div class="d-col">
+            <div class="node">
+              <strong>☁️ Push Service</strong>
+              <small>FCM (Chrome) / Mozilla / dst</small>
+            </div>
+          </div>
+          <div class="h-arrow"><span class="arrow-line">→</span>push event</div>
+          <div class="d-col">
+            <div class="node">
+              <strong>🔔 Service Worker Pasien</strong>
+              <small>menampilkan notifikasi OS</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <section id="alur-sesi-baru">
+      <h2><span class="num">13</span> Alur 1 — Pasien Membuat Sesi Baru</h2>
+      <p class="section-intro">
+        Apa yang terjadi sejak pasien klik "Mulai Konsultasi" sampai sesi muncul di
+        antrean dashboard dokter <strong>secara real-time</strong>.
+      </p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-card">
+            <h4>Pasien mengisi form &amp; submit</h4>
+            <p>Halaman "Tanya Dokter" → pilih dokter → isi nama &amp; kontak → <code>mulaiSesi()</code> dipanggil.</p>
+            <span class="file-tag">app/Livewire/Pages/TanyaDokter.php</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-card">
+            <h4>Record <code>SesiKonsultasi</code> dibuat</h4>
+            <p>Status awal <code>MENUNGGU</code>, <code>token</code> = UUID v4 baru.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-card">
+            <h4>Broadcast <code>SesiStatusBerubah</code> dipancarkan</h4>
+            <p>Dikirim ke <strong>dua channel</strong>: <code>konsultasi.{token}</code> (publik, untuk halaman pasien yang akan dibuka) dan <code>konsultasi.dokter.{dokter_id}</code> (privat, untuk dashboard dokter).</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-card">
+            <h4>Pasien diarahkan ke <code>/{rumahsakit}/konsultasi/{token}</code></h4>
+            <p>Menampilkan "ruang tunggu" — Mohon jangan tutup halaman ini.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-card">
+            <h4>Dashboard dokter menerima broadcast lewat <code>echo-private:konsultasi.dokter.{dokter.id}</code></h4>
+            <p><code>antreanBerubah()</code> dipanggil → antrean re-render, sesi baru langsung muncul tanpa refresh.</p>
+            <span class="file-tag">app/Filament/Dokter/Pages/KonsultasiDashboard.php</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-card">
+            <h4>Suara notifikasi antrean baru</h4>
+            <p>Listener Echo khusus di dashboard dokter mendengarkan <code>SesiStatusBerubah</code> dengan <code>status === 'MENUNGGU'</code> → memutar <code>playAntrianSound()</code> (<code>/audio/newantrian.mp3</code>).</p>
+            <span class="file-tag">resources/views/filament/dokter/pages/konsultasi-dashboard.blade.php + public/js/konsultasi-notifikasi.js</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <section id="alur-terima">
+      <h2><span class="num">14</span> Alur 2 — Dokter Menerima Sesi</h2>
+      <p class="section-intro">
+        Dokter klik "Terima Sesi" → halaman pasien (yang sedang menampilkan "ruang
+        tunggu") <strong>otomatis berpindah</strong> ke tampilan chat aktif.
+      </p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-card">
+            <h4>Dokter klik "Terima Sesi"</h4>
+            <p><code>KonsultasiDashboard::terima()</code> dipanggil.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-card">
+            <h4>Update record sesi</h4>
+            <p>
+              <code>status = BERLANGSUNG</code>, <code>mulai_at = now()</code>,
+              <code>berakhir_at = now()->addMinutes($durasi)</code>,
+              <code>dibalas_oleh = auth()->id()</code>.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-card">
+            <h4>Broadcast <code>SesiStatusBerubah</code> (lagi) → <code>-&gt;toOthers()</code></h4>
+            <p>Dikirim ke channel publik <code>konsultasi.{token}</code> — kali ini yang relevan adalah halaman pasien.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-card">
+            <h4>Pasien: <code>KonsultasiChat::statusBerubah()</code> dipanggil via <code>echo:konsultasi.{sesi.token},SesiStatusBerubah</code></h4>
+            <p><code>$this->sesi->refresh()</code> → <code>$sesi->status</code> kini <code>BERLANGSUNG</code>, lengkap dengan <code>berakhir_at</code> baru.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-card">
+            <h4>Livewire merender ulang halaman</h4>
+            <p>
+              Blok <code>@if($sesi->status === MENUNGGU)</code> tidak lagi cocok →
+              <code>@elseif(... === BERLANGSUNG)</code> yang dirender. Setiap blok status
+              diberi <code>wire:key="konsultasi-status-{{ $sesi->status->value }}"</code>
+              yang berbeda — sehingga morphdom <strong>mengganti seluruh elemen</strong>
+              (bukan menambal atribut), memastikan Alpine
+              <code>x-data="konsultasiTimer(...)"</code> pada wrapper chat baru
+              ter-inisialisasi dengan benar.
+            </p>
+            <span class="file-tag">resources/views/rumah_sakit/pages/konsultasi-chat.blade.php</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-card">
+            <h4>Tampilan chat aktif muncul</h4>
+            <p>Timer mundur (<code>konsultasiTimer(berakhir_at)</code>), area pesan, dan form input — semuanya tanpa pasien melakukan apa pun.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <section id="alur-pesan">
+      <h2><span class="num">15</span> Alur 3 — Dokter Mengirim Pesan ke Pasien</h2>
+      <p class="section-intro">
+        Inilah alur paling penting: satu aksi dokter ("Kirim") harus sampai ke pasien
+        <strong>apa pun kondisinya</strong> — sedang di chat, di halaman lain, di tab
+        lain, atau browser tertutup.
+      </p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-card">
+            <h4>Dokter ketik balasan &amp; klik kirim</h4>
+            <p><code>KonsultasiDashboard::kirimBalasan()</code> dipanggil.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-card">
+            <h4>Pesan disimpan</h4>
+            <p><code>KonsultasiPesan::create([... 'pengirim' => DOKTER ...])</code></p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-card">
+            <h4>Broadcast <code>PesanDikirim</code> → <code>-&gt;toOthers()</code></h4>
+            <p>
+              Dipancarkan <strong>seketika</strong> (<code>ShouldBroadcastNow</code>) ke
+              channel publik <code>konsultasi.{token}</code>. Reverb meneruskan ke
+              <strong>semua</strong> koneksi WebSocket yang sedang subscribe channel ini —
+              termasuk dashboard dokter sendiri (yang juga "mendengarkan" sesi yang
+              sedang dibuka).
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-card">
+            <h4>Jika pasien punya <code>push_subscription</code> tersimpan</h4>
+            <p><code>SendWebPushNotification::dispatch(...)</code> — masuk antrean (untuk Lapisan 3, lihat di bawah).</p>
+          </div>
+        </div>
+      </div>
+
+      <h3>Mulai dari sini, tergantung kondisi pasien:</h3>
+
+      <div class="branch-root">
+        <div class="node green" style="display:inline-block; width:auto; padding:.6rem 1.5rem;">
+          📡 Reverb meneruskan event <code>PesanDikirim</code> via WebSocket ke channel <code>konsultasi.{token}</code>
+        </div>
+      </div>
+
+      <div class="branches">
+        <div class="branch l1">
+          <div class="branch-head">LAPISAN 1+suara — Pasien di halaman lain (website sama)</div>
+          <div class="branch-body">
+            <ol>
+              <li>Alpine <code>globalKonsultasiListener</code> (terpasang di <em>semua</em> halaman lewat layout) menerima event lewat channel yang ia-subscribe dari <code>localStorage.konsultasi_sesi</code>.</li>
+              <li><code>playNotificationSound()</code> diputar (<code>/audio/newmessage.mp3</code>).</li>
+              <li><code>isOnChat = false</code> → toast "Pesan dari dr. X" muncul pojok kanan bawah, klik → buka halaman chat.</li>
+            </ol>
+            <div class="cond">Bekerja selama tab website masih terbuka — tidak butuh queue.</div>
+          </div>
+        </div>
+
+        <div class="branch l1">
+          <div class="branch-head">LAPISAN 1+suara — Pasien sedang di halaman chat</div>
+          <div class="branch-body">
+            <ol>
+              <li><code>KonsultasiChat::pesanMasuk($payload)</code> dipanggil via <code>#[On('echo:konsultasi.{sesi.token},PesanDikirim')]</code>.</li>
+              <li><code>$this->riwayat[] = $payload</code> → Livewire re-render, bubble chat baru muncul + auto-scroll.</li>
+              <li><code>globalKonsultasiListener</code> tetap aktif (token tetap di <code>localStorage</code> meski di halaman chat) → <code>playNotificationSound()</code> tetap diputar.</li>
+            </ol>
+            <div class="cond"><code>isOnChat = true</code> → toast <strong>tidak</strong> ditampilkan (pesan sudah terlihat langsung).</div>
+          </div>
+        </div>
+
+        <div class="branch l2">
+          <div class="branch-head">LAPISAN 2 — Pasien di tab lain (tab sama, tidak aktif)</div>
+          <div class="branch-body">
+            <ol>
+              <li><code>globalKonsultasiListener</code> tetap menerima event (koneksi WebSocket tab tidak terputus hanya karena tidak fokus).</li>
+              <li><code>document.hidden === true</code> → <code>new Notification('Pesan dari dr. X', {...})</code> — notifikasi sistem operasi muncul instan.</li>
+            </ol>
+            <div class="cond">Berlaku <em>bersamaan</em> dengan Lapisan 1 (toast tetap dibuat, suara tetap diputar) — keduanya tidak saling eksklusif.</div>
+          </div>
+        </div>
+
+        <div class="branch l3">
+          <div class="branch-head">LAPISAN 3 — Browser pasien tertutup total</div>
+          <div class="branch-body">
+            <ol>
+              <li>Koneksi WebSocket otomatis terputus → Reverb <strong>tidak</strong> bisa menjangkau pasien sama sekali.</li>
+              <li><code>queue:work</code> memproses job <code>SendWebPushNotification</code> yang sudah di-dispatch di langkah 4.</li>
+              <li><code>WebPush::queueNotification()</code> → HTTP POST ke <em>endpoint</em> Push Service yang tersimpan di <code>push_subscription</code>.</li>
+              <li>Push Service meneruskan ke <strong>Service Worker</strong> pasien (berjalan walau browser tertutup) → <code>showNotification()</code>.</li>
+              <li>Klik notifikasi → <code>notificationclick</code> di <code>sw.js</code> → fokus tab chat yang ada, atau buka tab baru.</li>
+            </ol>
+            <div class="cond">Satu-satunya lapisan yang butuh <code>php artisan queue:work</code> berjalan.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout info" style="margin-top:1.5rem">
+        <strong>Catatan</strong>
+        Lapisan 1, 2, dan 3 <strong>tidak saling eksklusif</strong> — tergantung kondisi
+        nyata pasien (tab fokus? halaman mana? browser terbuka?), satu atau lebih lapisan
+        bisa aktif sekaligus untuk satu pesan yang sama. Tujuannya: pasien <em>selalu</em>
+        tahu ada balasan baru, lewat kanal apa pun yang tersedia saat itu.
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <section id="alur-berakhir">
+      <h2><span class="num">16</span> Alur 4 — Sesi Berakhir</h2>
+      <p class="section-intro">
+        Sesi punya batas waktu (<code>durasi_menit</code>), dihitung dari
+        <code>berakhir_at</code> (waktu absolut, dihitung server — bukan "sisa detik"
+        yang bisa "reset" saat refresh).
+      </p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-card">
+            <h4>Timer berjalan di kedua sisi</h4>
+            <p>
+              Pasien: <code>konsultasiTimer(berakhir_at)</code> (Alpine) menghitung mundur
+              setiap detik. Dokter: countdown inline di dashboard, berubah merah saat
+              <code>≤ 60 detik</code>.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-card">
+            <h4>Saat hitungan mencapai 0 — sisi <strong>dokter</strong></h4>
+            <p>
+              <code>$watch('r', ...)</code> mendeteksi <code>r === 0</code> →
+              otomatis memanggil <code>$wire.siapAkhiri()</code> → form
+              "kesimpulan/catatan konsultasi" langsung muncul, dokter tidak perlu klik
+              apa pun untuk memulai proses penutupan.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-card">
+            <h4>Saat hitungan mencapai 0 — sisi <strong>pasien</strong></h4>
+            <p>
+              <code>habis = true</code> → area chat &amp; form input disembunyikan
+              (<code>x-show="!habis"</code>), digantikan overlay "Waktu konsultasi telah
+              habis — menunggu dokter menutup sesi dan memberikan catatan…".
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-card">
+            <h4>Dokter mengisi kesimpulan &amp; klik "Akhiri Sesi"</h4>
+            <p>
+              <code>status = SELESAI</code>, <code>kesimpulan</code> disimpan →
+              <code>broadcast(new SesiStatusBerubah($sesi))</code> dipancarkan lagi
+              (atau otomatis jadi <code>KEDALUWARSA</code> jika tidak direspons sama
+              sekali).
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-card">
+            <h4>Pasien: <code>statusBerubah()</code> menerima status <code>SELESAI</code>/<code>KEDALUWARSA</code></h4>
+            <p>
+              <code>dispatch('sesi-berakhir')</code> → di JS: <code>localStorage.removeItem('konsultasi_sesi')</code>,
+              Echo channel di-<code>leaveChannel()</code>. Halaman beralih ke mode
+              <strong>transkrip baca-saja</strong> + menampilkan "Catatan dari dr. X"
+              (kolom <code>kesimpulan</code>).
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <section id="glosarium">
+      <h2><span class="num">17</span> Glosarium</h2>
+      <dl class="glossary">
+        <dt>WebSocket</dt>
+        <dd>Jenis koneksi dua arah yang tetap terbuka, memungkinkan server "mendorong" data ke browser kapan saja tanpa diminta.</dd>
+
+        <dt>Reverb</dt>
+        <dd>Server WebSocket self-hosted milik Laravel, menggantikan kebutuhan layanan pihak ketiga seperti Pusher.</dd>
+
+        <dt>Protokol Pusher</dt>
+        <dd>Format pesan yang dipakai Reverb agar kompatibel dengan tooling Pusher yang sudah luas dipakai (<code>pusher-js</code>, Echo) — bukan berarti memakai layanan Pusher.</dd>
+
+        <dt>Laravel Echo</dt>
+        <dd>Library JS di browser untuk subscribe channel &amp; mendengarkan event dari Reverb dengan API sederhana (<code>Echo.channel(...).listen(...)</code>).</dd>
+
+        <dt>Channel</dt>
+        <dd>"Saluran" topik yang bisa di-subscribe. Publik (<code>Channel</code>) — siapa saja bisa subscribe; Privat (<code>PrivateChannel</code>) — wajib login &amp; lolos otorisasi di <code>routes/channels.php</code>.</dd>
+
+        <dt>Event Broadcast</dt>
+        <dd>Event Laravel yang juga dipancarkan ke Reverb. Didefinisikan lewat <code>broadcastOn()</code> (channel tujuan), <code>broadcastAs()</code> (nama pendek di browser), <code>broadcastWith()</code> (data yang dikirim).</dd>
+
+        <dt><code>ShouldBroadcastNow</code></dt>
+        <dd>Interface yang membuat event dipancarkan seketika (sinkron), tanpa antre di queue — dipakai untuk chat agar terasa instan.</dd>
+
+        <dt><code>broadcast(...)-&gt;toOthers()</code></dt>
+        <dd>Mengirim event ke semua subscriber channel <em>kecuali</em> koneksi pengirim sendiri — mencegah pesan muncul dobel di sisi pengirim.</dd>
+
+        <dt><code>#[On('echo:channel,Event')]</code></dt>
+        <dd>Atribut Livewire untuk mendengarkan event broadcast pada channel publik, memanggil method PHP saat event diterima — tanpa JS manual.</dd>
+
+        <dt><code>echo-private:</code></dt>
+        <dd>Varian awalan untuk channel privat — Echo akan melakukan proses otorisasi (request ke <code>/broadcasting/auth</code>) sebelum subscribe.</dd>
+
+        <dt>Placeholder dinamis <code>{properti}</code></dt>
+        <dd>Bagian dari nama channel di <code>#[On(...)]</code> yang diganti Livewire dengan nilai properti komponen sebelum didaftarkan ke Echo. Properti ini wajib bertipe non-nullable.</dd>
+
+        <dt>VAPID</dt>
+        <dd>Sepasang kunci kriptografi (public/private) yang membuktikan ke Push Service bahwa Web Push berasal dari server kita yang sah.</dd>
+
+        <dt>Push Subscription</dt>
+        <dd>Objek (endpoint + kunci enkripsi) yang didapat browser dari Push Service saat <code>pushManager.subscribe()</code> — "alamat pengiriman" unik milik browser tsb.</dd>
+
+        <dt>Service Worker</dt>
+        <dd>Skrip JS yang berjalan di latar belakang, terpisah dari halaman web — tetap aktif menerima <code>push</code> event &amp; menampilkan notifikasi meski browser/tab tertutup.</dd>
+
+        <dt>Push Service</dt>
+        <dd>Server perantara milik pembuat browser (FCM untuk Chrome, dll) yang menerima push dari server kita dan meneruskannya ke Service Worker browser pengguna — bahkan saat browser tertutup.</dd>
+
+        <dt>Job Queue / Worker</dt>
+        <dd>Mekanisme Laravel untuk menjalankan tugas (mis. kirim Web Push) di latar belakang lewat <code>php artisan queue:work</code>, agar tidak memblokir respons ke pengguna.</dd>
+
+        <dt><code>wire:key</code></dt>
+        <dd>Atribut Livewire yang memberi "identitas" pada elemen DOM untuk membantu morphdom — saat key berubah antar render, elemen lama dihapus &amp; elemen baru disisipkan utuh (memastikan <code>x-data</code> Alpine ter-inisialisasi ulang dengan benar).</dd>
+      </dl>
+    </section>
+
+    <footer>
+      Bagian dari dokumentasi fitur <strong>"Tanya Dokter — Konsultasi Chat Real-Time"</strong>.
+      Lihat juga catatan teknis kronologis di <a href="README.md">reverb/README.md</a>
+      untuk detail setiap bug &amp; perbaikan yang ditemukan selama pengembangan.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

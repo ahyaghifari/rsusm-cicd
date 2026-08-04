@@ -1,0 +1,40 @@
+buatkan aku file issue.md kategori-tamsil.md di dalam folder issues untuk planning data KategoriTamsil yang nantinya akan dimplementasikan oleh programmer atau AI Model yang murah atau gratis :
+
+Buatkan aku tabel dari migrasi dengan nama kategori_tamsil dengan kolom sebagai berikut : 
+id integer auto increment primary key
+kode varchar 10 unique
+nama varchar 255
+aktif boolean default true
+timestamp (created_at, updated_at)
+
+buatkan model nya dengan nama KategoriTamsil dan allowed fields semua kolom kecuali kolom id
+
+buatkan route presenter "kategori-tamsil" pada Routes dan arahkan ke controller KategoriTamsilController
+
+bikinkan juga controller CRUD untuk kategori tamsil dengan nama KategoriTamsilController dan nama route nya kategori-tamsil
+
+untuk controller gunakan sebagai PresentationLayer, untuk logika bisnis bikin KategoriTamsilService di folder app/Services
+
+setiap melakukan proses yang melakukan aktifitas yang berkaitan dengan data seperti create dan update, lakukan validasi dengan pesan berbahasa indonesia codeigniter terlebih dahulu, lalu berikan data yang sudah divalidasi ke service, jika tidak valid kembali ke halaman sebelumnya dengan session flashdata errors dan kembalikan errornya, jika proses create, update dan delete berhasil dilakukan kembali ke halaman list.php dengan session flashdata success
+
+bikin session setiap kali ingin mengedit atau mendelete, karena bisa saja pengguna mengubah route di action form di inspect element sehingga data yang dirubah atau dihapus malah data lainnya, jika data session tidak cocok dengan data yang ada, maka kembalikan ke halaman sebelumnya dengan session flashdata error. Untuk nama session bikin properti konstanta pada controller KATEGORI_TAMSIL_ID dengan access modifier private
+
+untuk kode, digenerate otomatis dengan huruf awal "KTAMSIL-" lalu diikuti dengan nomor urut berikutnya (001,002,003, dst)
+
+buat views dengan menggunakan layouts main.php pada folder views dengan nama folder kategori-tamsil dengan isi sebagai berikut : (jangan lupakan tambahkan csrf_field())
+
+new.php untuk membuat baru
+edit.php untuk mengedit data
+list.php untuk menampilkan data
+
+untuk menampilkan data pada list.php gunakan datatable
+
+pastikan semua menggunakan styling Tailwind CSS dan Daisy UI
+
+bikinkan seeder dengan nama KategoriTamsilSeeder dengan data sebagai berikut
+
+1. kode : KTAMSIL-001, nama : "Guru & Tendik, aktif : true
+2. kode : KTAMSIL-002, nama : "Pengelola Lab", aktif : true
+3. kode : KTAMSIL-003, nama : "Operator Dapodik", aktif : true
+
+pada sidebar tambahkan menu Kategori Tamsil dengan route kategori-tamsil yang mengarah ke halaman utama kategori tamsil

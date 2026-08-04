@@ -1,0 +1,12 @@
+buatkan aku power point untuk menjelaskan skema High Availability pada Proxmox, dengan isi setiap slide sebagai berikut :
+
+1. title : SKEMA HIGH AVAILABILITY Untuk Penanggulangan Otomatis Server
+2. jelaskan bahwa ada 2 skema yang diajukan yaitu dengan arsitektur stprage terdistribusi Ceph dan satunya lagi dengan penyimpanan terpusat menggunakan NAS
+3. Penjelasan tentang skema Ceph, jelaskan bahwa Ceph itu adalah storage penyimpanan terdistribusi, server ke serve lain memiliki storage dengan kapasitas yang harusnya setara, dan ketika ada perubahan storage maka storage lainnya yang tergabung ke dalam ceph akan mereplikasi atau direplikasi
+4. Sediakan tempat untuk gambar arsitektur ceph, kemudian berikan penjelasan persyaratan dari ceph itu antara lain memerlukan 3 node server proxmox, masing masing server atau node memiliki storage yang kapasitas nya sama, ram nya juga kurang lebih sama, serta memerlukan jaringan yang cepat dan stabil. Kemudian ada kelebihan, antara lain : Data direplikasi ke semua node, jika salah satu server mati paka server lain secara otomatis menggunakan storage yang sudah direplikasi ke storaggenya sendiri untuk menjalankan programmer. Kekurangannya, minimal memiliki 3 server proxmox, memerlukan resource yang besar (CPU, RAM, Storage), kompleksitas yang tinggi (konfigurasi dan troubleshooting)
+5. Sediakan tempat untuk menaruh gambar skema, ketika terjadi hal yaitu ketika salah satu node server mati atau rusak
+6. Penjelasan tentang skema dengan NAS/NFS storage, dimana storage penyimpanan akan menjadi terpusat, semua Virtual Machine beserta isinya akan berada di dalam NAS
+7. Sediakan tempat untuk gambar arsitektur dengan NAS, persyatarannya antara lain memerlukan 2 node server proxmox dan 1 mini server atau komputer sebagai QDevice, NAS sebagai data center server (shared storage), jaringan yang stabil. Kelebihan dari arsitektur ini antara lain Sederhana, mudah dikelola, dikonfugurasi, dipelihara. Skalabilitas, cukup menambah hardisk pada NAS jika dibutuhkan, cukup dengan 2 server. Kekurangannya antara lain SINGLE POINT OF FAILURE (Jika NAS bermasalah, Mati Atau Rusak, maka VM tidak bisa berjalan), jika jaringan server terputus dengan NAS VM juga tidak bisa berjalan 
+8. Sediakan tempat untuk menaruh gambar skema, ketika terjadi hal yaitu ketika salah satu node server mati atau rusak
+9. Buat 2 skema tersebut pada slide ini masukkan perbandingan dari 2 skema tersebut dari apa yang kujelaskan sebelumnya
+10. Terima kasih
