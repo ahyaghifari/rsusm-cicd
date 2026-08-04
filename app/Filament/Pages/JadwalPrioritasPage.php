@@ -153,7 +153,7 @@ class JadwalPrioritasPage extends Page
             return PoliKlinik::find($poliklinikId)?->dokter()
                 ->where('aktif', true)
                 ->orderBy('nama')
-                ->pluck('nama', 'id')
+                ->pluck('dokter.nama', 'dokter.id')
                 ->toArray() ?? [];
         }
 

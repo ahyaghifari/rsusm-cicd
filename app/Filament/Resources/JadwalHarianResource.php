@@ -107,7 +107,7 @@ class JadwalHarianResource extends BaseResource
                                     return PoliKlinik::find($poliklinikId)?->dokter()
                                         ->where('aktif', true)
                                         ->orderBy('nama')
-                                        ->pluck('nama', 'id') ?? [];
+                                        ->pluck('dokter.nama', 'dokter.id') ?? [];
                                 }
 
                                 $rsId = static::isSuperAdmin()
