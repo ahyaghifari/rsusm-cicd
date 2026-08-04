@@ -52,9 +52,6 @@ class JadwalPrioritasPage extends Page
 
     public array $rows = [];
 
-    /** @var array<string, array<int, array{tanggal:string, poliklinik:string, jam:string}>> keyed by row uuid */
-    public array $dokterJadwalPreview = [];
-
     public function mount(): void
     {
         if (! BaseResource::isSuperAdmin()) {
@@ -99,11 +96,6 @@ class JadwalPrioritasPage extends Page
         }
 
         return [(int) $tgl->format('n'), (int) $tgl->format('Y')];
-    }
-
-    public function updatedPeriode(): void
-    {
-        $this->refreshAllDokterJadwalPreview();
     }
 
     // ── Filter form (pilih RS) ──────────────────────────────────────────────
@@ -202,13 +194,11 @@ class JadwalPrioritasPage extends Page
     public function removeRow(string $key): void
     {
         unset($this->rows[$key]);
-        unset($this->dokterJadwalPreview[$key]);
     }
 
     private function resetRows(): void
     {
         $this->rows = [];
-        $this->dokterJadwalPreview = [];
         $this->addRow();
     }
 
@@ -220,40 +210,6 @@ class JadwalPrioritasPage extends Page
         $dokterId = $value ? (int) $value : null;
 
         $this->rows[$uuidKey]['nama_dokter'] = $dokterId ? Dokter::find($dokterId)?->nama : null;
-        $this->loadDokterJadwalPreview($uuidKey, $dokterId);
-    }
-
-    /** Tampilkan jadwal harian dokter yang dipilih (bulan/tahun aktif) — biar kelihatan bentrok atau tidak. */
-    private function loadDokterJadwalPreview(string $rowKey, ?int $dokterId): void
-    {
-        [$bulan, $tahun] = $this->bulanTahun();
-
-        if (! $dokterId || ! $bulan || ! $tahun) {
-            unset($this->dokterJadwalPreview[$rowKey]);
-            return;
-        }
-
-        $this->dokterJadwalPreview[$rowKey] = JadwalHarian::where('dokter_id', $dokterId)
-            ->whereYear('tanggal', $tahun)
-            ->whereMonth('tanggal', $bulan)
-            ->with('poliklinik')
-            ->orderBy('tanggal')
-            ->get()
-            ->map(fn (JadwalHarian $j) => [
-                'tanggal' => $j->tanggal->translatedFormat('d M Y'),
-                'poliklinik' => $j->poliklinik?->nama ?? '-',
-                'jam' => $j->jam_mulai?->format('H:i') . '–' . ($j->jam_selesai?->format('H:i') ?? 'selesai'),
-            ])
-            ->toArray();
-    }
-
-    /** Refresh semua preview jadwal dokter (dipanggil saat periode berubah). */
-    private function refreshAllDokterJadwalPreview(): void
-    {
-        foreach ($this->rows as $rowKey => $row) {
-            $dokterId = $row['dokter_id'] ?? null;
-            $this->loadDokterJadwalPreview($rowKey, $dokterId ? (int) $dokterId : null);
-        }
     }
 
     // ── Save ─────────────────────────────────────────────────────────────────

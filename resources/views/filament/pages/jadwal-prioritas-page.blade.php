@@ -176,18 +176,6 @@
                                 <input type="text" wire:model="rows.{{ $key }}.nama_dokter" placeholder="atau ketik nama bebas"
                                        class="mt-1 w-full text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white">
                                 @endif
-
-                                {{-- Preview jadwal dokter terpilih di bulan ini — biar kelihatan bentrok atau tidak --}}
-                                @if (! empty($dokterJadwalPreview[$key]))
-                                <div class="mt-2 rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/30 p-2 space-y-1">
-                                    <p class="text-[11px] font-semibold text-amber-700 dark:text-amber-400">Jadwal dokter ini bulan ini:</p>
-                                    @foreach ($dokterJadwalPreview[$key] as $preview)
-                                    <p class="text-[11px] text-amber-700 dark:text-amber-400">
-                                        {{ $preview['tanggal'] }} — {{ $preview['poliklinik'] }} ({{ $preview['jam'] }})
-                                    </p>
-                                    @endforeach
-                                </div>
-                                @endif
                             </td>
                             <td class="px-3 py-2 align-top">
                                 <input type="date" wire:model="rows.{{ $key }}.tanggal"
