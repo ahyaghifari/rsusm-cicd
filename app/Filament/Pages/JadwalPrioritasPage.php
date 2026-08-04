@@ -46,8 +46,9 @@ class JadwalPrioritasPage extends Page
     protected ?string $maxContentWidth = 'full';
 
     public ?int $selectedRumahSakitId = null;
-    public ?int $selectedBulan = null;
-    public ?int $selectedTahun = null;
+
+    /** Format 'Y-m' — dari input HTML native <input type="month">. */
+    public ?string $periode = null;
 
     public array $rows = [];
 
@@ -60,8 +61,7 @@ class JadwalPrioritasPage extends Page
             $this->selectedRumahSakitId = BaseResource::rumahSakitId();
         }
 
-        $this->selectedBulan = (int) now()->format('n');
-        $this->selectedTahun = (int) now()->format('Y');
+        $this->periode = now()->format('Y-m');
 
         $this->addRow();
     }
@@ -87,7 +87,26 @@ class JadwalPrioritasPage extends Page
             : BaseResource::rumahSakitId();
     }
 
-    // ── Filter form (pilih RS + periode) ────────────────────────────────────
+    /** [bulan, tahun] dari properti $periode ('Y-m'). Null-null kalau belum diisi/invalid. */
+    private function bulanTahun(): array
+    {
+        if (! $this->periode) return [null, null];
+
+        try {
+            $tgl = Carbon::createFromFormat('Y-m', $this->periode);
+        } catch (\Exception) {
+            return [null, null];
+        }
+
+        return [(int) $tgl->format('n'), (int) $tgl->format('Y')];
+    }
+
+    public function updatedPeriode(): void
+    {
+        $this->refreshAllDokterJadwalPreview();
+    }
+
+    // ── Filter form (pilih RS) ──────────────────────────────────────────────
 
     protected function getForms(): array
     {
@@ -107,28 +126,8 @@ class JadwalPrioritasPage extends Page
                     ->searchable()
                     ->live()
                     ->afterStateUpdated(fn () => $this->resetRows()),
-
-                Forms\Components\Select::make('selectedBulan')
-                    ->label('Bulan')
-                    ->placeholder('— Pilih Bulan —')
-                    ->options(collect(range(1, 12))->mapWithKeys(
-                        fn ($m) => [$m => Carbon::create()->month($m)->translatedFormat('F')]
-                    ))
-                    ->required()
-                    ->visible(fn () => (bool) $this->getActiveRumahSakitId())
-                    ->live(),
-
-                Forms\Components\Select::make('selectedTahun')
-                    ->label('Tahun')
-                    ->placeholder('— Pilih Tahun —')
-                    ->options(collect(range((int) now()->format('Y') - 1, (int) now()->format('Y') + 1))
-                        ->mapWithKeys(fn ($y) => [$y => (string) $y]))
-                    ->required()
-                    ->visible(fn () => (bool) $this->getActiveRumahSakitId())
-                    ->live(),
             ])
-            ->statePath('')
-            ->columns(3);
+            ->statePath('');
     }
 
     // ── Options ──────────────────────────────────────────────────────────────
@@ -173,12 +172,13 @@ class JadwalPrioritasPage extends Page
     public function getExistingJadwal(): Collection
     {
         $rsId = $this->getActiveRumahSakitId();
-        if (! $rsId || ! $this->selectedBulan || ! $this->selectedTahun) {
+        [$bulan, $tahun] = $this->bulanTahun();
+        if (! $rsId || ! $bulan || ! $tahun) {
             return collect();
         }
 
-        return JadwalHarian::whereYear('tanggal', $this->selectedTahun)
-            ->whereMonth('tanggal', $this->selectedBulan)
+        return JadwalHarian::whereYear('tanggal', $tahun)
+            ->whereMonth('tanggal', $bulan)
             ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rsId)->where('jadwal_tidak_tetap', true))
             ->with(['poliklinik', 'dokter'])
             ->orderBy('tanggal')
@@ -226,14 +226,16 @@ class JadwalPrioritasPage extends Page
     /** Tampilkan jadwal harian dokter yang dipilih (bulan/tahun aktif) — biar kelihatan bentrok atau tidak. */
     private function loadDokterJadwalPreview(string $rowKey, ?int $dokterId): void
     {
-        if (! $dokterId || ! $this->selectedBulan || ! $this->selectedTahun) {
+        [$bulan, $tahun] = $this->bulanTahun();
+
+        if (! $dokterId || ! $bulan || ! $tahun) {
             unset($this->dokterJadwalPreview[$rowKey]);
             return;
         }
 
         $this->dokterJadwalPreview[$rowKey] = JadwalHarian::where('dokter_id', $dokterId)
-            ->whereYear('tanggal', $this->selectedTahun)
-            ->whereMonth('tanggal', $this->selectedBulan)
+            ->whereYear('tanggal', $tahun)
+            ->whereMonth('tanggal', $bulan)
             ->with('poliklinik')
             ->orderBy('tanggal')
             ->get()
@@ -243,6 +245,15 @@ class JadwalPrioritasPage extends Page
                 'jam' => $j->jam_mulai?->format('H:i') . '–' . ($j->jam_selesai?->format('H:i') ?? 'selesai'),
             ])
             ->toArray();
+    }
+
+    /** Refresh semua preview jadwal dokter (dipanggil saat periode berubah). */
+    private function refreshAllDokterJadwalPreview(): void
+    {
+        foreach ($this->rows as $rowKey => $row) {
+            $dokterId = $row['dokter_id'] ?? null;
+            $this->loadDokterJadwalPreview($rowKey, $dokterId ? (int) $dokterId : null);
+        }
     }
 
     // ── Save ─────────────────────────────────────────────────────────────────
