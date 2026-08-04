@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\PosterLayouts\LayoutRegistry;
+use App\Enums\JenisPosterTemplate;
 use App\Filament\Resources\PosterTemplateResource\Pages;
 use App\Models\PosterTemplate;
 use Filament\Forms;
@@ -37,6 +37,12 @@ class PosterTemplateResource extends BaseRumahSakitResource
             Forms\Components\Section::make('Informasi Template')
                 ->schema([
                     static::rsFormField(),
+
+                    Forms\Components\Select::make('jenis')
+                        ->label('Jenis Poster')
+                        ->options(JenisPosterTemplate::class)
+                        ->default(JenisPosterTemplate::JADWAL_HARIAN)
+                        ->required(),
 
                     Forms\Components\TextInput::make('nama')
                         ->label('Nama Template')
@@ -108,6 +114,10 @@ class PosterTemplateResource extends BaseRumahSakitResource
                     ->searchable()
                     ->sortable(),
 
+                Tables\Columns\TextColumn::make('jenis')
+                    ->label('Jenis')
+                    ->badge(),
+
                 static::rsTableColumn(),
 
                 Tables\Columns\IconColumn::make('is_default')
@@ -129,10 +139,12 @@ class PosterTemplateResource extends BaseRumahSakitResource
                     ->icon('heroicon-o-paint-brush')
                     ->color('primary')
                     ->url(function (PosterTemplate $record) {
-                        $layout   = LayoutRegistry::for((int) $record->rumah_sakit_id);
-                        $routeKey = $layout instanceof \App\Filament\PosterLayouts\Layouts\ListPolosLayout
-                            ? 'zone-editor-list-polos'
-                            : 'zone-editor';
+                        $layout   = $record->layout();
+                        $routeKey = match (true) {
+                            $layout instanceof \App\Filament\PosterLayouts\Layouts\PerubahanJadwalLayout => 'zone-editor-perubahan-jadwal',
+                            $layout instanceof \App\Filament\PosterLayouts\Layouts\ListPolosLayout        => 'zone-editor-list-polos',
+                            default                                                                       => 'zone-editor',
+                        };
                         return static::getUrl($routeKey, ['record' => $record]);
                     }),
                 Tables\Actions\ReplicateAction::make()
@@ -156,8 +168,9 @@ class PosterTemplateResource extends BaseRumahSakitResource
             'index'                  => Pages\ListPosterTemplates::route('/'),
             'create'                 => Pages\CreatePosterTemplate::route('/create'),
             'edit'                   => Pages\EditPosterTemplate::route('/{record}/edit'),
-            'zone-editor'            => Pages\ZoneEditorPage::route('/{record}/zone-editor'),
-            'zone-editor-list-polos' => Pages\ZoneEditorPageListPolos::route('/{record}/zone-editor-list-polos'),
+            'zone-editor'                 => Pages\ZoneEditorPage::route('/{record}/zone-editor'),
+            'zone-editor-list-polos'      => Pages\ZoneEditorPageListPolos::route('/{record}/zone-editor-list-polos'),
+            'zone-editor-perubahan-jadwal'=> Pages\ZoneEditorPagePerubahanJadwal::route('/{record}/zone-editor-perubahan-jadwal'),
         ];
     }
 }

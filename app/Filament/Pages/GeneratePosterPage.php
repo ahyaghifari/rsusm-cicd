@@ -93,6 +93,23 @@ class GeneratePosterPage extends Page
             : $this->currentUserRumahSakitId();
     }
 
+    /**
+     * Ambil PosterTemplate berdasarkan ID, di-scope ke RS milik user (non-superadmin).
+     * Mencegah humas/admin RS A mengakses template RS B lewat manipulasi payload Livewire.
+     */
+    private function findTemplateForCurrentUser(?int $templateId, array $with = []): ?PosterTemplate
+    {
+        if (! $templateId) return null;
+
+        $query = PosterTemplate::query()->with($with);
+
+        if (! $this->isSuperAdmin()) {
+            $query->where('rumah_sakit_id', $this->currentUserRumahSakitId());
+        }
+
+        return $query->find($templateId);
+    }
+
     // ── Helpers akses $data ───────────────────────────────────────────────────
 
     private function getTemplateId(): ?int
@@ -169,7 +186,7 @@ class GeneratePosterPage extends Page
                             ->live()
                             ->afterStateUpdated(function (Forms\Get $get) {
                                 $templateId = (int) $get('template_id') ?: null;
-                                $template   = $templateId ? PosterTemplate::find($templateId) : null;
+                                $template   = $this->findTemplateForCurrentUser($templateId);
                                 if ($template) {
                                     $this->hospitalHasExecutiveClinic = (bool) RumahSakit::where('id', $template->rumah_sakit_id)->value('executive_clinic');
                                 } else {
@@ -237,7 +254,7 @@ class GeneratePosterPage extends Page
             return;
         }
 
-        $template = PosterTemplate::find($templateId);
+        $template = $this->findTemplateForCurrentUser($templateId);
         if (! $template) { $this->poli_list = []; return; }
 
         $rsId = $template->rumah_sakit_id;
@@ -325,7 +342,7 @@ class GeneratePosterPage extends Page
         if (isset($this->poli_list[$index])) {
             $this->poli_list[$index]['visible'] = ! $this->poli_list[$index]['visible'];
             $templateId = $this->getTemplateId();
-            $this->recalcPagination($templateId ? PosterTemplate::find($templateId) : null);
+            $this->recalcPagination($this->findTemplateForCurrentUser($templateId));
         }
     }
 
@@ -533,7 +550,7 @@ class GeneratePosterPage extends Page
             return [null, null];
         }
 
-        $template = PosterTemplate::with('rumahSakit')->find($templateId);
+        $template = $this->findTemplateForCurrentUser($templateId, ['rumahSakit']);
         if (! $template) {
             Notification::make()->title('Template tidak ditemukan.')->danger()->send();
             return [null, null];

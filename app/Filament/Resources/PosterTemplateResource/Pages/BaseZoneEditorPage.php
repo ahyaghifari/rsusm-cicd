@@ -53,7 +53,7 @@ abstract class BaseZoneEditorPage extends Page
         );
 
         $this->config = $this->record->config
-            ?? PosterTemplate::defaultConfig((int) $this->record->rumah_sakit_id);
+            ?? PosterTemplate::defaultConfig((int) $this->record->rumah_sakit_id, $this->record->jenis);
     }
 
     public function save(): void
