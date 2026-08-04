@@ -139,16 +139,8 @@ class JadwalPrioritasPage extends Page
             ->toArray();
     }
 
-    public function getDokterOptions(?int $poliklinikId): array
+    public function getDokterOptions(): array
     {
-        if ($poliklinikId) {
-            return PoliKlinik::find($poliklinikId)?->dokter()
-                ->where('aktif', true)
-                ->orderBy('nama')
-                ->pluck('dokter.nama', 'dokter.id')
-                ->toArray() ?? [];
-        }
-
         $rsId = $this->getActiveRumahSakitId();
         if (! $rsId) return [];
 

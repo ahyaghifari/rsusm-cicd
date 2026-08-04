@@ -164,10 +164,10 @@
                                         this.ts.on('change', (v) => $wire.set('rows.{{ $key }}.dokter_id', v || null));
                                     },
                                     destroy() { if (this.ts) { this.ts.destroy(); this.ts = null; } }
-                                }" wire:key="ts-dokter-{{ $key }}-{{ $row['poliklinik_id'] }}">
+                                }" wire:key="ts-dokter-{{ $key }}">
                                     <select x-ref="sel" class="w-full text-xs">
                                         <option value="">— Dokter (opsional) —</option>
-                                        @foreach ($this->getDokterOptions($row['poliklinik_id']) as $id => $nama)
+                                        @foreach ($this->getDokterOptions() as $id => $nama)
                                             <option value="{{ $id }}">{{ $nama }}</option>
                                         @endforeach
                                     </select>
