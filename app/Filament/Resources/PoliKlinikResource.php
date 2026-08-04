@@ -84,6 +84,11 @@ class PoliKlinikResource extends BaseResource
                     ->required()
                     ->default(true),
 
+                Forms\Components\Toggle::make('jadwal_tidak_tetap')
+                    ->label('Jadwal Tidak Tetap (Prioritas)')
+                    ->helperText('Aktifkan kalau jadwal dokter poli ini tidak mengikuti pola mingguan tetap (mis. poli umum). Jadwalnya diisi lewat halaman "Jadwal Prioritas", terpisah total dari Jadwal Praktek/Jadwal Harian biasa.')
+                    ->default(false),
+
                 Forms\Components\Toggle::make('prioritas_poster')
                     ->label('Selalu di Atas (Poster)')
                     ->helperText('Poli ini selalu ditampilkan di baris paling atas saat generate poster, tanpa mengubah jarak antar kolom.')
@@ -119,6 +124,10 @@ class PoliKlinikResource extends BaseResource
                     ->searchable(),
                 Tables\Columns\IconColumn::make('aktif')
                     ->boolean(),
+                Tables\Columns\IconColumn::make('jadwal_tidak_tetap')
+                    ->label('Jadwal Tidak Tetap')
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\IconColumn::make('prioritas_poster')
                     ->label('Prioritas Poster')
                     ->boolean()

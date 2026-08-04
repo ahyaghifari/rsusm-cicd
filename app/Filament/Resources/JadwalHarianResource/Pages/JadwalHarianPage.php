@@ -140,7 +140,7 @@ class JadwalHarianPage extends Page
         if (! $rsId || ! $this->activeTanggal) return false;
 
         return JadwalHarian::whereDate('tanggal', $this->activeTanggal)
-            ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rsId))
+            ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rsId)->where('jadwal_tidak_tetap', false))
             ->exists();
     }
 
@@ -164,6 +164,7 @@ class JadwalHarianPage extends Page
 
         return PoliKlinik::where('rumah_sakit_id', $rsId)
             ->where('aktif', true)
+            ->where('jadwal_tidak_tetap', false)
             ->orderBy('nama')
             ->pluck('nama', 'id')
             ->toArray();
@@ -197,7 +198,7 @@ class JadwalHarianPage extends Page
 
         $jadwals = JadwalHarian::whereDate('tanggal', $this->activeTanggal)
             ->whereHas('poliklinik', function ($q) use ($rsId) {
-                $q->where('rumah_sakit_id', $rsId);
+                $q->where('rumah_sakit_id', $rsId)->where('jadwal_tidak_tetap', false);
             })
             ->when($this->executiveClinicFilter === 'reguler',   fn ($q) => $q->where('is_executive', 0))
             ->when($this->executiveClinicFilter === 'eksekutif', fn ($q) => $q->where('is_executive', 1))
@@ -279,7 +280,7 @@ class JadwalHarianPage extends Page
 
         $jadwals = JadwalPraktek::where('hari', $hari)
             ->whereHas('poliklinik', function ($q) use ($rsId) {
-                $q->where('rumah_sakit_id', $rsId);
+                $q->where('rumah_sakit_id', $rsId)->where('jadwal_tidak_tetap', false);
             })
             ->when($this->executiveClinicFilter === 'reguler',   fn ($q) => $q->where('is_executive', 0))
             ->when($this->executiveClinicFilter === 'eksekutif', fn ($q) => $q->where('is_executive', 1))
@@ -460,7 +461,10 @@ class JadwalHarianPage extends Page
             }
         }
 
+        // jadwal_tidak_tetap dikecualikan — poliklinik itu dikelola lewat halaman
+        // Jadwal Prioritas, replace-all di sini tidak boleh menyentuh datanya.
         $poliIds = PoliKlinik::where('rumah_sakit_id', $rsId)
+            ->where('jadwal_tidak_tetap', false)
             ->pluck('id')
             ->toArray();
 
@@ -581,7 +585,7 @@ class JadwalHarianPage extends Page
         $scope = function ($q) use ($rsId) {
             $q->whereDate('tanggal', $this->activeTanggal)
               ->whereHas('poliklinik', function ($q2) use ($rsId) {
-                  $q2->where('rumah_sakit_id', $rsId);
+                  $q2->where('rumah_sakit_id', $rsId)->where('jadwal_tidak_tetap', false);
               })
               ->when($this->executiveClinicFilter === 'reguler',   fn ($q2) => $q2->where('is_executive', 0))
               ->when($this->executiveClinicFilter === 'eksekutif', fn ($q2) => $q2->where('is_executive', 1));

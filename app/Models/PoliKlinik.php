@@ -17,8 +17,9 @@ class PoliKlinik extends Model
     protected $table = 'poliklinik';
 
     protected $casts = [
-        'aktif'            => 'boolean',
-        'prioritas_poster' => 'boolean',
+        'aktif'              => 'boolean',
+        'jadwal_tidak_tetap' => 'boolean',
+        'prioritas_poster'   => 'boolean',
     ];
 
     // Allowed fields (Semua kolom kecuali ID)
@@ -29,6 +30,7 @@ class PoliKlinik extends Model
         'gambar',
         'deskripsi',
         'aktif',
+        'jadwal_tidak_tetap',
         'sort_order',
         'prioritas_poster',
         'posisi_prioritas',
