@@ -379,8 +379,9 @@ class GeneratePerubahanJadwalPage extends Page
         $result = [];
 
         $slots = [
-            'FontNamaKlinik' => $cfg['grid']['font_nama_klinik'] ?? [],
-            'FontIsi'        => $cfg['grid']['font_isi']         ?? [],
+            'FontNamaKlinik'   => $cfg['grid']['font_nama_klinik']   ?? [],
+            'FontIsi'          => $cfg['grid']['font_isi']           ?? [],
+            'FontSectionTitle' => $cfg['grid']['section_title_font'] ?? [],
         ];
 
         foreach ($slots as $alias => $fontObj) {

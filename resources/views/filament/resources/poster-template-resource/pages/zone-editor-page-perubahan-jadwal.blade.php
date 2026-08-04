@@ -44,15 +44,13 @@
     <main style="height: calc(100vh - 48px);">
     @php
         $zoneColors = [
-            'zona_judul'   => ['bg' => 'rgba(168,85,247,0.25)', 'border' => '#A855F7', 'label' => 'Judul'],
             'zona_tanggal' => ['bg' => 'rgba(34,197,94,0.25)',  'border' => '#22C55E', 'label' => 'Tanggal'],
             'zona_konten'  => ['bg' => 'rgba(239,68,68,0.25)',  'border' => '#EF4444', 'label' => 'Konten'],
         ];
 
         $fallbackZones = [
-            'zona_judul'   => ['x' => 60, 'y' => 140, 'w' => 960, 'h' => 160],
-            'zona_tanggal' => ['x' => 60, 'y' => 300, 'w' => 400, 'h' => 60],
-            'zona_konten'  => ['x' => 60, 'y' => 400, 'w' => 960, 'h' => 1300],
+            'zona_tanggal' => ['x' => 60, 'y' => 220, 'w' => 400, 'h' => 60],
+            'zona_konten'  => ['x' => 60, 'y' => 320, 'w' => 960, 'h' => 1400],
         ];
 
         $savedConfig = $this->config ?? [];
@@ -75,12 +73,11 @@
 
         $initialMaxDokterPerHalaman = (int)  ($g['max_dokter_per_halaman'] ?? 4);
         $initialGapV               = (int)   ($g['gap_v']               ?? 24);
-        $initialJudulWarna         =         ($g['judul_warna']         ?? '#c0392b');
-        $initialJudulSize          = (int)   ($g['judul_size']          ?? 56);
         $initialLabelExecutive     =         ($g['label_executive']     ?? 'Klinik Executive');
         $initialLabelReguler       =         ($g['label_reguler']       ?? 'Poliklinik Reguler');
         $initialSectionTitleWarna  =         ($g['section_title_warna'] ?? '#c0392b');
         $initialSectionTitleSize   = (int)   ($g['section_title_size']  ?? 32);
+        $initialSectionTitleFont   =         ($g['section_title_font']['nama'] ?? 'Montserrat');
         $initialCardBg             =         ($g['card_bg_warna']       ?? '#ffffff');
         $initialCardBorderWarna    =         ($g['card_border_warna']   ?? '#c0392b');
         $initialCardBorderWidth    = (int)   ($g['card_border_width']   ?? 2);
@@ -116,12 +113,11 @@
             initialZones: @js($activeZones),
             initialMaxDokterPerHalaman: {{ $initialMaxDokterPerHalaman }},
             initialGapV: {{ $initialGapV }},
-            initialJudulWarna: @js($initialJudulWarna),
-            initialJudulSize: {{ $initialJudulSize }},
             initialLabelExecutive: @js($initialLabelExecutive),
             initialLabelReguler: @js($initialLabelReguler),
             initialSectionTitleWarna: @js($initialSectionTitleWarna),
             initialSectionTitleSize: {{ $initialSectionTitleSize }},
+            initialSectionTitleFont: @js($initialSectionTitleFont),
             initialCardBg: @js($initialCardBg),
             initialCardBorderWarna: @js($initialCardBorderWarna),
             initialCardBorderWidth: {{ $initialCardBorderWidth }},
@@ -170,10 +166,10 @@
                 </div>
             </div>
 
-            {{-- Judul & Label Section --}}
+            {{-- Label & Batas Halaman Section --}}
             <div class="space-y-3">
                 <label class="flex items-center gap-2 text-xs font-bold text-gray-600 uppercase tracking-wider">
-                    <span class="text-lg">🏷️</span> Judul &amp; Label
+                    <span class="text-lg">🏷️</span> Label &amp; Batas Halaman
                 </label>
                 <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm space-y-3">
                     <div class="flex items-center justify-between gap-4">
@@ -182,18 +178,6 @@
                             class="w-16 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
                     </div>
                     <p class="text-[10px] text-gray-400 -mt-2">Kalau Executive atau Reguler punya lebih banyak dokter berubah dari batas ini, poster otomatis lanjut ke halaman/foto berikutnya.</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-gray-600">Warna Judul</span>
-                        <div class="flex items-center gap-2">
-                            <input type="color" x-model="judulWarna" @input="saveConfig()" class="h-8 w-10 cursor-pointer rounded-lg border border-gray-200 p-0.5 shadow-sm">
-                            <input type="text" x-model="judulWarna" @input="saveConfig()" class="w-24 text-xs text-center border border-gray-200 rounded-lg py-1.5 font-mono shadow-sm">
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between gap-4">
-                        <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Ukuran Judul (px)</span>
-                        <input type="range" x-model.number="judulSize" @input="saveConfig()" min="24" max="90" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none accent-purple-500">
-                        <input type="number" x-model.number="judulSize" @input="saveConfig()" min="24" max="90" class="w-14 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
-                    </div>
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-semibold text-gray-600">Label Executive</span>
                         <input type="text" x-model="labelExecutive" @input="saveConfig()" class="w-44 text-xs border border-gray-200 rounded-lg py-1.5 px-2 shadow-sm">
@@ -209,11 +193,21 @@
                             <input type="text" x-model="sectionTitleWarna" @input="saveConfig()" class="w-24 text-xs text-center border border-gray-200 rounded-lg py-1.5 font-mono shadow-sm">
                         </div>
                     </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-gray-600">Font Judul Section</span>
+                        <select x-model="sectionTitleFont" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-white shadow-sm focus:ring-2 focus:ring-blue-500 appearance-none bg-no-repeat"
+                            style="background-image:url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22/%3E%3C/svg%3E');background-position:right .5rem center;background-size:1.25rem;">
+                            @foreach ($this::$availableFonts as $f)
+                            <option value="{{ $f }}">{{ $f }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="flex items-center justify-between gap-4">
                         <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Ukuran Judul Section</span>
                         <input type="range" x-model.number="sectionTitleSize" @input="saveConfig()" min="16" max="60" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none accent-purple-500">
                         <input type="number" x-model.number="sectionTitleSize" @input="saveConfig()" min="16" max="60" class="w-14 text-center text-xs font-bold border border-gray-200 rounded-lg py-1 shadow-sm">
                     </div>
+                    <p class="text-[10px] text-gray-400 -mt-2">Alignment judul section selalu di tengah (tidak bisa diubah).</p>
                     <div class="flex items-center justify-between gap-4">
                         <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Jarak Antar Kartu</span>
                         <input type="range" x-model.number="gapV" @input="saveConfig()" min="0" max="80" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none accent-blue-500">
@@ -254,7 +248,8 @@
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-semibold text-gray-600">Font Klinik</span>
-                        <select x-model="fontNamaKlinik" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 bg-white shadow-sm">
+                        <select x-model="fontNamaKlinik" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-white shadow-sm focus:ring-2 focus:ring-blue-500 appearance-none bg-no-repeat"
+                            style="background-image:url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22/%3E%3C/svg%3E');background-position:right .5rem center;background-size:1.25rem;">
                             @foreach ($this::$availableFonts as $f)
                             <option value="{{ $f }}">{{ $f }}</option>
                             @endforeach
@@ -262,7 +257,8 @@
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-semibold text-gray-600">Font Isi</span>
-                        <select x-model="fontIsi" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 bg-white shadow-sm">
+                        <select x-model="fontIsi" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-white shadow-sm focus:ring-2 focus:ring-blue-500 appearance-none bg-no-repeat"
+                            style="background-image:url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22/%3E%3C/svg%3E');background-position:right .5rem center;background-size:1.25rem;">
                             @foreach ($this::$availableFonts as $f)
                             <option value="{{ $f }}">{{ $f }}</option>
                             @endforeach
@@ -327,7 +323,8 @@
                 <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm space-y-3">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-semibold text-gray-600">Font</span>
-                        <select x-model="tanggalFont" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 bg-white shadow-sm">
+                        <select x-model="tanggalFont" @change="saveConfig()" class="w-36 text-xs font-medium border border-gray-200 rounded-lg py-1.5 px-2 pr-7 bg-white shadow-sm focus:ring-2 focus:ring-blue-500 appearance-none bg-no-repeat"
+                            style="background-image:url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22/%3E%3C/svg%3E');background-position:right .5rem center;background-size:1.25rem;">
                             @foreach ($this::$availableFonts as $f)
                             <option value="{{ $f }}">{{ $f }}</option>
                             @endforeach
@@ -463,19 +460,13 @@
                                 {{ $c['label'] }}
                             </span>
 
-                            @if ($key === 'zona_judul')
-                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <div :style="{ fontFamily: fontNamaKlinik, fontWeight: 800, color: judulWarna, fontSize: (judulSize * 0.5) + 'px', textAlign: 'center', lineHeight: 1.15 }">
-                                    Perubahan Jadwal Praktik<br>Dokter Spesialis
-                                </div>
-                            </div>
-                            @elseif ($key === 'zona_tanggal')
+                            @if ($key === 'zona_tanggal')
                             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                                 <span :style="{ fontFamily: tanggalFont, fontWeight: 700, fontSize: (tanggalSize * 0.5) + 'px', color: tanggalWarna, background: tanggalBg, borderRadius: (tanggalRadius * 0.5) + 'px', padding: (tanggalPaddingY * 0.5) + 'px ' + (tanggalPaddingX * 0.5) + 'px' }">Sabtu, 07 Juni 2026</span>
                             </div>
                             @elseif ($key === 'zona_konten')
                             <div class="absolute pointer-events-none" style="left:4px; top:4px; right:4px; bottom:4px; overflow:hidden;">
-                                <div :style="{ fontFamily: fontNamaKlinik, fontWeight: 800, color: sectionTitleWarna, fontSize: (sectionTitleSize * 0.5) + 'px', marginBottom: '6px' }" x-text="labelExecutive"></div>
+                                <div :style="{ fontFamily: sectionTitleFont, fontWeight: 800, color: sectionTitleWarna, fontSize: (sectionTitleSize * 0.5) + 'px', textAlign: 'center', marginBottom: '6px' }" x-text="labelExecutive"></div>
                                 <div :style="{ background: cardBg, border: (cardBorderWidth*0.5)+'px solid '+cardBorderWarna, borderRadius: (cardRadius*0.5)+'px', padding: '8px 10px' }">
                                     <div :style="{ fontFamily: fontNamaKlinik, fontWeight: 700, color: warnaNamaKlinik, fontSize: (sizeNamaKlinik*0.5)+'px', textAlign: 'center' }">Klinik Mata</div>
                                     <div :style="{ fontFamily: fontIsi, fontWeight: 600, color: warnaNamaDokter, fontSize: (sizeNamaDokter*0.5)+'px', textAlign: 'center', margin: '4px 0' }">dr. Contoh, Sp.M</div>
@@ -511,12 +502,11 @@
             zones: config.initialZones,
             maxDokterPerHalaman: config.initialMaxDokterPerHalaman ?? 4,
             gapV:               config.initialGapV               ?? 24,
-            judulWarna:          config.initialJudulWarna          ?? '#c0392b',
-            judulSize:           config.initialJudulSize           ?? 56,
             labelExecutive:      config.initialLabelExecutive      ?? 'Klinik Executive',
             labelReguler:        config.initialLabelReguler        ?? 'Poliklinik Reguler',
             sectionTitleWarna:   config.initialSectionTitleWarna   ?? '#c0392b',
             sectionTitleSize:    config.initialSectionTitleSize    ?? 32,
+            sectionTitleFont:    config.initialSectionTitleFont    ?? 'Montserrat',
             cardBg:              config.initialCardBg              ?? '#ffffff',
             cardBorderWarna:     config.initialCardBorderWarna     ?? '#c0392b',
             cardBorderWidth:     config.initialCardBorderWidth     ?? 2,
@@ -548,7 +538,7 @@
                 if (!this.state || Object.keys(this.state).length === 0) {
                     this.saveConfig();
                 } else {
-                    for (const key of ['zona_judul', 'zona_tanggal', 'zona_konten']) {
+                    for (const key of ['zona_tanggal', 'zona_konten']) {
                         if (this.state[key]?.x !== undefined) {
                             this.zones[key] = { ...this.zones[key], x: this.state[key].x, y: this.state[key].y, w: this.state[key].w, h: this.state[key].h };
                         }
@@ -556,12 +546,11 @@
                     const g = this.state.grid ?? {};
                     if (g.max_dokter_per_halaman !== undefined) this.maxDokterPerHalaman = g.max_dokter_per_halaman;
                     if (g.gap_v               !== undefined) this.gapV             = g.gap_v;
-                    if (g.judul_warna         !== undefined) this.judulWarna       = g.judul_warna;
-                    if (g.judul_size          !== undefined) this.judulSize        = g.judul_size;
                     if (g.label_executive     !== undefined) this.labelExecutive   = g.label_executive;
                     if (g.label_reguler       !== undefined) this.labelReguler     = g.label_reguler;
                     if (g.section_title_warna !== undefined) this.sectionTitleWarna = g.section_title_warna;
                     if (g.section_title_size  !== undefined) this.sectionTitleSize  = g.section_title_size;
+                    if (g.section_title_font?.nama !== undefined) this.sectionTitleFont = g.section_title_font.nama;
                     if (g.card_bg_warna       !== undefined) this.cardBg           = g.card_bg_warna;
                     if (g.card_border_warna   !== undefined) this.cardBorderWarna  = g.card_border_warna;
                     if (g.card_border_width   !== undefined) this.cardBorderWidth  = g.card_border_width;
@@ -645,7 +634,6 @@
 
             saveConfig() {
                 this.state = {
-                    zona_judul:   { ...this.zones.zona_judul },
                     zona_tanggal: {
                         ...this.zones.zona_tanggal,
                         font: this.tanggalFont,
@@ -662,12 +650,11 @@
                     grid: {
                         max_dokter_per_halaman: parseInt(this.maxDokterPerHalaman) || 4,
                         gap_v:                parseInt(this.gapV) || 0,
-                        judul_warna:          this.judulWarna,
-                        judul_size:           parseInt(this.judulSize) || 56,
                         label_executive:      this.labelExecutive,
                         label_reguler:        this.labelReguler,
                         section_title_warna:  this.sectionTitleWarna,
                         section_title_size:   parseInt(this.sectionTitleSize) || 32,
+                        section_title_font:   { sumber: 'google', nama: this.sectionTitleFont },
                         card_bg_warna:        this.cardBg,
                         card_border_warna:    this.cardBorderWarna,
                         card_border_width:    parseInt(this.cardBorderWidth) || 0,

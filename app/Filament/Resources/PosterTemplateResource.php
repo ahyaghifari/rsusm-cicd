@@ -24,7 +24,7 @@ class PosterTemplateResource extends BaseRumahSakitResource
 
     protected static ?string $navigationGroup = 'Poster Jadwal';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 3;
     // protected static bool $shouldRegisterNavigation = false;
 
     // ── Form ──────────────────────────────────────────────────────────────────

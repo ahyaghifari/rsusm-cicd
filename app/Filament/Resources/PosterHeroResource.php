@@ -23,7 +23,7 @@ class PosterHeroResource extends BaseRumahSakitResource
 
     protected static ?string $navigationGroup = 'Poster Jadwal';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {

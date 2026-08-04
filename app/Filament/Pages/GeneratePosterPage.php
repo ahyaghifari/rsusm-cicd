@@ -101,7 +101,7 @@ class GeneratePosterPage extends Page
     {
         if (! $templateId) return null;
 
-        $query = PosterTemplate::query()->with($with);
+        $query = PosterTemplate::query()->with($with)->where('jenis', 'JADWAL_HARIAN');
 
         if (! $this->isSuperAdmin()) {
             $query->where('rumah_sakit_id', $this->currentUserRumahSakitId());
@@ -178,6 +178,7 @@ class GeneratePosterPage extends Page
                                 if (! $rsId) return [];
 
                                 return PosterTemplate::where('rumah_sakit_id', $rsId)
+                                    ->where('jenis', 'JADWAL_HARIAN')
                                     ->pluck('nama', 'id');
                             })
                             ->disabled(fn () => $this->isSuperAdmin() && ! $this->resolvedRumahSakitId())

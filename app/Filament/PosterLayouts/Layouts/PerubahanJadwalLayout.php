@@ -35,27 +35,26 @@ class PerubahanJadwalLayout implements PosterLayout
     public function defaultConfig(): array
     {
         return [
-            'zona_judul' => [
-                'x' => 60, 'y' => 140, 'w' => 960, 'h' => 160,
-            ],
+            // Judul poster ("Perubahan Jadwal Praktik Dokter Spesialis") sudah
+            // jadi bagian dari template PNG yang diupload admin, jadi tidak ada
+            // zona/konfigurasi judul terpisah di sini.
             'zona_tanggal' => [
-                'x' => 60, 'y' => 300, 'w' => 400, 'h' => 60,
+                'x' => 60, 'y' => 220, 'w' => 400, 'h' => 60,
                 'font' => 'Montserrat', 'size' => 30,
                 'warna' => '#ffffff', 'bg_warna' => '#c0392b', 'align' => 'center',
                 'padding_x' => 28, 'padding_y' => 10, 'radius' => 999,
             ],
             'zona_konten' => [
-                'x' => 60, 'y' => 400, 'w' => 960, 'h' => 1300,
+                'x' => 60, 'y' => 320, 'w' => 960, 'h' => 1400,
             ],
             'grid' => [
                 'max_dokter_per_halaman' => 4,
                 'gap_v'                  => 24,
-                'judul_warna'            => '#c0392b',
-                'judul_size'             => 56,
                 'label_executive'        => 'Klinik Executive',
                 'label_reguler'          => 'Poliklinik Reguler',
                 'section_title_warna'    => '#c0392b',
                 'section_title_size'     => 32,
+                'section_title_font'     => ['sumber' => 'google', 'nama' => 'Montserrat'],
                 'card_bg_warna'          => '#ffffff',
                 'card_border_warna'      => '#c0392b',
                 'card_border_width'      => 2,

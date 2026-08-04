@@ -24,12 +24,9 @@
     $cfg = $template->config ?: \App\Models\PosterTemplate::defaultConfig((int) $template->rumah_sakit_id, \App\Enums\JenisPosterTemplate::PERUBAHAN_JADWAL);
     $g   = $cfg['grid'] ?? [];
 
-    $zonaJudul   = $cfg['zona_judul']   ?? ['x' => 60, 'y' => 140, 'w' => 960, 'h' => 160];
     $zonaTanggal = $cfg['zona_tanggal'] ?? ['x' => 60, 'y' => 300, 'w' => 400, 'h' => 60, 'font' => 'Montserrat', 'size' => 30, 'warna' => '#ffffff', 'bg_warna' => '#c0392b', 'align' => 'center'];
     $zonaKonten  = $cfg['zona_konten']  ?? ['x' => 60, 'y' => 400, 'w' => 960, 'h' => 1300];
 
-    $judulWarna   = $g['judul_warna']        ?? '#c0392b';
-    $judulSize    = (int) ($g['judul_size']  ?? 56);
     $gapV         = (int) ($g['gap_v']       ?? 24);
 
     $labelExecutive = $g['label_executive'] ?? 'Klinik Executive';
@@ -37,6 +34,7 @@
 
     $sectionTitleWarna = $g['section_title_warna'] ?? '#c0392b';
     $sectionTitleSize  = (int) ($g['section_title_size'] ?? 32);
+    $sectionTitleFont  = $g['section_title_font']['nama'] ?? 'Montserrat';
 
     $cardBg      = $g['card_bg_warna']     ?? '#ffffff';
     $cardBorderC = $g['card_border_warna'] ?? '#c0392b';
@@ -68,8 +66,9 @@
     $tanggalRadius   = (int) ($zonaTanggal['radius']    ?? 999);
 
     $googleFonts = array_unique(array_filter([
-        str_replace(' ', '+', $fontNamaKlinik) . ':wght@400;600;700;800',
-        str_replace(' ', '+', $fontIsi)        . ':wght@400;500;600;700',
+        str_replace(' ', '+', $fontNamaKlinik)  . ':wght@400;600;700;800',
+        str_replace(' ', '+', $fontIsi)         . ':wght@400;500;600;700',
+        str_replace(' ', '+', $sectionTitleFont). ':wght@400;600;700;800',
     ]));
 @endphp
 
@@ -105,15 +104,6 @@ body {
 
 #layer-content { position: absolute; inset: 0; z-index: 3; }
 
-.judul {
-    font-family: '{{ $fontNamaKlinik }}', sans-serif;
-    font-size: {{ $judulSize }}px;
-    font-weight: 800;
-    color: {{ $judulWarna }};
-    text-align: center;
-    line-height: 1.15;
-}
-
 .tanggal-badge {
     display: inline-flex;
     align-items: center;
@@ -128,10 +118,11 @@ body {
 }
 
 .section-title {
-    font-family: '{{ $fontNamaKlinik }}', sans-serif;
+    font-family: '{{ $sectionTitleFont }}', sans-serif;
     font-size: {{ $sectionTitleSize }}px;
     font-weight: 800;
     color: {{ $sectionTitleWarna }};
+    text-align: center;
     margin-bottom: 16px;
 }
 
@@ -204,11 +195,6 @@ body {
 </div>
 
 <div id="layer-content">
-
-    {{-- Judul --}}
-    <div style="position:absolute; left:{{ $zonaJudul['x'] }}px; top:{{ $zonaJudul['y'] }}px; width:{{ $zonaJudul['w'] }}px; height:{{ $zonaJudul['h'] }}px; display:flex; align-items:center; justify-content:center;">
-        <div class="judul">Perubahan Jadwal Praktik<br>Dokter Spesialis</div>
-    </div>
 
     {{-- Tanggal --}}
     <div style="position:absolute; left:{{ $zonaTanggal['x'] }}px; top:{{ $zonaTanggal['y'] }}px; width:{{ $zonaTanggal['w'] }}px; height:{{ $zonaTanggal['h'] }}px; display:flex; align-items:center; justify-content:{{ ($zonaTanggal['align'] ?? 'center') === 'left' ? 'flex-start' : (($zonaTanggal['align'] ?? 'center') === 'right' ? 'flex-end' : 'center') }};">
