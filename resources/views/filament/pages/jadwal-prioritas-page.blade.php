@@ -111,15 +111,27 @@
                             <th class="px-3 py-2 text-left">Poliklinik</th>
                             <th class="px-3 py-2 text-left">Dokter</th>
                             <th class="px-3 py-2 text-left">Jam</th>
+                            <th class="px-3 py-2 text-right w-24">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-white/5">
                         @foreach ($existingJadwal as $j)
-                        <tr>
+                        <tr wire:key="existing-{{ $j->id }}">
                             <td class="px-3 py-2">{{ $j->tanggal->translatedFormat('d M Y') }}</td>
                             <td class="px-3 py-2">{{ $j->poliklinik?->nama ?? '-' }}</td>
                             <td class="px-3 py-2">{{ $j->nama_dokter ?: ($j->dokter?->nama ?? '-') }}</td>
                             <td class="px-3 py-2 font-mono">{{ $j->jam_mulai?->format('H:i') }}–{{ $j->jam_selesai?->format('H:i') ?? 'selesai' }}</td>
+                            <td class="px-3 py-2 text-right whitespace-nowrap">
+                                <button type="button" wire:click="editExisting({{ $j->id }})"
+                                        class="text-primary-600 hover:text-primary-700 text-xs font-medium mr-3">
+                                    Edit
+                                </button>
+                                <button type="button"
+                                        x-on:click="if (confirm('Hapus jadwal ini?')) $wire.hapusExisting({{ $j->id }})"
+                                        class="text-red-500 hover:text-red-600 text-xs font-medium">
+                                    Hapus
+                                </button>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>

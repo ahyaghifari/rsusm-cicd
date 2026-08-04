@@ -183,6 +183,38 @@ class JadwalPrioritasPage extends Page
         ];
     }
 
+    /** Muat 1 jadwal tersimpan ke baris input supaya bisa diubah lalu disimpan ulang (upsert). */
+    public function editExisting(int $id): void
+    {
+        abort_unless(auth()->user()?->can('update_jadwal::harian'), 403);
+
+        $jadwal = JadwalHarian::find($id);
+        if (! $jadwal) return;
+
+        $this->rows[(string) Str::uuid()] = [
+            'poliklinik_id' => $jadwal->poliklinik_id,
+            'dokter_id'     => $jadwal->dokter_id,
+            'nama_dokter'   => $jadwal->nama_dokter,
+            'tanggal'       => $jadwal->tanggal->format('Y-m-d'),
+            'jam_mulai'     => $jadwal->jam_mulai?->format('H:i'),
+            'jam_selesai'   => $jadwal->jam_selesai?->format('H:i'),
+        ];
+
+        Notification::make()
+            ->title('Jadwal dimuat ke form input')
+            ->body('Ubah lalu klik "Simpan Semua" untuk menyimpan perubahan.')
+            ->info()->send();
+    }
+
+    public function hapusExisting(int $id): void
+    {
+        abort_unless(auth()->user()?->can('update_jadwal::harian'), 403);
+
+        JadwalHarian::whereKey($id)->delete();
+
+        Notification::make()->title('Jadwal dihapus')->success()->send();
+    }
+
     public function removeRow(string $key): void
     {
         unset($this->rows[$key]);
