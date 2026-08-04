@@ -14,9 +14,9 @@
         <div class="fi-section rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10 p-6">
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                 Untuk poliklinik yang jadwal dokternya tidak mengikuti pola mingguan tetap (mis. poli umum) —
-                pilih poliklinik &amp; periode, lalu isi langsung per tanggal di sini. Semua jadwal di halaman ini
-                otomatis ditandai <span class="font-semibold">executive</span>. Untuk edit/hapus jadwal yang sudah
-                tersimpan, gunakan halaman <span class="font-semibold">Jadwal Harian</span>.
+                isi langsung per tanggal di sini. Semua jadwal di halaman ini otomatis ditandai
+                <span class="font-semibold">executive</span>. Untuk edit/hapus jadwal yang sudah tersimpan,
+                gunakan halaman <span class="font-semibold">Jadwal Harian</span>.
             </p>
 
             {{ $this->filterForm }}
@@ -26,26 +26,27 @@
         <div class="fi-section rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10 p-6 text-center text-sm text-gray-500">
             Pilih rumah sakit terlebih dahulu.
         </div>
-        @elseif (! $selectedPoliklinikId)
+        @elseif (! $selectedBulan || ! $selectedTahun)
         <div class="fi-section rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10 p-6 text-center text-sm text-gray-500">
-            Pilih poliklinik terlebih dahulu.
+            Pilih bulan &amp; tahun terlebih dahulu.
         </div>
         @else
 
-        {{-- Jadwal yang sudah tersimpan untuk poliklinik + periode ini --}}
+        {{-- Jadwal yang sudah tersimpan untuk RS + periode ini --}}
         @php $existingJadwal = $this->getExistingJadwal(); @endphp
         <div class="fi-section rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10 overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-100 dark:border-white/5">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-white">Jadwal Tersimpan Bulan Ini</h3>
             </div>
             @if ($existingJadwal->isEmpty())
-            <p class="px-4 py-4 text-sm text-gray-400">Belum ada jadwal tersimpan untuk poliklinik &amp; periode ini.</p>
+            <p class="px-4 py-4 text-sm text-gray-400">Belum ada jadwal tersimpan untuk periode ini.</p>
             @else
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50 dark:bg-gray-800 text-xs uppercase text-gray-500 dark:text-gray-400">
                         <tr>
                             <th class="px-3 py-2 text-left">Tanggal</th>
+                            <th class="px-3 py-2 text-left">Poliklinik</th>
                             <th class="px-3 py-2 text-left">Dokter</th>
                             <th class="px-3 py-2 text-left">Jam</th>
                         </tr>
@@ -54,6 +55,7 @@
                         @foreach ($existingJadwal as $j)
                         <tr>
                             <td class="px-3 py-2">{{ $j->tanggal->translatedFormat('d M Y') }}</td>
+                            <td class="px-3 py-2">{{ $j->poliklinik?->nama ?? '-' }}</td>
                             <td class="px-3 py-2">{{ $j->nama_dokter ?: ($j->dokter?->nama ?? '-') }}</td>
                             <td class="px-3 py-2 font-mono">{{ $j->jam_mulai?->format('H:i') }}–{{ $j->jam_selesai?->format('H:i') ?? 'selesai' }}</td>
                         </tr>
@@ -70,6 +72,7 @@
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50 dark:bg-gray-800 text-xs uppercase text-gray-500 dark:text-gray-400">
                         <tr>
+                            <th class="px-3 py-2 text-left w-48">Poliklinik</th>
                             <th class="px-3 py-2 text-left w-64">Dokter</th>
                             <th class="px-3 py-2 text-left w-36">Tanggal</th>
                             <th class="px-3 py-2 text-left w-28">Jam Mulai</th>
@@ -81,6 +84,15 @@
                         @forelse ($rows as $key => $row)
                         <tr wire:key="row-{{ $key }}">
                             <td class="px-3 py-2 align-top">
+                                <select wire:model.live="rows.{{ $key }}.poliklinik_id"
+                                        class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white">
+                                    <option value="">— Pilih Poliklinik —</option>
+                                    @foreach ($this->getPoliklinikOptions() as $id => $nama)
+                                        <option value="{{ $id }}">{{ $nama }}</option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td class="px-3 py-2 align-top">
                                 <div class="ts-portal-wrapper" wire:ignore x-data="{
                                     ts: null,
                                     init() {
@@ -89,10 +101,10 @@
                                         this.ts.on('change', (v) => $wire.set('rows.{{ $key }}.dokter_id', v || null));
                                     },
                                     destroy() { if (this.ts) { this.ts.destroy(); this.ts = null; } }
-                                }">
+                                }" wire:key="ts-dokter-{{ $key }}-{{ $row['poliklinik_id'] }}">
                                     <select x-ref="sel" class="w-full text-xs">
                                         <option value="">— Dokter (opsional) —</option>
-                                        @foreach ($this->getDokterOptions() as $id => $nama)
+                                        @foreach ($this->getDokterOptions($row['poliklinik_id']) as $id => $nama)
                                             <option value="{{ $id }}">{{ $nama }}</option>
                                         @endforeach
                                     </select>
@@ -137,7 +149,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="px-3 py-6 text-center text-sm text-gray-400">Belum ada baris — klik "Tambah Baris" di bawah.</td>
+                            <td colspan="6" class="px-3 py-6 text-center text-sm text-gray-400">Belum ada baris — klik "Tambah Baris" di bawah.</td>
                         </tr>
                         @endforelse
                     </tbody>

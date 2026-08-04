@@ -19,12 +19,12 @@ use Illuminate\Support\Str;
  * Input jadwal untuk poliklinik yang tidak punya pola mingguan tetap
  * (mis. poli umum yang jadwal dokternya beda tiap bulan). Beda dari
  * Jadwal Harian (yang terkunci ke 1 tanggal per layar), di sini tiap
- * baris punya tanggalnya sendiri — jadi bisa input banyak tanggal
- * berbeda dalam satu kali simpan.
+ * baris punya poliklinik & tanggalnya sendiri — jadi bisa input banyak
+ * poliklinik/tanggal berbeda dalam satu kali simpan.
  *
- * Poliklinik + bulan/tahun dipilih sekali di level halaman (bukan per
- * baris) — supaya bisa dipakai buat menampilkan jadwal yang sudah
- * tersimpan untuk poliklinik & periode tsb, bukan cuma form input buta.
+ * Rumah Sakit + Bulan/Tahun dipilih sekali di level halaman — dipakai
+ * buat menampilkan jadwal yang sudah tersimpan pada periode itu, bukan
+ * cuma form input buta.
  *
  * Semua baris di sini otomatis dianggap "executive" (prioritas) —
  * tidak ada toggle manual, langsung di-set true saat simpan.
@@ -46,13 +46,12 @@ class JadwalPrioritasPage extends Page
     protected ?string $maxContentWidth = 'full';
 
     public ?int $selectedRumahSakitId = null;
-    public ?int $selectedPoliklinikId = null;
     public ?int $selectedBulan = null;
     public ?int $selectedTahun = null;
 
     public array $rows = [];
 
-    /** @var array<string, array<int, array{tanggal:string, jam:string}>> keyed by row uuid */
+    /** @var array<string, array<int, array{tanggal:string, poliklinik:string, jam:string}>> keyed by row uuid */
     public array $dokterJadwalPreview = [];
 
     public function mount(): void
@@ -88,7 +87,7 @@ class JadwalPrioritasPage extends Page
             : BaseResource::rumahSakitId();
     }
 
-    // ── Filter form (pilih RS + poliklinik + periode) ───────────────────────
+    // ── Filter form (pilih RS + periode) ────────────────────────────────────
 
     protected function getForms(): array
     {
@@ -107,19 +106,6 @@ class JadwalPrioritasPage extends Page
                     ->visible(fn () => $this->isSuperAdmin())
                     ->searchable()
                     ->live()
-                    ->afterStateUpdated(function () {
-                        $this->selectedPoliklinikId = null;
-                        $this->resetRows();
-                    }),
-
-                Forms\Components\Select::make('selectedPoliklinikId')
-                    ->label('Poliklinik')
-                    ->placeholder('— Pilih Poliklinik —')
-                    ->options(fn () => $this->getPoliklinikOptions())
-                    ->required()
-                    ->disabled(fn () => ! $this->getActiveRumahSakitId())
-                    ->searchable()
-                    ->live()
                     ->afterStateUpdated(fn () => $this->resetRows()),
 
                 Forms\Components\Select::make('selectedBulan')
@@ -129,7 +115,7 @@ class JadwalPrioritasPage extends Page
                         fn ($m) => [$m => Carbon::create()->month($m)->translatedFormat('F')]
                     ))
                     ->required()
-                    ->visible(fn () => (bool) $this->selectedPoliklinikId)
+                    ->visible(fn () => (bool) $this->getActiveRumahSakitId())
                     ->live(),
 
                 Forms\Components\Select::make('selectedTahun')
@@ -138,11 +124,11 @@ class JadwalPrioritasPage extends Page
                     ->options(collect(range((int) now()->format('Y') - 1, (int) now()->format('Y') + 1))
                         ->mapWithKeys(fn ($y) => [$y => (string) $y]))
                     ->required()
-                    ->visible(fn () => (bool) $this->selectedPoliklinikId)
+                    ->visible(fn () => (bool) $this->getActiveRumahSakitId())
                     ->live(),
             ])
             ->statePath('')
-            ->columns(4);
+            ->columns(3);
     }
 
     // ── Options ──────────────────────────────────────────────────────────────
@@ -162,10 +148,10 @@ class JadwalPrioritasPage extends Page
             ->toArray();
     }
 
-    public function getDokterOptions(): array
+    public function getDokterOptions(?int $poliklinikId): array
     {
-        if ($this->selectedPoliklinikId) {
-            return PoliKlinik::find($this->selectedPoliklinikId)?->dokter()
+        if ($poliklinikId) {
+            return PoliKlinik::find($poliklinikId)?->dokter()
                 ->where('aktif', true)
                 ->orderBy('nama')
                 ->pluck('nama', 'id')
@@ -182,18 +168,19 @@ class JadwalPrioritasPage extends Page
             ->toArray();
     }
 
-    // ── Jadwal yang sudah tersimpan — poliklinik + periode aktif ────────────
+    // ── Jadwal yang sudah tersimpan — RS + periode aktif ─────────────────────
 
     public function getExistingJadwal(): Collection
     {
-        if (! $this->selectedPoliklinikId || ! $this->selectedBulan || ! $this->selectedTahun) {
+        $rsId = $this->getActiveRumahSakitId();
+        if (! $rsId || ! $this->selectedBulan || ! $this->selectedTahun) {
             return collect();
         }
 
-        return JadwalHarian::where('poliklinik_id', $this->selectedPoliklinikId)
-            ->whereYear('tanggal', $this->selectedTahun)
+        return JadwalHarian::whereYear('tanggal', $this->selectedTahun)
             ->whereMonth('tanggal', $this->selectedBulan)
-            ->with('dokter')
+            ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rsId)->where('jadwal_tidak_tetap', true))
+            ->with(['poliklinik', 'dokter'])
             ->orderBy('tanggal')
             ->get();
     }
@@ -203,11 +190,12 @@ class JadwalPrioritasPage extends Page
     public function addRow(): void
     {
         $this->rows[(string) Str::uuid()] = [
-            'dokter_id'   => null,
-            'nama_dokter' => null,
-            'tanggal'     => null,
-            'jam_mulai'   => null,
-            'jam_selesai' => null,
+            'poliklinik_id' => null,
+            'dokter_id'     => null,
+            'nama_dokter'   => null,
+            'tanggal'       => null,
+            'jam_mulai'     => null,
+            'jam_selesai'   => null,
         ];
     }
 
@@ -269,21 +257,16 @@ class JadwalPrioritasPage extends Page
             return;
         }
 
-        if (! $this->selectedPoliklinikId) {
-            Notification::make()->title('Pilih poliklinik terlebih dahulu')->warning()->send();
-            return;
-        }
-
         if (empty($this->rows)) {
             Notification::make()->title('Belum ada baris untuk disimpan')->warning()->send();
             return;
         }
 
         foreach (array_values($this->rows) as $i => $row) {
-            if (empty($row['tanggal'])) {
+            if (empty($row['poliklinik_id']) || empty($row['tanggal'])) {
                 Notification::make()
                     ->title('Baris ke-' . ($i + 1) . ' belum lengkap')
-                    ->body('Tanggal wajib diisi.')
+                    ->body('Poliklinik dan tanggal wajib diisi.')
                     ->warning()->send();
                 return;
             }
@@ -303,7 +286,7 @@ class JadwalPrioritasPage extends Page
             // nama_dokter kalau dokter_id kosong (free text), supaya beberapa
             // dokter tanpa akun master di tanggal+poliklinik sama tidak saling timpa.
             $matchKeys = [
-                'poliklinik_id' => $this->selectedPoliklinikId,
+                'poliklinik_id' => $row['poliklinik_id'],
                 'tanggal'       => $row['tanggal'],
             ];
             $matchKeys += $row['dokter_id']
