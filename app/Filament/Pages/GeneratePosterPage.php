@@ -65,7 +65,7 @@ class GeneratePosterPage extends Page
     /** Lewat jam 18:00 → default tanggal langsung besok (jadwal hari ini sudah lewat waktunya). */
     private function defaultTanggal(): string
     {
-        return now()->hour >= 18
+        return now()->hour >= 17
             ? now()->addDay()->format('Y-m-d')
             : now()->format('Y-m-d');
     }
@@ -120,12 +120,10 @@ class GeneratePosterPage extends Page
 
     // ── Helpers akses $data ───────────────────────────────────────────────────
 
-    /** RS yang sudah pakai skema "template per hari" — gak perlu pilih template manual lagi. */
-    private const HARI_TEMPLATE_RS_IDS = [1]; // RSU Syifa Medika Banjarbaru (GridShapeLayout)
-
+    /** Template dipilih otomatis (hari + jenis klinik) buat semua RS — gak ada lagi pilihan manual. */
     private function usesHariTemplate(?int $rsId): bool
     {
-        return $rsId && in_array($rsId, self::HARI_TEMPLATE_RS_IDS, true);
+        return (bool) $rsId;
     }
 
     /** Cek langsung dari data RS — gak perlu nunggu loadPoliList() jalan buat nampilin Filter Klinik. */
@@ -217,23 +215,6 @@ class GeneratePosterPage extends Page
                                 $this->hospitalHasExecutiveClinic = false;
                                 $this->loadPoliList();
                             }),
-
-                        Forms\Components\Select::make('template_id')
-                            ->label('Template Poster')
-                            ->options(function (Forms\Get $get) {
-                                $rsId = $this->resolvedRumahSakitId();
-                                if (! $rsId) return [];
-
-                                return PosterTemplate::where('rumah_sakit_id', $rsId)
-                                    ->where('jenis', 'JADWAL_HARIAN')
-                                    ->pluck('nama', 'id');
-                            })
-                            ->disabled(fn () => $this->isSuperAdmin() && ! $this->resolvedRumahSakitId())
-                            ->searchable()
-                            ->required(fn () => ! $this->usesHariTemplate($this->resolvedRumahSakitId()))
-                            ->visible(fn () => ! $this->usesHariTemplate($this->resolvedRumahSakitId()))
-                            ->live()
-                            ->afterStateUpdated(fn (Forms\Get $get) => $this->loadPoliList($get)),
 
                         Forms\Components\Select::make('executive_clinic_filter')
                             ->label('Filter Klinik')
@@ -586,8 +567,17 @@ class GeneratePosterPage extends Page
         $templateId = $this->getTemplateId();
         $tanggalStr = $this->getTanggal();
 
-        if (! $templateId || ! $tanggalStr) {
-            Notification::make()->title('Pilih template dan tanggal terlebih dahulu.')->warning()->send();
+        if (! $tanggalStr) {
+            Notification::make()->title('Pilih tanggal terlebih dahulu.')->warning()->send();
+            return [null, null];
+        }
+
+        if (! $templateId) {
+            Notification::make()
+                ->title('Template poster belum tersedia.')
+                ->body('Belum ada Template Poster untuk hari & jenis klinik ini. Buat dulu di menu Template Poster.')
+                ->danger()
+                ->send();
             return [null, null];
         }
 
