@@ -93,7 +93,7 @@
 </style>
 
 <div class="space-y-4"
-    x-data="{ isFs: $wire.entangle('isFullscreen') }"
+    x-data="{ isFs: $wire.entangle('isFullscreen'), cariDokter: '' }"
     x-init="document.body.classList.toggle('jp-fullscreen', isFs)"
     x-effect="isFs
         ? document.body.classList.add('jp-fullscreen')
@@ -271,7 +271,7 @@
                              terlepas dari filter Reguler/Eksekutif yang sedang aktif --}}
                         @if($this->hasJadwalHarianData())
                             <x-filament::button
-                                color="danger"
+                                color="gray"
                                 icon="heroicon-m-trash"
                                 outlined
                                 x-on:click="
@@ -312,8 +312,21 @@
                 </div>
             </x-slot>
 
+            {{-- Cari Dokter — filter tampilan baris tabel di bawah, tidak mengubah data --}}
+            <div class="relative mt-4 max-w-xs">
+                <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
+                </svg>
+                <input
+                    type="text"
+                    x-model="cariDokter"
+                    placeholder="Cari nama dokter..."
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white text-sm pl-9 shadow-sm focus:ring-primary-500 focus:border-primary-500"
+                >
+            </div>
+
             {{-- Custom Table for Jadwal Harian --}}
-            <div class="overflow-x-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm mt-4">
+            <div class="overflow-x-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm mt-2">
                 <table class="w-full text-left text-sm text-gray-700 dark:text-gray-300">
                     <thead class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
                         <tr>
@@ -339,6 +352,8 @@
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                         @forelse($rows as $uuid => $row)
                             <tr wire:key="row-{{ $uuid }}"
+                                data-nama-dokter="{{ \Illuminate\Support\Str::lower($row['nama_dokter'] ?? '') }}"
+                                x-show="cariDokter === '' || $el.dataset.namaDokter.includes(cariDokter.toLowerCase())"
                                 @class([
                                     'transition-colors',
                                     'border-l-4 border-amber-400 bg-amber-50/70 dark:bg-amber-900/10 hover:bg-amber-100/70 dark:hover:bg-amber-900/20' => (bool) ($row['is_executive'] ?? false),
