@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Hari;
 use App\Enums\JenisPosterTemplate;
 use App\Filament\PosterLayouts\Contracts\PosterLayout;
 use App\Filament\PosterLayouts\LayoutRegistry;
@@ -19,13 +20,15 @@ class PosterTemplate extends Model
         'logo_header',
         'shape_poli',
         'config',
-        'is_default',
+        'hari',
+        'is_executive',
     ];
 
     protected $casts = [
-        'jenis'      => JenisPosterTemplate::class,
-        'config'     => 'array',
-        'is_default' => 'boolean',
+        'jenis'        => JenisPosterTemplate::class,
+        'config'       => 'array',
+        'hari'         => Hari::class,
+        'is_executive' => 'boolean',
     ];
 
     // ── Relasi ─────────────────────────────────────────────────────────────────

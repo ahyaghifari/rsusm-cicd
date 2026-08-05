@@ -112,8 +112,40 @@ class GeneratePosterPage extends Page
 
     // ── Helpers akses $data ───────────────────────────────────────────────────
 
+    /** RS yang sudah pakai skema "template per hari" — gak perlu pilih template manual lagi. */
+    private const HARI_TEMPLATE_RS_IDS = [1]; // RSU Syifa Medika Banjarbaru (GridShapeLayout)
+
+    private function usesHariTemplate(?int $rsId): bool
+    {
+        return $rsId && in_array($rsId, self::HARI_TEMPLATE_RS_IDS, true);
+    }
+
+    /** Cari PosterTemplate yang cocok buat hari (dari tanggal) + jenis klinik. Fallback ke hari=null (default). */
+    private function resolveTemplateForHari(int $rsId, Carbon $tanggal, string $filter): ?PosterTemplate
+    {
+        $hariValue = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'][$tanggal->dayOfWeek];
+        $isExecutive = $filter === 'eksekutif';
+
+        $query = PosterTemplate::where('rumah_sakit_id', $rsId)
+            ->where('jenis', 'JADWAL_HARIAN')
+            ->where('is_executive', $isExecutive);
+
+        return (clone $query)->where('hari', $hariValue)->first()
+            ?? $query->whereNull('hari')->first();
+    }
+
     private function getTemplateId(): ?int
     {
+        $rsId = $this->resolvedRumahSakitId();
+
+        if ($this->usesHariTemplate($rsId)) {
+            $tanggalStr = $this->getTanggal();
+            if (! $tanggalStr) return null;
+
+            $template = $this->resolveTemplateForHari($rsId, Carbon::parse($tanggalStr), $this->getExecutiveClinicFilter());
+            return $template?->id;
+        }
+
         $val = $this->data['template_id'] ?? null;
         return $val ? (int) $val : null;
     }
@@ -169,6 +201,7 @@ class GeneratePosterPage extends Page
                                 $set('poster_hero_id', null);
                                 $this->poli_list = [];
                                 $this->hospitalHasExecutiveClinic = false;
+                                $this->loadPoliList();
                             }),
 
                         Forms\Components\Select::make('template_id')
@@ -183,26 +216,16 @@ class GeneratePosterPage extends Page
                             })
                             ->disabled(fn () => $this->isSuperAdmin() && ! $this->resolvedRumahSakitId())
                             ->searchable()
-                            ->required()
+                            ->required(fn () => ! $this->usesHariTemplate($this->resolvedRumahSakitId()))
+                            ->visible(fn () => ! $this->usesHariTemplate($this->resolvedRumahSakitId()))
                             ->live()
-                            ->afterStateUpdated(function (Forms\Get $get) {
-                                $templateId = (int) $get('template_id') ?: null;
-                                $template   = $this->findTemplateForCurrentUser($templateId);
-                                if ($template) {
-                                    $this->hospitalHasExecutiveClinic = (bool) RumahSakit::where('id', $template->rumah_sakit_id)->value('executive_clinic');
-                                } else {
-                                    $this->hospitalHasExecutiveClinic = false;
-                                }
-                                $this->loadQuickConfig($template);
-                                $this->loadPoliList($get);
-                            }),
+                            ->afterStateUpdated(fn (Forms\Get $get) => $this->loadPoliList($get)),
 
                         Forms\Components\Select::make('executive_clinic_filter')
                             ->label('Filter Klinik')
                             ->options([
-                                'reguler'               => 'Reguler',
-                                'eksekutif'             => 'Eksekutif',
-                                'reguler_dan_eksekutif' => 'Reguler dan Eksekutif',
+                                'reguler'   => 'Reguler',
+                                'eksekutif' => 'Eksekutif',
                             ])
                             ->default('reguler')
                             ->required()
@@ -220,6 +243,7 @@ class GeneratePosterPage extends Page
                             ->live()
                             ->afterStateUpdated(fn (Forms\Get $get) => $this->loadPoliList($get)),
 
+                        // ponytail: dinonaktifkan sementara atas permintaan — set visible(true) lagi buat aktifkan
                         Forms\Components\Select::make('poster_hero_id')
                             ->label('Foto Header')
                             ->options(function () {
@@ -233,7 +257,8 @@ class GeneratePosterPage extends Page
                             })
                             ->disabled(fn () => $this->isSuperAdmin() && ! $this->resolvedRumahSakitId())
                             ->searchable()
-                            ->helperText('Foto yang akan menjadi background layer bawah poster. Kelola di menu Foto Header.'),
+                            ->helperText('Foto yang akan menjadi background layer bawah poster. Kelola di menu Foto Header.')
+                            ->visible(false),
                     ])
                     ->columns(2),
             ])
@@ -262,6 +287,7 @@ class GeneratePosterPage extends Page
 
         $rs = RumahSakit::find($rsId);
         $this->hospitalHasExecutiveClinic = (bool) ($rs?->executive_clinic);
+        $this->loadQuickConfig($template);
 
         // Read executive clinic filter value
         $filter = $get ? $get('executive_clinic_filter') : null;

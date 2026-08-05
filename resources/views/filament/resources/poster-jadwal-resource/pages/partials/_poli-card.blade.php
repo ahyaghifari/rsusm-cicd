@@ -41,6 +41,7 @@
         {{-- Regular Dokter Column --}}
         <div class="poli-dokter" style="background:{{ $cardBg }}; justify-content:{{ $dokterValign }}; gap:{{ $dokterRowGap }}px; padding-top:{{ $overlapPx + $cardPaddingTop }}px; flex:1;">
             @forelse ($jadwalRows as $row)
+            <div style="display:flex; flex-direction:column; gap:1px;">
             <div style="display:flex; align-items:{{ !empty($row['jam_list']) ? 'center' : 'flex-start' }}; line-height:1.35; justify-content:space-between;">
                 <span style="
                     font-family:{{ $fontNamaDokter }};
@@ -116,10 +117,10 @@
                 font-size:{{ $grid['catatan_size'] ?? 8 }}px;
                 font-family:{{ $fontIsi }};
                 font-weight:{{ $grid['catatan_weight'] ?? '400' }};
-                margin-top:2px;
                 line-height:1.35;
             ">{{ $row['catatan'] }}</div>
             @endif
+            </div>
             @empty
             <div style="color:#aaa; font-size:11px; font-style:italic;">Tidak ada jadwal</div>
             @endforelse

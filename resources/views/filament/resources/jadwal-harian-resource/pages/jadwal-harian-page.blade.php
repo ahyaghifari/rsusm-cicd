@@ -520,8 +520,6 @@
                 <span class="text-red-400 font-bold">*</span> Wajib diisi. &nbsp;
                 <strong>Jam Selesai</strong> opsional.
             </p>
-
-            </div>
         </x-filament::section>
 
     @else

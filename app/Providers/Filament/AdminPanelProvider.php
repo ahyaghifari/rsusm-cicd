@@ -51,11 +51,11 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Media Informasi'),
                 NavigationGroup::make()
-                    ->label('Tentang Kami'),
+                    ->label('Tentang Kami')->collapsed(),
                 NavigationGroup::make()
-                    ->label('Layanan'),
+                    ->label('Layanan')->collapsed(),
                 NavigationGroup::make()
-                    ->label('Rawat Inap'),
+                    ->label('Rawat Inap')->collapsed(),
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),

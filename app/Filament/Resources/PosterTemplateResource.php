@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\Hari;
 use App\Enums\JenisPosterTemplate;
 use App\Filament\Resources\PosterTemplateResource\Pages;
 use App\Models\PosterTemplate;
+use App\Models\RumahSakit;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Table;
 
@@ -36,7 +39,7 @@ class PosterTemplateResource extends BaseRumahSakitResource
             // ── Informasi Dasar ──────────────────────────────────────────────
             Forms\Components\Section::make('Informasi Template')
                 ->schema([
-                    static::rsFormField(),
+                    static::rsFormField()->live(),
 
                     Forms\Components\Select::make('jenis')
                         ->label('Jenis Poster')
@@ -51,9 +54,22 @@ class PosterTemplateResource extends BaseRumahSakitResource
                         ->maxLength(100)
                         ->placeholder('Contoh: Template Reguler 2025'),
 
-                    Forms\Components\Toggle::make('is_default')
-                        ->label('Jadikan Template Default')
-                        ->helperText('Template default otomatis terpilih saat generate poster.'),
+                    Forms\Components\Select::make('hari')
+                        ->label('Hari')
+                        ->options(Hari::class)
+                        ->placeholder('— Default / Semua Hari —')
+                        ->helperText('Kosongkan untuk jadi template fallback kalau hari tsb belum punya template khusus.')
+                        ->visible(fn (Forms\Get $get) => $get('jenis') === JenisPosterTemplate::JADWAL_HARIAN->value),
+
+                    Forms\Components\Toggle::make('is_executive')
+                        ->label('Klinik Eksekutif')
+                        ->helperText('Aktifkan kalau template ini khusus buat jadwal klinik eksekutif.')
+                        ->default(false)
+                        ->visible(function (Forms\Get $get) {
+                            if ($get('jenis') !== JenisPosterTemplate::JADWAL_HARIAN->value) return false;
+                            $rsId = $get('rumah_sakit_id') ?? static::rumahSakitId();
+                            return $rsId && (bool) RumahSakit::where('id', $rsId)->value('executive_clinic');
+                        }),
                 ])
                 ->columns(2),
 
@@ -123,8 +139,13 @@ class PosterTemplateResource extends BaseRumahSakitResource
 
                 static::rsTableColumn(),
 
-                Tables\Columns\IconColumn::make('is_default')
-                    ->label('Default')
+                Tables\Columns\TextColumn::make('hari')
+                    ->label('Hari')
+                    ->badge()
+                    ->placeholder('Default'),
+
+                Tables\Columns\IconColumn::make('is_executive')
+                    ->label('Eksekutif')
                     ->boolean(),
 
                 Tables\Columns\TextColumn::make('updated_at')
@@ -154,7 +175,39 @@ class PosterTemplateResource extends BaseRumahSakitResource
                     ->label('Duplikat')
                     ->beforeReplicaSaved(function (PosterTemplate $replica): void {
                         $replica->nama = $replica->nama . ' (Copy)';
-                        $replica->is_default = false;
+                    }),
+                Tables\Actions\Action::make('terapkan_config')
+                    ->label('Terapkan Config')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('gray')
+                    ->form(fn (PosterTemplate $record) => [
+                        Forms\Components\CheckboxList::make('target_ids')
+                            ->label('Terapkan config zone dari template ini ke:')
+                            ->options(
+                                PosterTemplate::where('rumah_sakit_id', $record->rumah_sakit_id)
+                                    ->where('jenis', $record->jenis)
+                                    ->where('id', '!=', $record->id)
+                                    ->pluck('nama', 'id')
+                            )
+                            ->required()
+                            ->bulkToggleable()
+                            ->columns(1),
+                    ])
+                    ->visible(fn (PosterTemplate $record) => PosterTemplate::where('rumah_sakit_id', $record->rumah_sakit_id)
+                        ->where('jenis', $record->jenis)
+                        ->where('id', '!=', $record->id)
+                        ->exists())
+                    ->requiresConfirmation()
+                    ->modalHeading('Terapkan Konfigurasi Zone ke Template Lain')
+                    ->modalDescription(fn (PosterTemplate $record) => "Config zone (posisi, warna, font) dari \"{$record->nama}\" akan menimpa config template yang dipilih. PNG background & logo template tujuan tidak berubah. Tindakan ini tidak bisa dibatalkan.")
+                    ->action(function (PosterTemplate $record, array $data) {
+                        $targets = PosterTemplate::whereIn('id', $data['target_ids'])->get();
+                        $targets->each(fn (PosterTemplate $t) => $t->update(['config' => $record->config]));
+
+                        Notification::make()
+                            ->title("Config diterapkan ke {$targets->count()} template")
+                            ->success()
+                            ->send();
                     }),
                 Tables\Actions\DeleteAction::make(),
             ])
