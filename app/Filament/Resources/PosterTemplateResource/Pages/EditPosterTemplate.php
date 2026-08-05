@@ -17,7 +17,15 @@ class EditPosterTemplate extends EditRecord
                 ->label('Edit Zone')
                 ->icon('heroicon-o-paint-brush')
                 ->color('primary')
-                ->url(fn () => PosterTemplateResource::getUrl('zone-editor', ['record' => $this->record])),
+                ->url(function () {
+                    $layout   = $this->record->layout();
+                    $routeKey = match (true) {
+                        $layout instanceof \App\Filament\PosterLayouts\Layouts\PerubahanJadwalLayout => 'zone-editor-perubahan-jadwal',
+                        $layout instanceof \App\Filament\PosterLayouts\Layouts\ListPolosLayout        => 'zone-editor-list-polos',
+                        default                                                                       => 'zone-editor',
+                    };
+                    return PosterTemplateResource::getUrl($routeKey, ['record' => $this->record]);
+                }),
             Actions\DeleteAction::make(),
         ];
     }

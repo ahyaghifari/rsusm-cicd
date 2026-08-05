@@ -4,7 +4,7 @@
 {{-- Listener: open preview in new tab --}}
 <div x-data x-on:open-preview.window="window.open($event.detail.url, '_blank', 'width=540,height=960,scrollbars=yes,resizable=yes')"></div>
 
-<div class="space-y-3">
+<div class="-mt-6">
 
     {{-- ── Form Section ──────────────────────────────────────────────────────── --}}
     <form wire:submit.prevent="generate">
@@ -23,7 +23,7 @@
             </div>
 
             <div class="fi-section-content px-6 py-4">
-                <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <ul class="grid grid-cols-2 gap-2">
                     @foreach ($this->poli_list as $poli)
                     <li class="flex items-center gap-3 rounded-lg border bg-gray-50 px-4 py-3 dark:bg-gray-800 dark:border-gray-700">
                         <span class="flex-1 text-sm font-medium text-gray-900 dark:text-white">

@@ -158,19 +158,6 @@ class PosterTemplateResource extends BaseRumahSakitResource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('zone_editor')
-                    ->label('Edit Zone')
-                    ->icon('heroicon-o-paint-brush')
-                    ->color('primary')
-                    ->url(function (PosterTemplate $record) {
-                        $layout   = $record->layout();
-                        $routeKey = match (true) {
-                            $layout instanceof \App\Filament\PosterLayouts\Layouts\PerubahanJadwalLayout => 'zone-editor-perubahan-jadwal',
-                            $layout instanceof \App\Filament\PosterLayouts\Layouts\ListPolosLayout        => 'zone-editor-list-polos',
-                            default                                                                       => 'zone-editor',
-                        };
-                        return static::getUrl($routeKey, ['record' => $record]);
-                    }),
                 Tables\Actions\ReplicateAction::make()
                     ->label('Duplikat')
                     ->beforeReplicaSaved(function (PosterTemplate $replica): void {
@@ -209,12 +196,6 @@ class PosterTemplateResource extends BaseRumahSakitResource
                             ->success()
                             ->send();
                     }),
-                Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
     }
 
