@@ -15,15 +15,15 @@
         <div class="mt-6 fi-section rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10">
             <div class="fi-section-header px-6 py-4 border-b border-gray-200 dark:border-white/10">
                 <h3 class="fi-section-header-heading text-base font-semibold leading-6 text-gray-950 dark:text-white">
-                    3. Poliklinik
+                    Poliklinik
                 </h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                    Poliklinik yang akan ditampilkan pada poster.
+                    {{ count($this->poli_list) }} poliklinik &middot; {{ $this->dokterCount }} dokter masuk daftar.
                 </p>
             </div>
 
             <div class="fi-section-content px-6 py-4">
-                <ul class="space-y-2">
+                <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     @foreach ($this->poli_list as $poli)
                     <li class="flex items-center gap-3 rounded-lg border bg-gray-50 px-4 py-3 dark:bg-gray-800 dark:border-gray-700">
                         <span class="flex-1 text-sm font-medium text-gray-900 dark:text-white">
@@ -49,7 +49,7 @@
             >
                 <div class="text-left">
                     <h3 class="fi-section-header-heading text-base font-semibold leading-6 text-gray-950 dark:text-white">
-                        4. Sesuaikan Cepat
+                        Sesuaikan Cepat
                     </h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                         Override sementara konfigurasi template — tidak disimpan.

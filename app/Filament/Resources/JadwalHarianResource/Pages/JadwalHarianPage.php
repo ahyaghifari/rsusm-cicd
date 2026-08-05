@@ -444,6 +444,12 @@ class JadwalHarianPage extends Page
                     ->warning()->send();
                 return false;
             }
+            if (empty($row['dokter_id'])) {
+                Notification::make()
+                    ->title("Baris ke-" . ($i + 1) . ": Dokter wajib dipilih")
+                    ->warning()->send();
+                return false;
+            }
         }
 
         foreach (array_values($this->rows) as $i => $row) {

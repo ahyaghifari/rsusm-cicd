@@ -319,8 +319,7 @@
                         <tr>
                             <th class="px-3 py-3 w-10 text-center text-xs font-semibold text-gray-600 dark:text-gray-300">No</th>
                             <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-48">Poliklinik <span class="text-red-500">*</span></th>
-                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-48">Dokter</th>
-                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-40">Nama Dokter</th>
+                            <th class="px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-48">Dokter <span class="text-red-500">*</span></th>
                              @if($this->hasExecutiveClinic())
                             <th class="px-3 py-3 text-xs font-semibold text-amber-600 dark:text-amber-400 text-center whitespace-nowrap">
                                 <span class="inline-flex items-center gap-0.5">
@@ -394,19 +393,12 @@
                                         destroy() { if(this.ts) { this.ts.destroy(); this.ts = null; } }
                                     }">
                                         <select x-ref="sel" class="w-full text-sm">
-                                            <option value="">— Opsional —</option>
+                                            <option value="">— Pilih Dokter —</option>
                                             @foreach($this->getDokterOptions() as $val => $label)
                                                 <option value="{{ $val }}">{{ $label }}</option>
                                             @endforeach
                                         </select>
                                     </div>
-                                </td>
-
-                                {{-- Nama Dokter --}}
-                                <td class="px-2 py-1.5">
-                                    <input type="text" wire:model="rows.{{ $uuid }}.nama_dokter" placeholder="Nama dokter..."
-                                        @disabled(! $this->canEditJadwal())
-                                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500"/>
                                 </td>
 
                                  {{-- Executive --}}
@@ -475,7 +467,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ $this->hasExecutiveClinic() ? 11 : 10 }}" class="px-4 py-8 text-center text-gray-400 dark:text-gray-500">
+                                <td colspan="{{ $this->hasExecutiveClinic() ? 10 : 9 }}" class="px-4 py-8 text-center text-gray-400 dark:text-gray-500">
                                     <div class="flex flex-col items-center justify-center gap-2">
                                         <svg class="w-8 h-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>

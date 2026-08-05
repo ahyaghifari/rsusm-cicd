@@ -261,6 +261,12 @@ class JadwalPrioritasPage extends Page
                     ->warning()->send();
                 return;
             }
+            if (empty($row['dokter_id'])) {
+                Notification::make()
+                    ->title('Baris ke-' . ($i + 1) . ': Dokter wajib dipilih')
+                    ->warning()->send();
+                return;
+            }
             if (empty($row['jam_mulai'])) {
                 Notification::make()
                     ->title('Baris ke-' . ($i + 1) . ': Jam Mulai wajib diisi')
@@ -273,16 +279,12 @@ class JadwalPrioritasPage extends Page
 
         foreach ($this->rows as $row) {
             // Upsert: kalau dokter yang sama di poliklinik & tanggal yang sama
-            // sudah ada, update jamnya — bukan bikin baris duplikat. Match pakai
-            // nama_dokter kalau dokter_id kosong (free text), supaya beberapa
-            // dokter tanpa akun master di tanggal+poliklinik sama tidak saling timpa.
+            // sudah ada, update jamnya — bukan bikin baris duplikat.
             $matchKeys = [
                 'poliklinik_id' => $row['poliklinik_id'],
                 'tanggal'       => $row['tanggal'],
+                'dokter_id'     => $row['dokter_id'],
             ];
-            $matchKeys += $row['dokter_id']
-                ? ['dokter_id' => $row['dokter_id']]
-                : ['nama_dokter' => $row['nama_dokter'] ?: null];
 
             JadwalHarian::updateOrCreate(
                 $matchKeys,

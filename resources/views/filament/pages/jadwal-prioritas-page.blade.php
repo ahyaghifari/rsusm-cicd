@@ -148,7 +148,7 @@
                     <thead class="bg-gray-50 dark:bg-gray-800 text-xs uppercase text-gray-500 dark:text-gray-400">
                         <tr>
                             <th class="px-3 py-2 text-left w-48">Poliklinik</th>
-                            <th class="px-3 py-2 text-left w-64">Dokter</th>
+                            <th class="px-3 py-2 text-left w-64">Dokter <span class="text-red-500">*</span></th>
                             <th class="px-3 py-2 text-left w-36">Tanggal</th>
                             <th class="px-3 py-2 text-left w-28">Jam Mulai</th>
                             <th class="px-3 py-2 text-left w-28">Jam Selesai</th>
@@ -178,16 +178,12 @@
                                     destroy() { if (this.ts) { this.ts.destroy(); this.ts = null; } }
                                 }" wire:key="ts-dokter-{{ $key }}">
                                     <select x-ref="sel" class="w-full text-xs">
-                                        <option value="">— Dokter (opsional) —</option>
+                                        <option value="">— Pilih Dokter —</option>
                                         @foreach ($this->getDokterOptions() as $id => $nama)
                                             <option value="{{ $id }}">{{ $nama }}</option>
                                         @endforeach
                                     </select>
                                 </div>
-                                @if (! $row['dokter_id'])
-                                <input type="text" wire:model="rows.{{ $key }}.nama_dokter" placeholder="atau ketik nama bebas"
-                                       class="mt-1 w-full text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white">
-                                @endif
                             </td>
                             <td class="px-3 py-2 align-top">
                                 <input type="date" wire:model="rows.{{ $key }}.tanggal"

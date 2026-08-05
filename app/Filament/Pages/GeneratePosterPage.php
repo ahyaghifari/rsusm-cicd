@@ -43,6 +43,9 @@ class GeneratePosterPage extends Page
     /** @var array<int, array{id:int, nama:string, visible:bool, order:int}> */
     public array $poli_list = [];
 
+    /** Jumlah dokter unik (jadwal harian) yang masuk poli_list saat ini. */
+    public int $dokterCount = 0;
+
     /** Whether the selected hospital supports executive clinics. */
     public bool $hospitalHasExecutiveClinic = false;
 
@@ -311,6 +314,15 @@ class GeneratePosterPage extends Page
             ])
             ->values()
             ->toArray();
+
+        $poliIds = collect($this->poli_list)->pluck('id');
+        $this->dokterCount = JadwalHarian::whereDate('tanggal', $parsedTanggal)
+            ->whereIn('poliklinik_id', $poliIds)
+            ->when($filter === 'reguler',   fn ($q) => $q->where('is_executive', 0))
+            ->when($filter === 'eksekutif', fn ($q) => $q->where('is_executive', 1))
+            ->get(['dokter_id', 'nama_dokter'])
+            ->unique(fn ($r) => $r->dokter_id ?? $r->nama_dokter)
+            ->count();
 
         $this->recalcPagination($template);
     }
