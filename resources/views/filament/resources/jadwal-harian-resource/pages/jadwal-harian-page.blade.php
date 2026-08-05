@@ -318,7 +318,8 @@
                     type="text"
                     x-model="cariDokter"
                     placeholder="Cari nama dokter..."
-                    class="w-full rounded-lg border-2 border-primary-400 dark:border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-gray-900 dark:text-white text-sm font-medium py-2.5 px-4 shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder:text-primary-400 dark:placeholder:text-primary-300"
+                    style="border-color:#d606b0;"
+                    class="w-full rounded-lg border-2 bg-primary-50 dark:bg-primary-900/20 text-gray-900 dark:text-white text-sm font-medium py-2.5 px-4 shadow-sm focus:ring-2 focus:ring-primary-500 placeholder:text-primary-400 dark:placeholder:text-primary-300"
                 >
             </div>
 
@@ -353,7 +354,7 @@
                                 x-show="cariDokter === '' || $el.dataset.namaDokter.includes(cariDokter.toLowerCase())"
                                 @class([
                                     'transition-colors',
-                                    'border-l-4 border-amber-400 bg-amber-50/70 dark:bg-amber-900/10 hover:bg-amber-100/70 dark:hover:bg-amber-900/20' => (bool) ($row['is_executive'] ?? false),
+                                    'border-l-4 border-yellow-500 bg-yellow-50 dark:bg-yellow-900/15 hover:bg-yellow-100 dark:hover:bg-yellow-900/25' => (bool) ($row['is_executive'] ?? false),
                                     'bg-white dark:bg-gray-900 hover:bg-blue-50/30 dark:hover:bg-blue-900/10' => ! (bool) ($row['is_executive'] ?? false),
                                 ])>
                                 <td class="px-3 py-2 text-xs text-gray-400 text-center select-none">
