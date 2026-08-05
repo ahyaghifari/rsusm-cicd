@@ -417,7 +417,7 @@
                                  {{-- Executive --}}
                                 @if($this->hasExecutiveClinic())
                                 <td class="px-2 py-1.5 text-center">
-                                    <input type="checkbox" wire:model.boolean="rows.{{ $uuid }}.is_executive"
+                                    <input type="checkbox" wire:model.live.boolean="rows.{{ $uuid }}.is_executive"
                                         @disabled(! $this->canEditJadwal())
                                         class="rounded border-amber-300 text-amber-500 shadow-sm focus:ring-amber-400"/>
                                 </td>
