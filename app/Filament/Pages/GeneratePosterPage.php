@@ -57,9 +57,17 @@ class GeneratePosterPage extends Page
     public function mount(): void
     {
         $this->form->fill([
-            'tanggal'        => now()->format('Y-m-d'),
+            'tanggal'        => $this->defaultTanggal(),
             'rumah_sakit_id' => $this->currentUserRumahSakitId(),
         ]);
+    }
+
+    /** Lewat jam 18:00 → default tanggal langsung besok (jadwal hari ini sudah lewat waktunya). */
+    private function defaultTanggal(): string
+    {
+        return now()->hour >= 18
+            ? now()->addDay()->format('Y-m-d')
+            : now()->format('Y-m-d');
     }
 
     // ── Auth helpers ──────────────────────────────────────────────────────────
@@ -118,6 +126,12 @@ class GeneratePosterPage extends Page
     private function usesHariTemplate(?int $rsId): bool
     {
         return $rsId && in_array($rsId, self::HARI_TEMPLATE_RS_IDS, true);
+    }
+
+    /** Cek langsung dari data RS — gak perlu nunggu loadPoliList() jalan buat nampilin Filter Klinik. */
+    private function hospitalSupportsExecutive(?int $rsId): bool
+    {
+        return $rsId && (bool) RumahSakit::where('id', $rsId)->value('executive_clinic');
     }
 
     /** Cari PosterTemplate yang cocok buat hari (dari tanggal) + jenis klinik. Fallback ke hari=null (default). */
@@ -229,7 +243,7 @@ class GeneratePosterPage extends Page
                             ])
                             ->default('reguler')
                             ->required()
-                            ->visible(fn () => $this->hospitalHasExecutiveClinic)
+                            ->visible(fn () => $this->hospitalSupportsExecutive($this->resolvedRumahSakitId()))
                             ->live()
                             ->afterStateUpdated(fn (Forms\Get $get) => $this->loadPoliList($get)),
 
@@ -239,7 +253,7 @@ class GeneratePosterPage extends Page
                             ->native(false)
                             ->displayFormat('d/m/Y')
                             ->format('Y-m-d')
-                            ->default(now()->format('Y-m-d'))
+                            ->default(fn () => $this->defaultTanggal())
                             ->live()
                             ->afterStateUpdated(fn (Forms\Get $get) => $this->loadPoliList($get)),
 
