@@ -359,31 +359,6 @@ class GeneratePosterPage extends Page
         $this->activeHalaman = max(1, min($halaman, $this->totalHalaman));
     }
 
-    public function togglePoli(int $index): void
-    {
-        if (isset($this->poli_list[$index])) {
-            $this->poli_list[$index]['visible'] = ! $this->poli_list[$index]['visible'];
-            $templateId = $this->getTemplateId();
-            $this->recalcPagination($this->findTemplateForCurrentUser($templateId));
-        }
-    }
-
-    public function reorderPoli(int $oldIndex, int $newIndex): void
-    {
-        if ($oldIndex === $newIndex) return;
-
-        $list = $this->poli_list;
-        $item = array_splice($list, $oldIndex, 1)[0];
-        array_splice($list, $newIndex, 0, [$item]);
-
-        foreach ($list as $i => &$row) {
-            $row['order'] = $i + 1;
-        }
-        unset($row);
-
-        $this->poli_list = array_values($list);
-    }
-
     public function previewPoster(): void
     {
         $this->form->getState();
