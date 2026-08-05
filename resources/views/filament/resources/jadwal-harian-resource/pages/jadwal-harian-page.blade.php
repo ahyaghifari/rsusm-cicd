@@ -313,15 +313,12 @@
             </x-slot>
 
             {{-- Cari Dokter — filter tampilan baris tabel di bawah, tidak mengubah data --}}
-            <div class="relative mt-4 max-w-xs">
-                <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
-                </svg>
+            <div class="mt-4">
                 <input
                     type="text"
                     x-model="cariDokter"
                     placeholder="Cari nama dokter..."
-                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white text-sm pl-9 shadow-sm focus:ring-primary-500 focus:border-primary-500"
+                    class="w-full rounded-lg border-2 border-primary-400 dark:border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-gray-900 dark:text-white text-sm font-medium py-2.5 px-4 shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder:text-primary-400 dark:placeholder:text-primary-300"
                 >
             </div>
 

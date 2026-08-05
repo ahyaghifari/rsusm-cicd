@@ -92,20 +92,8 @@ class JadwalHarianPage extends Page
                     ->visible(fn () => JadwalHarianResource::isSuperAdmin())
                     ->live(),
 
-                Forms\Components\Select::make('executiveClinicFilter')
-                    ->label('Filter Klinik')
-                    ->options([
-                        'all'       => 'Semua',
-                        'reguler'   => 'Reguler',
-                        'eksekutif' => 'Eksekutif',
-                    ])
-                    ->default('reguler')
-                    ->visible(fn () => $this->hasExecutiveClinic() && $this->hasJadwalHarianData())
-                    ->live(),
-
             ])
-            ->statePath('')
-            ->columns(2);
+            ->statePath('');
     }
 
     // =========================================================================
