@@ -619,7 +619,7 @@ class GeneratePosterPage extends Page
                         $statusRaw   = $p?->status_layanan?->value ?? ($r->status_layanan?->value ?? 'BUKA');
 
                         return [
-                            'nama_dokter'       => $r->nama_dokter ?: ($r->dokter?->nama ?? '-'),
+                            'nama_dokter'       => $r->dokter?->nama ?? ($r->nama_dokter ?: '-'),
                             'jam_mulai'         => $jamMulai?->format('H:i'),
                             'jam_selesai'       => $jamSelesai?->format('H:i'),
                             'libur'             => $statusRaw === 'LIBUR',
