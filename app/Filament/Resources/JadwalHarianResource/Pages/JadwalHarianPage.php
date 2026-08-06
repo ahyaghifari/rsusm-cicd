@@ -318,7 +318,7 @@ class JadwalHarianPage extends Page
         $this->rowsCache             = [];
         $this->selectedUnitLayananId = null;
         $this->rows                  = [];
-        $this->executiveClinicFilter = 'reguler';
+        // $this->executiveClinicFilter = 'reguler';
 
         if ($this->selectedRumahSakitId) {
             $this->loadRows();
