@@ -188,8 +188,6 @@ class JadwalHarianPage extends Page
             ->whereHas('poliklinik', function ($q) use ($rsId) {
                 $q->where('rumah_sakit_id', $rsId)->where('jadwal_tidak_tetap', false);
             })
-            ->when($this->executiveClinicFilter === 'reguler',   fn ($q) => $q->where('is_executive', 0))
-            ->when($this->executiveClinicFilter === 'eksekutif', fn ($q) => $q->where('is_executive', 1))
             ->get();
 
         $newRows = [];
