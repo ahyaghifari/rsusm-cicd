@@ -82,12 +82,14 @@ class JadwalPraktekResource extends BaseResource
                         Forms\Components\TimePicker::make('waktu_mulai')
                             ->label('Jam Mulai')
                             ->seconds(false)
+                            ->native(false)
                             ->required(fn (Forms\Get $get) => ! $get('sesuai_perjanjian'))
                             ->nullable(),
 
                         Forms\Components\TimePicker::make('waktu_selesai')
                             ->label('Jam Selesai')
                             ->seconds(false)
+                            ->native(false)
                             ->nullable(),
 
                         Forms\Components\Toggle::make('sesuai_perjanjian')

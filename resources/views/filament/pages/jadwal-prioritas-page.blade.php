@@ -190,11 +190,11 @@
                                        class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white">
                             </td>
                             <td class="px-3 py-2 align-top">
-                                <input type="time" wire:model="rows.{{ $key }}.jam_mulai"
+                                <input type="time" lang="en-GB" wire:model="rows.{{ $key }}.jam_mulai"
                                        class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white">
                             </td>
                             <td class="px-3 py-2 align-top">
-                                <input type="time" wire:model="rows.{{ $key }}.jam_selesai"
+                                <input type="time" lang="en-GB" wire:model="rows.{{ $key }}.jam_selesai"
                                        class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white">
                             </td>
                             <td class="px-3 py-2 text-center align-top">

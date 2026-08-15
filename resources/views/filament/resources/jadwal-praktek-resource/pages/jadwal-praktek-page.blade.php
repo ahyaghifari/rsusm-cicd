@@ -301,12 +301,12 @@
                                         </td>
 
                                         <td class="px-2 py-1.5">
-                                            <input type="time" wire:model="rows.{{ $uuid }}.waktu_mulai"
+                                            <input type="time" lang="en-GB" wire:model="rows.{{ $uuid }}.waktu_mulai"
                                                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500 font-mono"/>
                                         </td>
 
                                         <td class="px-2 py-1.5">
-                                            <input type="time" wire:model="rows.{{ $uuid }}.waktu_selesai"
+                                            <input type="time" lang="en-GB" wire:model="rows.{{ $uuid }}.waktu_selesai"
                                                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500 font-mono"
                                                 placeholder="Opsional"/>
                                         </td>
@@ -460,12 +460,12 @@
                                             </td>
 
                                             <td class="px-2 py-1.5">
-                                                <input type="time" wire:model="dokterRows.{{ $uuid }}.waktu_mulai"
+                                                <input type="time" lang="en-GB" wire:model="dokterRows.{{ $uuid }}.waktu_mulai"
                                                     class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500 font-mono"/>
                                             </td>
 
                                             <td class="px-2 py-1.5">
-                                                <input type="time" wire:model="dokterRows.{{ $uuid }}.waktu_selesai"
+                                                <input type="time" lang="en-GB" wire:model="dokterRows.{{ $uuid }}.waktu_selesai"
                                                     class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500 font-mono"
                                                     placeholder="Opsional"/>
                                             </td>
