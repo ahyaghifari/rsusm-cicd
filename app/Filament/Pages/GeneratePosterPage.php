@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Filament\PosterLayouts\Layouts\ListPolosLayout;
 use App\Models\JadwalHarian;
 use App\Models\PoliKlinik;
+use App\Models\PosterGenerate;
 use App\Models\PosterHero;
 use App\Models\PosterTemplate;
 use App\Models\RumahSakit;
@@ -436,8 +437,11 @@ class GeneratePosterPage extends Page
 
         $html = $this->buildHtml($template, $tanggal, $this->activeHalaman);
 
-        $outputPath = storage_path('app/public/poster-output/poster-' . $tanggal->format('Ymd') . '-' . time() . '.png');
-        @mkdir(dirname($outputPath), 0755, true);
+        $kategoriKlinik = strtoupper($this->getExecutiveClinicFilter());
+        $namaFile = 'poster-jadwal-rs' . $template->rumah_sakit_id . '-' . strtolower($kategoriKlinik) . '-' . $tanggal->format('Ymd') . '-hal' . $this->activeHalaman . '.png';
+        $relativePath = 'posters/' . $namaFile;
+        $outputPath = Storage::disk('public')->path($relativePath);
+        Storage::disk('public')->makeDirectory('posters');
 
         try {
             $chromePath = config('services.browsershot.chrome_path');
@@ -483,11 +487,26 @@ class GeneratePosterPage extends Page
             return null;
         }
 
+        PosterGenerate::updateOrCreate(
+            [
+                'rumah_sakit_id' => $template->rumah_sakit_id,
+                'jenis'          => 'JADWAL_HARIAN',
+                'kategori_klinik' => $kategoriKlinik,
+                'tanggal'        => $tanggal->toDateString(),
+                'halaman'        => $this->activeHalaman,
+            ],
+            [
+                'poster_template_id' => $template->id,
+                'user_id'            => $this->currentUser()->id,
+                'nama_file'          => $namaFile,
+                'path'               => $relativePath,
+            ],
+        );
+
         $suffix = $this->totalHalaman > 1 ? "-hal{$this->activeHalaman}" : '';
 
         return response()->streamDownload(function () use ($outputPath) {
             readfile($outputPath);
-            @unlink($outputPath);
         }, 'poster-jadwal-' . $tanggal->format('d-m-Y') . $suffix . '.png', [
             'Content-Type' => 'image/png',
         ]);

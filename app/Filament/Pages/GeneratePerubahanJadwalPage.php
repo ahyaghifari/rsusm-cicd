@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\JadwalHarianPerubahan;
+use App\Models\PosterGenerate;
 use App\Models\PosterTemplate;
 use App\Models\RumahSakit;
 use App\Models\User;
@@ -279,8 +280,10 @@ class GeneratePerubahanJadwalPage extends Page
 
         $html = $this->buildHtml($template, $tanggal, $this->activeHalaman);
 
-        $outputPath = storage_path('app/public/poster-output/perubahan-' . $tanggal->format('Ymd') . '-' . time() . '.png');
-        @mkdir(dirname($outputPath), 0755, true);
+        $namaFile = 'perubahan-jadwal-rs' . $template->rumah_sakit_id . '-reguler-' . $tanggal->format('Ymd') . '-hal' . $this->activeHalaman . '.png';
+        $relativePath = 'posters/' . $namaFile;
+        $outputPath = Storage::disk('public')->path($relativePath);
+        Storage::disk('public')->makeDirectory('posters');
 
         try {
             $chromePath = config('services.browsershot.chrome_path');
@@ -326,11 +329,26 @@ class GeneratePerubahanJadwalPage extends Page
             return null;
         }
 
+        PosterGenerate::updateOrCreate(
+            [
+                'rumah_sakit_id' => $template->rumah_sakit_id,
+                'jenis'          => 'PERUBAHAN_JADWAL',
+                'kategori_klinik' => 'REGULER',
+                'tanggal'        => $tanggal->toDateString(),
+                'halaman'        => $this->activeHalaman,
+            ],
+            [
+                'poster_template_id' => $template->id,
+                'user_id'            => $this->currentUser()->id,
+                'nama_file'          => $namaFile,
+                'path'               => $relativePath,
+            ],
+        );
+
         $suffix = $this->totalHalaman > 1 ? "-hal{$this->activeHalaman}" : '';
 
         return response()->streamDownload(function () use ($outputPath) {
             readfile($outputPath);
-            @unlink($outputPath);
         }, 'perubahan-jadwal-' . $tanggal->format('d-m-Y') . $suffix . '.png', [
             'Content-Type' => 'image/png',
         ]);
