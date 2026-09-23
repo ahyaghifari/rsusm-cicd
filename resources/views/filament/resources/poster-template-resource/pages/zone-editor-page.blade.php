@@ -721,6 +721,13 @@
                                     @endforeach
                                 </div>
                             </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-gray-600">Satu Baris (Bentang)</span>
+                                <button type="button" @click="tanggalSatuBaris = !tanggalSatuBaris; saveConfig()" :class="tanggalSatuBaris ? 'bg-indigo-500' : 'bg-gray-300'" class="relative inline-flex h-5 w-9 items-center rounded-full transition">
+                                    <span :class="tanggalSatuBaris ? 'translate-x-4' : 'translate-x-1'" class="inline-block h-3 w-3 transform rounded-full bg-white transition"></span>
+                                </button>
+                            </div>
+                            <p class="text-[10px] text-gray-400">Nonaktif = pecah 2 baris (hari, tanggal). Aktif = satu baris, dibentangkan mengikuti lebar zona — pakai kalau zona tanggal dibuat sangat lebar.</p>
                         </div>
                     </div>
 
@@ -1065,6 +1072,7 @@
             tanggalFont: config.initialTanggalFont ?? 'Montserrat',
             tanggalWeight: config.initialTanggalWeight ?? '400',
             tanggalAlign: config.initialTanggalAlign ?? 'left',
+            tanggalSatuBaris: config.initialTanggalSatuBaris ?? false,
             keteranganSize: config.initialKeteranganSize ?? 24,
             keteranganWarna: config.initialKeteranganWarna ?? '#F0C040',
             keteranganFont: config.initialKeteranganFont ?? 'Poppins',
@@ -1129,6 +1137,7 @@
                     if (this.state.zona_tanggal?.font !== undefined)      this.tanggalFont = this.state.zona_tanggal.font;
                     if (this.state.zona_tanggal?.weight !== undefined)    this.tanggalWeight = this.state.zona_tanggal.weight;
                     if (this.state.zona_tanggal?.align !== undefined)     this.tanggalAlign = this.state.zona_tanggal.align;
+                    if (this.state.zona_tanggal?.satu_baris !== undefined) this.tanggalSatuBaris = this.state.zona_tanggal.satu_baris;
                     if (this.state.zona_keterangan?.size !== undefined)   this.keteranganSize = this.state.zona_keterangan.size;
                     if (this.state.zona_keterangan?.warna !== undefined)  this.keteranganWarna = this.state.zona_keterangan.warna;
                     if (this.state.zona_keterangan?.font !== undefined)   this.keteranganFont = this.state.zona_keterangan.font;
@@ -1197,7 +1206,7 @@
                 this.state = {
                     ...current,
                     zona_logo:   { ...this.zones.zona_logo, scale: parseInt(this.logoScale) || 100, opacity: parseInt(this.logoOpacity) || 100, padding: parseInt(this.logoPadding) || 0, bg_warna: this.logoBg },
-                    zona_tanggal: { ...this.zones.zona_tanggal, size: parseInt(this.tanggalSize) || 40, warna: this.tanggalWarna, bg_warna: this.tanggalBg, font: this.tanggalFont, weight: this.tanggalWeight, align: this.tanggalAlign },
+                    zona_tanggal: { ...this.zones.zona_tanggal, size: parseInt(this.tanggalSize) || 40, warna: this.tanggalWarna, bg_warna: this.tanggalBg, font: this.tanggalFont, weight: this.tanggalWeight, align: this.tanggalAlign, satu_baris: this.tanggalSatuBaris },
                     zona_keterangan: { ...this.zones.zona_keterangan, size: parseInt(this.keteranganSize) || 24, warna: this.keteranganWarna, font: this.keteranganFont, weight: this.keteranganWeight, bg_warna: this.keteranganBg, align: this.keteranganAlign },
                     zona_jadwal: { ...this.zones.zona_jadwal },
                     tinggi_hero: parseInt(this.heroPercent) || 0,

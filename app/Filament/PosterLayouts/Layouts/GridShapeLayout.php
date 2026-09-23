@@ -48,6 +48,7 @@ class GridShapeLayout implements PosterLayout
                 'font' => 'Montserrat', 'size' => 40,
                 'warna' => '#1a1a2e', 'align' => 'left',
                 'bg_warna' => 'rgba(255,255,255,0.95)',
+                'satu_baris' => false,
             ],
             'zona_keterangan' => [
                 'x' => 80, 'y' => 1000, 'w' => 900,

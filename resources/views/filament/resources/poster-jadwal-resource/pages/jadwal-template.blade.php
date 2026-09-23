@@ -238,6 +238,10 @@ body {
         $dateFont     = $fontFor(['sumber' => 'google', 'nama' => $zonaDate['font'] ?? 'Montserrat'], 'FontTanggal');
         $dateWeight   = $zonaDate['weight']        ?? '400';
         $dateAlign    = $zonaDate['align'] ?? 'left';
+        $dateSatuBaris = (bool) ($zonaDate['satu_baris'] ?? false);
+        $dateText     = $dateSatuBaris
+            ? $tanggal->translatedFormat('l, j F Y')
+            : $tanggal->translatedFormat('l,') . '<br>' . $tanggal->translatedFormat('j F Y');
     @endphp
     <div style="
         position:absolute;
@@ -252,7 +256,8 @@ body {
             color:{{ $dateColor }};
             text-align:{{ $dateAlign }};
             line-height:1.2;
-        ">{!! $tanggal->translatedFormat('l,') . '<br>' . $tanggal->translatedFormat('j F Y') !!}</div>
+            @if($dateSatuBaris) white-space:nowrap; @endif
+        ">{!! $dateText !!}</div>
     </div>
 
     {{-- Keterangan Hero —— mengikuti config zona_keterangan --}}
