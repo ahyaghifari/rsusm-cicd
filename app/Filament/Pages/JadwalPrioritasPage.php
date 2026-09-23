@@ -90,7 +90,10 @@ class JadwalPrioritasPage extends Page
         if (! $this->periode) return [null, null];
 
         try {
-            $tgl = Carbon::createFromFormat('Y-m', $this->periode);
+            // Format 'Y-m-d' eksplisit (tanggal dipatok ke 1) — 'Y-m' tanpa tanggal
+            // bikin Carbon isi tanggal pakai HARI INI, yang bisa "meluber" ke bulan
+            // berikutnya kalau hari ini tanggal 29-31 dan bulan target lebih pendek.
+            $tgl = Carbon::createFromFormat('Y-m-d', $this->periode . '-01');
         } catch (\Exception) {
             return [null, null];
         }
