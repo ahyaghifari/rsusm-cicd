@@ -63,6 +63,7 @@ class JadwalHarianController extends Controller
             ->orderBy('tanggal')
             ->get();
 
+        // Dikelompokkan per tanggal jadi key object-nya sendiri — gak perlu field 'tanggal' terpisah lagi.
         return $jadwalHarian
             ->groupBy(fn (JadwalHarian $r) => $r->tanggal->format('Y-m-d'))
             ->map(fn ($rowsPerTanggal) => $rowsPerTanggal
@@ -71,9 +72,7 @@ class JadwalHarianController extends Controller
                     'poliklinik' => $rows->first()->poliklinik->nama,
                     'dokter'     => $rows->map(fn ($r) => $this->dokterPayload($r))->values(),
                 ])
-                ->values())
-            ->map(fn ($poliklinikList, $tgl) => ['tanggal' => $tgl, 'poliklinik' => $poliklinikList])
-            ->values();
+                ->values());
     }
 
     public function index(Request $request, string $rs): JsonResponse
@@ -119,8 +118,6 @@ class JadwalHarianController extends Controller
         $tahun = $validated['tahun'] ?? (int) now()->format('Y');
 
         return response()->json([
-            'bulan'       => $bulan,
-            'tahun'       => $tahun,
             'rumah_sakit' => $rumahSakit->nama,
             'data'        => $this->jadwalBulanan($rumahSakit, $bulan, $tahun),
         ]);
@@ -139,8 +136,6 @@ class JadwalHarianController extends Controller
         $tahun = $validated['tahun'] ?? (int) now()->format('Y');
 
         return response()->json([
-            'bulan'       => $bulan,
-            'tahun'       => $tahun,
             'rumah_sakit' => $rumahSakit->nama,
             'data'        => $this->jadwalBulanan($rumahSakit, $bulan, $tahun, true),
         ]);
