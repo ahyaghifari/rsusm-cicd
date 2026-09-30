@@ -52,7 +52,7 @@ class JadwalHarianController extends Controller
             ->values();
     }
 
-    /** Sama seperti jadwal(), tapi 1 bulan penuh — dikelompokkan per tanggal lalu per poliklinik. */
+    /** 1 bulan penuh — dikelompokkan per poliklinik, lalu per dokter, lalu list jadwal (tanggal+jam)-nya. */
     public function jadwalBulanan(RumahSakit $rumahSakit, int $bulan, int $tahun, bool $executive = false)
     {
         $jadwalHarian = JadwalHarian::whereYear('tanggal', $tahun)
@@ -63,16 +63,25 @@ class JadwalHarianController extends Controller
             ->orderBy('tanggal')
             ->get();
 
-        // Dikelompokkan per tanggal jadi key object-nya sendiri — gak perlu field 'tanggal' terpisah lagi.
         return $jadwalHarian
-            ->groupBy(fn (JadwalHarian $r) => $r->tanggal->format('Y-m-d'))
-            ->map(fn ($rowsPerTanggal) => $rowsPerTanggal
-                ->groupBy('poliklinik_id')
-                ->map(fn ($rows) => [
-                    'poliklinik' => $rows->first()->poliklinik->nama,
-                    'dokter'     => $rows->map(fn ($r) => $this->dokterPayload($r))->values(),
-                ])
-                ->values());
+            ->groupBy('poliklinik_id')
+            ->map(fn ($rowsPerPoli) => [
+                'poliklinik' => $rowsPerPoli->first()->poliklinik->nama,
+                'dokter'     => $rowsPerPoli
+                    ->groupBy(fn (JadwalHarian $r) => $r->dokter_id ?? $r->nama_dokter)
+                    ->map(function ($rowsPerDokter) {
+                        return [
+                            'nama'   => $this->dokterPayload($rowsPerDokter->first())['nama'],
+                            'jadwal' => $rowsPerDokter->map(function (JadwalHarian $r) {
+                                $item = $this->dokterPayload($r);
+                                unset($item['nama']);
+                                return ['tanggal' => $r->tanggal->format('Y-m-d')] + $item;
+                            })->values(),
+                        ];
+                    })
+                    ->values(),
+            ])
+            ->values();
     }
 
     public function index(Request $request, string $rs): JsonResponse
