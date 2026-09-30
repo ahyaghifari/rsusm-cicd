@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\Hari;
 use App\Http\Controllers\Controller;
 use App\Models\JadwalHarian;
+use App\Models\JadwalPraktek;
 use App\Models\RumahSakit;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -52,33 +54,37 @@ class JadwalHarianController extends Controller
             ->values();
     }
 
-    /** 1 bulan penuh — dikelompokkan per poliklinik, lalu per dokter, lalu list jadwal (tanggal+jam)-nya. */
-    public function jadwalBulanan(RumahSakit $rumahSakit, int $bulan, int $tahun, bool $executive = false)
+    /**
+     * Jadwal praktek master (mingguan) — dikelompokkan per poliklinik, lalu per dokter,
+     * lalu list hari+jam prakteknya. Sumbernya jadwal_praktek (pola tetap), bukan
+     * jadwal_harian (instance per tanggal) — jadi tidak terikat bulan/tahun tertentu.
+     */
+    public function jadwalBulanan(RumahSakit $rumahSakit, bool $executive = false)
     {
-        $jadwalHarian = JadwalHarian::whereYear('tanggal', $tahun)
-            ->whereMonth('tanggal', $bulan)
-            ->where('is_executive', $executive)
-            ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rumahSakit->id))
-            ->with(['poliklinik', 'dokter', 'perubahan'])
-            ->orderBy('tanggal')
-            ->get();
+        $urutanHari = Hari::cases();
 
-        return $jadwalHarian
+        $jadwalPraktek = JadwalPraktek::where('is_executive', $executive)
+            ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rumahSakit->id))
+            ->with(['poliklinik', 'dokter'])
+            ->get()
+            ->sortBy(fn (JadwalPraktek $r) => array_search($r->hari, $urutanHari, true));
+
+        return $jadwalPraktek
             ->groupBy('poliklinik_id')
             ->map(fn ($rowsPerPoli) => [
                 'poliklinik' => $rowsPerPoli->first()->poliklinik->nama,
                 'dokter'     => $rowsPerPoli
-                    ->groupBy(fn (JadwalHarian $r) => $r->dokter_id ?? $r->nama_dokter)
-                    ->map(function ($rowsPerDokter) {
-                        return [
-                            'nama'   => $this->dokterPayload($rowsPerDokter->first())['nama'],
-                            'jadwal' => $rowsPerDokter->map(function (JadwalHarian $r) {
-                                $item = $this->dokterPayload($r);
-                                unset($item['nama']);
-                                return ['tanggal' => $r->tanggal->format('Y-m-d')] + $item;
-                            })->values(),
-                        ];
-                    })
+                    ->groupBy(fn (JadwalPraktek $r) => $r->dokter_id ?? $r->nama_dokter)
+                    ->map(fn ($rowsPerDokter) => [
+                        'nama'   => $rowsPerDokter->first()->nama_dokter ?: ($rowsPerDokter->first()->dokter?->nama ?? '-'),
+                        'jadwal' => $rowsPerDokter->map(fn (JadwalPraktek $r) => [
+                            'hari'              => $r->hari->value,
+                            'jam_mulai'         => $r->waktu_mulai?->format('H:i'),
+                            'jam_selesai'       => $r->waktu_selesai?->format('H:i') ?? 'Selesai',
+                            'sesuai_perjanjian' => (bool) $r->sesuai_perjanjian,
+                            'catatan'           => $r->catatan ?? '',
+                        ])->values(),
+                    ])
                     ->values(),
             ])
             ->values();
@@ -114,39 +120,25 @@ class JadwalHarianController extends Controller
         ]);
     }
 
-    public function bulanan(Request $request, string $rs): JsonResponse
+    public function bulanan(string $rs): JsonResponse
     {
         $rumahSakit = $this->rumahSakitOr404($rs);
         if ($rumahSakit instanceof JsonResponse) return $rumahSakit;
 
-        $validated = $request->validate([
-            'bulan' => ['nullable', 'integer', 'min:1', 'max:12'],
-            'tahun' => ['nullable', 'integer', 'min:2000', 'max:2100'],
-        ]);
-        $bulan = $validated['bulan'] ?? (int) now()->format('n');
-        $tahun = $validated['tahun'] ?? (int) now()->format('Y');
-
         return response()->json([
             'rumah_sakit' => $rumahSakit->nama,
-            'data'        => $this->jadwalBulanan($rumahSakit, $bulan, $tahun),
+            'data'        => $this->jadwalBulanan($rumahSakit),
         ]);
     }
 
-    public function bulananExecutive(Request $request, string $rs): JsonResponse
+    public function bulananExecutive(string $rs): JsonResponse
     {
         $rumahSakit = $this->rumahSakitOr404($rs);
         if ($rumahSakit instanceof JsonResponse) return $rumahSakit;
 
-        $validated = $request->validate([
-            'bulan' => ['nullable', 'integer', 'min:1', 'max:12'],
-            'tahun' => ['nullable', 'integer', 'min:2000', 'max:2100'],
-        ]);
-        $bulan = $validated['bulan'] ?? (int) now()->format('n');
-        $tahun = $validated['tahun'] ?? (int) now()->format('Y');
-
         return response()->json([
             'rumah_sakit' => $rumahSakit->nama,
-            'data'        => $this->jadwalBulanan($rumahSakit, $bulan, $tahun, true),
+            'data'        => $this->jadwalBulanan($rumahSakit, true),
         ]);
     }
 }
