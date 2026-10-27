@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Models\Dokter;
 use App\Models\RumahSakit;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ExportDokterCsv extends Command
@@ -49,7 +48,7 @@ class ExportDokterCsv extends Command
                 fputcsv($fh, [
                     $d->kode,
                     $d->nama,
-                    $d->foto ? Storage::disk('public')->url($d->foto) : '',
+                    $d->foto ? asset('storage/' . $d->foto) : '',
                     $d->spesialis?->nama ?? 'Umum',
                     $d->spesialis?->kode,
                 ]);
