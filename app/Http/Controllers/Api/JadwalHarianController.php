@@ -22,6 +22,7 @@ class JadwalHarianController extends Controller
         $status     = $p?->status_layanan?->value ?? $r->status_layanan?->value ?? 'BUKA';
 
         return [
+            'kode'              => $r->dokter?->kode,
             'nama'              => $r->nama_dokter ?: ($r->dokter?->nama ?? '-'),
             'jam_mulai'         => $jamMulai,
             'jam_selesai'       => $jamSelesai,
@@ -76,6 +77,7 @@ class JadwalHarianController extends Controller
                 'dokter'     => $rowsPerPoli
                     ->groupBy(fn (JadwalPraktek $r) => $r->dokter_id ?? $r->nama_dokter)
                     ->map(fn ($rowsPerDokter) => [
+                        'kode'   => $rowsPerDokter->first()->dokter?->kode,
                         'nama'   => $rowsPerDokter->first()->nama_dokter ?: ($rowsPerDokter->first()->dokter?->nama ?? '-'),
                         'jadwal' => $rowsPerDokter->map(fn (JadwalPraktek $r) => [
                             'hari'              => $r->hari->value,

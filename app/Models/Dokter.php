@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasKode;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Dokter extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasKode, SoftDeletes;
 
     /**
      * The table associated with the model.
