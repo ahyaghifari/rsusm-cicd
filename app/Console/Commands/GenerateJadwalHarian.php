@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Enums\Hari;
+use App\Models\CutiDokter;
 use App\Models\JadwalHarian;
 use App\Models\JadwalPraktek;
 use App\Models\RumahSakit;
@@ -63,23 +64,28 @@ class GenerateJadwalHarian extends Command
                         ->with('poliklinik')
                         ->get();
 
-                    // Snapshot poliklinik yang SUDAH punya JadwalHarian untuk tanggal ini,
-                    // diambil sekali SEBELUM loop insert — supaya insert baris pertama suatu
-                    // poliklinik (mis. dokter pagi) tidak membuat baris berikutnya (dokter
-                    // siang, poliklinik & hari sama) ikut ter-skip padahal belum pernah dibuat.
-                    $poliklinikSudahAda = JadwalHarian::whereDate('tanggal', $tanggalStr)
+                    // Snapshot (poliklinik, dokter, executive) yang SUDAH punya JadwalHarian untuk
+                    // tanggal ini, diambil sekali SEBELUM loop insert — supaya insert baris pertama
+                    // (mis. dokter pagi) tidak membuat baris berikutnya (dokter siang, poliklinik &
+                    // hari sama) ikut ter-skip padahal belum pernah dibuat. Per dokter (bukan per
+                    // poliklinik) karena baris cuti dibuat lebih dulu oleh CutiDokter.
+                    $kunci = fn ($r) => $r->poliklinik_id . '|' . ($r->dokter_id ?? $r->nama_dokter) . '|' . (int) $r->is_executive;
+
+                    $sudahAda = JadwalHarian::whereDate('tanggal', $tanggalStr)
                         ->whereIn('poliklinik_id', $jadwalPrakteks->pluck('poliklinik_id')->unique())
-                        ->pluck('poliklinik_id')
+                        ->get()
+                        ->map($kunci)
                         ->flip();
 
+                    $cutiHariIni = CutiDokter::aktifPada($tanggalStr)->get()->keyBy('dokter_id');
+
                     foreach ($jadwalPrakteks as $jp) {
-                        // Cek per (tanggal, poliklinik_id) — granular, bukan per RS
-                        if (isset($poliklinikSudahAda[$jp->poliklinik_id])) {
+                        if (isset($sudahAda[$kunci($jp)])) {
                             $skipped++;
                             continue;
                         }
 
-                        JadwalHarian::create([
+                        $jh = JadwalHarian::create([
                             'poliklinik_id'  => $jp->poliklinik_id,
                             'tanggal'        => $tanggalStr,
                             'dokter_id'      => $jp->dokter_id,
@@ -92,6 +98,10 @@ class GenerateJadwalHarian extends Command
                             'sesuai_perjanjian' => $jp->sesuai_perjanjian,
                             'sumber'         => 'GENERATE',
                         ]);
+
+                        if ($cuti = $cutiHariIni->get($jp->dokter_id)) {
+                            CutiDokter::tandaiLibur($jh, $cuti->alasan, $cuti->user_id);
+                        }
 
                         $inserted++;
                     }
