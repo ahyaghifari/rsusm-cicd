@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\Hari;
 use App\Http\Controllers\Controller;
+use App\Models\Dokter;
 use App\Models\JadwalHarian;
 use App\Models\JadwalPraktek;
 use App\Models\RumahSakit;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class JadwalHarianController extends Controller
 {
@@ -90,6 +92,91 @@ class JadwalHarianController extends Controller
                     ->values(),
             ])
             ->values();
+    }
+
+    /** Jadwal harian reguler + executive digabung, dikelompokkan per dokter. */
+    public function perDokter(Request $request, string $rs): JsonResponse
+    {
+        $rumahSakit = $this->rumahSakitOr404($rs);
+        if ($rumahSakit instanceof JsonResponse) return $rumahSakit;
+
+        $request->validate(['tanggal' => ['nullable', 'date_format:Y-m-d']]);
+        $tanggal = $request->input('tanggal') ?? now()->format('Y-m-d');
+
+        $data = JadwalHarian::whereDate('tanggal', $tanggal)
+            ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rumahSakit->id))
+            ->with(['poliklinik', 'dokter', 'perubahan'])
+            ->get()
+            ->groupBy(fn (JadwalHarian $r) => $r->dokter_id ?? $r->nama_dokter)
+            ->map(function ($rows) {
+                $p = $this->dokterPayload($rows->first());
+
+                return [
+                    'kode'   => $p['kode'],
+                    'nama'   => $p['nama'],
+                    'jadwal' => $rows->sortBy('jam_mulai')->map(fn (JadwalHarian $r) => [
+                        'poliklinik' => $r->poliklinik->nama,
+                        'jenis'      => $r->is_executive ? 'EXECUTIVE' : 'REGULER',
+                    ] + Arr::except($this->dokterPayload($r), ['kode', 'nama']))->values(),
+                ];
+            })
+            ->sortBy('nama')
+            ->values();
+
+        return response()->json([
+            'tanggal'     => $tanggal,
+            'rumah_sakit' => $rumahSakit->nama,
+            'data'        => $data,
+        ]);
+    }
+
+    /**
+     * Jadwal satu dokter (dicari lewat kode): `harian` = jadwal tanggal tsb (default hari ini),
+     * `bulanan` = jadwal praktek master mingguan. Reguler + executive digabung (field `jenis`).
+     */
+    public function dokter(Request $request, string $rs, string $kode): JsonResponse
+    {
+        $rumahSakit = $this->rumahSakitOr404($rs);
+        if ($rumahSakit instanceof JsonResponse) return $rumahSakit;
+
+        $dokter = Dokter::where('rumah_sakit_id', $rumahSakit->id)->where('kode', strtoupper($kode))->first();
+        if (! $dokter) {
+            return response()->json(['message' => 'Dokter tidak ditemukan.'], 404);
+        }
+
+        $request->validate(['tanggal' => ['nullable', 'date_format:Y-m-d']]);
+        $tanggal = $request->input('tanggal') ?? now()->format('Y-m-d');
+        $jenis   = fn ($r) => $r->is_executive ? 'EXECUTIVE' : 'REGULER';
+
+        $harian = JadwalHarian::whereDate('tanggal', $tanggal)->where('dokter_id', $dokter->id)
+            ->with(['poliklinik', 'dokter', 'perubahan'])->get()->sortBy('jam_mulai')
+            ->map(fn (JadwalHarian $r) => [
+                'poliklinik' => $r->poliklinik->nama,
+                'jenis'      => $jenis($r),
+            ] + Arr::except($this->dokterPayload($r), ['kode', 'nama']))
+            ->values();
+
+        $urutanHari = Hari::cases();
+        $bulanan = JadwalPraktek::where('dokter_id', $dokter->id)->with('poliklinik')->get()
+            ->sortBy(fn (JadwalPraktek $r) => array_search($r->hari, $urutanHari, true))
+            ->map(fn (JadwalPraktek $r) => [
+                'poliklinik'        => $r->poliklinik->nama,
+                'jenis'             => $jenis($r),
+                'hari'              => $r->hari->value,
+                'jam_mulai'         => $r->waktu_mulai?->format('H:i'),
+                'jam_selesai'       => $r->waktu_selesai?->format('H:i') ?? 'Selesai',
+                'sesuai_perjanjian' => (bool) $r->sesuai_perjanjian,
+                'catatan'           => $r->catatan ?? '',
+            ])
+            ->values();
+
+        return response()->json([
+            'rumah_sakit' => $rumahSakit->nama,
+            'dokter'      => ['kode' => $dokter->kode, 'nama' => $dokter->nama],
+            'tanggal'     => $tanggal,
+            'harian'      => $harian,
+            'bulanan'     => $bulanan,
+        ]);
     }
 
     public function index(Request $request, string $rs): JsonResponse
