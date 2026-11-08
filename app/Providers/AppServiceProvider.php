@@ -22,6 +22,11 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(100)->by($request->ip());
         });
 
+        // Dipasang di aplikasi mobile — banyak perangkat bisa berbagi IP yang sama (NAT), jadi limitnya lebih longgar dari public-api.
+        RateLimiter::for('mobile-api', function (Request $request) {
+            return Limit::perMinute(300)->by($request->ip());
+        });
+
         RateLimiter::for('portal', function (Request $request) {
             return Limit::perMinute(100)->by($request->ip());
         });

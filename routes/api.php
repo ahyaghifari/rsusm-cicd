@@ -3,7 +3,12 @@
 use App\Http\Controllers\Api\JadwalHarianController;
 use App\Http\Controllers\Api\KetersediaanBedController;
 use App\Http\Controllers\Api\PosterController;
+use App\Http\Controllers\Api\PromoController;
 use Illuminate\Support\Facades\Route;
+
+Route::middleware('throttle:mobile-api')->group(function () {
+    Route::get('/promo', [PromoController::class, 'index']);
+});
 
 Route::middleware('throttle:public-api')->group(function () {
     Route::get('/{rs}/jadwal-harian', [JadwalHarianController::class, 'index']);
