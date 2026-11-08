@@ -189,7 +189,7 @@
 
                         {{-- Pilih mode (sembunyi saat mengubah cuti lama — mode sudah ditentukan dari data) --}}
                         @unless($editingId)
-                        <x-filament::tabs label="Mode cuti" class="mb-5">
+                        <x-filament::tabs label="Mode cuti" class="mb-6">
                             @foreach(['satu_hari' => '1 Hari', 'rentang' => 'Rentang Tanggal', 'per_tanggal' => 'Per Tanggal'] as $key => $label)
                                 <x-filament::tabs.item
                                     :active="$mode === $key"
@@ -201,10 +201,10 @@
                         </x-filament::tabs>
                         @endunless
 
-                        <div class="space-y-5">
+                        <div class="space-y-6 mb-2">
                             @if($mode === 'satu_hari')
                                 <div>
-                                    <label class="fi-fo-field-wrp-label text-sm font-medium text-gray-950 dark:text-white mb-1.5 block">Tanggal <span class="text-danger-600">*</span></label>
+                                    <label class="fi-fo-field-wrp-label text-sm font-medium text-gray-950 dark:text-white mb-2 block">Tanggal <span class="text-danger-600">*</span></label>
                                     <x-filament::input.wrapper :valid="! $errors->has('tanggalSatuHari')">
                                         <x-filament::input type="date" wire:model="tanggalSatuHari" />
                                     </x-filament::input.wrapper>
@@ -213,14 +213,14 @@
                             @elseif($mode === 'rentang')
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                     <div>
-                                        <label class="fi-fo-field-wrp-label text-sm font-medium text-gray-950 dark:text-white mb-1.5 block">Tanggal Mulai <span class="text-danger-600">*</span></label>
+                                        <label class="fi-fo-field-wrp-label text-sm font-medium text-gray-950 dark:text-white mb-2 block">Tanggal Mulai <span class="text-danger-600">*</span></label>
                                         <x-filament::input.wrapper :valid="! $errors->has('tanggalMulai')">
                                             <x-filament::input type="date" wire:model="tanggalMulai" />
                                         </x-filament::input.wrapper>
                                         @error('tanggalMulai') <p class="text-xs text-danger-600 mt-1">{{ $message }}</p> @enderror
                                     </div>
                                     <div>
-                                        <label class="fi-fo-field-wrp-label text-sm font-medium text-gray-950 dark:text-white mb-1.5 block">Tanggal Sampai <span class="text-danger-600">*</span></label>
+                                        <label class="fi-fo-field-wrp-label text-sm font-medium text-gray-950 dark:text-white mb-2 block">Tanggal Sampai <span class="text-danger-600">*</span></label>
                                         <x-filament::input.wrapper :valid="! $errors->has('tanggalSelesai')">
                                             <x-filament::input type="date" wire:model="tanggalSelesai" />
                                         </x-filament::input.wrapper>
@@ -229,7 +229,7 @@
                                 </div>
                             @else
                                 <div>
-                                    <label class="fi-fo-field-wrp-label text-sm font-medium text-gray-950 dark:text-white mb-1.5 block">Daftar Tanggal <span class="text-danger-600">*</span></label>
+                                    <label class="fi-fo-field-wrp-label text-sm font-medium text-gray-950 dark:text-white mb-2 block">Daftar Tanggal <span class="text-danger-600">*</span></label>
                                     <div class="space-y-2">
                                         @foreach($tanggalList as $i => $tgl)
                                             <div class="flex items-center gap-2" wire:key="tgl-{{ $i }}">
@@ -257,7 +257,7 @@
                             @endif
 
                             <div>
-                                <label class="fi-fo-field-wrp-label text-sm font-medium text-gray-950 dark:text-white mb-1.5 block">
+                                <label class="fi-fo-field-wrp-label text-sm font-medium text-gray-950 dark:text-white mb-2 block">
                                     Alasan <span class="text-danger-600">*</span>
                                     <span class="font-normal text-gray-400">(tampil sebagai catatan di Jadwal Harian)</span>
                                 </label>
