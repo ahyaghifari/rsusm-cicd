@@ -6,9 +6,14 @@ Menampilkan semua promo aktif dari seluruh rumah sakit dalam satu daftar.
 
 ```
 GET {base_url}/api/promo
+GET {base_url}/api/promo?limit=5
 ```
 
-Tidak ada parameter dan tidak ada autentikasi. Rate limiter `mobile-api` (300 request/menit per IP) — lebih longgar dari API lain karena dipasang di aplikasi mobile.
+| Parameter | Lokasi | Keterangan |
+|-----------|--------|------------|
+| `limit` | query, opsional | Jumlah maksimal promo yang dikembalikan. Tanpa `limit`, semua promo aktif dikembalikan. Nilai dibatasi maksimal `100`. |
+
+Tidak ada autentikasi. Rate limiter `mobile-api` (300 request/menit per IP) — lebih longgar dari API lain karena dipasang di aplikasi mobile.
 
 ## Contoh respons (200)
 
