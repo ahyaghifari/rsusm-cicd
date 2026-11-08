@@ -4,6 +4,7 @@ namespace App\Filament\Resources\JadwalHarianResource\Pages;
 
 use App\Enums\Hari;
 use App\Enums\StatusLayanan;
+use App\Models\CutiDokter;
 use App\Filament\Resources\JadwalHarianResource;
 use App\Models\Dokter;
 use App\Models\JadwalHarian;
@@ -281,8 +282,12 @@ class JadwalHarianPage extends Page
             return;
         }
 
+        $cutiHariIni = CutiDokter::aktifPada($this->activeTanggal)->get()->keyBy('dokter_id');
+
         $newRows = [];
         foreach ($jadwals as $j) {
+            $cuti = $cutiHariIni->get($j->dokter_id);
+
             $newRows[(string) Str::uuid()] = [
                 'id'             => null,
                 'poliklinik_id'  => $j->poliklinik_id,
@@ -290,8 +295,8 @@ class JadwalHarianPage extends Page
                 'nama_dokter'    => $j->nama_dokter,
                 'jam_mulai'      => $j->waktu_mulai?->format('H:i'),
                 'jam_selesai'    => $j->waktu_selesai?->format('H:i'),
-                'status_layanan' => 'BUKA',
-                'catatan'        => $j->catatan,
+                'status_layanan' => $cuti ? 'LIBUR' : 'BUKA',
+                'catatan'        => $cuti ? $cuti->alasan : $j->catatan,
                 'is_executive'   => (bool) $j->is_executive,
                 'sesuai_perjanjian' => (bool) $j->sesuai_perjanjian,
                 'sumber'         => 'GENERATE',
