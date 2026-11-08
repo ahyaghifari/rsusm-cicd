@@ -110,43 +110,6 @@
                 </div>
             </x-filament::section>
 
-            {{-- ===================== DOKTER YANG AKAN CUTI (mendatang, semua) ===================== --}}
-            <x-filament::section>
-                <x-slot name="heading">Dokter yang Akan Cuti</x-slot>
-                <x-slot name="description">Semua cuti dari hari ini dan seterusnya, tanpa batas.</x-slot>
-
-                <div class="overflow-x-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm">
-                    <table class="w-full text-left text-sm text-gray-700 dark:text-gray-300">
-                        <thead class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
-                            <tr>
-                                <th class="px-3 py-3 w-10 text-center text-xs font-semibold">No</th>
-                                <th class="px-3 py-3 text-xs font-semibold">Dokter</th>
-                                <th class="px-3 py-3 text-xs font-semibold">Tanggal Mulai</th>
-                                <th class="px-3 py-3 text-xs font-semibold">Tanggal Sampai</th>
-                                <th class="px-3 py-3 text-xs font-semibold">Alasan</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                            @forelse($this->getCutiMendatang() as $cuti)
-                                <tr wire:key="mendatang-{{ $cuti->id }}">
-                                    <td class="px-3 py-2 text-xs text-gray-400 text-center">{{ $loop->iteration }}</td>
-                                    <td class="px-3 py-2 font-medium text-primary-600 dark:text-primary-400">{{ $cuti->dokter?->nama }}</td>
-                                    <td class="px-3 py-2">{{ $cuti->tanggal_mulai->translatedFormat('d F Y') }}</td>
-                                    <td class="px-3 py-2">{{ $cuti->tanggal_selesai->translatedFormat('d F Y') }}</td>
-                                    <td class="px-3 py-2">{{ $cuti->alasan }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="px-4 py-8 text-center text-gray-400 dark:text-gray-500 text-sm">
-                                        Belum ada cuti mendatang di rumah sakit ini.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </x-filament::section>
-
             {{-- ===================== CUTI DOKTER TERPILIH ===================== --}}
             <div class="space-y-4">
                 @if(! $dokterTerpilih)
@@ -221,81 +184,87 @@
 
                     {{-- Form tambah / ubah cuti (modal) --}}
                     @if($this->canEditCuti())
-                    <x-filament::modal id="cuti-form-modal" icon="heroicon-o-calendar-days" width="lg">
+                    <x-filament::modal id="cuti-form-modal" icon="heroicon-o-calendar-days" width="2xl">
                         <x-slot name="heading">{{ $editingId ? 'Ubah Cuti' : 'Tambah Cuti' }}</x-slot>
 
                         {{-- Pilih mode (sembunyi saat mengubah cuti lama — mode sudah ditentukan dari data) --}}
                         @unless($editingId)
-                        <div class="flex gap-2 mb-5 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                        <x-filament::tabs label="Mode cuti" class="mb-5">
                             @foreach(['satu_hari' => '1 Hari', 'rentang' => 'Rentang Tanggal', 'per_tanggal' => 'Per Tanggal'] as $key => $label)
-                                <button type="button" wire:click="$set('mode', '{{ $key }}')"
-                                    @class([
-                                        'flex-1 text-sm font-semibold py-2 px-3 rounded-md transition',
-                                        'bg-white dark:bg-gray-900 text-primary-600 dark:text-primary-400 shadow-sm' => $mode === $key,
-                                        'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200' => $mode !== $key,
-                                    ])>
+                                <x-filament::tabs.item
+                                    :active="$mode === $key"
+                                    wire:click="$set('mode', '{{ $key }}')"
+                                >
                                     {{ $label }}
-                                </button>
+                                </x-filament::tabs.item>
                             @endforeach
-                        </div>
+                        </x-filament::tabs>
                         @endunless
 
                         <div class="space-y-5">
                             @if($mode === 'satu_hari')
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1.5">Tanggal <span class="text-red-500">*</span></label>
-                                    <input type="date" wire:model="tanggalSatuHari"
-                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-base py-3 px-4 shadow-sm focus:ring-primary-500 focus:border-primary-500">
-                                    @error('tanggalSatuHari') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                                    <label class="fi-fo-field-wrp-label text-sm font-medium text-gray-950 dark:text-white mb-1.5 block">Tanggal <span class="text-danger-600">*</span></label>
+                                    <x-filament::input.wrapper :valid="! $errors->has('tanggalSatuHari')">
+                                        <x-filament::input type="date" wire:model="tanggalSatuHari" />
+                                    </x-filament::input.wrapper>
+                                    @error('tanggalSatuHari') <p class="text-xs text-danger-600 mt-1">{{ $message }}</p> @enderror
                                 </div>
                             @elseif($mode === 'rentang')
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                     <div>
-                                        <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1.5">Tanggal Mulai <span class="text-red-500">*</span></label>
-                                        <input type="date" wire:model="tanggalMulai"
-                                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-base py-3 px-4 shadow-sm focus:ring-primary-500 focus:border-primary-500">
-                                        @error('tanggalMulai') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                                        <label class="fi-fo-field-wrp-label text-sm font-medium text-gray-950 dark:text-white mb-1.5 block">Tanggal Mulai <span class="text-danger-600">*</span></label>
+                                        <x-filament::input.wrapper :valid="! $errors->has('tanggalMulai')">
+                                            <x-filament::input type="date" wire:model="tanggalMulai" />
+                                        </x-filament::input.wrapper>
+                                        @error('tanggalMulai') <p class="text-xs text-danger-600 mt-1">{{ $message }}</p> @enderror
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1.5">Tanggal Sampai <span class="text-red-500">*</span></label>
-                                        <input type="date" wire:model="tanggalSelesai"
-                                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-base py-3 px-4 shadow-sm focus:ring-primary-500 focus:border-primary-500">
-                                        @error('tanggalSelesai') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                                        <label class="fi-fo-field-wrp-label text-sm font-medium text-gray-950 dark:text-white mb-1.5 block">Tanggal Sampai <span class="text-danger-600">*</span></label>
+                                        <x-filament::input.wrapper :valid="! $errors->has('tanggalSelesai')">
+                                            <x-filament::input type="date" wire:model="tanggalSelesai" />
+                                        </x-filament::input.wrapper>
+                                        @error('tanggalSelesai') <p class="text-xs text-danger-600 mt-1">{{ $message }}</p> @enderror
                                     </div>
                                 </div>
                             @else
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1.5">Daftar Tanggal <span class="text-red-500">*</span></label>
+                                    <label class="fi-fo-field-wrp-label text-sm font-medium text-gray-950 dark:text-white mb-1.5 block">Daftar Tanggal <span class="text-danger-600">*</span></label>
                                     <div class="space-y-2">
                                         @foreach($tanggalList as $i => $tgl)
                                             <div class="flex items-center gap-2" wire:key="tgl-{{ $i }}">
-                                                <input type="date" wire:model="tanggalList.{{ $i }}"
-                                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-base py-3 px-4 shadow-sm focus:ring-primary-500 focus:border-primary-500">
+                                                <x-filament::input.wrapper class="flex-1" :valid="! $errors->has('tanggalList.'.$i)">
+                                                    <x-filament::input type="date" wire:model="tanggalList.{{ $i }}" />
+                                                </x-filament::input.wrapper>
                                                 @if(count($tanggalList) > 1)
-                                                    <button type="button" wire:click="hapusTanggal({{ $i }})" title="Hapus tanggal"
-                                                        class="shrink-0 p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
-                                                        <x-filament::icon icon="heroicon-m-x-mark" class="w-5 h-5"/>
-                                                    </button>
+                                                    <x-filament::icon-button
+                                                        icon="heroicon-m-x-mark"
+                                                        color="danger"
+                                                        label="Hapus tanggal"
+                                                        wire:click="hapusTanggal({{ $i }})"
+                                                    />
                                                 @endif
                                             </div>
                                         @endforeach
                                     </div>
-                                    @error('tanggalList') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
-                                    @error('tanggalList.*') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                                    @error('tanggalList') <p class="text-xs text-danger-600 mt-1">{{ $message }}</p> @enderror
+                                    @error('tanggalList.*') <p class="text-xs text-danger-600 mt-1">{{ $message }}</p> @enderror
 
-                                    <button type="button" wire:click="tambahTanggal"
-                                        class="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700">
-                                        <x-filament::icon icon="heroicon-m-plus-circle" class="w-4 h-4"/>
+                                    <x-filament::link tag="button" type="button" icon="heroicon-m-plus-circle" wire:click="tambahTanggal" class="mt-2">
                                         Tambah Tanggal
-                                    </button>
+                                    </x-filament::link>
                                 </div>
                             @endif
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1.5">Alasan <span class="text-red-500">*</span> <span class="font-normal text-gray-400">(tampil sebagai catatan di Jadwal Harian)</span></label>
-                                <input type="text" wire:model="alasan" maxlength="255"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 text-base py-3 px-4 shadow-sm focus:ring-primary-500 focus:border-primary-500">
-                                @error('alasan') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                                <label class="fi-fo-field-wrp-label text-sm font-medium text-gray-950 dark:text-white mb-1.5 block">
+                                    Alasan <span class="text-danger-600">*</span>
+                                    <span class="font-normal text-gray-400">(tampil sebagai catatan di Jadwal Harian)</span>
+                                </label>
+                                <x-filament::input.wrapper :valid="! $errors->has('alasan')">
+                                    <x-filament::input type="text" wire:model="alasan" maxlength="255" />
+                                </x-filament::input.wrapper>
+                                @error('alasan') <p class="text-xs text-danger-600 mt-1">{{ $message }}</p> @enderror
                             </div>
                         </div>
 
@@ -311,6 +280,43 @@
                     @endif
                 @endif
             </div>
+
+            {{-- ===================== DOKTER YANG AKAN CUTI (mendatang, semua) ===================== --}}
+            <x-filament::section>
+                <x-slot name="heading">Dokter yang Akan Cuti</x-slot>
+                <x-slot name="description">Semua cuti dari hari ini dan seterusnya, tanpa batas.</x-slot>
+
+                <div class="overflow-x-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm">
+                    <table class="w-full text-left text-sm text-gray-700 dark:text-gray-300">
+                        <thead class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
+                            <tr>
+                                <th class="px-3 py-3 w-10 text-center text-xs font-semibold">No</th>
+                                <th class="px-3 py-3 text-xs font-semibold">Dokter</th>
+                                <th class="px-3 py-3 text-xs font-semibold">Tanggal Mulai</th>
+                                <th class="px-3 py-3 text-xs font-semibold">Tanggal Sampai</th>
+                                <th class="px-3 py-3 text-xs font-semibold">Alasan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                            @forelse($this->getCutiMendatang() as $cuti)
+                                <tr wire:key="mendatang-{{ $cuti->id }}">
+                                    <td class="px-3 py-2 text-xs text-gray-400 text-center">{{ $loop->iteration }}</td>
+                                    <td class="px-3 py-2 font-medium text-primary-600 dark:text-primary-400">{{ $cuti->dokter?->nama }}</td>
+                                    <td class="px-3 py-2">{{ $cuti->tanggal_mulai->translatedFormat('d F Y') }}</td>
+                                    <td class="px-3 py-2">{{ $cuti->tanggal_selesai->translatedFormat('d F Y') }}</td>
+                                    <td class="px-3 py-2">{{ $cuti->alasan }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-4 py-8 text-center text-gray-400 dark:text-gray-500 text-sm">
+                                        Belum ada cuti mendatang di rumah sakit ini.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </x-filament::section>
         </div>
     @endif
 
