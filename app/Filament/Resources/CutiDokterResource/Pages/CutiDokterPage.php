@@ -29,8 +29,12 @@ class CutiDokterPage extends Page
 
     // Form cuti
     public ?int $editingId = null;
+    public string $mode = 'satu_hari'; // satu_hari | rentang | per_tanggal
+    public ?string $tanggalSatuHari = null;
     public ?string $tanggalMulai = null;
     public ?string $tanggalSelesai = null;
+    /** @var array<int, string|null> */
+    public array $tanggalList = [null];
     public string $alasan = 'Cuti';
 
     public function mount(): void
@@ -91,6 +95,18 @@ class CutiDokterPage extends Page
             ->each(fn ($d) => $d->cuti_mendatang = $mendatang[$d->id] ?? 0);
     }
 
+    /** Semua cuti mendatang (hari ini dst, tanpa batas akhir) di RS terpilih, lintas dokter. */
+    public function getCutiMendatang()
+    {
+        if (! $this->selectedRumahSakitId) return collect();
+
+        return CutiDokter::with('dokter:id,nama')
+            ->where('rumah_sakit_id', $this->selectedRumahSakitId)
+            ->whereDate('tanggal_selesai', '>=', today())
+            ->orderBy('tanggal_mulai')
+            ->get();
+    }
+
     public function getSelectedDokter(): ?Dokter
     {
         return $this->selectedDokterId
@@ -123,10 +139,13 @@ class CutiDokterPage extends Page
 
     public function resetForm(): void
     {
-        $this->editingId      = null;
-        $this->tanggalMulai   = null;
-        $this->tanggalSelesai = null;
-        $this->alasan         = 'Cuti';
+        $this->editingId       = null;
+        $this->mode            = 'satu_hari';
+        $this->tanggalSatuHari = null;
+        $this->tanggalMulai    = null;
+        $this->tanggalSelesai  = null;
+        $this->tanggalList     = [null];
+        $this->alasan          = 'Cuti';
         $this->resetValidation();
     }
 
@@ -134,10 +153,36 @@ class CutiDokterPage extends Page
     {
         $cuti = $this->findCuti($id);
 
-        $this->editingId      = $cuti->id;
-        $this->tanggalMulai   = $cuti->tanggal_mulai->toDateString();
-        $this->tanggalSelesai = $cuti->tanggal_selesai->toDateString();
-        $this->alasan         = $cuti->alasan;
+        $this->editingId = $cuti->id;
+        $this->alasan     = $cuti->alasan;
+
+        if ($cuti->tanggal_mulai->equalTo($cuti->tanggal_selesai)) {
+            $this->mode            = 'satu_hari';
+            $this->tanggalSatuHari = $cuti->tanggal_mulai->toDateString();
+        } else {
+            $this->mode            = 'rentang';
+            $this->tanggalMulai    = $cuti->tanggal_mulai->toDateString();
+            $this->tanggalSelesai  = $cuti->tanggal_selesai->toDateString();
+        }
+
+        $this->dispatch('open-modal', id: 'cuti-form-modal');
+    }
+
+    public function bukaFormTambah(): void
+    {
+        $this->resetForm();
+        $this->dispatch('open-modal', id: 'cuti-form-modal');
+    }
+
+    public function tambahTanggal(): void
+    {
+        $this->tanggalList[] = null;
+    }
+
+    public function hapusTanggal(int $index): void
+    {
+        unset($this->tanggalList[$index]);
+        $this->tanggalList = array_values($this->tanggalList) ?: [null];
     }
 
     public function simpanCuti(): void
@@ -145,27 +190,59 @@ class CutiDokterPage extends Page
         abort_unless($this->canEditCuti(), 403);
         abort_unless($this->getSelectedDokter(), 422);
 
-        $this->validate([
-            'tanggalMulai'   => ['required', 'date'],
-            'tanggalSelesai' => ['required', 'date', 'after_or_equal:tanggalMulai'],
-            'alasan'         => ['required', 'string', 'max:255'],
-        ], [
-            'tanggalMulai.required'          => 'Tanggal mulai wajib diisi.',
-            'tanggalSelesai.required'        => 'Tanggal sampai wajib diisi.',
-            'tanggalSelesai.after_or_equal'  => 'Tanggal sampai tidak boleh sebelum tanggal mulai.',
-            'alasan.required'                => 'Alasan wajib diisi.',
-        ]);
-
-        $data = [
-            'tanggal_mulai'   => $this->tanggalMulai,
-            'tanggal_selesai' => $this->tanggalSelesai,
-            'alasan'          => $this->alasan,
+        $pesanTanggal = [
+            'required' => 'Tanggal wajib diisi.',
+            'date'     => 'Tanggal tidak valid.',
         ];
 
+        $rentang = match ($this->mode) {
+            'satu_hari' => $this->validate([
+                'tanggalSatuHari' => ['required', 'date'],
+                'alasan'          => ['required', 'string', 'max:255'],
+            ], ['tanggalSatuHari.required' => $pesanTanggal['required']])
+                ? [[$this->tanggalSatuHari, $this->tanggalSatuHari]]
+                : [],
+
+            'rentang' => $this->validate([
+                'tanggalMulai'   => ['required', 'date'],
+                'tanggalSelesai' => ['required', 'date', 'after_or_equal:tanggalMulai'],
+                'alasan'         => ['required', 'string', 'max:255'],
+            ], [
+                'tanggalMulai.required'         => $pesanTanggal['required'],
+                'tanggalSelesai.required'       => 'Tanggal sampai wajib diisi.',
+                'tanggalSelesai.after_or_equal' => 'Tanggal sampai tidak boleh sebelum tanggal mulai.',
+            ])
+                ? [[$this->tanggalMulai, $this->tanggalSelesai]]
+                : [],
+
+            'per_tanggal' => (function () use ($pesanTanggal) {
+                $this->validate([
+                    'tanggalList'   => ['required', 'array', 'min:1'],
+                    'tanggalList.*' => ['required', 'date'],
+                    'alasan'        => ['required', 'string', 'max:255'],
+                ], ['tanggalList.*.required' => $pesanTanggal['required']]);
+
+                return collect($this->tanggalList)->unique()->sort()
+                    ->map(fn ($tgl) => [$tgl, $tgl])->values()->all();
+            })(),
+        };
+
         if ($this->editingId) {
-            $this->findCuti($this->editingId)->update($data);
+            [$mulai, $selesai] = $rentang[0];
+            $this->findCuti($this->editingId)->update([
+                'tanggal_mulai'   => $mulai,
+                'tanggal_selesai' => $selesai,
+                'alasan'          => $this->alasan,
+            ]);
         } else {
-            CutiDokter::create($data + ['dokter_id' => $this->selectedDokterId]);
+            foreach ($rentang as [$mulai, $selesai]) {
+                CutiDokter::create([
+                    'tanggal_mulai'   => $mulai,
+                    'tanggal_selesai' => $selesai,
+                    'alasan'          => $this->alasan,
+                    'dokter_id'       => $this->selectedDokterId,
+                ]);
+            }
         }
 
         Notification::make()
@@ -174,6 +251,7 @@ class CutiDokterPage extends Page
             ->success()->send();
 
         $this->resetForm();
+        $this->dispatch('close-modal', id: 'cuti-form-modal');
     }
 
     public function hapusCuti(int $id): void
