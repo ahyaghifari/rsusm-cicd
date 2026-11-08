@@ -184,7 +184,7 @@
 
                     {{-- Form tambah / ubah cuti (modal) --}}
                     @if($this->canEditCuti())
-                    <x-filament::modal id="cuti-form-modal" icon="heroicon-o-calendar-days" width="2xl">
+                    <x-filament::modal id="cuti-form-modal" width="2xl">
                         <x-slot name="heading">{{ $editingId ? 'Ubah Cuti' : 'Tambah Cuti' }}</x-slot>
 
                         {{-- Pilih mode (sembunyi saat mengubah cuti lama — mode sudah ditentukan dari data) --}}
@@ -211,7 +211,7 @@
                                     @error('tanggalSatuHari') <p class="text-xs text-danger-600 mt-1">{{ $message }}</p> @enderror
                                 </div>
                             @elseif($mode === 'rentang')
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6">
                                     <div>
                                         <label class="fi-fo-field-wrp-label text-sm font-medium text-gray-950 dark:text-white mb-2 block">Tanggal Mulai <span class="text-danger-600">*</span></label>
                                         <x-filament::input.wrapper :valid="! $errors->has('tanggalMulai')">
