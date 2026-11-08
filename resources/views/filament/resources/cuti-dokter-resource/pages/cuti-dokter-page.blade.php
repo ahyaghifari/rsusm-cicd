@@ -161,12 +161,22 @@
                                                         class="p-1.5 rounded-md text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition">
                                                         <x-filament::icon icon="heroicon-m-pencil-square" class="w-4 h-4"/>
                                                     </button>
-                                                    <button wire:click="hapusCuti({{ $cuti->id }})"
-                                                        wire:confirm="Hapus cuti ini? Jadwal harian pada tanggal tersebut dikembalikan ke Buka."
-                                                        title="Hapus"
-                                                        class="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
-                                                        <x-filament::icon icon="heroicon-m-trash" class="w-4 h-4"/>
-                                                    </button>
+                                                    <x-filament::modal id="hapus-cuti-{{ $cuti->id }}" width="sm" icon="heroicon-o-trash" icon-color="danger">
+                                                        <x-slot name="trigger">
+                                                            <button type="button" title="Hapus"
+                                                                class="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                                                                <x-filament::icon icon="heroicon-m-trash" class="w-4 h-4"/>
+                                                            </button>
+                                                        </x-slot>
+                                                        <x-slot name="heading">Hapus Cuti?</x-slot>
+                                                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                            Jadwal harian pada tanggal tersebut akan dikembalikan ke Buka.
+                                                        </p>
+                                                        <x-slot name="footerActions">
+                                                            <x-filament::button color="gray" x-on:click="close">Batal</x-filament::button>
+                                                            <x-filament::button color="danger" wire:click="hapusCuti({{ $cuti->id }})" x-on:click="close">Hapus</x-filament::button>
+                                                        </x-slot>
+                                                    </x-filament::modal>
                                                 @endif
                                             </td>
                                         </tr>
@@ -184,7 +194,7 @@
 
                     {{-- Form tambah / ubah cuti (modal) --}}
                     @if($this->canEditCuti())
-                    <x-filament::modal id="cuti-form-modal" width="2xl">
+                    <x-filament::modal id="cuti-form-modal" width="2xl" footer-actions-alignment="end">
                         <x-slot name="heading">{{ $editingId ? 'Ubah Cuti' : 'Tambah Cuti' }}</x-slot>
 
                         {{-- Pilih mode (sembunyi saat mengubah cuti lama — mode sudah ditentukan dari data) --}}
