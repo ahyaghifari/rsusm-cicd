@@ -310,24 +310,24 @@
                             </x-filament::button>
                         @endif
 
-                        {{-- Muat dari Jadwal Mingguan: untuk admin/super_admin tombol ini SELALU
-                             tampil (boleh menimpa jadwal yang sudah tersimpan, lihat konfirmasi di
-                             bawah — penimpaan dipersempit per kategori kalau RS punya klinik
-                             eksekutif dan kategori sedang dipilih). Role lain tetap pakai
-                             pengecekan lama: tombol hilang kalau tanggal itu sudah ada datanya. --}}
+                        {{-- Muat dari Jadwal Mingguan: untuk admin/super_admin yang bisa pilih
+                             kategori, pengecekan "sudah ada data" dipersempit ke kategori yang
+                             sedang dipilih (reguler/eksekutif), jadi tombol tetap muncul untuk
+                             kategori yang belum ada datanya walau kategori lain sudah ada. Untuk
+                             role lain / RS tanpa klinik eksekutif, tetap cek seluruh hari seperti biasa. --}}
                         @php
                             $kategoriAktif = $this->canPilihKategoriKlinik() && $executiveClinicFilter !== 'all'
                                 ? $executiveClinicFilter
                                 : null;
                         @endphp
-                        @if($this->bisaSelaluMuatMingguan() || ! $this->hasJadwalHarianData($kategoriAktif))
+                        @if(! $this->hasJadwalHarianData($kategoriAktif))
                             <x-filament::button
                                 color="gray"
                                 icon="heroicon-m-arrow-down-tray"
                                 x-on:click="
                                     const count = Object.keys($wire.rows ?? {}).length;
                                     if (count > 0) {
-                                        if (window.confirm('Jadwal yang sudah tersimpan untuk tanggal ini akan ditimpa dengan template dari jadwal mingguan. Lanjutkan?')) {
+                                        if (window.confirm('Baris yang belum disimpan akan diganti dengan template dari jadwal mingguan dan langsung tersimpan. Lanjutkan?')) {
                                             $wire.muatDariJadwalMingguan()
                                         }
                                     } else {
