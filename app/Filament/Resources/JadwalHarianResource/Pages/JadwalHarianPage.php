@@ -149,6 +149,16 @@ class JadwalHarianPage extends Page
             && (bool) auth()->user()?->hasAnyRole(['admin', 'super_admin']);
     }
 
+    /**
+     * admin & super_admin boleh memuat ulang dari jadwal mingguan kapan saja, walau
+     * jadwal harian untuk tanggal itu (atau kategorinya) sudah ada — hasilnya menimpa
+     * data yang sudah tersimpan untuk kategori yang sama (lihat scoping di persistJadwal()).
+     */
+    public function bisaSelaluMuatMingguan(): bool
+    {
+        return (bool) auth()->user()?->hasAnyRole(['admin', 'super_admin']);
+    }
+
     public function getNamaHariAktif(): string
     {
         if (! $this->activeTanggal) return '';
@@ -275,7 +285,7 @@ class JadwalHarianPage extends Page
             ? $this->executiveClinicFilter
             : null;
 
-        if ($this->hasJadwalHarianData($kategoriAktif)) {
+        if (! $this->bisaSelaluMuatMingguan() && $this->hasJadwalHarianData($kategoriAktif)) {
             Notification::make()
                 ->title('Jadwal harian untuk tanggal ini sudah ada')
                 ->body('Kosongkan jadwal yang ada terlebih dahulu sebelum memuat ulang dari jadwal mingguan.')
