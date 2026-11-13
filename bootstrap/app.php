@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\BasicAuthApi;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -18,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->trustProxies(at: env('TRUSTED_PROXIES', ''));
         $middleware->append(SecurityHeaders::class);
+        $middleware->alias(['dokter.basic' => BasicAuthApi::class]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (ThrottleRequestsException $_, Request $request) {

@@ -51,6 +51,12 @@ return [
         'password' => env('ANTRIAN_API_PASSWORD'),
     ],
 
+    'dokter_api' => [
+        // Basic Auth untuk konsumen eksternal API GET /api/dokter.
+        'username' => env('DOKTER_API_USERNAME'),
+        'password' => env('DOKTER_API_PASSWORD'),
+    ],
+
     'browsershot' => [
         'chrome_path' => env('CHROME_PATH'),
     ],
