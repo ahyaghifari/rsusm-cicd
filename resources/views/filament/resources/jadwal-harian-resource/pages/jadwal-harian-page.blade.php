@@ -267,30 +267,6 @@
                     @endphp
 
                     @if(! $tanggalTerlalu && $this->canEditJadwal())
-                        {{-- Pilih kategori klinik — khusus admin & super_admin di RS yang
-                             punya klinik eksekutif. Menentukan kategori mana yang dicek
-                             "sudah ada data atau belum" untuk tombol Muat di bawah. --}}
-                        @if($this->canPilihKategoriKlinik())
-                            <div class="flex items-center gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                                <button type="button" wire:click="$set('executiveClinicFilter', 'reguler')"
-                                    @class([
-                                        'px-3 py-1.5 rounded-md text-xs font-semibold transition',
-                                        'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 shadow-sm' => $executiveClinicFilter === 'reguler',
-                                        'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200' => $executiveClinicFilter !== 'reguler',
-                                    ])>
-                                    Reguler
-                                </button>
-                                <button type="button" wire:click="$set('executiveClinicFilter', 'eksekutif')"
-                                    @class([
-                                        'px-3 py-1.5 rounded-md text-xs font-semibold transition',
-                                        'bg-white dark:bg-gray-900 text-amber-600 dark:text-amber-400 shadow-sm' => $executiveClinicFilter === 'eksekutif',
-                                        'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200' => $executiveClinicFilter !== 'eksekutif',
-                                    ])>
-                                    Eksekutif
-                                </button>
-                            </div>
-                        @endif
-
                         {{-- Kosongkan: muncul kalau tanggal ini sudah punya jadwal tersimpan,
                              terlepas dari filter Reguler/Eksekutif yang sedang aktif --}}
                         @if($this->hasJadwalHarianData())
@@ -310,17 +286,10 @@
                             </x-filament::button>
                         @endif
 
-                        {{-- Muat dari Jadwal Mingguan: untuk admin/super_admin yang bisa pilih
-                             kategori, pengecekan "sudah ada data" dipersempit ke kategori yang
-                             sedang dipilih (reguler/eksekutif), jadi tombol tetap muncul untuk
-                             kategori yang belum ada datanya walau kategori lain sudah ada. Untuk
-                             role lain / RS tanpa klinik eksekutif, tetap cek seluruh hari seperti biasa. --}}
-                        @php
-                            $kategoriAktif = $this->canPilihKategoriKlinik() && $executiveClinicFilter !== 'all'
-                                ? $executiveClinicFilter
-                                : null;
-                        @endphp
-                        @if(! $this->hasJadwalHarianData($kategoriAktif))
+                        {{-- Muat dari Jadwal Mingguan: hanya muncul kalau tanggal ini BELUM
+                             punya jadwal tersimpan sama sekali (tidak terpengaruh filter
+                             klinik). Begitu dimuat, langsung tersimpan ke database. --}}
+                        @if(! $this->hasJadwalHarianData())
                             <x-filament::button
                                 color="gray"
                                 icon="heroicon-m-arrow-down-tray"

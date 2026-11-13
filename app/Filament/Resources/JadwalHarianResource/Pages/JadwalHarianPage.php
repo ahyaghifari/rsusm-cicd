@@ -123,30 +123,14 @@ class JadwalHarianPage extends Page
         return (bool) RumahSakit::where('id', $rsId)->value('executive_clinic');
     }
 
-    /**
-     * @param string|null $kategori 'reguler' | 'eksekutif' | null (null = cek seluruh hari, tidak dipecah kategori)
-     */
-    public function hasJadwalHarianData(?string $kategori = null): bool
+    public function hasJadwalHarianData(): bool
     {
         $rsId = $this->getActiveRumahSakitId();
         if (! $rsId || ! $this->activeTanggal) return false;
 
         return JadwalHarian::whereDate('tanggal', $this->activeTanggal)
             ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rsId)->where('jadwal_tidak_tetap', false))
-            ->when($kategori === 'reguler',   fn ($q) => $q->where('is_executive', 0))
-            ->when($kategori === 'eksekutif', fn ($q) => $q->where('is_executive', 1))
             ->exists();
-    }
-
-    /**
-     * Khusus role admin & super_admin: di RS yang punya klinik eksekutif, mereka boleh
-     * memilih kategori (reguler/eksekutif) sebelum memuat dari jadwal mingguan — biar tombol
-     * "Muat dari Jadwal Mingguan" tetap muncul per kategori walau kategori lain sudah ada datanya.
-     */
-    public function canPilihKategoriKlinik(): bool
-    {
-        return $this->hasExecutiveClinic()
-            && (bool) auth()->user()?->hasAnyRole(['admin', 'super_admin']);
     }
 
     public function getNamaHariAktif(): string
@@ -268,14 +252,8 @@ class JadwalHarianPage extends Page
         abort_unless($this->canEditJadwal(), 403);
 
         // Tombol ini seharusnya sudah disembunyikan di UI kalau data sudah ada —
-        // guard ini cuma jaring pengaman kalau method dipanggil langsung. Untuk
-        // admin/super_admin di RS dengan klinik eksekutif, pengecekan dipersempit
-        // ke kategori yang sedang dipilih (lihat canPilihKategoriKlinik()).
-        $kategoriAktif = $this->canPilihKategoriKlinik() && $this->executiveClinicFilter !== 'all'
-            ? $this->executiveClinicFilter
-            : null;
-
-        if ($this->hasJadwalHarianData($kategoriAktif)) {
+        // guard ini cuma jaring pengaman kalau method dipanggil langsung.
+        if ($this->hasJadwalHarianData()) {
             Notification::make()
                 ->title('Jadwal harian untuk tanggal ini sudah ada')
                 ->body('Kosongkan jadwal yang ada terlebih dahulu sebelum memuat ulang dari jadwal mingguan.')
