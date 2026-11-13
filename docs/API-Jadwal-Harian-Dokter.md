@@ -128,6 +128,7 @@ Field pada `bulanan[]` sama dengan `jadwal[]`, kecuali tidak ada `status` dan ad
 - Dokter dikelompokkan menurut `dokter_id`; jika kosong, menurut nama dokter pada jadwal. Jadwal tanpa `dokter_id` tidak bisa dicari lewat `kode`.
 - `jadwal` berasal dari tabel `jadwal_harian`, yang diisi oleh command `jadwal:generate-harian`. Tanggal yang belum digenerate menghasilkan `jadwal` kosong.
 - `bulanan` berasal dari jadwal praktek master (tabel `jadwal_praktek`), yaitu pola mingguan yang berulang, bukan jadwal per tanggal dalam satu bulan kalender.
+- `catatan` pada `bulanan[]` berisi catatan jadwal master, lalu ditambah keterangan cuti jika dokter cuti pada hari tersebut dalam 30 hari ke depan, mis. `"Cuti 27-30 November 2026: Ibadah umroh"`. Beberapa keterangan dipisah dengan `; `. Hanya hari praktek yang jatuh di dalam rentang cuti yang ditandai. Aturan yang sama berlaku untuk endpoint `jadwal-bulanan` dan `jadwal-bulanan-executive`.
 
 ## Error
 

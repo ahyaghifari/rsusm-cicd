@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\Hari;
 use App\Http\Controllers\Controller;
+use App\Models\CutiDokter;
 use App\Models\Dokter;
 use App\Models\JadwalHarian;
 use App\Models\JadwalPraktek;
 use App\Models\RumahSakit;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -32,6 +34,65 @@ class JadwalHarianController extends Controller
             'sesuai_perjanjian' => (bool) $r->sesuai_perjanjian,
             'catatan'           => $p?->catatan ?: ($r->catatan ?? ''),
         ];
+    }
+
+    /** Rentang ke depan (hari) untuk menampilkan cuti di jadwal mingguan. */
+    private const JANGKAUAN_CUTI_HARI = 30;
+
+    /**
+     * Keterangan cuti untuk jadwal mingguan, dalam rentang hari ini s/d 30 hari ke depan.
+     * Hanya hari praktek yang benar-benar terkena cuti yang ditandai.
+     * Kunci "dokter_id|HARI" => ["Cuti 27-30 November 2026: alasan", ...].
+     */
+    private function cutiMendatang(int $rumahSakitId, ?int $dokterId = null): array
+    {
+        $mulai   = today();
+        $selesai = today()->addDays(self::JANGKAUAN_CUTI_HARI);
+
+        $cuti = CutiDokter::where('rumah_sakit_id', $rumahSakitId)
+            ->when($dokterId, fn ($q) => $q->where('dokter_id', $dokterId))
+            ->whereDate('tanggal_mulai', '<=', $selesai->toDateString())
+            ->whereDate('tanggal_selesai', '>=', $mulai->toDateString())
+            ->orderBy('tanggal_mulai')
+            ->get();
+
+        $map = [];
+        foreach (CarbonPeriod::create($mulai, $selesai) as $tgl) {
+            $hari = Hari::cases()[$tgl->dayOfWeekIso - 1]->value;
+
+            foreach ($cuti as $c) {
+                if ($tgl->betweenIncluded($c->tanggal_mulai, $c->tanggal_selesai)) {
+                    $map[$c->dokter_id . '|' . $hari][$c->id] = $this->keteranganCuti($c);
+                }
+            }
+        }
+
+        return array_map('array_values', $map);
+    }
+
+    /** "Cuti 27-30 November 2026: alasan" / "Cuti 28 November - 2 Desember 2026: alasan". */
+    private function keteranganCuti(CutiDokter $c): string
+    {
+        $m = $c->tanggal_mulai->copy()->locale('id');
+        $s = $c->tanggal_selesai->copy()->locale('id');
+
+        $rentang = match (true) {
+            $m->isSameDay($s)   => $s->translatedFormat('j F Y'),
+            $m->isSameMonth($s) => $m->format('j') . '-' . $s->translatedFormat('j F Y'),
+            $m->isSameYear($s)  => $m->translatedFormat('j F') . ' - ' . $s->translatedFormat('j F Y'),
+            default             => $m->translatedFormat('j F Y') . ' - ' . $s->translatedFormat('j F Y'),
+        };
+
+        return "Cuti {$rentang}: {$c->alasan}";
+    }
+
+    /** Catatan master + keterangan cuti mendatang (jika ada) untuk hari tersebut. */
+    private function catatanMingguan(JadwalPraktek $r, array $cuti): string
+    {
+        return implode('; ', array_filter([
+            $r->catatan,
+            ...($cuti[$r->dokter_id . '|' . $r->hari->value] ?? []),
+        ]));
     }
 
     private function rumahSakitOr404(string $rs): RumahSakit|JsonResponse
@@ -65,6 +126,7 @@ class JadwalHarianController extends Controller
     public function jadwalBulanan(RumahSakit $rumahSakit, bool $executive = false)
     {
         $urutanHari = Hari::cases();
+        $cuti       = $this->cutiMendatang($rumahSakit->id);
 
         $jadwalPraktek = JadwalPraktek::where('is_executive', $executive)
             ->whereHas('poliklinik', fn ($q) => $q->where('rumah_sakit_id', $rumahSakit->id))
@@ -86,7 +148,7 @@ class JadwalHarianController extends Controller
                             'jam_mulai'         => $r->waktu_mulai?->format('H:i'),
                             'jam_selesai'       => $r->waktu_selesai?->format('H:i') ?? 'Selesai',
                             'sesuai_perjanjian' => (bool) $r->sesuai_perjanjian,
-                            'catatan'           => $r->catatan ?? '',
+                            'catatan'           => $this->catatanMingguan($r, $cuti),
                         ])->values(),
                     ])
                     ->values(),
@@ -124,6 +186,7 @@ class JadwalHarianController extends Controller
         $bulanan = null;
         if ($dokterId) {
             $urutanHari = Hari::cases();
+            $cuti       = $this->cutiMendatang($rumahSakit->id, $dokterId);
             $bulanan = JadwalPraktek::where('dokter_id', $dokterId)->with('poliklinik')->get()
                 ->sortBy(fn (JadwalPraktek $r) => array_search($r->hari, $urutanHari, true))
                 ->map(fn (JadwalPraktek $r) => [
@@ -133,7 +196,7 @@ class JadwalHarianController extends Controller
                     'jam_mulai'         => $r->waktu_mulai?->format('H:i'),
                     'jam_selesai'       => $r->waktu_selesai?->format('H:i') ?? 'Selesai',
                     'sesuai_perjanjian' => (bool) $r->sesuai_perjanjian,
-                    'catatan'           => $r->catatan ?? '',
+                    'catatan'           => $this->catatanMingguan($r, $cuti),
                 ])
                 ->values();
         }
